@@ -667,14 +667,14 @@ function esc(s) {{
   }})[c]);
 }}
 function protoLabel(protocols) {{
-  if (!protocols || !protocols.length) return '<span class="config-badge-proto">VLESS + WebSocket</span>';
+  if (!protocols || !protocols.length) return '<span class="config-badge-proto">VLESS • WS</span>';
   const labels = {{
-    'vless-ws': 'VLESS + WebSocket',
-    'xhttp-packet-up': 'XHTTP (packet-up)',
-    'xhttp-stream-up': 'XHTTP (stream-up)',
-    'xhttp-stream-one': 'XHTTP ULTRA (stream-one)'
+    'vless-ws': 'VLESS • WS',
+    'xhttp-packet-up': 'XHTTP • packet-up',
+    'xhttp-stream-up': 'XHTTP • stream-up',
+    'xhttp-stream-one': 'XHTTP ULTRA • stream-one'
   }};
-  return protocols.map(p => `<span class="config-badge-proto">${{labels[p] || 'VLESS + WebSocket'}}</span>`).join(' ');
+  return protocols.map(p => `<span class="config-badge-proto">${{labels[p] || 'VLESS • WS'}}</span>`).join(' ');
 }}
 
 // ===== PARTICLES =====
@@ -793,7 +793,7 @@ function render(d) {{
     const statusClass = l.active ? 'on' : 'off';
     const statusIcon = l.active ? 'circle-check' : 'circle-x';
     const statusText = l.active ? 'فعال' : 'غیرفعال';
-    const protoBadges = l.protocols ? protoLabel(l.protocols) : '<span class="config-badge-proto">VLESS + WebSocket</span>';
+    const protoBadges = l.protocols ? protoLabel(l.protocols) : '<span class="config-badge-proto">VLESS • WS</span>';
 
     html += `<div class="config-item">
       <div class="config-header" onclick="toggleBody(this)">
@@ -829,7 +829,7 @@ function render(d) {{
 
   root.innerHTML = html;
 
-  // هر ۱۰ ثانیه آمار رو رفرش کن
+  // هر ۱۰ ثانیه آمار رو رفرش کن (فقط اگر صفحه باز باشد)
   if (window._refreshInterval) clearInterval(window._refreshInterval);
   window._refreshInterval = setInterval(async () => {{
     const newData = await loadData();
@@ -877,6 +877,11 @@ function showToast(msg, type = '') {{
   t.className = 'toast show ' + (type || '');
   clearTimeout(t._hide);
   t._hide = setTimeout(() => t.classList.remove('show'), 3000);
+}}
+
+// ===== TOFA =====
+function toFa(n) {{
+  return String(n).replace(/\\d/g, d => '۰۱۲۳۴۵۶۷۸۹'[d]);
 }}
 
 // ===== INIT =====
