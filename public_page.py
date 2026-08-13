@@ -17,8 +17,6 @@ def get_sub_page_html(api_url: str, title: str, subtitle: str = "") -> str:
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,400;14..32,600;14..32,700;14..32,800;14..32,900&family=Vazirmatn:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.19.0/dist/tabler-icons.min.css">
-<!-- Chart.js CDN -->
-<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
 <style>
 /* ===== RESET & BASE ===== */
 * {{ margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }}
@@ -362,7 +360,7 @@ body {{
   border: 1px solid var(--border);
   border-radius: var(--radius);
   box-shadow: var(--shadow);
-  margin-bottom: 18px;
+  margin-bottom: 14px;
   overflow: hidden;
   border-color: var(--border);
   transition: border-color 0.3s, box-shadow 0.3s;
@@ -392,6 +390,7 @@ body {{
   font-weight: 700;
   flex: 1;
   min-width: 0;
+  flex-wrap: wrap;
 }}
 .config-badge-proto {{
   font-size: 9px;
@@ -400,6 +399,7 @@ body {{
   font-weight: 700;
   background: rgba(255,215,0,0.10);
   color: var(--primary-light);
+  white-space: nowrap;
 }}
 .config-status {{
   font-size: 10px;
@@ -471,45 +471,6 @@ body {{
 .remain-tag.ok {{ background: var(--green-bg); color: var(--green); }}
 .remain-tag.warn {{ background: rgba(255,215,0,0.10); color: var(--primary-light); }}
 .remain-tag.danger {{ background: var(--red-bg); color: var(--red); }}
-
-/* ===== CHART INSIDE CONFIG ===== */
-.config-chart-wrap {{
-  margin: 12px 0 6px;
-  height: 90px;
-  position: relative;
-}}
-.config-chart-wrap canvas {{
-  width: 100% !important;
-  height: 100% !important;
-}}
-.config-chart-controls {{
-  display: flex;
-  gap: 6px;
-  justify-content: flex-start;
-  margin-top: 6px;
-  flex-wrap: wrap;
-}}
-.range-btn {{
-  font-size: 9px;
-  font-weight: 700;
-  padding: 3px 10px;
-  border-radius: 20px;
-  background: var(--surface3);
-  border: 1px solid var(--border);
-  color: var(--text3);
-  cursor: pointer;
-  transition: all 0.15s;
-  font-family: inherit;
-}}
-.range-btn.active {{
-  background: var(--accent-d);
-  color: var(--accent2);
-  border-color: var(--accent);
-}}
-.range-btn:hover {{
-  background: var(--accent-d);
-  color: var(--accent2);
-}}
 
 /* ===== SERVER LIST ===== */
 .server-list {{
@@ -646,7 +607,6 @@ body {{
   .btn-copy-all {{ justify-content: center; }}
   .config-header {{ flex-wrap: wrap; }}
   .config-label {{ min-width: 100%; }}
-  .config-chart-wrap {{ height: 65px; }}
 }}
 @media (max-width: 380px) {{
   .stats {{ grid-template-columns: 1fr; }}
@@ -690,12 +650,7 @@ body {{
 <script>
 // ===== CONFIG =====
 const API_URL = "{api_url}";
-const BASE_URL = API_URL.replace(/\\/api\\/public\\/sub\\/.*$/, '');
 let allLinks = [];
-let linkCharts = {{}};      // هر کانفیگ یک Chart instance
-let linkChartData = {{}};   // داده‌های هر کانفیگ
-let linkRanges = {{}};      // رنج فعلی هر کانفیگ ('1m', '60m', '24h', '7d')
-const UUID_KEY = API_URL.split('/').pop();
 
 // ===== HELPERS =====
 function fmtB(b) {{
@@ -712,17 +667,14 @@ function esc(s) {{
   }})[c]);
 }}
 function protoLabel(protocols) {{
-  if (!protocols || !protocols.length) return '<span class="config-badge-proto">VLESS+WS</span>';
+  if (!protocols || !protocols.length) return '<span class="config-badge-proto">VLESS + WebSocket</span>';
   const labels = {{
-    'vless-ws': 'VLESS+WS',
-    'xhttp-packet-up': 'XHTTP',
-    'xhttp-stream-up': 'XHTTP',
-    'xhttp-stream-one': 'XHTTP ULTRA'
+    'vless-ws': 'VLESS + WebSocket',
+    'xhttp-packet-up': 'XHTTP (packet-up)',
+    'xhttp-stream-up': 'XHTTP (stream-up)',
+    'xhttp-stream-one': 'XHTTP ULTRA (stream-one)'
   }};
-  return protocols.map(p => `<span class="config-badge-proto">${{labels[p] || 'VLESS+WS'}}</span>`).join('');
-}}
-function toFa(n) {{
-  return String(n).replace(/\\d/g, d => '۰۱۲۳۴۵۶۷۸۹'[d]);
+  return protocols.map(p => `<span class="config-badge-proto">${{labels[p] || 'VLESS + WebSocket'}}</span>`).join(' ');
 }}
 
 // ===== PARTICLES =====
@@ -755,135 +707,7 @@ function setBeeState(on) {{
   }}
 }}
 
-// ===== FETCH TRAFFIC DATA FOR A LINK =====
-async function fetchLinkTraffic(linkId, range) {{
-  const url = `/api/public/sub/${{UUID_KEY}}/traffic?link=${{linkId}}&range=${{range}}`;
-  try {{
-    const r = await fetch(url);
-    if (!r.ok) throw new Error('HTTP ' + r.status);
-    return await r.json();
-  }} catch (e) {{
-    console.error('Traffic fetch error:', e);
-    return null;
-  }}
-}}
-
-// ===== CREATE CHART FOR A LINK =====
-function createLinkChart(linkId, canvasId) {{
-  const ctx = document.getElementById(canvasId).getContext('2d');
-  const grad = ctx.createLinearGradient(0, 0, 0, 90);
-  grad.addColorStop(0, 'rgba(255,215,0,0.30)');
-  grad.addColorStop(1, 'rgba(255,215,0,0)');
-
-  const chart = new Chart(ctx, {{
-    type: 'line',
-    data: {{
-      labels: [],
-      datasets: [
-        {{
-          label: 'مصرف (MB)',
-          data: [],
-          borderColor: '#ffd700',
-          backgroundColor: grad,
-          fill: true,
-          tension: 0.4,
-          pointRadius: 0,
-          pointHoverRadius: 4,
-          pointHoverBackgroundColor: '#ffd700',
-          pointHoverBorderColor: '#fff',
-          pointHoverBorderWidth: 2,
-          borderWidth: 2
-        }}
-      ]
-    }},
-    options: {{
-      responsive: true,
-      maintainAspectRatio: false,
-      interaction: {{ mode: 'index', intersect: false }},
-      plugins: {{
-        legend: {{ display: false }},
-        tooltip: {{
-          backgroundColor: 'rgba(10,10,10,0.95)',
-          borderColor: 'rgba(255,215,0,0.3)',
-          borderWidth: 1,
-          titleColor: '#f5f5f5',
-          bodyColor: '#b0b0b0',
-          padding: 8,
-          cornerRadius: 6,
-          titleFont: {{ family: 'Vazirmatn', size: 9, weight: '700' }},
-          bodyFont: {{ family: 'Vazirmatn', size: 9 }},
-          callbacks: {{
-            label: v => `مصرف: ${{v.parsed.y.toFixed(2)}} MB`
-          }}
-        }}
-      }},
-      scales: {{
-        x: {{ grid: {{ display: false }}, border: {{ display: false }}, ticks: {{ display: false }} }},
-        y: {{ grid: {{ display: false }}, border: {{ display: false }}, ticks: {{ display: false }} }}
-      }},
-      elements: {{ line: {{ capBezierPoints: true }} }}
-    }}
-  }});
-
-  linkCharts[linkId] = chart;
-  linkChartData[linkId] = {{ labels: [], values: [] }};
-  linkRanges[linkId] = '60m';
-
-  // بارگذاری اولیه داده
-  loadLinkChartData(linkId);
-
-  // بازه‌های زمانی
-  const controls = document.getElementById('controls-' + linkId);
-  if (controls) {{
-    controls.querySelectorAll('.range-btn').forEach(btn => {{
-      btn.addEventListener('click', function() {{
-        const range = this.dataset.range;
-        controls.querySelectorAll('.range-btn').forEach(b => b.classList.remove('active'));
-        this.classList.add('active');
-        linkRanges[linkId] = range;
-        loadLinkChartData(linkId);
-      }});
-    }});
-    // فعال کردن دکمه پیش‌فرض (60m)
-    const defaultBtn = controls.querySelector('.range-btn[data-range="60m"]');
-    if (defaultBtn) defaultBtn.classList.add('active');
-  }}
-
-  return chart;
-}}
-
-// ===== LOAD DATA FOR A LINK CHART =====
-async function loadLinkChartData(linkId) {{
-  const range = linkRanges[linkId] || '60m';
-  const data = await fetchLinkTraffic(linkId, range);
-  if (!data || !data.timestamps || !data.timestamps.length) {{
-    // اگر داده‌ای نبود، یک پیام نمایش بده
-    const chart = linkCharts[linkId];
-    if (chart) {{
-      chart.data.labels = ['بدون داده'];
-      chart.data.datasets[0].data = [0];
-      chart.update('none');
-    }}
-    return;
-  }}
-  // تبدیل تاریخ‌ها به فرمت خوانا
-  const labels = data.timestamps.map(t => {{
-    const d = new Date(t);
-    return d.toLocaleTimeString('fa-IR', {{ hour: '2-digit', minute: '2-digit' }});
-  }});
-  // مقادیر بر حسب مگابایت
-  const values = data.values.map(v => v / (1024 * 1024));
-
-  const chart = linkCharts[linkId];
-  if (chart) {{
-    chart.data.labels = labels;
-    chart.data.datasets[0].data = values;
-    chart.update('none');
-    linkChartData[linkId] = {{ labels, values }};
-  }}
-}}
-
-// ===== DATA FETCH (اصلی) =====
+// ===== DATA FETCH =====
 async function loadData() {{
   try {{
     const r = await fetch(API_URL);
@@ -913,7 +737,6 @@ function render(d) {{
   setBeeState(hasActive);
 
   const activeCount = d.links.filter(l => l.active).length;
-  const totalUsed = d.links.reduce((s, l) => s + (l.used_bytes || 0), 0);
   const uniqueIps = d.unique_ips !== undefined ? d.unique_ips : d.active_connections || 0;
   let html = '';
 
@@ -925,23 +748,23 @@ function render(d) {{
     ${{d.desc ? `<div class="info-desc">${{esc(d.desc)}}</div>` : ''}}
   </div>`;
 
-  // Stats: وضعیت کانفیگ (فعال/غیرفعال), اتصالات, مصرف کل
+  // Stats
   const overallStatus = activeCount > 0 ? 'فعال' : 'غیرفعال';
   html += `<div class="stats">
     <div class="stat-item">
       <div class="stat-label">وضعیت کانفیگ</div>
       <div class="stat-value">${{overallStatus}}</div>
-      <div class="stat-sub" style="display:none"></div> <!-- زیرنویس مخفی -->
+      <div class="stat-sub" style="display:none"></div>
     </div>
     <div class="stat-item">
       <div class="stat-label">اتصالات</div>
       <div class="stat-value">${{toFa(uniqueIps)}}</div>
-      <div class="stat-sub"><span class="dot-live"></span> آنلاین</div>
+      <div class="stat-sub" style="display:none"></div>
     </div>
     <div class="stat-item">
       <div class="stat-label">مصرف کل</div>
       <div class="stat-value">${{d.total_used_fmt || '0 B'}}</div>
-      <div class="stat-sub">مجموع همه کانفیگ‌ها</div>
+      <div class="stat-sub" style="display:none"></div>
     </div>
   </div>`;
 
@@ -960,7 +783,7 @@ function render(d) {{
   // Config list header
   html += `<div class="section-header"><i class="ti ti-link"></i> کانفیگ‌ها (${{d.links.length}})</div>`;
 
-  // Config items with per-link chart
+  // Config items
   for (let i = 0; i < d.links.length; i++) {{
     const l = d.links[i];
     const pct = l.limit_bytes > 0 ? Math.min(100, (l.used_bytes / l.limit_bytes) * 100) : 0;
@@ -970,11 +793,9 @@ function render(d) {{
     const statusClass = l.active ? 'on' : 'off';
     const statusIcon = l.active ? 'circle-check' : 'circle-x';
     const statusText = l.active ? 'فعال' : 'غیرفعال';
-    const protoBadges = l.protocols ? protoLabel(l.protocols) : '<span class="config-badge-proto">VLESS+WS</span>';
-    const linkId = 'link-' + i + '-' + l.uuid.slice(0, 6);
-    const canvasId = 'chart-' + linkId;
+    const protoBadges = l.protocols ? protoLabel(l.protocols) : '<span class="config-badge-proto">VLESS + WebSocket</span>';
 
-    html += `<div class="config-item" data-link-id="${{linkId}}">
+    html += `<div class="config-item">
       <div class="config-header" onclick="toggleBody(this)">
         <div class="config-label">
           <span>${{esc(l.label)}}</span>
@@ -992,15 +813,6 @@ function render(d) {{
           <div class="bar-track"><div class="bar-fill" style="width:${{pct}}%;"></div></div>
           <span class="remain-tag ${{rc}}"><i class="ti ${{remain < 0 ? 'ti-infinity' : 'ti-database'}}"></i> ${{remain < 0 ? 'نامحدود' : 'باقی: ' + rf}}</span>
         </div>
-        <div class="config-chart-wrap">
-          <canvas id="${{canvasId}}"></canvas>
-          <div class="config-chart-controls" id="controls-${{linkId}}">
-            <button class="range-btn" data-range="1m">۱ دقیقه</button>
-            <button class="range-btn" data-range="60m">۶۰ دقیقه</button>
-            <button class="range-btn" data-range="24h">۲۴ ساعت</button>
-            <button class="range-btn" data-range="7d">هفته</button>
-          </div>
-        </div>
         ${{l._lines.length ? `<div class="server-list">
           <div class="server-list-title"><i class="ti ti-server-2"></i> سرورهای دسترسی</div>
           ${{l._lines.map((line, j) => `
@@ -1017,18 +829,9 @@ function render(d) {{
 
   root.innerHTML = html;
 
-  // بعد از رندر، برای هر کانفیگ نمودار بساز
-  for (let i = 0; i < d.links.length; i++) {{
-    const l = d.links[i];
-    const linkId = 'link-' + i + '-' + l.uuid.slice(0, 6);
-    const canvasId = 'chart-' + linkId;
-    createLinkChart(linkId, canvasId);
-  }}
-
-  // پاکسازی اینتروال‌های قدیمی
+  // هر ۱۰ ثانیه آمار رو رفرش کن
   if (window._refreshInterval) clearInterval(window._refreshInterval);
   window._refreshInterval = setInterval(async () => {{
-    // رفرش آمار کلی (بدون رندر مجدد)
     const newData = await loadData();
     if (newData && !newData.locked) {{
       const statItems = document.querySelectorAll('.stat-item');
@@ -1042,14 +845,6 @@ function render(d) {{
       }}
     }}
   }}, 10000);
-
-  // همچنین داده‌های نمودارها را هر ۳۰ ثانیه رفرش کن
-  if (window._chartRefreshInterval) clearInterval(window._chartRefreshInterval);
-  window._chartRefreshInterval = setInterval(() => {{
-    Object.keys(linkRanges).forEach(linkId => {{
-      loadLinkChartData(linkId);
-    }});
-  }}, 30000);
 }}
 
 // ===== TOGGLE =====
