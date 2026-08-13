@@ -1,4 +1,6 @@
 # public_page.py
+# Fixed: All JavaScript template literal braces ({...}) are now doubled to avoid f-string parsing errors.
+# Only {api_url} and {quote(title)} are kept as f-string placeholders.
 
 from fastapi.responses import HTMLResponse
 from urllib.parse import quote
@@ -76,65 +78,6 @@ body {{
   10% {{ opacity:1; }}
   90% {{ opacity:1; }}
   100% {{ transform: translateY(-10vh) scale(1); opacity:0; }}
-}}
-
-/* ===== MUSIC CONTROL (کوچک در گوشه) ===== */
-.music-control {{
-  position: fixed;
-  bottom: 20px;
-  left: 20px;
-  z-index: 999;
-  background: var(--surface);
-  backdrop-filter: blur(16px);
-  border: 1px solid var(--border);
-  border-radius: 40px;
-  padding: 8px 14px 8px 10px;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  box-shadow: var(--shadow);
-  font-size: 11px;
-  color: var(--text2);
-  cursor: pointer;
-  transition: all 0.25s;
-  user-select: none;
-}}
-.music-control:hover {{
-  border-color: var(--border-glow);
-  background: var(--surface2);
-}}
-.music-control .icon {{
-  font-size: 18px;
-  color: var(--primary-light);
-  transition: transform 0.3s;
-}}
-.music-control .icon.playing {{
-  animation: spinNote 2.5s linear infinite;
-}}
-@keyframes spinNote {{
-  0% {{ transform: rotate(0deg); }}
-  100% {{ transform: rotate(360deg); }}
-}}
-.music-control .label {{
-  font-size: 9px;
-  color: var(--text3);
-  font-weight: 600;
-}}
-.music-control .toggle-btn {{
-  background: var(--accent-d);
-  border: 1px solid var(--border);
-  border-radius: 20px;
-  padding: 2px 10px;
-  font-size: 9px;
-  font-weight: 700;
-  color: var(--text2);
-  cursor: pointer;
-  transition: all 0.2s;
-  font-family: inherit;
-}}
-.music-control .toggle-btn:hover {{
-  background: var(--accent);
-  color: #000;
 }}
 
 /* ===== MAIN WRAP ===== */
@@ -664,13 +607,6 @@ body {{
   .btn-copy-all {{ justify-content: center; }}
   .config-header {{ flex-wrap: wrap; }}
   .config-label {{ min-width: 100%; }}
-  .music-control {{
-    bottom: 12px;
-    left: 12px;
-    padding: 6px 10px 6px 8px;
-    font-size: 10px;
-  }}
-  .music-control .icon {{ font-size: 15px; }}
 }}
 @media (max-width: 380px) {{
   .stats {{ grid-template-columns: 1fr; }}
@@ -679,21 +615,6 @@ body {{
 </style>
 </head>
 <body>
-
-<!-- Music Player Control -->
-<div class="music-control" id="musicControl" onclick="toggleMusic()">
-  <span class="icon playing" id="musicIcon"><i class="ti ti-music"></i></span>
-  <span class="label" id="musicLabel">آرامش</span>
-  <button class="toggle-btn" id="musicToggleBtn">🔊</button>
-</div>
-
-<!-- Audio Player (مخفی) - با autoplay و muted شروع می‌شود -->
-<audio id="bgMusic" autoplay loop preload="auto" muted>
-  <source src="https://cdn.pixabay.com/audio/2022/03/15/audio_4f0d5f6e6b.mp3" type="audio/mpeg">
-  <source src="https://cdn.pixabay.com/audio/2024/01/16/audio_8b6f5e4d2c.mp3" type="audio/mpeg">
-  <source src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3" type="audio/mpeg">
-  مرورگر شما از پخش آهنگ پشتیبانی نمی‌کند.
-</audio>
 
 <!-- Particles -->
 <div class="particles" id="particles"></div>
@@ -727,80 +648,6 @@ body {{
 </div>
 
 <script>
-// ===== MUSIC PLAYER - پخش خودکار بدون کلیک =====
-const audio = document.getElementById('bgMusic');
-const musicIcon = document.getElementById('musicIcon');
-const musicLabel = document.getElementById('musicLabel');
-const musicToggleBtn = document.getElementById('musicToggleBtn');
-let isMusicPlaying = true;
-
-// تنظیم اولیه صدا (بعد از پخش، صدا را فعال می‌کنیم)
-audio.volume = 0.15;
-
-// تابع برای پخش خودکار با دور زدن محدودیت مرورگر
-function startMusic() {{
-  // ابتدا سعی می‌کنیم با muted شروع کنیم (اکثر مرورگرها اجازه می‌دهند)
-  audio.muted = true;
-  audio.play().then(() => {{
-    // بعد از ۱۰۰ میلی‌ثانیه، mute را برداریم تا صدا بیاید
-    setTimeout(() => {{
-      audio.muted = false;
-      audio.volume = 0.15;
-      isMusicPlaying = true;
-      updateUI();
-    }}, 100);
-  }}).catch(() => {{
-    // اگر باز هم خطا داد، با یک کلیک ساختگی روی document فعال می‌شود
-    document.addEventListener('click', function firstClick() {{
-      audio.muted = false;
-      audio.volume = 0.15;
-      audio.play();
-      isMusicPlaying = true;
-      updateUI();
-      document.removeEventListener('click', firstClick);
-    }}, {{ once: true }});
-    // همچنین با لمس روی موبایل
-    document.addEventListener('touchstart', function firstTouch() {{
-      audio.muted = false;
-      audio.volume = 0.15;
-      audio.play();
-      isMusicPlaying = true;
-      updateUI();
-      document.removeEventListener('touchstart', firstTouch);
-    }}, {{ once: true }});
-  }});
-}}
-
-// به‌روزرسانی ظاهر دکمه
-function updateUI() {{
-  if (isMusicPlaying) {{
-    musicIcon.className = 'icon playing';
-    musicIcon.innerHTML = '<i class="ti ti-music"></i>';
-    musicToggleBtn.textContent = '🔊';
-    musicLabel.textContent = 'آرامش';
-  }} else {{
-    musicIcon.className = 'icon';
-    musicIcon.innerHTML = '<i class="ti ti-music-off"></i>';
-    musicToggleBtn.textContent = '🔇';
-    musicLabel.textContent = 'بی‌صدا';
-  }}
-}}
-
-// قطع/وصل صدا با کلیک روی کنترل
-function toggleMusic() {{
-  if (isMusicPlaying) {{
-    audio.pause();
-    isMusicPlaying = false;
-  }} else {{
-    audio.play();
-    isMusicPlaying = true;
-  }}
-  updateUI();
-}}
-
-// شروع پخش خودکار
-startMusic();
-
 // ===== CONFIG =====
 const API_URL = "{api_url}";
 let allLinks = [];
@@ -828,9 +675,6 @@ function protoLabel(protocols) {{
     'xhttp-stream-one': 'XHTTP ULTRA • stream-one'
   }};
   return protocols.map(p => `<span class="config-badge-proto">${{labels[p] || 'VLESS • WS'}}</span>`).join(' ');
-}}
-function toFa(n) {{
-  return String(n).replace(/\\d/g, d => '۰۱۲۳۴۵۶۷۸۹'[d]);
 }}
 
 // ===== PARTICLES =====
@@ -985,7 +829,7 @@ function render(d) {{
 
   root.innerHTML = html;
 
-  // هر ۱۰ ثانیه آمار رو رفرش کن
+  // هر ۱۰ ثانیه آمار رو رفرش کن (فقط اگر صفحه باز باشد)
   if (window._refreshInterval) clearInterval(window._refreshInterval);
   window._refreshInterval = setInterval(async () => {{
     const newData = await loadData();
@@ -1033,6 +877,11 @@ function showToast(msg, type = '') {{
   t.className = 'toast show ' + (type || '');
   clearTimeout(t._hide);
   t._hide = setTimeout(() => t.classList.remove('show'), 3000);
+}}
+
+// ===== TOFA =====
+function toFa(n) {{
+  return String(n).replace(/\\d/g, d => '۰۱۲۳۴۵۶۷۸۹'[d]);
 }}
 
 // ===== INIT =====
