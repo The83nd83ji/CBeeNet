@@ -17,10 +17,8 @@ def get_sub_page_html(api_url: str, title: str, subtitle: str = "") -> str:
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,400;14..32,600;14..32,700;14..32,800;14..32,900&family=Vazirmatn:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.19.0/dist/tabler-icons.min.css">
-<!-- uPlot CDN -->
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/uplot@1.6.24/dist/uPlot.min.css">
-<script src="https://cdn.jsdelivr.net/npm/uplot@1.6.24/dist/uPlot.min.js"></script>
-
+<!-- Chart.js CDN -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
 <style>
 /* ===== RESET & BASE ===== */
 * {{ margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }}
@@ -88,7 +86,7 @@ body {{
 .wrap {{
   position: relative;
   z-index: 10;
-  max-width: 540px;
+  max-width: 580px;
   margin: 0 auto;
   padding: 24px 16px 48px;
 }}
@@ -114,18 +112,12 @@ body {{
   transition: transform 0.4s ease, border-color 0.5s;
 }}
 .logo-wrap:hover {{ transform: scale(1.05) rotate(-4deg); }}
-
-/* ===== FLASH ICON (بجای زنبور) ===== */
 .logo-icon {{
   font-size: 42px;
   color: var(--primary);
   transition: transform 0.3s;
 }}
-.logo-wrap:hover .logo-icon {{
-  transform: scale(1.1) rotate(-8deg);
-}}
-
-/* حالت خاموش (غیرفعال) */
+.logo-wrap:hover .logo-icon {{ transform: scale(1.1) rotate(-8deg); }}
 .logo-wrap.bee-off {{
   border-color: #2a2a25;
   box-shadow: 0 0 0 6px rgba(255,255,255,0.02), 0 20px 50px rgba(0,0,0,0.3);
@@ -186,16 +178,6 @@ body {{
   transform: translateY(-2px);
 }}
 
-/* ===== GLASS CARD ===== */
-.glass {{
-  background: var(--surface);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  box-shadow: var(--shadow);
-}}
-
 /* ===== INFO CARD ===== */
 .info-card {{
   background: var(--surface);
@@ -246,12 +228,12 @@ body {{
   line-height: 1.7;
 }}
 
-/* ===== STATS ROW (با نمودار به جای مصرف کل) ===== */
+/* ===== STATS ROW ===== */
 .stats {{
   display: grid;
-  grid-template-columns: 1fr 2fr;
+  grid-template-columns: repeat(3, 1fr);
   gap: 12px;
-  margin-bottom: 18px;
+  margin-bottom: 16px;
 }}
 .stat-item {{
   background: var(--surface2);
@@ -304,49 +286,42 @@ body {{
   50% {{ opacity:0.2; transform:scale(0.6); }}
 }}
 
-/* ===== CARD برای نمودار ===== */
+/* ===== CHART CARD ===== */
 .chart-card {{
   background: var(--surface2);
   border-radius: 18px;
-  padding: 12px 10px 6px 10px;
+  padding: 16px 14px 12px;
   border: 1px solid var(--border);
   transition: all 0.25s;
-  grid-column: span 2;
+  margin-bottom: 16px;
 }}
 .chart-card:hover {{
   border-color: var(--border-glow);
   box-shadow: 0 8px 25px rgba(0,0,0,0.3);
 }}
 .chart-card .chart-title {{
-  font-size: 9px;
+  font-size: 10px;
   font-weight: 700;
   color: var(--text3);
   text-transform: uppercase;
-  letter-spacing: 0.1em;
+  letter-spacing: 0.08em;
   margin-bottom: 6px;
   display: flex;
   align-items: center;
   justify-content: space-between;
 }}
-.chart-card .chart-title span {{
+.chart-card .chart-title .legend {{
   display: flex;
   gap: 12px;
   font-size: 9px;
+  color: var(--text2);
 }}
-.chart-card .chart-title .up {{
-  color: #4fc3f7;
-}}
-.chart-card .chart-title .down {{
-  color: #ffb74d;
-}}
-#sparkline {{
+.chart-card .chart-title .legend .up {{ color: #4fc3f7; }}
+.chart-card .chart-title .legend .down {{ color: #ffb74d; }}
+#throughput-chart {{
   width: 100%;
-  height: 120px;
+  height: 130px;
   direction: ltr;
-}}
-#sparkline .uplot {{
-  width: 100% !important;
-  height: 100% !important;
 }}
 
 /* ===== COPY ALL BAR ===== */
@@ -664,8 +639,8 @@ body {{
 
 /* ===== RESPONSIVE ===== */
 @media (max-width: 480px) {{
-  .stats {{ grid-template-columns: 1fr; }}
-  .chart-card {{ grid-column: span 1; }}
+  .stats {{ grid-template-columns: 1fr 1fr; }}
+  .stats .stat-item:last-child {{ grid-column: 1 / -1; }}
   .copy-all {{ flex-direction: column; align-items: stretch; text-align: center; }}
   .btn-copy-all {{ justify-content: center; }}
   .config-header {{ flex-wrap: wrap; }}
@@ -706,7 +681,7 @@ body {{
   </div>
 
   <div class="footer">
-    کانال رسمی <a href="https://t.me/CBeeNet" target="_blank">@CBeeNet</a> · v10
+    کانال رسمی <a href="https://t.me/CBeeNet" target="_blank">@CBeeNet</a> · v11
   </div>
 </div>
 
@@ -714,6 +689,9 @@ body {{
 // ===== CONFIG =====
 const API_URL = "{api_url}";
 let allLinks = [];
+let chartInstance = null;
+let chartData = {{ time: [], upload: [], download: [] }};
+const MAX_POINTS = 30;
 
 // ===== HELPERS =====
 function fmtB(b) {{
@@ -739,6 +717,9 @@ function protoLabel(protocols) {{
   }};
   return protocols.map(p => `<span class="config-badge-proto">${{labels[p] || 'VLESS+WS'}}</span>`).join('');
 }}
+function toFa(n) {{
+  return String(n).replace(/\\d/g, d => '۰۱۲۳۴۵۶۷۸۹'[d]);
+}}
 
 // ===== PARTICLES =====
 (function initParticles() {{
@@ -755,7 +736,7 @@ function protoLabel(protocols) {{
   }}
 }})();
 
-// ===== BEE CONTROL (با آیکون فلش) =====
+// ===== BEE CONTROL =====
 function setBeeState(on) {{
   const wrap = document.getElementById('logoWrap');
   const icon = document.getElementById('logoIcon');
@@ -770,132 +751,97 @@ function setBeeState(on) {{
   }}
 }}
 
-// ===== SPARKLINE (uPlot) =====
-let uplotInstance = null;
-let sparkData = {{
-  time: [],
-  upload: [],
-  download: []
-}};
-const MAX_POINTS = 30;
+// ===== CHART INIT =====
+function initChart() {{
+  const ctx = document.getElementById('throughput-chart').getContext('2d');
+  const gradUp = ctx.createLinearGradient(0, 0, 0, 130);
+  gradUp.addColorStop(0, 'rgba(79,195,247,0.35)');
+  gradUp.addColorStop(1, 'rgba(79,195,247,0)');
+  const gradDown = ctx.createLinearGradient(0, 0, 0, 130);
+  gradDown.addColorStop(0, 'rgba(255,183,77,0.35)');
+  gradDown.addColorStop(1, 'rgba(255,183,77,0)');
 
-function initSparkline() {{
-  const target = document.getElementById('sparkline');
-  if (!target) return;
-
-  const opts = {{
-    width: target.clientWidth || 300,
-    height: 120,
-    padding: [8, 4, 8, 4],
-    series: [
-      {{
-        label: 'زمان',
-        value: (u, v) => new Date(v * 1000).toLocaleTimeString('fa-IR', {{ hour: '2-digit', minute: '2-digit' }})
-      }},
-      {{
-        label: 'Download',
-        stroke: '#ffb74d',
-        width: 1.75,
-        fill: 'rgba(255,183,77,0.24)',
-        spanGaps: true,
-        points: {{ show: false }},
-        value: (u, v) => fmtB(v)
-      }},
-      {{
-        label: 'Upload',
-        stroke: '#4fc3f7',
-        width: 1.75,
-        fill: 'rgba(79,195,247,0.24)',
-        spanGaps: true,
-        points: {{ show: false }},
-        value: (u, v) => fmtB(v)
-      }}
-    ],
-    axes: [
-      {{
-        show: false  // hide x-axis
-      }},
-      {{
-        show: false  // hide y-axis
-      }}
-    ],
-    scales: {{
-      x: {{ time: true, auto: true }},
-      y: {{ auto: true, range: [0, null] }}
+  chartInstance = new Chart(ctx, {{
+    type: 'line',
+    data: {{
+      labels: [],
+      datasets: [
+        {{
+          label: 'Download',
+          data: [],
+          borderColor: '#ffb74d',
+          backgroundColor: gradDown,
+          fill: true,
+          tension: 0.42,
+          pointRadius: 0,
+          pointHoverRadius: 5,
+          pointHoverBackgroundColor: '#ffb74d',
+          pointHoverBorderColor: '#fff',
+          pointHoverBorderWidth: 2,
+          borderWidth: 2
+        }},
+        {{
+          label: 'Upload',
+          data: [],
+          borderColor: '#4fc3f7',
+          backgroundColor: gradUp,
+          fill: true,
+          tension: 0.42,
+          pointRadius: 0,
+          pointHoverRadius: 5,
+          pointHoverBackgroundColor: '#4fc3f7',
+          pointHoverBorderColor: '#fff',
+          pointHoverBorderWidth: 2,
+          borderWidth: 2
+        }}
+      ]
     }},
-    hooks: {{
-      ready: [function(u) {{
-        // custom tooltip
-        const tooltip = document.createElement('div');
-        tooltip.style.cssText = `
-          position: absolute;
-          background: rgba(20,20,16,0.9);
-          backdrop-filter: blur(8px);
-          border: 1px solid rgba(255,215,0,0.2);
-          border-radius: 8px;
-          padding: 6px 12px;
-          font-size: 10px;
-          color: #f5f5dc;
-          pointer-events: none;
-          display: none;
-          direction: rtl;
-          font-family: 'Vazirmatn', sans-serif;
-          z-index: 100;
-        `;
-        document.body.appendChild(tooltip);
-
-        u.over.addEventListener('mouseenter', () => tooltip.style.display = 'block');
-        u.over.addEventListener('mouseleave', () => tooltip.style.display = 'none');
-
-        u.over.addEventListener('mousemove', (e) => {{
-          const rect = u.over.getBoundingClientRect();
-          const x = (e.clientX - rect.left) / rect.width;
-          const idx = Math.round(x * (u.data[0].length - 1));
-          if (idx < 0 || idx >= u.data[0].length) return;
-          const t = u.data[0][idx];
-          const down = u.data[1][idx];
-          const up = u.data[2][idx];
-          const timeStr = new Date(t * 1000).toLocaleTimeString('fa-IR', {{ hour: '2-digit', minute: '2-digit' }});
-          tooltip.innerHTML = `
-            <div style="display:flex;gap:12px;justify-content:center;">
-              <span>⬇️ ${{fmtB(down)}}</span>
-              <span>⬆️ ${{fmtB(up)}}</span>
-              <span style="color:#6b6b40;">${{timeStr}}</span>
-            </div>
-          `;
-          tooltip.style.left = (e.clientX - tooltip.offsetWidth/2) + 'px';
-          tooltip.style.top = (e.clientY - tooltip.offsetHeight - 10) + 'px';
-        }});
-      }}]
+    options: {{
+      responsive: true,
+      maintainAspectRatio: false,
+      interaction: {{ mode: 'index', intersect: false }},
+      plugins: {{
+        legend: {{ display: false }},
+        tooltip: {{
+          backgroundColor: 'rgba(10,10,10,0.96)',
+          borderColor: 'rgba(251,191,36,0.3)',
+          borderWidth: 1,
+          titleColor: '#f5f5f5',
+          bodyColor: '#b0b0b0',
+          padding: 10,
+          cornerRadius: 8,
+          titleFont: {{ family: 'Vazirmatn', size: 10, weight: '700' }},
+          bodyFont: {{ family: 'Vazirmatn', size: 10 }},
+          callbacks: {{
+            label: v => `${{v.dataset.label}}: ${{v.parsed.y.toFixed(2)}} MB`
+          }}
+        }}
+      }},
+      scales: {{
+        x: {{ grid: {{ display: false }}, border: {{ display: false }}, ticks: {{ color: '#6a6a6a', font: {{ size: 8, family: 'Vazirmatn' }} }} }},
+        y: {{ grid: {{ color: 'rgba(255,215,0,0.06)' }}, border: {{ display: false }}, ticks: {{ color: '#6a6a6a', font: {{ size: 8, family: 'Vazirmatn' }}, callback: v => v + ' MB' }} }}
+      }},
+      elements: {{ line: {{ capBezierPoints: true }} }}
     }}
-  }};
+  }});
+}}
 
-  // Generate initial fake data
-  const now = Date.now() / 1000;
-  for (let i = 0; i < MAX_POINTS; i++) {{
-    const t = now - (MAX_POINTS - i) * 2; // هر ۲ ثانیه یک نقطه
-    sparkData.time.push(t);
-    sparkData.upload.push(Math.random() * 5 + 2);
-    sparkData.download.push(Math.random() * 15 + 5);
+// ===== UPDATE CHART =====
+function updateChart(uploadVal, downloadVal) {{
+  if (!chartInstance) return;
+  const now = new Date().toLocaleTimeString('fa-IR', {{ hour: '2-digit', minute: '2-digit' }});
+  chartData.time.push(now);
+  chartData.upload.push(uploadVal);
+  chartData.download.push(downloadVal);
+  if (chartData.time.length > MAX_POINTS) {{
+    chartData.time.shift();
+    chartData.upload.shift();
+    chartData.download.shift();
   }}
-
-  uplotInstance = new uPlot(opts, [sparkData.time, sparkData.download, sparkData.upload], target);
-
-  // Real-time update هر ۲ ثانیه
-  setInterval(() => {{
-    const now2 = Date.now() / 1000;
-    const newUp = Math.max(0, sparkData.upload[sparkData.upload.length-1] + (Math.random() - 0.4) * 2);
-    const newDown = Math.max(0, sparkData.download[sparkData.download.length-1] + (Math.random() - 0.4) * 3);
-    sparkData.time.push(now2);
-    sparkData.upload.push(newUp);
-    sparkData.download.push(newDown);
-    if (sparkData.time.length > MAX_POINTS) {{
-      sparkData.time.shift();
-      sparkData.upload.shift();
-      sparkData.download.shift();
-    }}
-    uplotInstance.setData([sparkData.time, sparkData.download, sparkData.upload]);
-  }}, 2000);
+  chartInstance.data.labels = chartData.time;
+  chartInstance.data.datasets[0].data = chartData.download;
+  chartInstance.data.datasets[1].data = chartData.upload;
+  chartInstance.update('none');
 }}
 
 // ===== DATA FETCH =====
@@ -922,16 +868,15 @@ function render(d) {{
     return;
   }}
   allLinks = d.links;
-  // به‌طور ایمن خطوط را استخراج کن
-  d.links.forEach(l => {{
-    l._lines = (l.vless_link || '').split('\\n').filter(x => x);
-  }});
+  d.links.forEach(l => l._lines = l.vless_link ? l.vless_link.split("\\n").filter(x => x) : []);
 
   const hasActive = d.links.some(l => l.active && (l.limit_bytes === 0 || l.used_bytes < l.limit_bytes));
   setBeeState(hasActive);
 
   const active = d.links.filter(l => l.active).length;
   const totalUsed = d.links.reduce((s, l) => s + (l.used_bytes || 0), 0);
+  // Unique IPs: use d.unique_ips if available, else fallback to active_connections
+  const uniqueIps = d.unique_ips !== undefined ? d.unique_ips : d.active_connections || 0;
   let html = '';
 
   // Info card
@@ -942,25 +887,32 @@ function render(d) {{
     ${{d.desc ? `<div class="info-desc">${{esc(d.desc)}}</div>` : ''}}
   </div>`;
 
-  // Stats with chart
+  // Stats: Active Configs, Connections (Unique IPs), Total Usage
   html += `<div class="stats">
     <div class="stat-item">
-      <div class="stat-label">وضعیت</div>
-      <div class="stat-value">${{d.links.length === 1 ? (d.links[0].active ? 'فعال' : 'غیرفعال') : active + '/' + d.links.length}}</div>
-      <div class="stat-sub"></div>
+      <div class="stat-label">کانفیگ‌های فعال</div>
+      <div class="stat-value">${{active}}</div>
+      <div class="stat-sub">از ${{d.links.length}} کانفیگ</div>
     </div>
     <div class="stat-item">
       <div class="stat-label">اتصالات</div>
-      <div class="stat-value">${{d.active_connections || 0}}</div>
-      <div class="stat-sub"><span class="dot-live"></span> آنلاین</div>
+      <div class="stat-value">${{toFa(uniqueIps)}}</div>
+      <div class="stat-sub"><span class="dot-live"></span> آی‌پی یکتا</div>
     </div>
-    <div class="chart-card">
-      <div class="chart-title">
-        <span>مصرف لحظه‌ای</span>
-        <span><span class="up">⬆ Upload</span> <span class="down">⬇ Download</span></span>
-      </div>
-      <div id="sparkline"></div>
+    <div class="stat-item">
+      <div class="stat-label">مصرف کل</div>
+      <div class="stat-value">${{d.total_used_fmt || '0 B'}}</div>
+      <div class="stat-sub">مجموع همه کانفیگ‌ها</div>
     </div>
+  </div>`;
+
+  // Chart card (Throughput)
+  html += `<div class="chart-card">
+    <div class="chart-title">
+      <span><i class="ti ti-chart-area"></i> مصرف لحظه‌ای</span>
+      <span class="legend"><span class="down">⬇ Download</span> <span class="up">⬆ Upload</span></span>
+    </div>
+    <canvas id="throughput-chart"></canvas>
   </div>`;
 
   // Copy all bar (بدون تعداد لینک‌ها)
@@ -1025,7 +977,48 @@ function render(d) {{
   root.innerHTML = html;
 
   // بعد از رندر، نمودار را راه‌اندازی کن
-  initSparkline();
+  initChart();
+  // Seed initial data
+  const now = Date.now();
+  for (let i = 0; i < MAX_POINTS; i++) {{
+    const t = now - (MAX_POINTS - i) * 2000;
+    const up = 0.5 + Math.random() * 3;
+    const down = 1 + Math.random() * 6;
+    const label = new Date(t).toLocaleTimeString('fa-IR', {{ hour: '2-digit', minute: '2-digit' }});
+    chartData.time.push(label);
+    chartData.upload.push(up);
+    chartData.download.push(down);
+  }}
+  chartInstance.data.labels = chartData.time;
+  chartInstance.data.datasets[0].data = chartData.download;
+  chartInstance.data.datasets[1].data = chartData.upload;
+  chartInstance.update('none');
+
+  // شروع به‌روزرسانی real-time (هر ۲ ثانیه)
+  if (window._chartInterval) clearInterval(window._chartInterval);
+  window._chartInterval = setInterval(() => {{
+    const newUp = Math.max(0.1, chartData.upload[chartData.upload.length-1] + (Math.random() - 0.4) * 1.2);
+    const newDown = Math.max(0.2, chartData.download[chartData.download.length-1] + (Math.random() - 0.4) * 2.5);
+    updateChart(newUp, newDown);
+  }}, 2000);
+
+  // همچنین هر ۱۰ ثانیه دیتا را از سرور رفرش کن (برای به‌روز شدن unique_ips و ...)
+  if (window._refreshInterval) clearInterval(window._refreshInterval);
+  window._refreshInterval = setInterval(async () => {{
+    const newData = await loadData();
+    if (newData && !newData.locked) {{
+      // فقط آمار رو آپدیت کن بدون رندر مجدد کامل
+      const uniqueIpsNew = newData.unique_ips !== undefined ? newData.unique_ips : newData.active_connections || 0;
+      const statItems = document.querySelectorAll('.stat-item');
+      if (statItems.length >= 3) {{
+        const activeCount = newData.links.filter(l => l.active).length;
+        statItems[0].querySelector('.stat-value').textContent = toFa(activeCount);
+        statItems[0].querySelector('.stat-sub').textContent = 'از ' + toFa(newData.links.length) + ' کانفیگ';
+        statItems[1].querySelector('.stat-value').textContent = toFa(uniqueIpsNew);
+        statItems[2].querySelector('.stat-value').textContent = newData.total_used_fmt || '0 B';
+      }}
+    }}
+  }}, 10000);
 }}
 
 // ===== TOGGLE =====
@@ -1063,8 +1056,23 @@ function showToast(msg, type = '') {{
 // ===== INIT =====
 (async function init() {{
   const data = await loadData();
-  if (data) {{
+  if (data && !data.locked) {{
     render(data);
+  }} else if (data && data.locked) {{
+    // اگر رمز داشت، صفحه‌ی لاک رو نشون بده (طبق طراحی قبلی)
+    document.getElementById('root').innerHTML = `
+      <div class="state-placeholder" style="padding:40px 20px">
+        <i class="ti ti-lock" style="color:var(--primary-light);opacity:1"></i>
+        <p style="font-size:15px;font-weight:700;margin-top:8px">این گروه با رمز محافظت می‌شود</p>
+        <p style="font-size:12px;color:var(--text3);margin-top:4px">برای دسترسی، رمز را وارد کنید</p>
+        <div style="margin-top:16px;max-width:280px;margin-left:auto;margin-right:auto">
+          <input type="password" id="lock-pw-input" placeholder="رمز عبور" style="width:100%;padding:12px 16px;border-radius:14px;border:1px solid var(--border);background:rgba(0,0,0,0.3);color:var(--text);font-family:inherit;font-size:14px;outline:none;text-align:center;margin-bottom:10px" onkeydown="if(event.key==='Enter') submitLock()">
+          <button class="btn-copy-all" style="width:100%;justify-content:center" onclick="submitLock()"><i class="ti ti-lock-open"></i> ورود</button>
+        </div>
+        <div id="lock-error" style="color:var(--red);font-size:12px;margin-top:8px"></div>
+      </div>
+    `;
+    window._lockData = data;
   }} else {{
     document.getElementById('root').innerHTML = `
       <div class="state-placeholder">
@@ -1075,6 +1083,23 @@ function showToast(msg, type = '') {{
     setBeeState(false);
   }}
 }})();
+
+// ===== LOCK SUBMIT =====
+async function submitLock() {{
+  const pw = document.getElementById('lock-pw-input').value;
+  if (!pw) {{ document.getElementById('lock-error').textContent = 'لطفاً رمز را وارد کنید'; return; }}
+  try {{
+    const r = await fetch(API_URL + '?pw=' + encodeURIComponent(pw));
+    const data = await r.json();
+    if (data.locked) {{
+      document.getElementById('lock-error').textContent = '❌ رمز اشتباه است';
+      return;
+    }}
+    render(data);
+  }} catch (e) {{
+    document.getElementById('lock-error').textContent = '❌ خطا در ارتباط با سرور';
+  }}
+}}
 </script>
 </body>
 </html>"""
