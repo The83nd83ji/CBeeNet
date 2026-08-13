@@ -472,26 +472,44 @@ body {{
 .remain-tag.warn {{ background: rgba(255,215,0,0.10); color: var(--primary-light); }}
 .remain-tag.danger {{ background: var(--red-bg); color: var(--red); }}
 
-/* ===== SPARKLINE INSIDE CONFIG ===== */
+/* ===== CHART INSIDE CONFIG ===== */
 .config-chart-wrap {{
   margin: 12px 0 6px;
-  height: 70px;
+  height: 90px;
   position: relative;
 }}
 .config-chart-wrap canvas {{
   width: 100% !important;
   height: 100% !important;
 }}
-.config-chart-legend {{
+.config-chart-controls {{
   display: flex;
-  gap: 12px;
-  font-size: 8.5px;
-  color: var(--text3);
-  justify-content: flex-end;
-  margin-top: 2px;
+  gap: 6px;
+  justify-content: flex-start;
+  margin-top: 6px;
+  flex-wrap: wrap;
 }}
-.config-chart-legend .up {{ color: #4fc3f7; }}
-.config-chart-legend .down {{ color: #ffb74d; }}
+.range-btn {{
+  font-size: 9px;
+  font-weight: 700;
+  padding: 3px 10px;
+  border-radius: 20px;
+  background: var(--surface3);
+  border: 1px solid var(--border);
+  color: var(--text3);
+  cursor: pointer;
+  transition: all 0.15s;
+  font-family: inherit;
+}}
+.range-btn.active {{
+  background: var(--accent-d);
+  color: var(--accent2);
+  border-color: var(--accent);
+}}
+.range-btn:hover {{
+  background: var(--accent-d);
+  color: var(--accent2);
+}}
 
 /* ===== SERVER LIST ===== */
 .server-list {{
@@ -628,7 +646,7 @@ body {{
   .btn-copy-all {{ justify-content: center; }}
   .config-header {{ flex-wrap: wrap; }}
   .config-label {{ min-width: 100%; }}
-  .config-chart-wrap {{ height: 55px; }}
+  .config-chart-wrap {{ height: 65px; }}
 }}
 @media (max-width: 380px) {{
   .stats {{ grid-template-columns: 1fr; }}
@@ -672,10 +690,12 @@ body {{
 <script>
 // ===== CONFIG =====
 const API_URL = "{api_url}";
+const BASE_URL = API_URL.replace(/\\/api\\/public\\/sub\\/.*$/, '');
 let allLinks = [];
-let linkCharts = {{}}; // هر کانفیگ یک Chart instance
-let linkData = {{}};   // داده‌های هر کانفیگ
-const MAX_POINTS = 25;
+let linkCharts = {{}};      // هر کانفیگ یک Chart instance
+let linkChartData = {{}};   // داده‌های هر کانفیگ
+let linkRanges = {{}};      // رنج فعلی هر کانفیگ ('1m', '60m', '24h', '7d')
+const UUID_KEY = API_URL.split('/').pop();
 
 // ===== HELPERS =====
 function fmtB(b) {{
@@ -735,15 +755,25 @@ function setBeeState(on) {{
   }}
 }}
 
-// ===== CREATE SPARKLINE FOR A LINK =====
+// ===== FETCH TRAFFIC DATA FOR A LINK =====
+async function fetchLinkTraffic(linkId, range) {{
+  const url = `/api/public/sub/${{UUID_KEY}}/traffic?link=${{linkId}}&range=${{range}}`;
+  try {{
+    const r = await fetch(url);
+    if (!r.ok) throw new Error('HTTP ' + r.status);
+    return await r.json();
+  }} catch (e) {{
+    console.error('Traffic fetch error:', e);
+    return null;
+  }}
+}}
+
+// ===== CREATE CHART FOR A LINK =====
 function createLinkChart(linkId, canvasId) {{
   const ctx = document.getElementById(canvasId).getContext('2d');
-  const gradUp = ctx.createLinearGradient(0, 0, 0, 70);
-  gradUp.addColorStop(0, 'rgba(79,195,247,0.30)');
-  gradUp.addColorStop(1, 'rgba(79,195,247,0)');
-  const gradDown = ctx.createLinearGradient(0, 0, 0, 70);
-  gradDown.addColorStop(0, 'rgba(255,183,77,0.30)');
-  gradDown.addColorStop(1, 'rgba(255,183,77,0)');
+  const grad = ctx.createLinearGradient(0, 0, 0, 90);
+  grad.addColorStop(0, 'rgba(255,215,0,0.30)');
+  grad.addColorStop(1, 'rgba(255,215,0,0)');
 
   const chart = new Chart(ctx, {{
     type: 'line',
@@ -751,32 +781,18 @@ function createLinkChart(linkId, canvasId) {{
       labels: [],
       datasets: [
         {{
-          label: 'Download',
+          label: 'مصرف (MB)',
           data: [],
-          borderColor: '#ffb74d',
-          backgroundColor: gradDown,
+          borderColor: '#ffd700',
+          backgroundColor: grad,
           fill: true,
-          tension: 0.42,
+          tension: 0.4,
           pointRadius: 0,
           pointHoverRadius: 4,
-          pointHoverBackgroundColor: '#ffb74d',
+          pointHoverBackgroundColor: '#ffd700',
           pointHoverBorderColor: '#fff',
           pointHoverBorderWidth: 2,
-          borderWidth: 1.8
-        }},
-        {{
-          label: 'Upload',
-          data: [],
-          borderColor: '#4fc3f7',
-          backgroundColor: gradUp,
-          fill: true,
-          tension: 0.42,
-          pointRadius: 0,
-          pointHoverRadius: 4,
-          pointHoverBackgroundColor: '#4fc3f7',
-          pointHoverBorderColor: '#fff',
-          pointHoverBorderWidth: 2,
-          borderWidth: 1.8
+          borderWidth: 2
         }}
       ]
     }},
@@ -788,7 +804,7 @@ function createLinkChart(linkId, canvasId) {{
         legend: {{ display: false }},
         tooltip: {{
           backgroundColor: 'rgba(10,10,10,0.95)',
-          borderColor: 'rgba(251,191,36,0.3)',
+          borderColor: 'rgba(255,215,0,0.3)',
           borderWidth: 1,
           titleColor: '#f5f5f5',
           bodyColor: '#b0b0b0',
@@ -797,7 +813,7 @@ function createLinkChart(linkId, canvasId) {{
           titleFont: {{ family: 'Vazirmatn', size: 9, weight: '700' }},
           bodyFont: {{ family: 'Vazirmatn', size: 9 }},
           callbacks: {{
-            label: v => `${{v.dataset.label}}: ${{v.parsed.y.toFixed(2)}} MB`
+            label: v => `مصرف: ${{v.parsed.y.toFixed(2)}} MB`
           }}
         }}
       }},
@@ -809,54 +825,65 @@ function createLinkChart(linkId, canvasId) {{
     }}
   }});
 
-  // مقداردهی اولیه با داده‌های تصادفی
-  const now = Date.now();
-  const data = {{ time: [], upload: [], download: [] }};
-  for (let i = 0; i < MAX_POINTS; i++) {{
-    const t = now - (MAX_POINTS - i) * 1500;
-    const up = 0.3 + Math.random() * 2.5;
-    const down = 0.5 + Math.random() * 4;
-    data.time.push(new Date(t).toLocaleTimeString('fa-IR', {{ hour: '2-digit', minute: '2-digit' }}));
-    data.upload.push(up);
-    data.download.push(down);
-  }}
-  chart.data.labels = data.time;
-  chart.data.datasets[0].data = data.download;
-  chart.data.datasets[1].data = data.upload;
-  chart.update('none');
-
-  // ذخیره داده برای به‌روزرسانی
-  linkData[linkId] = data;
   linkCharts[linkId] = chart;
+  linkChartData[linkId] = {{ labels: [], values: [] }};
+  linkRanges[linkId] = '60m';
 
-  // شروع به‌روزرسانی خودکار برای این کانفیگ
-  if (!window._chartIntervals) window._chartIntervals = {{}};
-  if (window._chartIntervals[linkId]) clearInterval(window._chartIntervals[linkId]);
-  window._chartIntervals[linkId] = setInterval(() => {{
-    const d = linkData[linkId];
-    if (!d) return;
-    const newUp = Math.max(0.1, d.upload[d.upload.length-1] + (Math.random() - 0.4) * 1.0);
-    const newDown = Math.max(0.2, d.download[d.download.length-1] + (Math.random() - 0.4) * 2.0);
-    const label = new Date().toLocaleTimeString('fa-IR', {{ hour: '2-digit', minute: '2-digit' }});
-    d.time.push(label);
-    d.upload.push(newUp);
-    d.download.push(newDown);
-    if (d.time.length > MAX_POINTS) {{
-      d.time.shift();
-      d.upload.shift();
-      d.download.shift();
-    }}
-    const chart = linkCharts[linkId];
-    if (chart) {{
-      chart.data.labels = d.time;
-      chart.data.datasets[0].data = d.download;
-      chart.data.datasets[1].data = d.upload;
-      chart.update('none');
-    }}
-  }}, 1800);
+  // بارگذاری اولیه داده
+  loadLinkChartData(linkId);
+
+  // بازه‌های زمانی
+  const controls = document.getElementById('controls-' + linkId);
+  if (controls) {{
+    controls.querySelectorAll('.range-btn').forEach(btn => {{
+      btn.addEventListener('click', function() {{
+        const range = this.dataset.range;
+        controls.querySelectorAll('.range-btn').forEach(b => b.classList.remove('active'));
+        this.classList.add('active');
+        linkRanges[linkId] = range;
+        loadLinkChartData(linkId);
+      }});
+    }});
+    // فعال کردن دکمه پیش‌فرض (60m)
+    const defaultBtn = controls.querySelector('.range-btn[data-range="60m"]');
+    if (defaultBtn) defaultBtn.classList.add('active');
+  }}
+
+  return chart;
 }}
 
-// ===== DATA FETCH =====
+// ===== LOAD DATA FOR A LINK CHART =====
+async function loadLinkChartData(linkId) {{
+  const range = linkRanges[linkId] || '60m';
+  const data = await fetchLinkTraffic(linkId, range);
+  if (!data || !data.timestamps || !data.timestamps.length) {{
+    // اگر داده‌ای نبود، یک پیام نمایش بده
+    const chart = linkCharts[linkId];
+    if (chart) {{
+      chart.data.labels = ['بدون داده'];
+      chart.data.datasets[0].data = [0];
+      chart.update('none');
+    }}
+    return;
+  }}
+  // تبدیل تاریخ‌ها به فرمت خوانا
+  const labels = data.timestamps.map(t => {{
+    const d = new Date(t);
+    return d.toLocaleTimeString('fa-IR', {{ hour: '2-digit', minute: '2-digit' }});
+  }});
+  // مقادیر بر حسب مگابایت
+  const values = data.values.map(v => v / (1024 * 1024));
+
+  const chart = linkCharts[linkId];
+  if (chart) {{
+    chart.data.labels = labels;
+    chart.data.datasets[0].data = values;
+    chart.update('none');
+    linkChartData[linkId] = {{ labels, values }};
+  }}
+}}
+
+// ===== DATA FETCH (اصلی) =====
 async function loadData() {{
   try {{
     const r = await fetch(API_URL);
@@ -887,7 +914,6 @@ function render(d) {{
 
   const activeCount = d.links.filter(l => l.active).length;
   const totalUsed = d.links.reduce((s, l) => s + (l.used_bytes || 0), 0);
-  // Unique IPs → فقط برچسب "اتصالات" تغییر کرده
   const uniqueIps = d.unique_ips !== undefined ? d.unique_ips : d.active_connections || 0;
   let html = '';
 
@@ -905,7 +931,7 @@ function render(d) {{
     <div class="stat-item">
       <div class="stat-label">وضعیت کانفیگ</div>
       <div class="stat-value">${{overallStatus}}</div>
-      <div class="stat-sub">${{activeCount}} از ${{d.links.length}} فعال</div>
+      <div class="stat-sub" style="display:none"></div> <!-- زیرنویس مخفی -->
     </div>
     <div class="stat-item">
       <div class="stat-label">اتصالات</div>
@@ -934,7 +960,7 @@ function render(d) {{
   // Config list header
   html += `<div class="section-header"><i class="ti ti-link"></i> کانفیگ‌ها (${{d.links.length}})</div>`;
 
-  // Config items with per-link sparkline
+  // Config items with per-link chart
   for (let i = 0; i < d.links.length; i++) {{
     const l = d.links[i];
     const pct = l.limit_bytes > 0 ? Math.min(100, (l.used_bytes / l.limit_bytes) * 100) : 0;
@@ -968,9 +994,11 @@ function render(d) {{
         </div>
         <div class="config-chart-wrap">
           <canvas id="${{canvasId}}"></canvas>
-          <div class="config-chart-legend">
-            <span class="down">⬇ Download</span>
-            <span class="up">⬆ Upload</span>
+          <div class="config-chart-controls" id="controls-${{linkId}}">
+            <button class="range-btn" data-range="1m">۱ دقیقه</button>
+            <button class="range-btn" data-range="60m">۶۰ دقیقه</button>
+            <button class="range-btn" data-range="24h">۲۴ ساعت</button>
+            <button class="range-btn" data-range="7d">هفته</button>
           </div>
         </div>
         ${{l._lines.length ? `<div class="server-list">
@@ -997,22 +1025,10 @@ function render(d) {{
     createLinkChart(linkId, canvasId);
   }}
 
-  // پاکسازی اینتروال‌های قدیمی که دیگر استفاده نمی‌شوند
-  const currentLinkIds = d.links.map((l, i) => 'link-' + i + '-' + l.uuid.slice(0, 6));
-  if (window._chartIntervals) {{
-    Object.keys(window._chartIntervals).forEach(id => {{
-      if (!currentLinkIds.includes(id)) {{
-        clearInterval(window._chartIntervals[id]);
-        delete window._chartIntervals[id];
-        delete linkCharts[id];
-        delete linkData[id];
-      }}
-    }});
-  }}
-
-  // هر ۱۰ ثانیه آمار کلی رو رفرش کن (بدون رندر مجدد)
+  // پاکسازی اینتروال‌های قدیمی
   if (window._refreshInterval) clearInterval(window._refreshInterval);
   window._refreshInterval = setInterval(async () => {{
+    // رفرش آمار کلی (بدون رندر مجدد)
     const newData = await loadData();
     if (newData && !newData.locked) {{
       const statItems = document.querySelectorAll('.stat-item');
@@ -1021,12 +1037,19 @@ function render(d) {{
         const overallStatusNew = activeCountNew > 0 ? 'فعال' : 'غیرفعال';
         const uniqueIpsNew = newData.unique_ips !== undefined ? newData.unique_ips : newData.active_connections || 0;
         statItems[0].querySelector('.stat-value').textContent = overallStatusNew;
-        statItems[0].querySelector('.stat-sub').textContent = activeCountNew + ' از ' + newData.links.length + ' فعال';
         statItems[1].querySelector('.stat-value').textContent = toFa(uniqueIpsNew);
         statItems[2].querySelector('.stat-value').textContent = newData.total_used_fmt || '0 B';
       }}
     }}
   }}, 10000);
+
+  // همچنین داده‌های نمودارها را هر ۳۰ ثانیه رفرش کن
+  if (window._chartRefreshInterval) clearInterval(window._chartRefreshInterval);
+  window._chartRefreshInterval = setInterval(() => {{
+    Object.keys(linkRanges).forEach(linkId => {{
+      loadLinkChartData(linkId);
+    }});
+  }}, 30000);
 }}
 
 // ===== TOGGLE =====
