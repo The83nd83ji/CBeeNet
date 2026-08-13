@@ -1188,36 +1188,25 @@ a{color:inherit;text-decoration:none}
       </div>
       <div class="cp-block mb16">
         <div class="cp-block-label"><i class="ti ti-plug-connected"></i> پروتکل انتقال</div>
-        <select id="nl-proto" style="display:none">
-          <option value="vless-ws">VLESS / WebSocket</option>
-          <option value="xhttp-packet-up">XHTTP Ultra · packet-up</option>
-          <option value="xhttp-stream-up">XHTTP Ultra · stream-up</option>
-        </select>
         <div class="proto-cards">
-          <div class="proto-card active" data-val="vless-ws" onclick="selectProto('vless-ws',this)">
+          <div class="proto-card active" data-val="vless-ws" onclick="toggleProto(this)">
             <div class="proto-card-check"><i class="ti ti-check"></i></div>
             <div class="proto-card-icon"><i class="ti ti-link"></i></div>
             <div class="proto-card-title">VLESS / WS</div>
             <div class="proto-card-desc">پایدار و همه‌منظوره</div>
           </div>
-          <div class="proto-card" data-val="xhttp-packet-up" onclick="selectProto('xhttp-packet-up',this)">
+          <div class="proto-card" data-val="xhttp-packet-up" onclick="toggleProto(this)">
             <div class="proto-card-check"><i class="ti ti-check"></i></div>
             <div class="proto-card-icon"><i class="ti ti-bolt"></i></div>
             <div class="proto-card-title">XHTTP · packet-up</div>
             <div class="proto-card-desc">سازگار با CDN</div>
           </div>
-          <div class="proto-card" data-val="xhttp-stream-up" onclick="selectProto('xhttp-stream-up',this)">
+          <div class="proto-card" data-val="xhttp-stream-up" onclick="toggleProto(this)">
             <div class="proto-card-check"><i class="ti ti-check"></i></div>
             <div class="proto-card-icon"><i class="ti ti-rocket"></i></div>
             <div class="proto-card-title">XHTTP · stream-up</div>
             <div class="proto-card-desc">تاخیر پایین‌تر</div>
           </div>
-        </div>
-        <div style="margin-top:12px;display:flex;align-items:center;gap:10px;padding:8px 12px;background:var(--accent-d);border-radius:10px;border:1px solid var(--card-b)">
-          <input type="checkbox" id="nl-triple" style="width:18px;height:18px;accent-color:var(--accent);cursor:pointer">
-          <label for="nl-triple" style="font-size:12px;font-weight:700;color:var(--t2);cursor:pointer">
-            <i class="ti ti-layers-intersect"></i> ساخت سه‌گانه (VLESS/WS + XHTTP packet-up + XHTTP stream-up)
-          </label>
         </div>
       </div>
       <div class="cp-block mb16">
@@ -1529,10 +1518,8 @@ function setExpiry(days,el){
   document.querySelectorAll('#exp-chips .chip').forEach(c=>c.classList.remove('active'));
   el.classList.add('active');
 }
-function selectProto(val,el){
-  document.getElementById('nl-proto').value = val;
-  document.querySelectorAll('.proto-card').forEach(c=>c.classList.remove('active'));
-  el.classList.add('active');
+function toggleProto(el){
+  el.classList.toggle('active');
 }
 const sb=document.getElementById('sb'),overlay=document.getElementById('overlay');
 function openSb(){sb.classList.add('open');overlay.classList.add('show')}
@@ -1665,6 +1652,16 @@ if(curSub)nlSub.value=curSub;
     document.getElementById('lsummary').innerHTML=links.slice(0,6).map(l=>`<div class="sr"><span class="sr-k" style="gap:5px"><i class="ti ${l.expired?'ti-calendar-x':l.active?'ti-circle-check':'ti-circle-x'}" style="color:${l.expired?'var(--amber)':l.active?'var(--green)':'var(--red)'}"></i>${esc(l.label)}</span><span class="sr-v" style="font-size:10px">${fmtB(l.used_bytes)} / ${l.limit_bytes===0?'∞':fmtB(l.limit_bytes)}</span></div>`).join('');
   }catch(e){console.error(e)}
 }
+function getSelectedProtocols(){
+  const cards=document.querySelectorAll('.proto-card');
+  const selected=[];
+  cards.forEach(c=>{
+    if(c.classList.contains('active')){
+      selected.push(c.dataset.val);
+    }
+  });
+  return selected;
+}
 async function createLink(){
   const label=document.getElementById('nl-label').value.trim()||'کانفیگ جدید';
   const val=document.getElementById('nl-val').value;
@@ -1677,7 +1674,11 @@ async function createLink(){
   let count=parseInt(document.getElementById('nl-count').value)||1;
   if(count<1)count=1;
   const is_personal=document.getElementById('nl-personal').checked;
-  const triple=document.getElementById('nl-triple').checked;
+  const protocols=getSelectedProtocols();
+  if(!protocols.length){
+    toast('حداقل یک پروتکل را انتخاب کنید','err');
+    return;
+  }
   const body={
     label: label,
     limit_value: val||0,
@@ -1687,19 +1688,13 @@ async function createLink(){
     sub_id: sub_id,
     ips: addr,
     port: port,
-    is_personal: is_personal
+    is_personal: is_personal,
+    protocols: protocols
   };
-  let protocols;
-  if (triple) {
-    protocols = ['vless-ws','xhttp-packet-up','xhttp-stream-up'];
-  } else {
-    protocols = [document.getElementById('nl-proto').value||'vless-ws'];
-  }
   try{
     let r, d;
     if (count > 1) {
       body.count = count;
-      body.protocols = protocols;
       r = await authF('/api/links/bulk', {
         method:'POST',
         headers:{'Content-Type':'application/json'},
@@ -1714,7 +1709,6 @@ async function createLink(){
         if (firstLink) navigator.clipboard.writeText(firstLink).catch(()=>{});
       }
     } else {
-      body.protocols = protocols;
       r = await authF('/api/links', {
         method:'POST',
         headers:{'Content-Type':'application/json'},
@@ -1730,7 +1724,6 @@ async function createLink(){
     ['nl-label','nl-val','nl-exp','nl-note','nl-ips','nl-port'].forEach(id=>document.getElementById(id).value='');
     document.getElementById('nl-count').value=1;
     document.getElementById('nl-personal').checked=false;
-    document.getElementById('nl-triple').checked=false;
     loadLinks();
   } catch(e){ toast('خطا در ساخت','err'); }
 }
