@@ -23,9 +23,12 @@ IRAN_TZ = ZoneInfo("Asia/Tehran")
 
 app = FastAPI(title="CBeeNet Gateway", docs_url=None, redoc_url=None)
 
+# ── کلید مخفی ثابت (اگر محیطی تنظیم نشود) ─────────────────────────────────────
+FIXED_SECRET = "CBeeNet-Secret-2025"  # این مقدار را به دلخواه تغییر دهید
+
 CONFIG = {
     "port": int(os.environ.get("PORT", 8000)),
-    "secret": os.environ.get("SECRET_KEY", secrets.token_urlsafe(32)),
+    "secret": os.environ.get("SECRET_KEY", FIXED_SECRET),  # اولویت با محیطی است
     "host": os.environ.get("RAILWAY_PUBLIC_DOMAIN", "localhost"),
 }
 
@@ -43,7 +46,7 @@ DATA_FILE = DATA_DIR / "rvg_state.json"
 SAVE_LOCK = asyncio.Lock()
 
 async def load_state():
-    global LINKS, AUTH, SUBS, GLOBAL_SETTINGS, RESELLERS, CONFIG
+    global LINKS, AUTH, SUBS, GLOBAL_SETTINGS, RESELLERS
     try:
         DATA_DIR.mkdir(parents=True, exist_ok=True)
         if DATA_FILE.exists():
@@ -58,18 +61,11 @@ async def load_state():
             RESELLERS.update(data.get("resellers", {}))
             if "global_settings" in data: GLOBAL_SETTINGS.update(data["global_settings"])
             if "password_hash" in data: AUTH["password_hash"] = data["password_hash"]
-            # بازیابی secret_key اگر وجود داشت
-            if "secret_key" in data:
-                CONFIG["secret"] = data["secret_key"]
-            else:
-                # اگر secret_key در فایل نبود، یک مقدار جدید بساز و ذخیره کن
-                CONFIG["secret"] = secrets.token_urlsafe(32)
-                await save_state()  # ذخیره با کلید جدید
+            # secret_key را از فایل نادیده می‌گیریم تا همیشه از CONFIG استفاده شود
             logger.info(f"Loaded state from {DATA_FILE}: {len(LINKS)} links")
         else:
             logger.info("No existing state file found, starting fresh")
-            # اگر فایل وجود ندارد، یک secret_key جدید بساز و ذخیره کن
-            CONFIG["secret"] = secrets.token_urlsafe(32)
+            # اگر فایل وجود ندارد، state اولیه را با رمز پیش‌فرض ذخیره می‌کنیم
             await save_state()
     except Exception as e:
         logger.error(f"Error loading state: {e}")
@@ -82,7 +78,7 @@ async def save_state():
             "resellers": dict(RESELLERS),
             "global_settings": dict(GLOBAL_SETTINGS),
             "password_hash": AUTH["password_hash"],
-            "secret_key": CONFIG["secret"]  # <-- ذخیره کلید مخفی
+            "secret_key": CONFIG["secret"]  # فقط برای اطلاع ذخیره می‌شود، اما هنگام بارگذاری نادیده گرفته می‌شود
         }
         DATA_DIR.mkdir(parents=True, exist_ok=True)
         async with aiofiles.open(DATA_FILE, "w", encoding="utf-8") as f:
@@ -129,7 +125,9 @@ SESSION_TTL = 60 * 60 * 24 * 7
 def hash_password(pw: str) -> str:
     return hashlib.sha256(f"{pw}{CONFIG['secret']}".encode()).hexdigest()
 
-AUTH = {"password_hash": hash_password(os.environ.get("ADMIN_PASSWORD", "admin"))}
+# رمز پیش‌فرض ثابت (در صورت نبود متغیر محیطی)
+DEFAULT_ADMIN_PASSWORD = "admin"
+AUTH = {"password_hash": hash_password(os.environ.get("ADMIN_PASSWORD", DEFAULT_ADMIN_PASSWORD))}
 SESSIONS: dict = {}
 SESSIONS_LOCK = asyncio.Lock()
 
@@ -1011,7 +1009,7 @@ async def dashboard(request: Request):
     await ensure_default_link()
     return HTMLResponse(content=DASHBOARD_HTML)
 
-@app.get("/CFOX", response_class=HTMLResponse)
+@app.get("/Cbee", response_class=HTMLResponse)
 async def cfox_dashboard(request: Request):
     s = await get_session_data(request.cookies.get(SESSION_COOKIE))
     if not s or s["role"] != "admin": return RedirectResponse(url="/login")
