@@ -1,4 +1,4 @@
-# pages.py - CBee Gateway
+# pages.py - CBee Gateway v1 (3X-UI Style Dashboard)
 import json
 
 LOGIN_HTML = r"""<!DOCTYPE html>
@@ -91,7 +91,7 @@ body {
   z-index: 1;
 }
 .brand-name {
-  font-size: 32px;
+  font-size: 42px;
   font-weight: 900;
   font-family: 'Vazirmatn', sans-serif;
   background: linear-gradient(135deg, #1677ff, #0050b3);
@@ -237,7 +237,7 @@ input:focus + .ic { color: #1677ff; }
 @keyframes spin { to { transform: rotate(360deg); } }
 @media (max-width: 440px) {
   .card { padding: 28px 20px 24px; }
-  .brand-name { font-size: 26px; }
+  .brand-name { font-size: 32px; }
 }
 </style>
 </head>
@@ -248,7 +248,7 @@ input:focus + .ic { color: #1677ff; }
   <div class="card">
     <div class="brand">
       <div class="brand-name">CBee</div>
-      <div class="brand-sub">Gateway · v3.6.0</div>
+      <div class="brand-sub">Gateway · v1</div>
     </div>
     <h1>ورود به پنل</h1>
     <p class="sub">رمز عبور را برای دسترسی به داشبورد وارد کنید</p>
@@ -362,9 +362,9 @@ body{font-family:'Vazirmatn',sans-serif;background:var(--bg);color:var(--t1);min
 a{color:inherit;text-decoration:none}
 .sidebar{width:var(--sidebar-w);min-height:100vh;background:var(--bg2);border-left:1px solid var(--card-b);display:flex;flex-direction:column;flex-shrink:0;position:fixed;right:0;top:0;bottom:0;z-index:200;transition:transform .25s cubic-bezier(.4,0,.2,1),background .3s,border-color .3s}
 .logo{display:flex;align-items:center;gap:12px;padding:20px 16px 16px;border-bottom:1px solid var(--card-b)}
-.logo-img{width:38px;height:38px;border-radius:50%;overflow:hidden;border:1px solid var(--card-b);box-shadow:0 0 0 1px rgba(22,119,255,.08);flex-shrink:0;background:linear-gradient(135deg,var(--accent),var(--accent2));display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:900;color:#fff;font-family:'Vazirmatn',sans-serif}
+.logo-img{width:38px;height:38px;border-radius:50%;overflow:hidden;border:1px solid var(--card-b);box-shadow:0 0 0 1px rgba(22,119,255,.08);flex-shrink:0;background:linear-gradient(135deg,var(--accent),var(--accent2));display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:900;color:#fff;font-family:'Vazirmatn',sans-serif}
 .logo-img img{width:100%;height:100%;object-fit:cover}
-.logo-name{font-size:16px;font-weight:900;color:var(--t1);font-family:'Vazirmatn',sans-serif;letter-spacing:-0.02em}
+.logo-name{font-size:20px;font-weight:900;color:var(--t1);font-family:'Vazirmatn',sans-serif;letter-spacing:-0.02em}
 .logo-sub{font-size:10px;color:var(--t3);margin-top:1px}
 .sb-close{display:none;position:absolute;left:12px;top:20px;background:var(--accent-d);border:1px solid var(--card-b);color:var(--t2);width:30px;height:30px;border-radius:8px;font-size:16px;align-items:center;justify-content:center;cursor:pointer}
 .nav-wrap{flex:1;overflow-y:auto;padding:6px 0 8px}
@@ -383,9 +383,9 @@ a{color:inherit;text-decoration:none}
 .logout-btn:hover{background:rgba(239,68,68,0.2)}
 .mob-top{display:none;position:fixed;top:0;right:0;left:0;height:52px;background:var(--bg2);border-bottom:1px solid var(--card-b);z-index:150;align-items:center;justify-content:space-between;padding:0 14px;transition:background .3s}
 .mob-top .ml{display:flex;align-items:center;gap:9px}
-.mob-logo{width:28px;height:28px;border-radius:50%;overflow:hidden;background:linear-gradient(135deg,var(--accent),var(--accent2));display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:900;color:#fff;font-family:'Vazirmatn',sans-serif}
+.mob-logo{width:28px;height:28px;border-radius:50%;overflow:hidden;background:linear-gradient(135deg,var(--accent),var(--accent2));display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:900;color:#fff;font-family:'Vazirmatn',sans-serif}
 .mob-logo img{width:100%;height:100%;object-fit:cover}
-.mob-title{color:var(--t1);font-size:13px;font-weight:700}
+.mob-title{color:var(--t1);font-size:16px;font-weight:900;font-family:'Vazirmatn',sans-serif}
 .mob-right{display:flex;gap:6px}
 .menu-btn,.theme-mob{background:var(--accent-d);border:1px solid var(--card-b);color:var(--t2);width:34px;height:34px;border-radius:8px;font-size:17px;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:.15s}
 .overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.65);z-index:190;backdrop-filter:blur(3px)}
@@ -924,7 +924,7 @@ a{color:inherit;text-decoration:none}
   <button class="sb-close" id="close-sb"><i class="ti ti-x"></i></button>
   <div class="logo">
     <div class="logo-img">CB</div>
-    <div><div class="logo-name">CBee</div><div class="logo-sub">Gateway · v3.6.0</div></div>
+    <div><div class="logo-name">CBee</div><div class="logo-sub">Gateway · v1</div></div>
   </div>
   <div class="nav-wrap">
     <div class="nav-sec">پنل</div>
@@ -948,7 +948,7 @@ a{color:inherit;text-decoration:none}
   </div>
 </aside>
 <main class="main">
-<!-- ========== صفحه داشبورد ========== -->
+<!-- ========== صفحه داشبورد (مشابه 3X-UI) ========== -->
 <section class="pg on" id="pg-overview">
   <div class="topbar">
     <div><div class="tb-title"><i class="ti ti-layout-dashboard"></i> داشبورد</div><div class="tb-sub" id="last-upd">در حال بارگذاری...</div></div>
@@ -958,23 +958,28 @@ a{color:inherit;text-decoration:none}
       <button class="btn btn-p btn-sm" onclick="refreshAll()"><i class="ti ti-refresh"></i> رفرش</button>
     </div>
   </div>
+  <!-- کارت‌های آمار -->
   <div class="metrics">
     <div class="metric"><div class="m-icon"><i class="ti ti-plug-connected"></i></div><div class="m-label">اتصالات فعال</div><div class="m-val" id="m-conns">—</div><div class="m-sub"><span class="dot dg pulse"></span> WebSocket / XHTTP زنده</div></div>
     <div class="metric"><div class="m-icon"><i class="ti ti-transfer"></i></div><div class="m-label">کل ترافیک</div><div class="m-val" id="m-traffic">—<span class="m-unit">MB</span></div><div class="m-sub">از راه‌اندازی</div></div>
     <div class="metric suc"><div class="m-icon suc"><i class="ti ti-link"></i></div><div class="m-label">کانفیگ فعال</div><div class="m-val" id="m-alinks">—</div><div class="m-sub" id="m-lsub">از کل</div></div>
     <div class="metric pur"><div class="m-icon pur"><i class="ti ti-folders"></i></div><div class="m-label">گروه‌های ساب</div><div class="m-val" id="m-subs">—</div><div class="m-sub">فعال</div></div>
   </div>
+
+  <!-- نمودارها -->
   <div class="g3">
     <div class="card"><div class="card-title"><i class="ti ti-chart-area"></i> ترافیک ساعتی (MB) · دانلود / آپلود</div><div class="ch"><canvas id="ch1"></canvas></div></div>
     <div class="card"><div class="card-title"><i class="ti ti-chart-donut"></i> توزیع پروتکل‌ها</div><div class="ch-sm"><canvas id="ch2"></canvas></div></div>
   </div>
+
+  <!-- وضعیت سرویس و خلاصه کانفیگ‌ها -->
   <div class="g2">
     <div class="card">
       <div class="card-title"><i class="ti ti-activity"></i> وضعیت سرویس</div>
       <div class="sr"><span class="sr-k"><i class="ti ti-shield-check"></i> UUID Auth</span><span class="sr-v" style="color:var(--green-t)">● فعال · سخت‌گیرانه</span></div>
       <div class="sr"><span class="sr-k"><i class="ti ti-circle-check"></i> VLESS / WS Tunnel</span><span class="sr-v" style="color:var(--green-t)">● فعال</span></div>
       <div class="sr"><span class="sr-k"><i class="ti ti-bolt"></i> XHTTP Ultra</span><span class="sr-v" style="color:var(--green-t)">● فعال · 3 mode</span></div>
-      <div class="sr"><span class="sr-k"><i class="ti ti-folders"></i> Sub Groups</span><span class="sr-v" style="color:var(--green-t)">● فعال v3.6.0</span></div>
+      <div class="sr"><span class="sr-k"><i class="ti ti-folders"></i> Sub Groups</span><span class="sr-v" style="color:var(--green-t)">● فعال v1</span></div>
       <div class="sr"><span class="sr-k"><i class="ti ti-rss"></i> Subscription API</span><span class="sr-v" style="color:var(--green-t)">● فعال</span></div>
       <div class="sr"><span class="sr-k"><i class="ti ti-clock"></i> آپتایم</span><span class="sr-v" id="uptime-inline">—</span></div>
       <div class="sr" style="flex-direction:column;align-items:flex-start;gap:4px">
@@ -988,12 +993,12 @@ a{color:inherit;text-decoration:none}
     </div>
   </div>
   <div class="dash-footer">
-    <span class="df-text">CBee Gateway v3.6.0 · Railway · 2025</span>
+    <span class="df-text">CBee Gateway v1 · Railway · 2025</span>
     <a class="df-link" href="https://t.me/CBeeNet" target="_blank"><i class="ti ti-brand-telegram"></i> t.me/CBeeNet</a>
   </div>
 </section>
 
-<!-- ========== صفحه کانفیگ‌ها ========== -->
+<!-- ========== سایر صفحات (همانند قبل، کامل) ========== -->
 <section class="pg" id="pg-links">
   <div class="topbar">
     <div><div class="tb-title"><i class="ti ti-link-plus"></i> کانفیگ‌ها</div><div class="tb-sub">ساخت و مدیریت کانفیگ با سهمیه، انقضا و گروه‌بندی</div></div>
@@ -1207,7 +1212,7 @@ a{color:inherit;text-decoration:none}
     </div>
     <div class="card">
       <div class="card-title"><i class="ti ti-shield-check"></i> کنترل دسترسی</div>
-      <div class="sr"><span class="sr-k"><i class="ti ti-id-badge"></i> UUID Auth سخت‌گیرانه</span><span class="sr-v" style="color:var(--green-t)">● فعال v9</span></div>
+      <div class="sr"><span class="sr-k"><i class="ti ti-id-badge"></i> UUID Auth سخت‌گیرانه</span><span class="sr-v" style="color:var(--green-t)">● فعال</span></div>
       <div class="sr"><span class="sr-k"><i class="ti ti-toggle-right"></i> فعال/غیرفعال کانفیگ</span><span class="sr-v" style="color:var(--green-t)">● فعال</span></div>
       <div class="sr"><span class="sr-k"><i class="ti ti-gauge"></i> سهمیه ترافیک</span><span class="sr-v" style="color:var(--green-t)">● فعال</span></div>
       <div class="sr"><span class="sr-k"><i class="ti ti-calendar-x"></i> تاریخ انقضا</span><span class="sr-v" style="color:var(--green-t)">● فعال</span></div>
@@ -1262,7 +1267,7 @@ a{color:inherit;text-decoration:none}
       </div>
       <div class="srv-tiles">
         <div class="srv-tile"><div class="srv-tile-icon"><i class="ti ti-route"></i></div><div class="srv-tile-text"><div class="srv-tile-label">پورت</div><div class="srv-tile-val">443 (TLS)</div></div></div>
-        <div class="srv-tile"><div class="srv-tile-icon"><i class="ti ti-versions"></i></div><div class="srv-tile-text"><div class="srv-tile-label">نسخه</div><div class="srv-tile-val">v3.6.0</div></div></div>
+        <div class="srv-tile"><div class="srv-tile-icon"><i class="ti ti-versions"></i></div><div class="srv-tile-text"><div class="srv-tile-label">نسخه</div><div class="srv-tile-val">v1</div></div></div>
         <div class="srv-tile"><div class="srv-tile-icon"><i class="ti ti-brand-fastapi"></i></div><div class="srv-tile-text"><div class="srv-tile-label">فریم‌ورک</div><div class="srv-tile-val">FastAPI + Uvicorn</div></div></div>
         <div class="srv-tile"><div class="srv-tile-icon"><i class="ti ti-cloud"></i></div><div class="srv-tile-text"><div class="srv-tile-label">پلتفرم</div><div class="srv-tile-val">Railway</div></div></div>
         <div class="srv-tile" style="grid-column:1/-1"><div class="srv-tile-icon"><i class="ti ti-device-floppy"></i></div><div class="srv-tile-text"><div class="srv-tile-label">ذخیره‌سازی</div><div class="srv-tile-val">JSON File (/data)</div></div></div>
@@ -1309,7 +1314,7 @@ a{color:inherit;text-decoration:none}
 </main>
 
 <script>
-// ========== متغیرها و توابع اصلی (بدون تغییر) ==========
+// ========== متغیرها و توابع اصلی ==========
 let isDark=localStorage.getItem('CBeeNet-theme')!=='light';
 function applyTheme(dark){
   document.documentElement.setAttribute('data-theme',dark?'dark':'light');
