@@ -43,7 +43,7 @@ DATA_FILE = DATA_DIR / "rvg_state.json"
 SAVE_LOCK = asyncio.Lock()
 
 async def load_state():
-    global LINKS, AUTH, SUBS, GLOBAL_SETTINGS, RESELLERS
+    global LINKS, AUTH, SUBS, GLOBAL_SETTINGS, RESELLERS, CONFIG
     try:
         DATA_DIR.mkdir(parents=True, exist_ok=True)
         if DATA_FILE.exists():
@@ -58,9 +58,19 @@ async def load_state():
             RESELLERS.update(data.get("resellers", {}))
             if "global_settings" in data: GLOBAL_SETTINGS.update(data["global_settings"])
             if "password_hash" in data: AUTH["password_hash"] = data["password_hash"]
+            # بازیابی secret_key اگر وجود داشت
+            if "secret_key" in data:
+                CONFIG["secret"] = data["secret_key"]
+            else:
+                # اگر secret_key در فایل نبود، یک مقدار جدید بساز و ذخیره کن
+                CONFIG["secret"] = secrets.token_urlsafe(32)
+                await save_state()  # ذخیره با کلید جدید
             logger.info(f"Loaded state from {DATA_FILE}: {len(LINKS)} links")
         else:
             logger.info("No existing state file found, starting fresh")
+            # اگر فایل وجود ندارد، یک secret_key جدید بساز و ذخیره کن
+            CONFIG["secret"] = secrets.token_urlsafe(32)
+            await save_state()
     except Exception as e:
         logger.error(f"Error loading state: {e}")
 
@@ -71,7 +81,8 @@ async def save_state():
             "subs": dict(SUBS),
             "resellers": dict(RESELLERS),
             "global_settings": dict(GLOBAL_SETTINGS),
-            "password_hash": AUTH["password_hash"]
+            "password_hash": AUTH["password_hash"],
+            "secret_key": CONFIG["secret"]  # <-- ذخیره کلید مخفی
         }
         DATA_DIR.mkdir(parents=True, exist_ok=True)
         async with aiofiles.open(DATA_FILE, "w", encoding="utf-8") as f:
