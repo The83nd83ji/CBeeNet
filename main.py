@@ -1000,7 +1000,7 @@ async def dashboard(request: Request):
     await ensure_default_link()
     return HTMLResponse(content=DASHBOARD_HTML)
 
-@app.get("/Cbee", response_class=HTMLResponse)
+@app.get("/CFOX", response_class=HTMLResponse)
 async def cfox_dashboard(request: Request):
     s = await get_session_data(request.cookies.get(SESSION_COOKIE))
     if not s or s["role"] != "admin": return RedirectResponse(url="/login")
