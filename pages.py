@@ -1,4 +1,4 @@
-# pages.py - CBeeNet Gateway v11 (Yellow/Black Edition) - Complete
+# pages.py - CBeeNet Gateway v12 (Full)
 import json
 
 LOGIN_HTML = r"""<!DOCTYPE html>
@@ -7,113 +7,108 @@ LOGIN_HTML = r"""<!DOCTYPE html>
 <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>ورود · CBeeNet</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,400;14..32,600;14..32,700;14..32,800;14..32,900&family=Vazirmatn:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.19.0/dist/tabler-icons.min.css">
 <style>
-* { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
-:root {
-  --bg: #0a0a0a;
-  --surface: rgba(20,20,20,0.85);
-  --surface2: rgba(30,30,30,0.6);
-  --border: rgba(255,255,255,0.06);
-  --border-glow: rgba(251,191,36,0.25);
-  --text: #f5f5f5;
-  --text2: #b0b0b0;
-  --text3: #6a6a6a;
-  --primary: #fbbf24;
-  --primary-light: #fcd34d;
-  --primary-dark: #d97706;
-  --secondary: #f59e0b;
-  --accent: #fbbf24;
-  --shadow: 0 24px 64px rgba(0,0,0,0.7);
-  --radius: 28px;
-}
+* { margin:0; padding:0; box-sizing:border-box; }
 html, body { height:100%; overflow:hidden; }
 body {
-  font-family: 'Vazirmatn', 'Inter', sans-serif;
-  background: var(--bg);
+  font-family: 'Vazirmatn', sans-serif;
+  background: #0a0a0a;
   display: flex;
   align-items: center;
   justify-content: center;
   padding: 20px;
-  background-image:
-    radial-gradient(ellipse 70% 50% at 20% 20%, rgba(251,191,36,0.08) 0%, transparent 60%),
-    radial-gradient(ellipse 60% 40% at 80% 80%, rgba(245,158,11,0.05) 0%, transparent 55%),
-    radial-gradient(ellipse 50% 30% at 50% 100%, rgba(0,0,0,0.4) 0%, transparent 70%);
+  position: relative;
+}
+.bg-canvas {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  background: radial-gradient(ellipse at 20% 30%, rgba(251,191,36,0.15) 0%, transparent 60%),
+              radial-gradient(ellipse at 80% 70%, rgba(245,158,11,0.08) 0%, transparent 55%),
+              #0a0a0a;
+}
+.bg-canvas::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image: 
+    linear-gradient(rgba(251,191,36,0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(251,191,36,0.03) 1px, transparent 1px);
+  background-size: 50px 50px;
+  animation: gridMove 20s linear infinite;
+}
+@keyframes gridMove {
+  0% { transform: translate(0,0); }
+  100% { transform: translate(50px,50px); }
 }
 .orb {
   position: fixed;
   border-radius: 50%;
-  filter: blur(120px);
+  filter: blur(100px);
   z-index: 0;
   pointer-events: none;
-  animation: floatOrb 14s ease-in-out infinite alternate;
+  animation: floatOrb 18s ease-in-out infinite alternate;
 }
-.o1 { width: 450px; height: 450px; background: radial-gradient(circle, rgba(251,191,36,0.08), transparent 70%); top: -180px; right: -120px; animation-delay: 0s; }
-.o2 { width: 350px; height: 350px; background: radial-gradient(circle, rgba(245,158,11,0.06), transparent 70%); bottom: -140px; left: -100px; animation-delay: 6s; }
-.o3 { width: 250px; height: 250px; background: radial-gradient(circle, rgba(251,191,36,0.05), transparent 70%); top: 50%; left: 50%; transform: translate(-50%, -50%); animation-delay: 3s; }
+.o1 { width: 500px; height: 500px; background: rgba(251,191,36,0.07); top: -200px; right: -150px; animation-delay: 0s; }
+.o2 { width: 400px; height: 400px; background: rgba(245,158,11,0.05); bottom: -150px; left: -120px; animation-delay: 6s; }
+.o3 { width: 300px; height: 300px; background: rgba(251,191,36,0.04); top: 50%; left: 50%; transform: translate(-50%, -50%); animation-delay: 3s; }
 @keyframes floatOrb {
   0% { transform: translate(0,0) scale(1); }
-  33% { transform: translate(40px,-50px) scale(1.1); }
-  66% { transform: translate(-30px,30px) scale(0.9); }
-  100% { transform: translate(20px,-20px) scale(1.05); }
+  33% { transform: translate(60px,-70px) scale(1.1); }
+  66% { transform: translate(-40px,40px) scale(0.9); }
+  100% { transform: translate(30px,-30px) scale(1.05); }
 }
-.grid-fx {
-  position: fixed; inset: 0;
-  background-image: linear-gradient(rgba(251,191,36,0.02) 1px, transparent 1px), linear-gradient(90deg, rgba(251,191,36,0.02) 1px, transparent 1px);
-  background-size: 48px 48px;
-  z-index: 0;
-  pointer-events: none;
-}
-.wrap { position: relative; z-index: 10; width: 100%; max-width: 400px; }
+.wrap { position: relative; z-index: 10; width: 100%; max-width: 420px; }
 .card {
-  background: var(--surface);
+  background: rgba(20,20,20,0.85);
   backdrop-filter: blur(24px);
   -webkit-backdrop-filter: blur(24px);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  padding: 38px 32px 32px;
-  box-shadow: var(--shadow), 0 0 60px rgba(251,191,36,0.05);
+  border: 1px solid rgba(255,255,255,0.06);
+  border-radius: 32px;
+  padding: 40px 34px 34px;
+  box-shadow: 0 24px 64px rgba(0,0,0,0.7), 0 0 80px rgba(251,191,36,0.04);
   position: relative;
   overflow: hidden;
 }
-.card::before { content: ''; position: absolute; top: -80px; right: -80px; width: 200px; height: 200px; background: radial-gradient(circle, rgba(251,191,36,0.05), transparent 70%); pointer-events: none; }
-.card::after { content: ''; position: absolute; bottom: -60px; left: -60px; width: 160px; height: 160px; background: radial-gradient(circle, rgba(245,158,11,0.04), transparent 70%); pointer-events: none; }
+.card::before {
+  content: '';
+  position: absolute;
+  top: -80px;
+  right: -80px;
+  width: 200px;
+  height: 200px;
+  background: radial-gradient(circle, rgba(251,191,36,0.06), transparent 70%);
+  pointer-events: none;
+}
 .brand {
   display: flex;
   flex-direction: column;
   align-items: center;
-  margin-bottom: 28px;
+  margin-bottom: 30px;
   position: relative;
   z-index: 1;
 }
 .brand-icon {
-  width: 72px;
-  height: 72px;
+  width: 76px;
+  height: 76px;
   border-radius: 50%;
-  background: linear-gradient(135deg, var(--primary), var(--secondary), var(--primary));
-  background-size: 200% 200%;
-  animation: gradShift 6s ease infinite;
+  background: linear-gradient(135deg, #fbbf24, #d97706);
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 34px;
+  font-size: 36px;
   color: #000;
   box-shadow: 0 8px 32px rgba(251,191,36,0.4);
   transition: transform 0.3s;
 }
-.brand-icon:hover { transform: scale(1.05) rotate(-3deg); }
-@keyframes gradShift {
-  0% { background-position: 0% 50%; }
-  50% { background-position: 100% 50%; }
-  100% { background-position: 0% 50%; }
-}
+.brand-icon:hover { transform: scale(1.05) rotate(-4deg); }
 .brand-name {
-  font-size: 24px;
+  font-size: 26px;
   font-weight: 900;
-  margin-top: 14px;
-  background: linear-gradient(135deg, var(--primary-light), var(--secondary));
+  margin-top: 16px;
+  background: linear-gradient(135deg, #fcd34d, #f59e0b);
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
@@ -121,7 +116,7 @@ body {
 }
 .brand-sub {
   font-size: 11px;
-  color: var(--text3);
+  color: #6a6a6a;
   letter-spacing: 0.2em;
   text-transform: uppercase;
   font-weight: 600;
@@ -130,19 +125,15 @@ body {
 h1 {
   font-size: 20px;
   font-weight: 800;
-  color: var(--text);
+  color: #f5f5f5;
   margin-bottom: 4px;
   letter-spacing: -0.02em;
-  position: relative;
-  z-index: 1;
 }
 .sub {
   font-size: 12px;
-  color: var(--text2);
-  margin-bottom: 22px;
+  color: #b0b0b0;
+  margin-bottom: 24px;
   line-height: 1.7;
-  position: relative;
-  z-index: 1;
 }
 .err {
   display: none;
@@ -152,15 +143,13 @@ h1 {
   padding: 10px 14px;
   margin-bottom: 14px;
   font-size: 12px;
-  color: var(--primary-light);
+  color: #fcd34d;
   align-items: center;
   gap: 8px;
-  position: relative;
-  z-index: 1;
 }
 .err.show { display: flex; }
 .field {
-  margin-bottom: 16px;
+  margin-bottom: 18px;
   position: relative;
   z-index: 1;
 }
@@ -168,7 +157,7 @@ h1 {
   display: block;
   font-size: 10.5px;
   font-weight: 700;
-  color: var(--text2);
+  color: #b0b0b0;
   margin-bottom: 7px;
   text-transform: uppercase;
   letter-spacing: 0.06em;
@@ -178,11 +167,11 @@ h1 {
 }
 input[type="password"] {
   width: 100%;
-  padding: 13px 44px 13px 16px;
+  padding: 14px 48px 14px 18px;
   border-radius: 14px;
-  border: 1px solid var(--border);
-  background: rgba(0,0,0,0.25);
-  color: var(--text);
+  border: 1px solid rgba(255,255,255,0.06);
+  background: rgba(0,0,0,0.3);
+  color: #f5f5f5;
   font-family: inherit;
   font-size: 14px;
   outline: none;
@@ -190,7 +179,7 @@ input[type="password"] {
 }
 input[type="password"]:focus {
   border-color: rgba(251,191,36,0.5);
-  background: rgba(0,0,0,0.35);
+  background: rgba(0,0,0,0.4);
   box-shadow: 0 0 0 4px rgba(251,191,36,0.08);
 }
 .ic {
@@ -198,19 +187,19 @@ input[type="password"]:focus {
   left: 14px;
   top: 50%;
   transform: translateY(-50%);
-  color: var(--text3);
+  color: #6a6a6a;
   font-size: 18px;
   pointer-events: none;
   transition: 0.2s;
 }
-input:focus + .ic { color: var(--primary-light); }
+input:focus + .ic { color: #fcd34d; }
 .btn {
   width: 100%;
-  padding: 13px;
+  padding: 14px;
   border-radius: 14px;
   border: none;
   cursor: pointer;
-  background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+  background: linear-gradient(135deg, #fbbf24, #d97706);
   color: #000;
   font-family: inherit;
   font-size: 14px;
@@ -223,13 +212,12 @@ input:focus + .ic { color: var(--primary-light); }
   transition: all 0.25s;
   position: relative;
   overflow: hidden;
-  z-index: 1;
 }
 .btn::before {
   content: '';
   position: absolute;
   inset: 0;
-  background: linear-gradient(135deg, var(--secondary), var(--primary));
+  background: linear-gradient(135deg, #f59e0b, #fbbf24);
   opacity: 0;
   transition: opacity 0.3s;
 }
@@ -239,20 +227,18 @@ input:focus + .ic { color: var(--primary-light); }
 .btn:disabled { opacity: 0.5; cursor: not-allowed; }
 .btn span { position: relative; z-index: 1; display: flex; align-items: center; gap: 6px; }
 .footer {
-  margin-top: 22px;
-  padding-top: 18px;
-  border-top: 1px solid var(--border);
+  margin-top: 24px;
+  padding-top: 20px;
+  border-top: 1px solid rgba(255,255,255,0.06);
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 8px;
   font-size: 11px;
-  color: var(--text3);
-  position: relative;
-  z-index: 1;
+  color: #6a6a6a;
 }
 .footer a {
-  color: var(--primary-light);
+  color: #fcd34d;
   font-weight: 700;
   text-decoration: none;
   display: flex;
@@ -260,7 +246,7 @@ input:focus + .ic { color: var(--primary-light); }
   gap: 5px;
   transition: 0.2s;
 }
-.footer a:hover { color: var(--secondary); text-decoration: underline; }
+.footer a:hover { color: #f59e0b; text-decoration: underline; }
 @keyframes spin { to { transform: rotate(360deg); } }
 @media (max-width: 440px) {
   .card { padding: 28px 20px 24px; }
@@ -270,13 +256,14 @@ input:focus + .ic { color: var(--primary-light); }
 </style>
 </head>
 <body>
-<div class="orb o1"></div><div class="orb o2"></div><div class="orb o3"></div><div class="grid-fx"></div>
+<div class="bg-canvas"></div>
+<div class="orb o1"></div><div class="orb o2"></div><div class="orb o3"></div>
 <div class="wrap">
   <div class="card">
     <div class="brand">
       <div class="brand-icon">🐝</div>
       <div class="brand-name">CBeeNet</div>
-      <div class="brand-sub">Gateway · v11</div>
+      <div class="brand-sub">Gateway · v12</div>
     </div>
     <h1>ورود به پنل</h1>
     <p class="sub">رمز عبور را برای دسترسی به داشبورد وارد کنید</p>
@@ -484,14 +471,6 @@ a{color:inherit;text-decoration:none}
 .m-val{font-size:25px;font-weight:700;color:var(--t1);line-height:1;letter-spacing:-.02em}
 .m-unit{font-size:12px;font-weight:400;color:var(--t3)}
 .m-sub{font-size:10px;color:var(--t3);margin-top:6px;display:flex;align-items:center;gap:3px}
-.vless-box{background:linear-gradient(135deg,var(--bg3) 0%,var(--bg2) 100%);border:1px solid var(--card-b);border-radius:var(--radius);padding:20px 22px;margin-bottom:18px;box-shadow:var(--shadow);position:relative;overflow:hidden;transition:background .3s}
-.vless-box::before{content:'';position:absolute;top:-50px;left:-50px;width:180px;height:180px;background:radial-gradient(circle,var(--accent-d),transparent 70%);pointer-events:none}
-.vl-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:13px;flex-wrap:wrap;gap:8px}
-.vl-title{color:var(--t2);font-size:11px;display:flex;align-items:center;gap:6px;font-weight:700;text-transform:uppercase;letter-spacing:.06em}
-.vl-title i{color:var(--accent);font-size:15px}
-.vl-code{background:rgba(0,0,0,.18);border:1px solid var(--card-b);border-radius:9px;padding:13px 15px;font-size:11px;font-family:ui-monospace,monospace;color:var(--accent2);word-break:break-all;line-height:1.8;letter-spacing:.01em}
-[data-theme="light"] .vl-code{background:rgba(0,0,0,.04)}
-.vl-actions{display:flex;gap:8px;margin-top:13px;flex-wrap:wrap}
 .btn{font-family:inherit;font-size:12px;font-weight:500;border-radius:9px;padding:8px 14px;cursor:pointer;display:inline-flex;align-items:center;gap:5px;border:none;transition:all .15s;white-space:nowrap}
 .btn i{font-size:13px}
 .btn:disabled{opacity:.4;cursor:not-allowed}
@@ -961,7 +940,7 @@ a{color:inherit;text-decoration:none}
   <button class="sb-close" id="close-sb"><i class="ti ti-x"></i></button>
   <div class="logo">
     <div class="logo-img">🐝</div>
-    <div><div class="logo-name">CBeeNet</div><div class="logo-sub">Gateway · v11</div></div>
+    <div><div class="logo-name">CBeeNet</div><div class="logo-sub">Gateway · v12</div></div>
   </div>
   <div class="nav-wrap">
     <div class="nav-sec">پنل</div>
@@ -994,36 +973,28 @@ a{color:inherit;text-decoration:none}
       <button class="btn btn-p btn-sm" onclick="refreshAll()"><i class="ti ti-refresh"></i> رفرش</button>
     </div>
   </div>
+  <!-- کارت‌های آمار -->
   <div class="metrics">
     <div class="metric"><div class="m-icon"><i class="ti ti-plug-connected"></i></div><div class="m-label">اتصالات فعال</div><div class="m-val" id="m-conns">—</div><div class="m-sub"><span class="dot dg pulse"></span> WebSocket / XHTTP زنده</div></div>
     <div class="metric"><div class="m-icon"><i class="ti ti-transfer"></i></div><div class="m-label">کل ترافیک</div><div class="m-val" id="m-traffic">—<span class="m-unit">MB</span></div><div class="m-sub">از راه‌اندازی</div></div>
     <div class="metric suc"><div class="m-icon suc"><i class="ti ti-link"></i></div><div class="m-label">کانفیگ فعال</div><div class="m-val" id="m-alinks">—</div><div class="m-sub" id="m-lsub">از کل</div></div>
     <div class="metric pur"><div class="m-icon pur"><i class="ti ti-folders"></i></div><div class="m-label">گروه‌های ساب</div><div class="m-val" id="m-subs">—</div><div class="m-sub">فعال</div></div>
   </div>
-  <div class="vless-box">
-    <div class="vl-header">
-      <div class="vl-title"><i class="ti ti-link"></i> لینک پیش‌فرض (بدون محدودیت)</div>
-      <span class="badge bg-blue"><span class="dot db"></span> TLS 443 · WS</span>
-    </div>
-    <div class="vl-code" id="vless-main">در حال دریافت...</div>
-    <div class="vl-actions">
-      <button class="btn btn-p" onclick="cpText('vless-main')"><i class="ti ti-copy"></i> کپی</button>
-      <button class="btn btn-g" onclick="qrFor('vless-main')"><i class="ti ti-qrcode"></i> QR</button>
-      <button class="btn btn-o" onclick="navTo('links')"><i class="ti ti-link-plus"></i> کانفیگ محدود</button>
-      <button class="btn btn-pur" onclick="navTo('subgroups')"><i class="ti ti-folders"></i> گروه‌های ساب</button>
-    </div>
-  </div>
+
+  <!-- نمودارهای اصلی -->
   <div class="g3">
     <div class="card"><div class="card-title"><i class="ti ti-chart-area"></i> ترافیک ساعتی (MB) · دانلود / آپلود</div><div class="ch"><canvas id="ch1"></canvas></div></div>
-    <div class="card"><div class="card-title"><i class="ti ti-chart-donut"></i> توزیع</div><div class="ch-sm"><canvas id="ch2"></canvas></div></div>
+    <div class="card"><div class="card-title"><i class="ti ti-chart-donut"></i> توزیع پروتکل‌ها</div><div class="ch-sm"><canvas id="ch2"></canvas></div></div>
   </div>
+
+  <!-- وضعیت سرویس و خلاصه کانفیگ‌ها -->
   <div class="g2">
     <div class="card">
       <div class="card-title"><i class="ti ti-activity"></i> وضعیت سرویس</div>
       <div class="sr"><span class="sr-k"><i class="ti ti-shield-check"></i> UUID Auth</span><span class="sr-v" style="color:var(--green-t)">● فعال · سخت‌گیرانه</span></div>
       <div class="sr"><span class="sr-k"><i class="ti ti-circle-check"></i> VLESS / WS Tunnel</span><span class="sr-v" style="color:var(--green-t)">● فعال</span></div>
-      <div class="sr"><span class="sr-k"><i class="ti ti-bolt"></i> Siz10a XHTTP Ultra</span><span class="sr-v" style="color:var(--green-t)">● فعال · 3 mode</span></div>
-      <div class="sr"><span class="sr-k"><i class="ti ti-folders"></i> Sub Groups</span><span class="sr-v" style="color:var(--green-t)">● فعال v9</span></div>
+      <div class="sr"><span class="sr-k"><i class="ti ti-bolt"></i> XHTTP Ultra</span><span class="sr-v" style="color:var(--green-t)">● فعال · 3 mode</span></div>
+      <div class="sr"><span class="sr-k"><i class="ti ti-folders"></i> Sub Groups</span><span class="sr-v" style="color:var(--green-t)">● فعال v12</span></div>
       <div class="sr"><span class="sr-k"><i class="ti ti-rss"></i> Subscription API</span><span class="sr-v" style="color:var(--green-t)">● فعال</span></div>
       <div class="sr"><span class="sr-k"><i class="ti ti-clock"></i> آپتایم</span><span class="sr-v" id="uptime-inline">—</span></div>
       <div class="sr" style="flex-direction:column;align-items:flex-start;gap:4px">
@@ -1037,10 +1008,11 @@ a{color:inherit;text-decoration:none}
     </div>
   </div>
   <div class="dash-footer">
-    <span class="df-text">CBeeNet Gateway v11 · Railway · 2025</span>
+    <span class="df-text">CBeeNet Gateway v12 · Railway · 2025</span>
     <a class="df-link" href="https://t.me/CBeeNet" target="_blank"><i class="ti ti-brand-telegram"></i> t.me/CBeeNet</a>
   </div>
 </section>
+
 <section class="pg" id="pg-links">
   <div class="topbar">
     <div><div class="tb-title"><i class="ti ti-link-plus"></i> کانفیگ‌ها</div><div class="tb-sub">ساخت و مدیریت کانفیگ با سهمیه، انقضا و گروه‌بندی</div></div>
@@ -1130,6 +1102,7 @@ a{color:inherit;text-decoration:none}
   <div class="cfg-grid" id="links-grid"></div>
   <div class="empty" id="links-empty" style="display:none"><i class="ti ti-link-off"></i><p>هنوز کانفیگی وجود ندارد</p></div>
 </section>
+
 <section class="pg" id="pg-subgroups">
   <div class="topbar">
     <div><div class="tb-title"><i class="ti ti-folders"></i> گروه‌های ساب</div><div class="tb-sub">هر گروه یک صفحه پابلیک مجزا با کانفیگ‌های خودش دارد</div></div>
@@ -1148,6 +1121,7 @@ a{color:inherit;text-decoration:none}
     <div class="subs-empty-v2"><div class="subs-empty-v2-icon"><i class="ti ti-folders"></i></div><div class="subs-empty-v2-title">هنوز گروهی وجود ندارد</div><div class="subs-empty-v2-sub">یک گروه جدید بسازید تا کانفیگ‌ها را دسته‌بندی کنید</div></div>
   </div>
 </section>
+
 <section class="pg" id="pg-subscriptions">
   <div class="topbar"><div><div class="tb-title"><i class="ti ti-rss"></i> سابسکریپشن</div><div class="tb-sub">لینک‌های اشتراک برای اپ‌های v2ray</div></div></div>
   <div class="g2">
@@ -1167,6 +1141,7 @@ a{color:inherit;text-decoration:none}
     <div id="sub-groups-list">در حال بارگذاری...</div>
   </div>
 </section>
+
 <section class="pg" id="pg-traffic">
   <div class="topbar">
     <div><div class="tb-title"><i class="ti ti-chart-area"></i> ترافیک</div><div class="tb-sub">تحلیل و مانیتورینگ مصرف پهنای باند</div></div>
@@ -1205,6 +1180,7 @@ a{color:inherit;text-decoration:none}
     <div class="traf-chart-body"><canvas id="ch3"></canvas></div>
   </div>
 </section>
+
 <section class="pg" id="pg-connections">
   <div class="topbar">
     <div><div class="tb-title"><i class="ti ti-plug-connected"></i> اتصالات فعال</div><div class="tb-sub">مانیتورینگ زنده‌ی آی‌پی و ترافیک هر اتصال</div></div>
@@ -1243,6 +1219,7 @@ a{color:inherit;text-decoration:none}
     <div class="conn-empty-v2-sub">به محض اتصال کلاینت‌ها، اینجا نمایش داده می‌شوند</div>
   </div>
 </section>
+
 <section class="pg" id="pg-security">
   <div class="topbar"><div><div class="tb-title"><i class="ti ti-shield-lock"></i> امنیت</div></div></div>
   <div class="g2">
@@ -1264,14 +1241,17 @@ a{color:inherit;text-decoration:none}
     </div>
   </div>
 </section>
+
 <section class="pg" id="pg-logs">
   <div class="topbar"><div><div class="tb-title"><i class="ti ti-history"></i> لاگ فعالیت‌ها</div><div class="tb-sub">تاریخچه‌ی کامل رخدادهای پنل</div></div><div class="tb-right"><button class="btn btn-p btn-sm" onclick="loadActivity()"><i class="ti ti-refresh"></i></button></div></div>
   <div class="card"><div class="log-timeline" id="logs-list">—</div><div class="empty" id="logs-empty" style="display:none"><i class="ti ti-history-toggle"></i><p>هنوز لاگی ثبت نشده</p></div></div>
 </section>
+
 <section class="pg" id="pg-errors">
   <div class="topbar"><div><div class="tb-title"><i class="ti ti-alert-triangle"></i> خطاها</div></div><div class="tb-right"><span class="badge bg-red" id="errs-badge">۰</span><button class="btn btn-p btn-sm" onclick="refreshAll()"><i class="ti ti-refresh"></i></button></div></div>
   <div class="card"><div class="card-title"><i class="ti ti-bug"></i> لاگ خطاها</div><div id="errs-full">—</div></div>
 </section>
+
 <section class="pg" id="pg-testws">
   <div class="topbar"><div><div class="tb-title"><i class="ti ti-wifi"></i> تست WebSocket</div></div></div>
   <div class="card" style="max-width:660px">
@@ -1290,6 +1270,7 @@ a{color:inherit;text-decoration:none}
     </div>
   </div>
 </section>
+
 <section class="pg" id="pg-settings">
   <div class="topbar"><div><div class="tb-title"><i class="ti ti-settings"></i> تنظیمات</div></div></div>
   <div class="g2">
@@ -1303,7 +1284,7 @@ a{color:inherit;text-decoration:none}
       </div>
       <div class="srv-tiles">
         <div class="srv-tile"><div class="srv-tile-icon"><i class="ti ti-route"></i></div><div class="srv-tile-text"><div class="srv-tile-label">پورت</div><div class="srv-tile-val">443 (TLS)</div></div></div>
-        <div class="srv-tile"><div class="srv-tile-icon"><i class="ti ti-versions"></i></div><div class="srv-tile-text"><div class="srv-tile-label">نسخه</div><div class="srv-tile-val">v11</div></div></div>
+        <div class="srv-tile"><div class="srv-tile-icon"><i class="ti ti-versions"></i></div><div class="srv-tile-text"><div class="srv-tile-label">نسخه</div><div class="srv-tile-val">v12</div></div></div>
         <div class="srv-tile"><div class="srv-tile-icon"><i class="ti ti-brand-fastapi"></i></div><div class="srv-tile-text"><div class="srv-tile-label">فریم‌ورک</div><div class="srv-tile-val">FastAPI + Uvicorn</div></div></div>
         <div class="srv-tile"><div class="srv-tile-icon"><i class="ti ti-cloud"></i></div><div class="srv-tile-text"><div class="srv-tile-label">پلتفرم</div><div class="srv-tile-val">Railway</div></div></div>
         <div class="srv-tile" style="grid-column:1/-1"><div class="srv-tile-icon"><i class="ti ti-device-floppy"></i></div><div class="srv-tile-text"><div class="srv-tile-label">ذخیره‌سازی</div><div class="srv-tile-val">JSON File (/data)</div></div></div>
@@ -1467,12 +1448,12 @@ async function fetchStats(){
       const labels=Object.keys(d.hourly).sort(),vals=labels.map(k=>+(d.hourly[k]/1024**2).toFixed(2));
       const upload = vals.map(v => +(v * 0.4).toFixed(2));
       const download = vals.map(v => +(v * 0.6).toFixed(2));
-      [ch1].forEach(c=>{if(!c)return;
-        c.data.labels=labels;
-        c.data.datasets[0].data = download;
-        c.data.datasets[1].data = upload;
-        c.update();
-      });
+      if(ch1){
+        ch1.data.labels=labels;
+        ch1.data.datasets[0].data = download;
+        ch1.data.datasets[1].data = upload;
+        ch1.update();
+      }
       if(vals.length){const avg=vals.reduce((a,b)=>a+b,0)/vals.length,peak=Math.max(...vals);document.getElementById('t-avg').innerHTML=avg.toFixed(2)+'<span class="m-unit">MB</span>';document.getElementById('t-peak').innerHTML=peak.toFixed(2)+'<span class="m-unit">MB</span>';}
     }
     renderErrs(d.recent_errors||[]);
@@ -1520,7 +1501,6 @@ async function loadLinks(){
     const grid=document.getElementById('links-grid'),empty=document.getElementById('links-empty');
     if(!links.length){grid.innerHTML='';empty.style.display='block';document.getElementById('lsummary').innerHTML='<div class="empty"><i class="ti ti-link-off"></i><p>کانفیگی وجود ندارد</p></div>';return}
     empty.style.display='none';
-    const subMap=Object.fromEntries(subs.map(s=>[s.sub_id,s.name]));
     grid.innerHTML=links.map(l=>{
       const lim=l.limit_bytes===0?'∞':fmtB(l.limit_bytes);
       const pct=l.limit_bytes===0?0:Math.min(100,l.used_bytes/l.limit_bytes*100);
@@ -1899,12 +1879,9 @@ async function loadConns(){
   }catch(e){console.error(e)}
 }
 async function loadErrs(){try{const r=await authF('/stats'),d=await r.json();renderErrs(d.recent_errors||[]);}catch(e){}}
-async function fetchDefaultVless(){
-  try{const r=await authF('/api/links'),d=await r.json();const links=d.links||[];const def=links.find(l=>l.limit_bytes===0&&l.active&&!l.expired)||links.find(l=>l.active&&!l.expired)||links[0];document.getElementById('vless-main').textContent=def?def.vless_link:'هنوز کانفیگی وجود ندارد';}catch(e){}
-}
 function cpText(id){navigator.clipboard.writeText(document.getElementById(id).textContent).then(()=>toast('کپی شد ✓','ok'))}
 function qrFor(id){showQR(document.getElementById(id).textContent)}
-function refreshAll(){fetchStats();fetchDefaultVless();loadLinks();if(document.getElementById('pg-subgroups').classList.contains('on'))loadSubs();if(document.getElementById('pg-subscriptions').classList.contains('on'))loadSubsPage();if(document.getElementById('pg-connections').classList.contains('on'))loadConns();if(document.getElementById('pg-logs').classList.contains('on'))loadActivity();toast('رفرش شد','ok')}
+function refreshAll(){fetchStats();if(document.getElementById('pg-links').classList.contains('on'))loadLinks();if(document.getElementById('pg-subgroups').classList.contains('on'))loadSubs();if(document.getElementById('pg-subscriptions').classList.contains('on'))loadSubsPage();if(document.getElementById('pg-connections').classList.contains('on'))loadConns();if(document.getElementById('pg-logs').classList.contains('on'))loadActivity();toast('رفرش شد ✓','ok')}
 async function changePw(){
   const cur=document.getElementById('cp-cur').value,nw=document.getElementById('cp-new').value,cf=document.getElementById('cp-cf').value;
   if(!cur||!nw||!cf){toast('همه فیلدها را پر کنید','err');return}
@@ -2013,9 +1990,9 @@ function initCharts(){
   ch2 = new Chart(document.getElementById('ch2'), {
     type: 'doughnut',
     data: {
-      labels: ['VLESS/WS', 'XHTTP Ultra', 'HTTP Proxy'],
+      labels: ['VLESS/WS', 'XHTTP packet-up', 'XHTTP stream-up'],
       datasets: [{
-        data: [55, 35, 10],
+        data: [60, 25, 15],
         backgroundColor: ['#fbbf24', '#fcd34d', '#f59e0b'],
         borderColor: 'var(--bg)',
         borderWidth: 4,
@@ -2108,7 +2085,7 @@ document.addEventListener('DOMContentLoaded',async()=>{
   initCharts();
   document.getElementById('set-host').textContent=location.host;
   document.getElementById('sub-all-url')&&(document.getElementById('sub-all-url').textContent=location.protocol+'//'+location.host+'/sub-all');
-  fetchStats();fetchDefaultVless();loadLinks();loadSubs();
+  fetchStats();loadLinks();loadSubs();
   setInterval(fetchStats,4000);
   setInterval(()=>{
     if(document.getElementById('pg-links').classList.contains('on'))loadLinks();
@@ -2307,7 +2284,7 @@ html,body{{min-height:100%;background:var(--bg);font-family:var(--serif);color:v
   <div class="top">
     <div class="brand">
       <div class="brand-img">🐝</div>
-      <div><div class="brand-name">CBeeNet</div><div class="brand-sub">Gateway · v11</div></div>
+      <div><div class="brand-name">CBeeNet</div><div class="brand-sub">Gateway · v12</div></div>
     </div>
     <div class="top-actions">
       <button class="icon-btn" id="theme-toggle" onclick="toggleTheme()" title="تغییر تم"><i class="ti ti-sun" id="theme-icon"></i></button>
@@ -2317,7 +2294,7 @@ html,body{{min-height:100%;background:var(--bg);font-family:var(--serif);color:v
   <div id="root">
     <div class="empty-state"><i class="ti ti-loader-2" style="animation:spin 1s linear infinite"></i>در حال بارگذاری...</div>
   </div>
-  <div class="footer">کانال رسمی: <a href="https://t.me/CBeeNet" target="_blank">@CBeeNet</a> · CBeeNet Gateway v11</div>
+  <div class="footer">کانال رسمی: <a href="https://t.me/CBeeNet" target="_blank">@CBeeNet</a> · CBeeNet Gateway v12</div>
 </div>
 <script>
 const UUID_KEY='{uuid_key}';
@@ -2417,7 +2394,7 @@ function renderContent(d){{
     vless : l.vless_link,
     sub   : l.sub_url + (savedPw ? '?pw=' + encodeURIComponent(savedPw) : ''),
     label : l.label,
-  }}));
+  }));
   document.getElementById('root').innerHTML=`
     <div class="sub-info">
       <div class="sub-eyebrow"><i class="ti ti-folders"></i> گروه دسترسی</div>
