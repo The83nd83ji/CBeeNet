@@ -1,4 +1,4 @@
-# pages.py - CBeeNet Gateway v11 (Yellow/Black Edition)
+# pages.py - CBeeNet Gateway v11 (Yellow/Black Edition) - Complete
 import json
 
 LOGIN_HTML = r"""<!DOCTYPE html>
@@ -572,13 +572,15 @@ a{color:inherit;text-decoration:none}
 .chip:hover{background:rgba(251,191,36,.18);color:var(--accent2)}
 .chip.active{background:var(--accent);color:#000;border-color:var(--accent);box-shadow:0 3px 10px rgba(251,191,36,.35)}
 .proto-group{display:flex;gap:10px;flex-wrap:wrap;margin-top:10px}
-.proto-check{display:flex;align-items:center;gap:5px;cursor:pointer;font-size:11px;color:var(--t2);background:var(--accent-d);padding:6px 12px;border-radius:8px;border:1px solid var(--card-b);transition:.15s}
-.proto-check:hover{background:rgba(251,191,36,.18)}
-.proto-check input{accent-color:var(--accent);width:16px;height:16px;cursor:pointer}
-.proto-check.checked{background:rgba(251,191,36,.2);border-color:var(--accent);color:var(--t1)}
-.proto-check.checked input{accent-color:var(--accent)}
+.proto-check{display:flex;align-items:center;gap:6px;cursor:pointer;font-size:11px;font-weight:600;color:var(--t2);background:rgba(0,0,0,0.2);padding:7px 14px 7px 12px;border-radius:10px;border:1.5px solid var(--card-b);transition:all .18s;user-select:none;position:relative}
+.proto-check:hover{background:rgba(251,191,36,0.08);border-color:var(--card-bh)}
+.proto-check input{accent-color:var(--accent);width:16px;height:16px;cursor:pointer;margin:0;opacity:0;position:absolute}
+.proto-check .pc-icon{margin-left:4px;font-size:15px;display:inline-flex;transition:transform .18s}
+.proto-check .pc-label{transition:color .18s}
+.proto-check.checked{background:rgba(251,191,36,0.18);border-color:var(--accent);color:var(--t1);box-shadow:0 0 0 1px var(--accent),0 4px 12px rgba(251,191,36,0.15)}
+.proto-check.checked .pc-icon{transform:scale(1.1);color:var(--accent)}
 .count-chips{display:flex;gap:6px;margin-top:9px}
-.count-chip{font-size:10.5px;font-weight:700;padding:5px 12px;border-radius:8px;background:var(--accent-d);color:var(--t2);border:1px solid var(--card-b);cursor:pointer;transition:.15s;white-space:nowrap}
+.count-chip{font-size:10.5px;font-weight:700;padding:5px 14px;border-radius:8px;background:var(--accent-d);color:var(--t2);border:1px solid var(--card-b);cursor:pointer;transition:.15s;white-space:nowrap}
 .count-chip:hover{background:rgba(251,191,36,.18);color:var(--accent2)}
 .count-chip.active{background:var(--accent);color:#000;border-color:var(--accent);box-shadow:0 3px 10px rgba(251,191,36,.35)}
 .cp-footer{display:flex;align-items:center;justify-content:space-between;gap:12px;padding-top:16px;border-top:1px solid var(--card-b);flex-wrap:wrap}
@@ -1094,13 +1096,19 @@ a{color:inherit;text-decoration:none}
         <div class="cp-block-label"><i class="ti ti-plug-connected"></i> پروتکل‌های انتقال (چندگانه)</div>
         <div class="proto-group">
           <label class="proto-check checked" onclick="toggleProto(this)">
-            <input type="checkbox" value="vless-ws" checked> VLESS / WS
+            <input type="checkbox" value="vless-ws" checked>
+            <span class="pc-icon">🌀</span>
+            <span class="pc-label">VLESS / WS</span>
           </label>
           <label class="proto-check" onclick="toggleProto(this)">
-            <input type="checkbox" value="xhttp-packet-up"> XHTTP · packet-up
+            <input type="checkbox" value="xhttp-packet-up">
+            <span class="pc-icon">⚡</span>
+            <span class="pc-label">XHTTP · packet-up</span>
           </label>
           <label class="proto-check" onclick="toggleProto(this)">
-            <input type="checkbox" value="xhttp-stream-up"> XHTTP · stream-up
+            <input type="checkbox" value="xhttp-stream-up">
+            <span class="pc-icon">🚀</span>
+            <span class="pc-label">XHTTP · stream-up</span>
           </label>
         </div>
         <div style="margin-top:12px;display:flex;align-items:center;gap:10px;padding:8px 12px;background:var(--accent-d);border-radius:10px;border:1px solid var(--card-b)">
@@ -1410,7 +1418,6 @@ function setCount(val,el){
   document.querySelectorAll('.count-chip').forEach(c=>c.classList.remove('active'));
   el.classList.add('active');
 }
-// Ensure hidden count field exists
 document.addEventListener('DOMContentLoaded', function() {
   if(!document.getElementById('nl-count')) {
     const hidden = document.createElement('input');
@@ -1458,7 +1465,6 @@ async function fetchStats(){
     prevTraf=d.total_traffic_mb;
     if(d.hourly){
       const labels=Object.keys(d.hourly).sort(),vals=labels.map(k=>+(d.hourly[k]/1024**2).toFixed(2));
-      // Create upload data (random split for demo: upload = total * 0.4, download = total * 0.6)
       const upload = vals.map(v => +(v * 0.4).toFixed(2));
       const download = vals.map(v => +(v * 0.6).toFixed(2));
       [ch1].forEach(c=>{if(!c)return;
@@ -1566,7 +1572,6 @@ async function createLink(){
   const exp=document.getElementById('nl-exp').value;
   const note=document.getElementById('nl-note').value.trim();
   const sub_id=document.getElementById('nl-sub').value||null;
-  // Get selected protocols
   const protoChecks = document.querySelectorAll('.proto-check input[type="checkbox"]:checked');
   const protocols = Array.from(protoChecks).map(inp => inp.value);
   if(!protocols.length){toast('حداقل یک پروتکل انتخاب کنید','err');return}
@@ -1611,7 +1616,6 @@ async function createLink(){
       }
     }
     ['nl-label','nl-val','nl-exp','nl-note'].forEach(id=>document.getElementById(id).value='');
-    // reset protocol checkboxes to default (VLESS/WS checked)
     document.querySelectorAll('.proto-check input').forEach(inp => inp.checked = (inp.value === 'vless-ws'));
     document.querySelectorAll('.proto-check').forEach(el => el.classList.toggle('checked', el.querySelector('input').checked));
     document.getElementById('nl-count').value = 1;
@@ -1941,7 +1945,6 @@ function makeGradient(ctx,color1,color2){
   return g;
 }
 function initCharts(){
-  // Chart 1: Two lines (Download/Upload)
   const c1=document.getElementById('ch1').getContext('2d');
   const gradDown=makeGradient(c1,'rgba(251,191,36,0.35)','rgba(251,191,36,0)');
   const gradUp=makeGradient(c1,'rgba(52,211,153,0.25)','rgba(52,211,153,0)');
@@ -2007,7 +2010,6 @@ function initCharts(){
     }
   });
 
-  // Chart 2: Doughnut
   ch2 = new Chart(document.getElementById('ch2'), {
     type: 'doughnut',
     data: {
@@ -2033,7 +2035,6 @@ function initCharts(){
     }
   });
 
-  // Chart 3: Traffic page (single + average)
   const c3=document.getElementById('ch3').getContext('2d');
   const gradFill3 = makeGradient(c3, 'rgba(251,191,36,0.45)', 'rgba(251,191,36,0)');
   ch3 = new Chart(document.getElementById('ch3'), {
