@@ -16,7 +16,6 @@ from fastapi.middleware.cors import CORSMiddleware
 import uvicorn
 import httpx
 import logging
-from pymongo import MongoClient
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(message)s")
 logger = logging.getLogger("CBeeNet-Gateway")
@@ -39,78 +38,47 @@ app.add_middleware(
 )
 
 # ── Persistence ───────────────────────────────────────────────────────────────
-DATA_DIR = Path(os.environ.get("DATA_DIR", "/data"))
+DATA_DIR = Path(os.environ.get("DATA_DIR", "/app/data"))
 DATA_FILE = DATA_DIR / "rvg_state.json"
 SAVE_LOCK = asyncio.Lock()
-mongo_client = None
-mongo_db = None
-
-async def init_mongo():
-    global mongo_client, mongo_db
-    uri = os.environ.get("MONGODB_URI")
-    if uri:
-        try:
-            mongo_client = MongoClient(uri, serverSelectionTimeoutMS=5000)
-            mongo_db = mongo_client["CBeeNet"]
-            logger.info("MongoDB connected")
-        except Exception as e:
-            logger.warning(f"MongoDB fail: {e}")
 
 async def load_state():
     global LINKS, AUTH, SUBS, GLOBAL_SETTINGS, RESELLERS
-    try:
-        token = os.environ.get("GITHUB_TOKEN", "")
-        repo = os.environ.get("GITHUB_REPO", "")
-        fname = os.environ.get("GITHUB_FILE", "state.json")
-        if token and repo:
-            url = f"https://api.github.com/repos/{repo}/contents/{fname}"
-            headers = {"Authorization": f"Bearer {token}", "Accept": "application/vnd.github+json", "User-Agent": "CBeeNet"}
-            r = await http_client.get(url, headers=headers, timeout=10.0)
-            if r.status_code == 200:
-                import base64
-                data = json.loads(base64.b64decode(r.json()["content"]).decode())
-                # تبدیل protocol قدیمی به protocols
-                for uid, link in data.get("links", {}).items():
-                    if "protocol" in link and "protocols" not in link:
-                        link["protocols"] = [link.pop("protocol")]
-                LINKS.update(data.get("links", {}))
-                SUBS.update(data.get("subs", {}))
-                RESELLERS.update(data.get("resellers", {}))
-                if "global_settings" in data: GLOBAL_SETTINGS.update(data["global_settings"])
-                if "password_hash" in data: AUTH["password_hash"] = data["password_hash"]
-                logger.info(f"GitHub loaded: {len(LINKS)} links")
-                return
-    except: pass
     try:
         DATA_DIR.mkdir(parents=True, exist_ok=True)
         if DATA_FILE.exists():
             async with aiofiles.open(DATA_FILE, "r", encoding="utf-8") as f:
                 data = json.loads(await f.read())
+            # تبدیل protocol قدیمی به protocols
             for uid, link in data.get("links", {}).items():
                 if "protocol" in link and "protocols" not in link:
                     link["protocols"] = [link.pop("protocol")]
             LINKS.update(data.get("links", {}))
-    except: pass
+            SUBS.update(data.get("subs", {}))
+            RESELLERS.update(data.get("resellers", {}))
+            if "global_settings" in data: GLOBAL_SETTINGS.update(data["global_settings"])
+            if "password_hash" in data: AUTH["password_hash"] = data["password_hash"]
+            logger.info(f"Loaded state from {DATA_FILE}: {len(LINKS)} links")
+        else:
+            logger.info("No existing state file found, starting fresh")
+    except Exception as e:
+        logger.error(f"Error loading state: {e}")
 
 async def save_state():
     try:
-        data = {"links": dict(LINKS), "subs": dict(SUBS), "resellers": dict(RESELLERS),
-            "global_settings": dict(GLOBAL_SETTINGS), "password_hash": AUTH["password_hash"]}
-        token = os.environ.get("GITHUB_TOKEN", "")
-        repo = os.environ.get("GITHUB_REPO", "")
-        fname = os.environ.get("GITHUB_FILE", "state.json")
-        if token and repo:
-            url = f"https://api.github.com/repos/{repo}/contents/{fname}"
-            headers = {"Authorization": f"Bearer {token}", "Accept": "application/vnd.github+json", "User-Agent": "CBeeNet"}
-            sha = None
-            try:
-                r = await http_client.get(url, headers=headers, timeout=10.0)
-                if r.status_code == 200: sha = r.json().get("sha")
-            except: pass
-            import base64
-            await http_client.put(url, headers=headers, json={"message": "auto-save", "content": base64.b64encode(json.dumps(data).encode()).decode(), "sha": sha} if sha else {"message": "auto-save", "content": base64.b64encode(json.dumps(data).encode()).decode()}, timeout=10.0)
-            return
-    except: pass
+        data = {
+            "links": dict(LINKS),
+            "subs": dict(SUBS),
+            "resellers": dict(RESELLERS),
+            "global_settings": dict(GLOBAL_SETTINGS),
+            "password_hash": AUTH["password_hash"]
+        }
+        DATA_DIR.mkdir(parents=True, exist_ok=True)
+        async with aiofiles.open(DATA_FILE, "w", encoding="utf-8") as f:
+            await f.write(json.dumps(data, indent=2, ensure_ascii=False))
+        logger.debug("State saved successfully")
+    except Exception as e:
+        logger.error(f"Error saving state: {e}")
 
 # ── In-memory state ───────────────────────────────────────────────────────────
 connections: dict = {}
@@ -199,7 +167,6 @@ async def startup():
     limits = httpx.Limits(max_connections=500, max_keepalive_connections=100)
     timeout = httpx.Timeout(30.0, connect=10.0)
     http_client = httpx.AsyncClient(limits=limits, timeout=timeout, follow_redirects=True)
-    await init_mongo()
     await load_state()
     log_activity("system", "سرور راه‌اندازی شد", "ok")
     logger.info(f"CBeeNet Gateway started on port {CONFIG['port']}")
