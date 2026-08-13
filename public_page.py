@@ -1,6 +1,4 @@
 # public_page.py
-# Fixed: All JavaScript template literal braces ({...}) are now doubled to avoid f-string parsing errors.
-# Only {api_url} and {quote(title)} are kept as f-string placeholders.
 
 from fastapi.responses import HTMLResponse
 from urllib.parse import quote
@@ -78,6 +76,64 @@ body {{
   10% {{ opacity:1; }}
   90% {{ opacity:1; }}
   100% {{ transform: translateY(-10vh) scale(1); opacity:0; }}
+}}
+
+/* ===== MUSIC PLAYER (کنترل کوچک) ===== */
+.music-control {{
+  position: fixed;
+  bottom: 20px;
+  left: 20px;
+  z-index: 999;
+  background: var(--surface);
+  backdrop-filter: blur(16px);
+  border: 1px solid var(--border);
+  border-radius: 40px;
+  padding: 8px 14px 8px 10px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  box-shadow: var(--shadow);
+  font-size: 11px;
+  color: var(--text2);
+  cursor: pointer;
+  transition: all 0.25s;
+}}
+.music-control:hover {{
+  border-color: var(--border-glow);
+  background: var(--surface2);
+}}
+.music-control .icon {{
+  font-size: 18px;
+  color: var(--primary-light);
+  transition: transform 0.3s;
+}}
+.music-control .icon.playing {{
+  animation: spinNote 2s linear infinite;
+}}
+@keyframes spinNote {{
+  0% {{ transform: rotate(0deg); }}
+  100% {{ transform: rotate(360deg); }}
+}}
+.music-control .label {{
+  font-size: 9px;
+  color: var(--text3);
+  font-weight: 600;
+}}
+.music-control .toggle-btn {{
+  background: var(--accent-d);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  padding: 2px 10px;
+  font-size: 9px;
+  font-weight: 700;
+  color: var(--text2);
+  cursor: pointer;
+  transition: all 0.2s;
+  font-family: inherit;
+}}
+.music-control .toggle-btn:hover {{
+  background: var(--accent);
+  color: #000;
 }}
 
 /* ===== MAIN WRAP ===== */
@@ -607,6 +663,13 @@ body {{
   .btn-copy-all {{ justify-content: center; }}
   .config-header {{ flex-wrap: wrap; }}
   .config-label {{ min-width: 100%; }}
+  .music-control {{
+    bottom: 12px;
+    left: 12px;
+    padding: 6px 10px 6px 8px;
+    font-size: 10px;
+  }}
+  .music-control .icon {{ font-size: 15px; }}
 }}
 @media (max-width: 380px) {{
   .stats {{ grid-template-columns: 1fr; }}
@@ -615,6 +678,21 @@ body {{
 </style>
 </head>
 <body>
+
+<!-- Music Player Control -->
+<div class="music-control" id="musicControl" onclick="toggleMusic()">
+  <span class="icon playing" id="musicIcon"><i class="ti ti-music"></i></span>
+  <span class="label" id="musicLabel">آرامش</span>
+  <button class="toggle-btn" id="musicToggleBtn">🔊</button>
+</div>
+
+<!-- Audio Player (مخفی) -->
+<audio id="bgMusic" autoplay loop preload="auto" volume="0.15">
+  <source src="https://cdn.pixabay.com/download/audio/2022/03/10/audio_c8c8a7b0c8.mp3?filename=calm-ambient-113731.mp3" type="audio/mpeg">
+  <source src="https://cdn.pixabay.com/audio/2022/03/10/audio_c8c8a7b0c8.mp3" type="audio/mpeg">
+  <source src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3" type="audio/mpeg">
+  مرورگر شما از پخش آهنگ پشتیبانی نمی‌کند.
+</audio>
 
 <!-- Particles -->
 <div class="particles" id="particles"></div>
@@ -648,6 +726,49 @@ body {{
 </div>
 
 <script>
+// ===== MUSIC PLAYER =====
+let isMusicPlaying = true;
+const audio = document.getElementById('bgMusic');
+const musicIcon = document.getElementById('musicIcon');
+const musicLabel = document.getElementById('musicLabel');
+const musicToggleBtn = document.getElementById('musicToggleBtn');
+
+// تنظیم اولیه صدا
+audio.volume = 0.15;
+
+// تلاش برای پخش خودکار
+function tryAutoPlay() {{
+  audio.play().catch(() => {{
+    // اگر اتوپلی مسدود شد، با کلیک کاربر شروع می‌شود
+    document.addEventListener('click', function firstClick() {{
+      audio.play();
+      document.removeEventListener('click', firstClick);
+    }}, {{ once: true }});
+  }});
+}}
+
+// تابع قطع/وصل صدا
+function toggleMusic() {{
+  if (isMusicPlaying) {{
+    audio.pause();
+    isMusicPlaying = false;
+    musicIcon.className = 'icon';
+    musicIcon.innerHTML = '<i class="ti ti-music-off"></i>';
+    musicToggleBtn.textContent = '🔇';
+    musicLabel.textContent = 'بی‌صدا';
+  }} else {{
+    audio.play();
+    isMusicPlaying = true;
+    musicIcon.className = 'icon playing';
+    musicIcon.innerHTML = '<i class="ti ti-music"></i>';
+    musicToggleBtn.textContent = '🔊';
+    musicLabel.textContent = 'آرامش';
+  }}
+}}
+
+// شروع پخش
+tryAutoPlay();
+
 // ===== CONFIG =====
 const API_URL = "{api_url}";
 let allLinks = [];
@@ -675,6 +796,9 @@ function protoLabel(protocols) {{
     'xhttp-stream-one': 'XHTTP ULTRA • stream-one'
   }};
   return protocols.map(p => `<span class="config-badge-proto">${{labels[p] || 'VLESS • WS'}}</span>`).join(' ');
+}}
+function toFa(n) {{
+  return String(n).replace(/\\d/g, d => '۰۱۲۳۴۵۶۷۸۹'[d]);
 }}
 
 // ===== PARTICLES =====
@@ -829,7 +953,7 @@ function render(d) {{
 
   root.innerHTML = html;
 
-  // هر ۱۰ ثانیه آمار رو رفرش کن (فقط اگر صفحه باز باشد)
+  // هر ۱۰ ثانیه آمار رو رفرش کن
   if (window._refreshInterval) clearInterval(window._refreshInterval);
   window._refreshInterval = setInterval(async () => {{
     const newData = await loadData();
@@ -877,11 +1001,6 @@ function showToast(msg, type = '') {{
   t.className = 'toast show ' + (type || '');
   clearTimeout(t._hide);
   t._hide = setTimeout(() => t.classList.remove('show'), 3000);
-}}
-
-// ===== TOFA =====
-function toFa(n) {{
-  return String(n).replace(/\\d/g, d => '۰۱۲۳۴۵۶۷۸۹'[d]);
 }}
 
 // ===== INIT =====
