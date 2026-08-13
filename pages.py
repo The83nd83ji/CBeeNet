@@ -1,4 +1,4 @@
-# pages.py - CBee Gateway (3X-UI v3.6.0 Theme) - FINAL
+# pages.py - CBee Gateway
 import json
 
 LOGIN_HTML = r"""<!DOCTYPE html>
