@@ -858,9 +858,9 @@ function initSparkline() {{
           const timeStr = new Date(t * 1000).toLocaleTimeString('fa-IR', {{ hour: '2-digit', minute: '2-digit' }});
           tooltip.innerHTML = `
             <div style="display:flex;gap:12px;justify-content:center;">
-              <span>⬇️ ${fmtB(down)}</span>
-              <span>⬆️ ${fmtB(up)}</span>
-              <span style="color:#6b6b40;">${timeStr}</span>
+              <span>⬇️ ${{fmtB(down)}}</span>
+              <span>⬆️ ${{fmtB(up)}}</span>
+              <span style="color:#6b6b40;">${{timeStr}}</span>
             </div>
           `;
           tooltip.style.left = (e.clientX - tooltip.offsetWidth/2) + 'px';
@@ -922,9 +922,11 @@ function render(d) {{
     return;
   }}
   allLinks = d.links;
-  d.links.forEach(l => l._lines = l.vless_link ? l.vless_link.split("\\n").filter(x => x) : []);
+  // به‌طور ایمن خطوط را استخراج کن
+  d.links.forEach(l => {{
+    l._lines = (l.vless_link || '').split('\\n').filter(x => x);
+  }});
 
-  // Determine if any link is active and has remaining quota (or unlimited)
   const hasActive = d.links.some(l => l.active && (l.limit_bytes === 0 || l.used_bytes < l.limit_bytes));
   setBeeState(hasActive);
 
@@ -940,7 +942,7 @@ function render(d) {{
     ${{d.desc ? `<div class="info-desc">${{esc(d.desc)}}</div>` : ''}}
   </div>`;
 
-  // Stats with chart instead of total usage number
+  // Stats with chart
   html += `<div class="stats">
     <div class="stat-item">
       <div class="stat-label">وضعیت</div>
