@@ -1,4 +1,4 @@
-# pages.py - CBee Gateway v1.0.0 (3-Theme, Server Name Editor)
+# pages.py - CBee Gateway v1.0.0 (3X-UI Style, Unified Color, No Profile)
 import json
 
 LOGIN_HTML = r"""<!DOCTYPE html>
@@ -310,7 +310,7 @@ DASHBOARD_HTML = r"""<!DOCTYPE html>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.19.0/dist/tabler-icons.min.css">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
 <style>
-/* ===== Variables ===== */
+*{margin:0;padding:0;box-sizing:border-box}
 :root{
   --bg:#0d1117;
   --bg2:#161b22;
@@ -436,12 +436,12 @@ a{color:inherit;text-decoration:none}
 .theme-btn:hover{background:var(--card-b);color:var(--t1)}
 .logout-btn{display:flex;align-items:center;justify-content:center;gap:7px;background:var(--red-bg);color:var(--red-t);border-radius:9px;padding:8px;font-size:12px;font-weight:500;font-family:inherit;border:1px solid rgba(239,68,68,0.2);cursor:pointer;width:100%;transition:.15s;margin-top:6px}
 .logout-btn:hover{background:rgba(239,68,68,0.2)}
-.mob-top{display:none;position:fixed;top:0;right:0;left:0;height:52px;background:var(--bg2);border-bottom:1px solid var(--card-b);z-index:150;align-items:center;justify-content:space-between;padding:0 14px;transition:background .3s}
+.mob-top{display:none;position:fixed;top:0;right:0;left:0;height:52px;background:var(--bg2);border-bottom:1px solid var(--card-b);z-index:150;align-items:center;justify-content:center;padding:0 14px;transition:background .3s}
 .mob-top .ml{display:flex;align-items:center;gap:9px}
 .mob-logo{width:28px;height:28px;border-radius:50%;overflow:hidden;background:linear-gradient(135deg,var(--accent),var(--accent2));display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:900;color:#fff;font-family:'Vazirmatn',sans-serif}
 .mob-logo img{width:100%;height:100%;object-fit:cover}
 .mob-title{color:var(--t1);font-size:16px;font-weight:900;font-family:'Vazirmatn',sans-serif}
-.mob-right{display:flex;gap:6px}
+.mob-right{display:none;gap:6px}
 .menu-btn,.theme-mob{background:var(--accent-d);border:1px solid var(--card-b);color:var(--t2);width:34px;height:34px;border-radius:8px;font-size:17px;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:.15s}
 .overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.65);z-index:190;backdrop-filter:blur(3px)}
 .overlay.show{display:block}
@@ -475,13 +475,7 @@ a{color:inherit;text-decoration:none}
 .sparkline-chart{height:50px;margin-top:6px;position:relative}
 .sparkline-chart canvas{width:100% !important;height:100% !important}
 .sparkline-sub{font-size:9.5px;color:var(--t3);margin-top:4px;display:flex;align-items:center;gap:4px}
-.sparkline-sub .dot{width:5px;height:5px;border-radius:50%;display:inline-block}
-.sparkline-sub .dot.green{background:var(--green)}
-.sparkline-sub .dot.blue{background:var(--accent)}
-.sparkline-sub .dot.amber{background:var(--amber)}
-.sparkline-card.accent .sparkline-label i{color:var(--accent)}
-.sparkline-card.green .sparkline-label i{color:var(--green)}
-.sparkline-card.amber .sparkline-label i{color:var(--amber)}
+.sparkline-sub .dot{width:5px;height:5px;border-radius:50%;display:inline-block;background:var(--accent)}
 @media(max-width:768px){.sparkline-row{grid-template-columns:1fr;gap:12px}}
 .m-icon{width:34px;height:34px;border-radius:8px;background:var(--accent-d);display:flex;align-items:center;justify-content:center;margin-bottom:11px;color:var(--accent);font-size:17px}
 .m-icon.suc{background:var(--green-bg);color:var(--green)}
@@ -954,7 +948,7 @@ a{color:inherit;text-decoration:none}
     <div class="mob-logo">CB</div>
     <span class="mob-title">CBee</span>
   </div>
-  <div class="mob-right">
+  <div class="mob-right" style="display:none">
     <button class="theme-mob" id="theme-mob-btn" onclick="toggleTheme()"><i class="ti ti-sun" id="theme-mob-icon"></i></button>
     <button class="menu-btn" id="open-sb"><i class="ti ti-menu-2"></i></button>
   </div>
@@ -999,31 +993,31 @@ a{color:inherit;text-decoration:none}
     </div>
   </div>
 
-  <!-- 3 Sparkline Cards -->
+  <!-- 3 Sparkline Cards - Unified Color -->
   <div class="sparkline-row">
-    <div class="sparkline-card accent">
+    <div class="sparkline-card">
       <div class="sparkline-top">
         <span class="sparkline-label"><i class="ti ti-gauge"></i> بار نسبی</span>
         <span class="sparkline-value" id="spark-load">0<span class="unit">%</span></span>
       </div>
       <div class="sparkline-chart"><canvas id="sparkLoad"></canvas></div>
-      <div class="sparkline-sub"><span class="dot blue"></span> لحظه‌ای</div>
+      <div class="sparkline-sub"><span class="dot"></span> لحظه‌ای</div>
     </div>
-    <div class="sparkline-card green">
+    <div class="sparkline-card">
       <div class="sparkline-top">
         <span class="sparkline-label"><i class="ti ti-database"></i> مصرف کل</span>
         <span class="sparkline-value" id="spark-traffic">0<span class="unit">MB</span></span>
       </div>
       <div class="sparkline-chart"><canvas id="sparkTraffic"></canvas></div>
-      <div class="sparkline-sub"><span class="dot green"></span> از راه‌اندازی</div>
+      <div class="sparkline-sub"><span class="dot"></span> از راه‌اندازی</div>
     </div>
-    <div class="sparkline-card amber">
+    <div class="sparkline-card">
       <div class="sparkline-top">
         <span class="sparkline-label"><i class="ti ti-plug-connected"></i> اتصالات</span>
         <span class="sparkline-value" id="spark-conns">0</span>
       </div>
       <div class="sparkline-chart"><canvas id="sparkConns"></canvas></div>
-      <div class="sparkline-sub"><span class="dot amber"></span> لحظه‌ای</div>
+      <div class="sparkline-sub"><span class="dot"></span> لحظه‌ای</div>
     </div>
   </div>
 
@@ -1390,9 +1384,7 @@ function applyTheme(theme){
   document.documentElement.setAttribute('data-theme', theme);
   localStorage.setItem('CBeeNet-theme', theme);
   currentTheme = theme;
-  // بروزرسانی نمایش در تنظیمات
   document.getElementById('current-theme-display').textContent = theme;
-  // بروزرسانی دکمه تم در سایدبار
   const isLight = theme.startsWith('light');
   const icon = isLight ? 'ti-moon' : 'ti-sun';
   const label = isLight ? 'تم تاریک' : 'تم روشن';
@@ -1400,8 +1392,6 @@ function applyTheme(theme){
   document.getElementById('theme-label').textContent = label;
   const mobIcon = document.getElementById('theme-mob-icon');
   if(mobIcon) mobIcon.className = 'ti ' + icon;
-  // تغییر رنگ پس‌زمینه لاگین (اختیاری)
-  // اما برای صفحه اصلی کافی است
 }
 
 function setTheme(theme){
@@ -1410,14 +1400,12 @@ function setTheme(theme){
 }
 
 function toggleTheme(){
-  // تغییر بین تاریک و روشن با حفظ رنگ
   const isLight = currentTheme.startsWith('light');
   const color = currentTheme.split('-')[1] || 'yellow';
   const newTheme = isLight ? 'dark-' + color : 'light-' + color;
   applyTheme(newTheme);
 }
 
-// بارگذاری تم ذخیره‌شده
 applyTheme(localStorage.getItem('CBeeNet-theme') || 'dark-yellow');
 
 // ========== توابع کمکی ==========
@@ -1492,7 +1480,6 @@ document.addEventListener('DOMContentLoaded', function() {
     hidden.value = 1;
     document.querySelector('.cp-body').appendChild(hidden);
   }
-  // بارگذاری تنظیمات سرور از localStorage
   const savedServer = localStorage.getItem('CBeeNet-server-name') || 'CBeeNet';
   const savedPrefix = localStorage.getItem('CBeeNet-server-prefix') || '';
   document.getElementById('server-name-input').value = savedServer;
@@ -1559,23 +1546,25 @@ const MAX_SPARK = 60;
 let sparkLoadChart, sparkTrafficChart, sparkConnsChart;
 let ch1, ch2, ch3;
 function initSparklineCharts(){
+  const accentColor = getComputedStyle(document.documentElement).getPropertyValue('--accent').trim() || '#1677ff';
+  const accentBg = getComputedStyle(document.documentElement).getPropertyValue('--accent-d').trim() || 'rgba(22,119,255,0.12)';
   const ctxLoad = document.getElementById('sparkLoad').getContext('2d');
   sparkLoadChart = new Chart(ctxLoad, {
     type: 'line',
-    data: { labels: [], datasets: [{ data: [], borderColor: 'var(--accent)', backgroundColor: 'var(--accent-d)', borderWidth: 2, pointRadius: 0, fill: true, tension: 0.3 }] },
-    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false }, tooltip: { enabled: false } }, scales: { x: { display: false, grid: { display: false } }, y: { display: false, grid: { display: false }, min: 0, max: 100 } }, animation: { duration: 200 } }
+    data: { labels: [], datasets: [{ data: [], borderColor: accentColor, backgroundColor: accentBg, borderWidth: 2, pointRadius: 0, fill: true, tension: 0.3 }] },
+    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false }, tooltip: { enabled: false } }, scales: { x: { display: false, grid: { display: false } }, y: { display: false, grid: { display: false }, min: 0, max: 100 } }, animation: { duration: 100 } }
   });
   const ctxTraffic = document.getElementById('sparkTraffic').getContext('2d');
   sparkTrafficChart = new Chart(ctxTraffic, {
     type: 'line',
-    data: { labels: [], datasets: [{ data: [], borderColor: 'var(--accent)', backgroundColor: 'var(--accent-d)', borderWidth: 2, pointRadius: 0, fill: true, tension: 0.3 }] },
-    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false }, tooltip: { enabled: false } }, scales: { x: { display: false, grid: { display: false } }, y: { display: false, grid: { display: false }, min: 0 } }, animation: { duration: 200 } }
+    data: { labels: [], datasets: [{ data: [], borderColor: accentColor, backgroundColor: accentBg, borderWidth: 2, pointRadius: 0, fill: true, tension: 0.3 }] },
+    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false }, tooltip: { enabled: false } }, scales: { x: { display: false, grid: { display: false } }, y: { display: false, grid: { display: false }, min: 0 } }, animation: { duration: 100 } }
   });
   const ctxConns = document.getElementById('sparkConns').getContext('2d');
   sparkConnsChart = new Chart(ctxConns, {
     type: 'line',
-    data: { labels: [], datasets: [{ data: [], borderColor: 'var(--accent)', backgroundColor: 'var(--accent-d)', borderWidth: 2, pointRadius: 0, fill: true, tension: 0.3 }] },
-    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false }, tooltip: { enabled: false } }, scales: { x: { display: false, grid: { display: false } }, y: { display: false, grid: { display: false }, min: 0 } }, animation: { duration: 200 } }
+    data: { labels: [], datasets: [{ data: [], borderColor: accentColor, backgroundColor: accentBg, borderWidth: 2, pointRadius: 0, fill: true, tension: 0.3 }] },
+    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false }, tooltip: { enabled: false } }, scales: { x: { display: false, grid: { display: false } }, y: { display: false, grid: { display: false }, min: 0 } }, animation: { duration: 100 } }
   });
 }
 function updateSparkline(chart, data, maxVal){
@@ -1601,13 +1590,11 @@ async function fetchStats(){
     document.getElementById('last-upd').textContent='آخرین بروزرسانی: '+new Date().toLocaleTimeString('fa-IR');
     document.getElementById('conns-live').innerHTML='<span class="dot dg pulse"></span> '+d.active_connections+' اتصال';
     document.getElementById('t-traffic').innerHTML=d.total_traffic_mb.toFixed(1)+'<span class="m-unit">MB</span>';
-    // بار نسبی
     const delta = d.total_traffic_mb - prevTraf;
-    const pct = Math.min(100, Math.max(0, Math.round((delta / 50) * 100 * 10) / 10)); // دقت 0.1%
+    const pct = Math.min(100, Math.max(0, Math.round((delta / 50) * 100 * 10) / 10));
     document.getElementById('bw-pct').textContent = pct + '%';
     document.getElementById('bw-bar').style.width = pct + '%';
     prevTraf = d.total_traffic_mb;
-    // بروزرسانی اسپارک‌لاین‌ها
     sparkData.load.push(pct);
     document.getElementById('spark-load').innerHTML = pct + '<span class="unit">%</span>';
     updateSparkline(sparkLoadChart, sparkData.load, 100);
@@ -1621,7 +1608,6 @@ async function fetchStats(){
     document.getElementById('spark-conns').textContent = connsVal;
     const maxConns = Math.max(5, ...sparkData.conns);
     updateSparkline(sparkConnsChart, sparkData.conns, maxConns * 1.2);
-    // سایر بخش‌ها
     document.getElementById('m-conns').textContent=d.active_connections;
     document.getElementById('m-traffic').innerHTML=d.total_traffic_mb.toFixed(1)+'<span class="m-unit">MB</span>';
     document.getElementById('m-alinks').textContent=d.active_links??'—';
@@ -1673,7 +1659,6 @@ async function loadLinks(){
     const grid=document.getElementById('links-grid'),empty=document.getElementById('links-empty');
     if(!links.length){grid.innerHTML='';empty.style.display='block';document.getElementById('lsummary').innerHTML='<div class="empty"><i class="ti ti-link-off"></i><p>کانفیگی وجود ندارد</p></div>';return}
     empty.style.display='none';
-    // استفاده از تنظیمات سرور برای نمایش نام
     const serverName = localStorage.getItem('CBeeNet-server-name') || 'CBeeNet';
     const serverPrefix = localStorage.getItem('CBeeNet-server-prefix') || '';
     grid.innerHTML=links.map(l=>{
