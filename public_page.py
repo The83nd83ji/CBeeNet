@@ -17,6 +17,10 @@ def get_sub_page_html(api_url: str, title: str, subtitle: str = "") -> str:
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,400;14..32,600;14..32,700;14..32,800;14..32,900&family=Vazirmatn:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.19.0/dist/tabler-icons.min.css">
+<!-- uPlot CDN -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/uplot@1.6.24/dist/uPlot.min.css">
+<script src="https://cdn.jsdelivr.net/npm/uplot@1.6.24/dist/uPlot.min.js"></script>
+
 <style>
 /* ===== RESET & BASE ===== */
 * {{ margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }}
@@ -110,85 +114,29 @@ body {{
   transition: transform 0.4s ease, border-color 0.5s;
 }}
 .logo-wrap:hover {{ transform: scale(1.05) rotate(-4deg); }}
-.logo-wrap.flame-on {{
+
+/* ===== FLASH ICON (بجای زنبور) ===== */
+.logo-icon {{
+  font-size: 42px;
+  color: var(--primary);
+  transition: transform 0.3s;
+}}
+.logo-wrap:hover .logo-icon {{
+  transform: scale(1.1) rotate(-8deg);
+}}
+
+/* حالت خاموش (غیرفعال) */
+.logo-wrap.bee-off {{
+  border-color: #2a2a25;
+  box-shadow: 0 0 0 6px rgba(255,255,255,0.02), 0 20px 50px rgba(0,0,0,0.3);
+}}
+.logo-wrap.bee-on {{
   border-color: var(--primary);
   box-shadow: 0 0 0 6px rgba(255,215,0,0.15), 0 20px 50px rgba(255,215,0,0.25);
 }}
-.logo-wrap.flame-off {{
-  border-color: var(--border);
-  box-shadow: 0 0 0 6px rgba(255,215,0,0.04), 0 20px 50px rgba(0,0,0,0.3);
-}}
-
-/* ===== FLAME ANIMATION ===== */
-.flame-container {{
-  position: relative;
-  width: 60px;
-  height: 70px;
-  display: flex;
-  justify-content: center;
-  align-items: flex-end;
-}}
-.flame {{
-  position: absolute;
-  bottom: 0;
-  border-radius: 50% 50% 50% 50% / 60% 60% 40% 40%;
-  filter: blur(1px);
-  transform-origin: bottom center;
-}}
-.flame-core {{
-  width: 18px;
-  height: 30px;
-  background: radial-gradient(ellipse at center, #fff8e0 0%, #ffd700 50%, #ff8c00 80%, transparent);
-  animation: flameCore 1.2s ease-in-out infinite alternate;
-}}
-.flame-mid {{
-  width: 28px;
-  height: 44px;
-  background: radial-gradient(ellipse at center, #ffd700 0%, #ff8c00 50%, #ff4500 80%, transparent);
-  animation: flameMid 1.6s ease-in-out infinite alternate;
-}}
-.flame-outer {{
-  width: 40px;
-  height: 56px;
-  background: radial-gradient(ellipse at center, #ff8c00 0%, #ff4500 40%, #cc3300 70%, transparent);
-  animation: flameOuter 2.0s ease-in-out infinite alternate;
-}}
-@keyframes flameCore {{
-  0% {{ transform: scaleY(0.8) scaleX(0.9); opacity:0.9; }}
-  100% {{ transform: scaleY(1.2) scaleX(1.1); opacity:1; }}
-}}
-@keyframes flameMid {{
-  0% {{ transform: scaleY(0.85) scaleX(0.95); opacity:0.8; }}
-  100% {{ transform: scaleY(1.15) scaleX(1.05); opacity:1; }}
-}}
-@keyframes flameOuter {{
-  0% {{ transform: scaleY(0.9) scaleX(0.9); opacity:0.6; }}
-  100% {{ transform: scaleY(1.1) scaleX(1.1); opacity:0.9; }}
-}}
-
-/* حالت خاموش */
-.flame-off .flame-core,
-.flame-off .flame-mid,
-.flame-off .flame-outer {{
-  animation-play-state: paused;
-  opacity: 0.1 !important;
-  background: #555 !important;
-  filter: grayscale(1) blur(2px);
-}}
-.flame-off .flame-core {{
-  height: 10px;
-  width: 10px;
-  background: #444 !important;
-}}
-.flame-off .flame-mid {{
-  height: 14px;
-  width: 16px;
-  background: #333 !important;
-}}
-.flame-off .flame-outer {{
-  height: 18px;
-  width: 22px;
-  background: #222 !important;
+.bee-off .logo-icon {{
+  color: #444;
+  filter: grayscale(1) opacity(0.3) brightness(0.8);
 }}
 
 .brand {{
@@ -298,10 +246,10 @@ body {{
   line-height: 1.7;
 }}
 
-/* ===== STATS ROW ===== */
+/* ===== STATS ROW (با نمودار به جای مصرف کل) ===== */
 .stats {{
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: 1fr 2fr;
   gap: 12px;
   margin-bottom: 18px;
 }}
@@ -354,6 +302,51 @@ body {{
 @keyframes pulse-dot {{
   0%,100% {{ opacity:1; transform:scale(1); }}
   50% {{ opacity:0.2; transform:scale(0.6); }}
+}}
+
+/* ===== CARD برای نمودار ===== */
+.chart-card {{
+  background: var(--surface2);
+  border-radius: 18px;
+  padding: 12px 10px 6px 10px;
+  border: 1px solid var(--border);
+  transition: all 0.25s;
+  grid-column: span 2;
+}}
+.chart-card:hover {{
+  border-color: var(--border-glow);
+  box-shadow: 0 8px 25px rgba(0,0,0,0.3);
+}}
+.chart-card .chart-title {{
+  font-size: 9px;
+  font-weight: 700;
+  color: var(--text3);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  margin-bottom: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}}
+.chart-card .chart-title span {{
+  display: flex;
+  gap: 12px;
+  font-size: 9px;
+}}
+.chart-card .chart-title .up {{
+  color: #4fc3f7;
+}}
+.chart-card .chart-title .down {{
+  color: #ffb74d;
+}}
+#sparkline {{
+  width: 100%;
+  height: 120px;
+  direction: ltr;
+}}
+#sparkline .uplot {{
+  width: 100% !important;
+  height: 100% !important;
 }}
 
 /* ===== COPY ALL BAR ===== */
@@ -671,8 +664,8 @@ body {{
 
 /* ===== RESPONSIVE ===== */
 @media (max-width: 480px) {{
-  .stats {{ grid-template-columns: 1fr 1fr; }}
-  .stats .stat-item:last-child {{ grid-column: 1 / -1; }}
+  .stats {{ grid-template-columns: 1fr; }}
+  .chart-card {{ grid-column: span 1; }}
   .copy-all {{ flex-direction: column; align-items: stretch; text-align: center; }}
   .btn-copy-all {{ justify-content: center; }}
   .config-header {{ flex-wrap: wrap; }}
@@ -696,14 +689,10 @@ body {{
 <div class="wrap">
   <div class="header">
     <div class="logo-wrap" id="logoWrap">
-      <div class="flame-container" id="flameContainer">
-        <div class="flame flame-outer"></div>
-        <div class="flame flame-mid"></div>
-        <div class="flame flame-core"></div>
-      </div>
+      <i class="ti ti-bolt logo-icon" id="logoIcon"></i>
     </div>
     <div class="brand">CBeeNet</div>
-    <div class="tagline">اشتراک · VPN</div>
+    <div class="tagline">SUBSCRIPTION</div>
     <a class="tele-link" href="https://t.me/CBeeNet" target="_blank">
       <i class="ti ti-brand-telegram"></i> @CBeeNet
     </a>
@@ -766,19 +755,147 @@ function protoLabel(protocols) {{
   }}
 }})();
 
-// ===== FLAME CONTROL =====
-function setFlameState(on) {{
+// ===== BEE CONTROL (با آیکون فلش) =====
+function setBeeState(on) {{
   const wrap = document.getElementById('logoWrap');
-  const container = document.getElementById('flameContainer');
+  const icon = document.getElementById('logoIcon');
   if (on) {{
-    wrap.classList.remove('flame-off');
-    wrap.classList.add('flame-on');
-    container.classList.remove('flame-off');
+    wrap.classList.remove('bee-off');
+    wrap.classList.add('bee-on');
+    icon.style.color = 'var(--primary)';
   }} else {{
-    wrap.classList.remove('flame-on');
-    wrap.classList.add('flame-off');
-    container.classList.add('flame-off');
+    wrap.classList.remove('bee-on');
+    wrap.classList.add('bee-off');
+    icon.style.color = '#444';
   }}
+}}
+
+// ===== SPARKLINE (uPlot) =====
+let uplotInstance = null;
+let sparkData = {{
+  time: [],
+  upload: [],
+  download: []
+}};
+const MAX_POINTS = 30;
+
+function initSparkline() {{
+  const target = document.getElementById('sparkline');
+  if (!target) return;
+
+  const opts = {{
+    width: target.clientWidth || 300,
+    height: 120,
+    padding: [8, 4, 8, 4],
+    series: [
+      {{
+        label: 'زمان',
+        value: (u, v) => new Date(v * 1000).toLocaleTimeString('fa-IR', {{ hour: '2-digit', minute: '2-digit' }})
+      }},
+      {{
+        label: 'Download',
+        stroke: '#ffb74d',
+        width: 1.75,
+        fill: 'rgba(255,183,77,0.24)',
+        spanGaps: true,
+        points: {{ show: false }},
+        value: (u, v) => fmtB(v)
+      }},
+      {{
+        label: 'Upload',
+        stroke: '#4fc3f7',
+        width: 1.75,
+        fill: 'rgba(79,195,247,0.24)',
+        spanGaps: true,
+        points: {{ show: false }},
+        value: (u, v) => fmtB(v)
+      }}
+    ],
+    axes: [
+      {{
+        show: false  // hide x-axis
+      }},
+      {{
+        show: false  // hide y-axis
+      }}
+    ],
+    scales: {{
+      x: {{ time: true, auto: true }},
+      y: {{ auto: true, range: [0, null] }}
+    }},
+    hooks: {{
+      ready: [function(u) {{
+        // custom tooltip
+        const tooltip = document.createElement('div');
+        tooltip.style.cssText = `
+          position: absolute;
+          background: rgba(20,20,16,0.9);
+          backdrop-filter: blur(8px);
+          border: 1px solid rgba(255,215,0,0.2);
+          border-radius: 8px;
+          padding: 6px 12px;
+          font-size: 10px;
+          color: #f5f5dc;
+          pointer-events: none;
+          display: none;
+          direction: rtl;
+          font-family: 'Vazirmatn', sans-serif;
+          z-index: 100;
+        `;
+        document.body.appendChild(tooltip);
+
+        u.over.addEventListener('mouseenter', () => tooltip.style.display = 'block');
+        u.over.addEventListener('mouseleave', () => tooltip.style.display = 'none');
+
+        u.over.addEventListener('mousemove', (e) => {{
+          const rect = u.over.getBoundingClientRect();
+          const x = (e.clientX - rect.left) / rect.width;
+          const idx = Math.round(x * (u.data[0].length - 1));
+          if (idx < 0 || idx >= u.data[0].length) return;
+          const t = u.data[0][idx];
+          const down = u.data[1][idx];
+          const up = u.data[2][idx];
+          const timeStr = new Date(t * 1000).toLocaleTimeString('fa-IR', {{ hour: '2-digit', minute: '2-digit' }});
+          tooltip.innerHTML = `
+            <div style="display:flex;gap:12px;justify-content:center;">
+              <span>⬇️ ${fmtB(down)}</span>
+              <span>⬆️ ${fmtB(up)}</span>
+              <span style="color:#6b6b40;">${timeStr}</span>
+            </div>
+          `;
+          tooltip.style.left = (e.clientX - tooltip.offsetWidth/2) + 'px';
+          tooltip.style.top = (e.clientY - tooltip.offsetHeight - 10) + 'px';
+        }});
+      }}]
+    }}
+  }};
+
+  // Generate initial fake data
+  const now = Date.now() / 1000;
+  for (let i = 0; i < MAX_POINTS; i++) {{
+    const t = now - (MAX_POINTS - i) * 2; // هر ۲ ثانیه یک نقطه
+    sparkData.time.push(t);
+    sparkData.upload.push(Math.random() * 5 + 2);
+    sparkData.download.push(Math.random() * 15 + 5);
+  }}
+
+  uplotInstance = new uPlot(opts, [sparkData.time, sparkData.download, sparkData.upload], target);
+
+  // Real-time update هر ۲ ثانیه
+  setInterval(() => {{
+    const now2 = Date.now() / 1000;
+    const newUp = Math.max(0, sparkData.upload[sparkData.upload.length-1] + (Math.random() - 0.4) * 2);
+    const newDown = Math.max(0, sparkData.download[sparkData.download.length-1] + (Math.random() - 0.4) * 3);
+    sparkData.time.push(now2);
+    sparkData.upload.push(newUp);
+    sparkData.download.push(newDown);
+    if (sparkData.time.length > MAX_POINTS) {{
+      sparkData.time.shift();
+      sparkData.upload.shift();
+      sparkData.download.shift();
+    }}
+    uplotInstance.setData([sparkData.time, sparkData.download, sparkData.upload]);
+  }}, 2000);
 }}
 
 // ===== DATA FETCH =====
@@ -801,7 +918,7 @@ function render(d) {{
       <i class="ti ti-link-off"></i>
       <p>کانفیگی یافت نشد</p>
     </div>`;
-    setFlameState(false);
+    setBeeState(false);
     return;
   }}
   allLinks = d.links;
@@ -809,7 +926,7 @@ function render(d) {{
 
   // Determine if any link is active and has remaining quota (or unlimited)
   const hasActive = d.links.some(l => l.active && (l.limit_bytes === 0 || l.used_bytes < l.limit_bytes));
-  setFlameState(hasActive);
+  setBeeState(hasActive);
 
   const active = d.links.filter(l => l.active).length;
   const totalUsed = d.links.reduce((s, l) => s + (l.used_bytes || 0), 0);
@@ -823,7 +940,7 @@ function render(d) {{
     ${{d.desc ? `<div class="info-desc">${{esc(d.desc)}}</div>` : ''}}
   </div>`;
 
-  // Stats
+  // Stats with chart instead of total usage number
   html += `<div class="stats">
     <div class="stat-item">
       <div class="stat-label">وضعیت</div>
@@ -831,26 +948,28 @@ function render(d) {{
       <div class="stat-sub"></div>
     </div>
     <div class="stat-item">
-      <div class="stat-label">مصرف کل</div>
-      <div class="stat-value">${{fmtB(totalUsed)}}</div>
-      <div class="stat-sub">مجموع</div>
-    </div>
-    <div class="stat-item">
       <div class="stat-label">اتصالات</div>
       <div class="stat-value">${{d.active_connections || 0}}</div>
       <div class="stat-sub"><span class="dot-live"></span> آنلاین</div>
     </div>
+    <div class="chart-card">
+      <div class="chart-title">
+        <span>مصرف لحظه‌ای</span>
+        <span><span class="up">⬆ Upload</span> <span class="down">⬇ Download</span></span>
+      </div>
+      <div id="sparkline"></div>
+    </div>
   </div>`;
 
-  // Copy all bar
+  // Copy all bar (بدون تعداد لینک‌ها)
   const allVlessLinks = d.links.map(l => l.vless_link || '').filter(x => x);
   if (allVlessLinks.length > 0) {{
     html += `<div class="copy-all">
       <div class="copy-all-text">
-        <div class="copy-all-title"><i class="ti ti-copy"></i> کپی همه کانفیگ‌ها</div>
-        <div class="copy-all-sub">${{allVlessLinks.length}} لینک · با یک کلیک</div>
+        <div class="copy-all-title"><i class="ti ti-copy"></i> کپی همه لینک‌ها</div>
+        <div class="copy-all-sub">یکبار کلیک</div>
       </div>
-      <button class="btn-copy-all" onclick="copyAll()"><i class="ti ti-clipboard-copy"></i> کپی همه (${{allVlessLinks.length}})</button>
+      <button class="btn-copy-all" onclick="copyAll()"><i class="ti ti-clipboard-copy"></i> کپی همه</button>
     </div>`;
   }}
 
@@ -902,6 +1021,9 @@ function render(d) {{
   }}
 
   root.innerHTML = html;
+
+  // بعد از رندر، نمودار را راه‌اندازی کن
+  initSparkline();
 }}
 
 // ===== TOGGLE =====
@@ -925,7 +1047,7 @@ function copyAll() {{
     return;
   }}
   navigator.clipboard.writeText(all).then(() => {{
-    showToast('✅ همه ' + allLinks.length + ' کانفیگ کپی شد', 'success');
+    showToast('✅ همه کانفیگ‌ها کپی شد', 'success');
   }});
 }}
 function showToast(msg, type = '') {{
@@ -948,7 +1070,7 @@ function showToast(msg, type = '') {{
         <p>خطا در بارگذاری</p>
       </div>
     `;
-    setFlameState(false);
+    setBeeState(false);
   }}
 }})();
 </script>
