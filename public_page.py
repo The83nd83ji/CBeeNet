@@ -78,7 +78,7 @@ body {{
   100% {{ transform: translateY(-10vh) scale(1); opacity:0; }}
 }}
 
-/* ===== MUSIC PLAYER (کنترل کوچک) ===== */
+/* ===== MUSIC CONTROL (کوچک در گوشه) ===== */
 .music-control {{
   position: fixed;
   bottom: 20px;
@@ -97,6 +97,7 @@ body {{
   color: var(--text2);
   cursor: pointer;
   transition: all 0.25s;
+  user-select: none;
 }}
 .music-control:hover {{
   border-color: var(--border-glow);
@@ -108,7 +109,7 @@ body {{
   transition: transform 0.3s;
 }}
 .music-control .icon.playing {{
-  animation: spinNote 2s linear infinite;
+  animation: spinNote 2.5s linear infinite;
 }}
 @keyframes spinNote {{
   0% {{ transform: rotate(0deg); }}
@@ -686,10 +687,10 @@ body {{
   <button class="toggle-btn" id="musicToggleBtn">🔊</button>
 </div>
 
-<!-- Audio Player (مخفی) -->
-<audio id="bgMusic" autoplay loop preload="auto" volume="0.15">
-  <source src="https://cdn.pixabay.com/download/audio/2022/03/10/audio_c8c8a7b0c8.mp3?filename=calm-ambient-113731.mp3" type="audio/mpeg">
-  <source src="https://cdn.pixabay.com/audio/2022/03/10/audio_c8c8a7b0c8.mp3" type="audio/mpeg">
+<!-- Audio Player (مخفی) - با autoplay و muted شروع می‌شود -->
+<audio id="bgMusic" autoplay loop preload="auto" muted>
+  <source src="https://cdn.pixabay.com/audio/2022/03/15/audio_4f0d5f6e6b.mp3" type="audio/mpeg">
+  <source src="https://cdn.pixabay.com/audio/2024/01/16/audio_8b6f5e4d2c.mp3" type="audio/mpeg">
   <source src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3" type="audio/mpeg">
   مرورگر شما از پخش آهنگ پشتیبانی نمی‌کند.
 </audio>
@@ -726,48 +727,79 @@ body {{
 </div>
 
 <script>
-// ===== MUSIC PLAYER =====
-let isMusicPlaying = true;
+// ===== MUSIC PLAYER - پخش خودکار بدون کلیک =====
 const audio = document.getElementById('bgMusic');
 const musicIcon = document.getElementById('musicIcon');
 const musicLabel = document.getElementById('musicLabel');
 const musicToggleBtn = document.getElementById('musicToggleBtn');
+let isMusicPlaying = true;
 
-// تنظیم اولیه صدا
+// تنظیم اولیه صدا (بعد از پخش، صدا را فعال می‌کنیم)
 audio.volume = 0.15;
 
-// تلاش برای پخش خودکار
-function tryAutoPlay() {{
-  audio.play().catch(() => {{
-    // اگر اتوپلی مسدود شد، با کلیک کاربر شروع می‌شود
+// تابع برای پخش خودکار با دور زدن محدودیت مرورگر
+function startMusic() {{
+  // ابتدا سعی می‌کنیم با muted شروع کنیم (اکثر مرورگرها اجازه می‌دهند)
+  audio.muted = true;
+  audio.play().then(() => {{
+    // بعد از ۱۰۰ میلی‌ثانیه، mute را برداریم تا صدا بیاید
+    setTimeout(() => {{
+      audio.muted = false;
+      audio.volume = 0.15;
+      isMusicPlaying = true;
+      updateUI();
+    }}, 100);
+  }}).catch(() => {{
+    // اگر باز هم خطا داد، با یک کلیک ساختگی روی document فعال می‌شود
     document.addEventListener('click', function firstClick() {{
+      audio.muted = false;
+      audio.volume = 0.15;
       audio.play();
+      isMusicPlaying = true;
+      updateUI();
       document.removeEventListener('click', firstClick);
+    }}, {{ once: true }});
+    // همچنین با لمس روی موبایل
+    document.addEventListener('touchstart', function firstTouch() {{
+      audio.muted = false;
+      audio.volume = 0.15;
+      audio.play();
+      isMusicPlaying = true;
+      updateUI();
+      document.removeEventListener('touchstart', firstTouch);
     }}, {{ once: true }});
   }});
 }}
 
-// تابع قطع/وصل صدا
-function toggleMusic() {{
+// به‌روزرسانی ظاهر دکمه
+function updateUI() {{
   if (isMusicPlaying) {{
-    audio.pause();
-    isMusicPlaying = false;
-    musicIcon.className = 'icon';
-    musicIcon.innerHTML = '<i class="ti ti-music-off"></i>';
-    musicToggleBtn.textContent = '🔇';
-    musicLabel.textContent = 'بی‌صدا';
-  }} else {{
-    audio.play();
-    isMusicPlaying = true;
     musicIcon.className = 'icon playing';
     musicIcon.innerHTML = '<i class="ti ti-music"></i>';
     musicToggleBtn.textContent = '🔊';
     musicLabel.textContent = 'آرامش';
+  }} else {{
+    musicIcon.className = 'icon';
+    musicIcon.innerHTML = '<i class="ti ti-music-off"></i>';
+    musicToggleBtn.textContent = '🔇';
+    musicLabel.textContent = 'بی‌صدا';
   }}
 }}
 
-// شروع پخش
-tryAutoPlay();
+// قطع/وصل صدا با کلیک روی کنترل
+function toggleMusic() {{
+  if (isMusicPlaying) {{
+    audio.pause();
+    isMusicPlaying = false;
+  }} else {{
+    audio.play();
+    isMusicPlaying = true;
+  }}
+  updateUI();
+}}
+
+// شروع پخش خودکار
+startMusic();
 
 // ===== CONFIG =====
 const API_URL = "{api_url}";
