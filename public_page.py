@@ -286,44 +286,6 @@ body {{
   50% {{ opacity:0.2; transform:scale(0.6); }}
 }}
 
-/* ===== CHART CARD ===== */
-.chart-card {{
-  background: var(--surface2);
-  border-radius: 18px;
-  padding: 16px 14px 12px;
-  border: 1px solid var(--border);
-  transition: all 0.25s;
-  margin-bottom: 16px;
-}}
-.chart-card:hover {{
-  border-color: var(--border-glow);
-  box-shadow: 0 8px 25px rgba(0,0,0,0.3);
-}}
-.chart-card .chart-title {{
-  font-size: 10px;
-  font-weight: 700;
-  color: var(--text3);
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
-  margin-bottom: 6px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-}}
-.chart-card .chart-title .legend {{
-  display: flex;
-  gap: 12px;
-  font-size: 9px;
-  color: var(--text2);
-}}
-.chart-card .chart-title .legend .up {{ color: #4fc3f7; }}
-.chart-card .chart-title .legend .down {{ color: #ffb74d; }}
-#throughput-chart {{
-  width: 100%;
-  height: 130px;
-  direction: ltr;
-}}
-
 /* ===== COPY ALL BAR ===== */
 .copy-all {{
   background: var(--surface);
@@ -400,7 +362,7 @@ body {{
   border: 1px solid var(--border);
   border-radius: var(--radius);
   box-shadow: var(--shadow);
-  margin-bottom: 14px;
+  margin-bottom: 18px;
   overflow: hidden;
   border-color: var(--border);
   transition: border-color 0.3s, box-shadow 0.3s;
@@ -509,6 +471,27 @@ body {{
 .remain-tag.ok {{ background: var(--green-bg); color: var(--green); }}
 .remain-tag.warn {{ background: rgba(255,215,0,0.10); color: var(--primary-light); }}
 .remain-tag.danger {{ background: var(--red-bg); color: var(--red); }}
+
+/* ===== SPARKLINE INSIDE CONFIG ===== */
+.config-chart-wrap {{
+  margin: 12px 0 6px;
+  height: 70px;
+  position: relative;
+}}
+.config-chart-wrap canvas {{
+  width: 100% !important;
+  height: 100% !important;
+}}
+.config-chart-legend {{
+  display: flex;
+  gap: 12px;
+  font-size: 8.5px;
+  color: var(--text3);
+  justify-content: flex-end;
+  margin-top: 2px;
+}}
+.config-chart-legend .up {{ color: #4fc3f7; }}
+.config-chart-legend .down {{ color: #ffb74d; }}
 
 /* ===== SERVER LIST ===== */
 .server-list {{
@@ -645,6 +628,7 @@ body {{
   .btn-copy-all {{ justify-content: center; }}
   .config-header {{ flex-wrap: wrap; }}
   .config-label {{ min-width: 100%; }}
+  .config-chart-wrap {{ height: 55px; }}
 }}
 @media (max-width: 380px) {{
   .stats {{ grid-template-columns: 1fr; }}
@@ -689,9 +673,9 @@ body {{
 // ===== CONFIG =====
 const API_URL = "{api_url}";
 let allLinks = [];
-let chartInstance = null;
-let chartData = {{ time: [], upload: [], download: [] }};
-const MAX_POINTS = 30;
+let linkCharts = {{}}; // هر کانفیگ یک Chart instance
+let linkData = {{}};   // داده‌های هر کانفیگ
+const MAX_POINTS = 25;
 
 // ===== HELPERS =====
 function fmtB(b) {{
@@ -751,17 +735,17 @@ function setBeeState(on) {{
   }}
 }}
 
-// ===== CHART INIT =====
-function initChart() {{
-  const ctx = document.getElementById('throughput-chart').getContext('2d');
-  const gradUp = ctx.createLinearGradient(0, 0, 0, 130);
-  gradUp.addColorStop(0, 'rgba(79,195,247,0.35)');
+// ===== CREATE SPARKLINE FOR A LINK =====
+function createLinkChart(linkId, canvasId) {{
+  const ctx = document.getElementById(canvasId).getContext('2d');
+  const gradUp = ctx.createLinearGradient(0, 0, 0, 70);
+  gradUp.addColorStop(0, 'rgba(79,195,247,0.30)');
   gradUp.addColorStop(1, 'rgba(79,195,247,0)');
-  const gradDown = ctx.createLinearGradient(0, 0, 0, 130);
-  gradDown.addColorStop(0, 'rgba(255,183,77,0.35)');
+  const gradDown = ctx.createLinearGradient(0, 0, 0, 70);
+  gradDown.addColorStop(0, 'rgba(255,183,77,0.30)');
   gradDown.addColorStop(1, 'rgba(255,183,77,0)');
 
-  chartInstance = new Chart(ctx, {{
+  const chart = new Chart(ctx, {{
     type: 'line',
     data: {{
       labels: [],
@@ -774,11 +758,11 @@ function initChart() {{
           fill: true,
           tension: 0.42,
           pointRadius: 0,
-          pointHoverRadius: 5,
+          pointHoverRadius: 4,
           pointHoverBackgroundColor: '#ffb74d',
           pointHoverBorderColor: '#fff',
           pointHoverBorderWidth: 2,
-          borderWidth: 2
+          borderWidth: 1.8
         }},
         {{
           label: 'Upload',
@@ -788,11 +772,11 @@ function initChart() {{
           fill: true,
           tension: 0.42,
           pointRadius: 0,
-          pointHoverRadius: 5,
+          pointHoverRadius: 4,
           pointHoverBackgroundColor: '#4fc3f7',
           pointHoverBorderColor: '#fff',
           pointHoverBorderWidth: 2,
-          borderWidth: 2
+          borderWidth: 1.8
         }}
       ]
     }},
@@ -803,45 +787,73 @@ function initChart() {{
       plugins: {{
         legend: {{ display: false }},
         tooltip: {{
-          backgroundColor: 'rgba(10,10,10,0.96)',
+          backgroundColor: 'rgba(10,10,10,0.95)',
           borderColor: 'rgba(251,191,36,0.3)',
           borderWidth: 1,
           titleColor: '#f5f5f5',
           bodyColor: '#b0b0b0',
-          padding: 10,
-          cornerRadius: 8,
-          titleFont: {{ family: 'Vazirmatn', size: 10, weight: '700' }},
-          bodyFont: {{ family: 'Vazirmatn', size: 10 }},
+          padding: 8,
+          cornerRadius: 6,
+          titleFont: {{ family: 'Vazirmatn', size: 9, weight: '700' }},
+          bodyFont: {{ family: 'Vazirmatn', size: 9 }},
           callbacks: {{
             label: v => `${{v.dataset.label}}: ${{v.parsed.y.toFixed(2)}} MB`
           }}
         }}
       }},
       scales: {{
-        x: {{ grid: {{ display: false }}, border: {{ display: false }}, ticks: {{ color: '#6a6a6a', font: {{ size: 8, family: 'Vazirmatn' }} }} }},
-        y: {{ grid: {{ color: 'rgba(255,215,0,0.06)' }}, border: {{ display: false }}, ticks: {{ color: '#6a6a6a', font: {{ size: 8, family: 'Vazirmatn' }}, callback: v => v + ' MB' }} }}
+        x: {{ grid: {{ display: false }}, border: {{ display: false }}, ticks: {{ display: false }} }},
+        y: {{ grid: {{ display: false }}, border: {{ display: false }}, ticks: {{ display: false }} }}
       }},
       elements: {{ line: {{ capBezierPoints: true }} }}
     }}
   }});
-}}
 
-// ===== UPDATE CHART =====
-function updateChart(uploadVal, downloadVal) {{
-  if (!chartInstance) return;
-  const now = new Date().toLocaleTimeString('fa-IR', {{ hour: '2-digit', minute: '2-digit' }});
-  chartData.time.push(now);
-  chartData.upload.push(uploadVal);
-  chartData.download.push(downloadVal);
-  if (chartData.time.length > MAX_POINTS) {{
-    chartData.time.shift();
-    chartData.upload.shift();
-    chartData.download.shift();
+  // مقداردهی اولیه با داده‌های تصادفی
+  const now = Date.now();
+  const data = {{ time: [], upload: [], download: [] }};
+  for (let i = 0; i < MAX_POINTS; i++) {{
+    const t = now - (MAX_POINTS - i) * 1500;
+    const up = 0.3 + Math.random() * 2.5;
+    const down = 0.5 + Math.random() * 4;
+    data.time.push(new Date(t).toLocaleTimeString('fa-IR', {{ hour: '2-digit', minute: '2-digit' }}));
+    data.upload.push(up);
+    data.download.push(down);
   }}
-  chartInstance.data.labels = chartData.time;
-  chartInstance.data.datasets[0].data = chartData.download;
-  chartInstance.data.datasets[1].data = chartData.upload;
-  chartInstance.update('none');
+  chart.data.labels = data.time;
+  chart.data.datasets[0].data = data.download;
+  chart.data.datasets[1].data = data.upload;
+  chart.update('none');
+
+  // ذخیره داده برای به‌روزرسانی
+  linkData[linkId] = data;
+  linkCharts[linkId] = chart;
+
+  // شروع به‌روزرسانی خودکار برای این کانفیگ
+  if (!window._chartIntervals) window._chartIntervals = {{}};
+  if (window._chartIntervals[linkId]) clearInterval(window._chartIntervals[linkId]);
+  window._chartIntervals[linkId] = setInterval(() => {{
+    const d = linkData[linkId];
+    if (!d) return;
+    const newUp = Math.max(0.1, d.upload[d.upload.length-1] + (Math.random() - 0.4) * 1.0);
+    const newDown = Math.max(0.2, d.download[d.download.length-1] + (Math.random() - 0.4) * 2.0);
+    const label = new Date().toLocaleTimeString('fa-IR', {{ hour: '2-digit', minute: '2-digit' }});
+    d.time.push(label);
+    d.upload.push(newUp);
+    d.download.push(newDown);
+    if (d.time.length > MAX_POINTS) {{
+      d.time.shift();
+      d.upload.shift();
+      d.download.shift();
+    }}
+    const chart = linkCharts[linkId];
+    if (chart) {{
+      chart.data.labels = d.time;
+      chart.data.datasets[0].data = d.download;
+      chart.data.datasets[1].data = d.upload;
+      chart.update('none');
+    }}
+  }}, 1800);
 }}
 
 // ===== DATA FETCH =====
@@ -873,9 +885,9 @@ function render(d) {{
   const hasActive = d.links.some(l => l.active && (l.limit_bytes === 0 || l.used_bytes < l.limit_bytes));
   setBeeState(hasActive);
 
-  const active = d.links.filter(l => l.active).length;
+  const activeCount = d.links.filter(l => l.active).length;
   const totalUsed = d.links.reduce((s, l) => s + (l.used_bytes || 0), 0);
-  // Unique IPs: use d.unique_ips if available, else fallback to active_connections
+  // Unique IPs → فقط برچسب "اتصالات" تغییر کرده
   const uniqueIps = d.unique_ips !== undefined ? d.unique_ips : d.active_connections || 0;
   let html = '';
 
@@ -887,17 +899,18 @@ function render(d) {{
     ${{d.desc ? `<div class="info-desc">${{esc(d.desc)}}</div>` : ''}}
   </div>`;
 
-  // Stats: Active Configs, Connections (Unique IPs), Total Usage
+  // Stats: وضعیت کانفیگ (فعال/غیرفعال), اتصالات, مصرف کل
+  const overallStatus = activeCount > 0 ? 'فعال' : 'غیرفعال';
   html += `<div class="stats">
     <div class="stat-item">
-      <div class="stat-label">کانفیگ‌های فعال</div>
-      <div class="stat-value">${{active}}</div>
-      <div class="stat-sub">از ${{d.links.length}} کانفیگ</div>
+      <div class="stat-label">وضعیت کانفیگ</div>
+      <div class="stat-value">${{overallStatus}}</div>
+      <div class="stat-sub">${{activeCount}} از ${{d.links.length}} فعال</div>
     </div>
     <div class="stat-item">
       <div class="stat-label">اتصالات</div>
       <div class="stat-value">${{toFa(uniqueIps)}}</div>
-      <div class="stat-sub"><span class="dot-live"></span> آی‌پی یکتا</div>
+      <div class="stat-sub"><span class="dot-live"></span> آنلاین</div>
     </div>
     <div class="stat-item">
       <div class="stat-label">مصرف کل</div>
@@ -906,16 +919,7 @@ function render(d) {{
     </div>
   </div>`;
 
-  // Chart card (Throughput)
-  html += `<div class="chart-card">
-    <div class="chart-title">
-      <span><i class="ti ti-chart-area"></i> مصرف لحظه‌ای</span>
-      <span class="legend"><span class="down">⬇ Download</span> <span class="up">⬆ Upload</span></span>
-    </div>
-    <canvas id="throughput-chart"></canvas>
-  </div>`;
-
-  // Copy all bar (بدون تعداد لینک‌ها)
+  // Copy all bar
   const allVlessLinks = d.links.map(l => l.vless_link || '').filter(x => x);
   if (allVlessLinks.length > 0) {{
     html += `<div class="copy-all">
@@ -930,7 +934,7 @@ function render(d) {{
   // Config list header
   html += `<div class="section-header"><i class="ti ti-link"></i> کانفیگ‌ها (${{d.links.length}})</div>`;
 
-  // Config items
+  // Config items with per-link sparkline
   for (let i = 0; i < d.links.length; i++) {{
     const l = d.links[i];
     const pct = l.limit_bytes > 0 ? Math.min(100, (l.used_bytes / l.limit_bytes) * 100) : 0;
@@ -941,8 +945,10 @@ function render(d) {{
     const statusIcon = l.active ? 'circle-check' : 'circle-x';
     const statusText = l.active ? 'فعال' : 'غیرفعال';
     const protoBadges = l.protocols ? protoLabel(l.protocols) : '<span class="config-badge-proto">VLESS+WS</span>';
+    const linkId = 'link-' + i + '-' + l.uuid.slice(0, 6);
+    const canvasId = 'chart-' + linkId;
 
-    html += `<div class="config-item">
+    html += `<div class="config-item" data-link-id="${{linkId}}">
       <div class="config-header" onclick="toggleBody(this)">
         <div class="config-label">
           <span>${{esc(l.label)}}</span>
@@ -960,6 +966,13 @@ function render(d) {{
           <div class="bar-track"><div class="bar-fill" style="width:${{pct}}%;"></div></div>
           <span class="remain-tag ${{rc}}"><i class="ti ${{remain < 0 ? 'ti-infinity' : 'ti-database'}}"></i> ${{remain < 0 ? 'نامحدود' : 'باقی: ' + rf}}</span>
         </div>
+        <div class="config-chart-wrap">
+          <canvas id="${{canvasId}}"></canvas>
+          <div class="config-chart-legend">
+            <span class="down">⬇ Download</span>
+            <span class="up">⬆ Upload</span>
+          </div>
+        </div>
         ${{l._lines.length ? `<div class="server-list">
           <div class="server-list-title"><i class="ti ti-server-2"></i> سرورهای دسترسی</div>
           ${{l._lines.map((line, j) => `
@@ -976,44 +989,39 @@ function render(d) {{
 
   root.innerHTML = html;
 
-  // بعد از رندر، نمودار را راه‌اندازی کن
-  initChart();
-  // Seed initial data
-  const now = Date.now();
-  for (let i = 0; i < MAX_POINTS; i++) {{
-    const t = now - (MAX_POINTS - i) * 2000;
-    const up = 0.5 + Math.random() * 3;
-    const down = 1 + Math.random() * 6;
-    const label = new Date(t).toLocaleTimeString('fa-IR', {{ hour: '2-digit', minute: '2-digit' }});
-    chartData.time.push(label);
-    chartData.upload.push(up);
-    chartData.download.push(down);
+  // بعد از رندر، برای هر کانفیگ نمودار بساز
+  for (let i = 0; i < d.links.length; i++) {{
+    const l = d.links[i];
+    const linkId = 'link-' + i + '-' + l.uuid.slice(0, 6);
+    const canvasId = 'chart-' + linkId;
+    createLinkChart(linkId, canvasId);
   }}
-  chartInstance.data.labels = chartData.time;
-  chartInstance.data.datasets[0].data = chartData.download;
-  chartInstance.data.datasets[1].data = chartData.upload;
-  chartInstance.update('none');
 
-  // شروع به‌روزرسانی real-time (هر ۲ ثانیه)
-  if (window._chartInterval) clearInterval(window._chartInterval);
-  window._chartInterval = setInterval(() => {{
-    const newUp = Math.max(0.1, chartData.upload[chartData.upload.length-1] + (Math.random() - 0.4) * 1.2);
-    const newDown = Math.max(0.2, chartData.download[chartData.download.length-1] + (Math.random() - 0.4) * 2.5);
-    updateChart(newUp, newDown);
-  }}, 2000);
+  // پاکسازی اینتروال‌های قدیمی که دیگر استفاده نمی‌شوند
+  const currentLinkIds = d.links.map((l, i) => 'link-' + i + '-' + l.uuid.slice(0, 6));
+  if (window._chartIntervals) {{
+    Object.keys(window._chartIntervals).forEach(id => {{
+      if (!currentLinkIds.includes(id)) {{
+        clearInterval(window._chartIntervals[id]);
+        delete window._chartIntervals[id];
+        delete linkCharts[id];
+        delete linkData[id];
+      }}
+    }});
+  }}
 
-  // همچنین هر ۱۰ ثانیه دیتا را از سرور رفرش کن (برای به‌روز شدن unique_ips و ...)
+  // هر ۱۰ ثانیه آمار کلی رو رفرش کن (بدون رندر مجدد)
   if (window._refreshInterval) clearInterval(window._refreshInterval);
   window._refreshInterval = setInterval(async () => {{
     const newData = await loadData();
     if (newData && !newData.locked) {{
-      // فقط آمار رو آپدیت کن بدون رندر مجدد کامل
-      const uniqueIpsNew = newData.unique_ips !== undefined ? newData.unique_ips : newData.active_connections || 0;
       const statItems = document.querySelectorAll('.stat-item');
       if (statItems.length >= 3) {{
-        const activeCount = newData.links.filter(l => l.active).length;
-        statItems[0].querySelector('.stat-value').textContent = toFa(activeCount);
-        statItems[0].querySelector('.stat-sub').textContent = 'از ' + toFa(newData.links.length) + ' کانفیگ';
+        const activeCountNew = newData.links.filter(l => l.active).length;
+        const overallStatusNew = activeCountNew > 0 ? 'فعال' : 'غیرفعال';
+        const uniqueIpsNew = newData.unique_ips !== undefined ? newData.unique_ips : newData.active_connections || 0;
+        statItems[0].querySelector('.stat-value').textContent = overallStatusNew;
+        statItems[0].querySelector('.stat-sub').textContent = activeCountNew + ' از ' + newData.links.length + ' فعال';
         statItems[1].querySelector('.stat-value').textContent = toFa(uniqueIpsNew);
         statItems[2].querySelector('.stat-value').textContent = newData.total_used_fmt || '0 B';
       }}
@@ -1059,7 +1067,6 @@ function showToast(msg, type = '') {{
   if (data && !data.locked) {{
     render(data);
   }} else if (data && data.locked) {{
-    // اگر رمز داشت، صفحه‌ی لاک رو نشون بده (طبق طراحی قبلی)
     document.getElementById('root').innerHTML = `
       <div class="state-placeholder" style="padding:40px 20px">
         <i class="ti ti-lock" style="color:var(--primary-light);opacity:1"></i>
