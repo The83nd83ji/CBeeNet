@@ -1,7 +1,7 @@
-# pages.py - CBee Gateway v1.0.1 (Royal Theme + Fixed Language) - FIXED
+# pages.py - CBee Gateway v1.0.1 (Royal Theme + Fixed Language)
 import json
 
-# ===== دیکشنری ترجمه کامل (بدون تغییر) =====
+# ===== دیکشنری ترجمه کامل =====
 LANG = {
     "en": {
         "login_title": "Login to Panel",
@@ -760,7 +760,7 @@ document.getElementById('form').addEventListener('submit', async e => {
 </script>
 </body></html>"""
 
-# ===== DASHBOARD_HTML با اصلاحات =====
+# ===== DASHBOARD_HTML (اصلاح‌شده با خطاگیری کامل) =====
 DASHBOARD_HTML = r"""<!DOCTYPE html>
 <html lang="en" dir="ltr">
 <head>
@@ -1710,7 +1710,7 @@ a{color:inherit;text-decoration:none}
     </div>
   </div>
 
-  <!-- ===== SPARKLINE CARDS (top of dashboard) ===== -->
+  <!-- ===== SPARKLINE CARDS ===== -->
   <div class="sparkline-row">
     <div class="sparkline-card">
       <div class="sparkline-top">
@@ -1790,7 +1790,7 @@ a{color:inherit;text-decoration:none}
     </div>
   </div>
 
-  <!-- ===== PROTOCOL DISTRIBUTION + BANDWIDTH USAGE (like 3x-UI) ===== -->
+  <!-- ===== PROTOCOL DISTRIBUTION + BANDWIDTH USAGE ===== -->
   <div class="dash-charts-second">
     <div class="dash-protocol-card">
       <div class="chart-title"><i class="ti ti-chart-pie"></i> <span data-lang="protocol_distribution">Protocol Distribution</span></div>
@@ -2178,1194 +2178,1087 @@ a{color:inherit;text-decoration:none}
 </main>
 
 <script>
-// ===== MULTI-LANGUAGE =====
+// ===== محافظت در برابر عدم وجود Chart.js =====
+if (typeof Chart === 'undefined') {
+    console.warn('Chart.js not loaded. Charts disabled.');
+    window.Chart = function() { return { update: function() {}, destroy: function() {} }; };
+}
+
+// ===== داده‌های چندزبانه =====
 const LANG_DATA = """ + json.dumps(LANG, ensure_ascii=False) + """;
 const LANG = JSON.parse(LANG_DATA);
 let currentLang = localStorage.getItem('CBeeNet-lang') || 'en';
 
-function setLanguage(lang){
-  currentLang = lang;
-  localStorage.setItem('CBeeNet-lang', lang);
-  applyLanguage();
-  document.querySelectorAll('.btn-lang').forEach(btn => {
-    btn.classList.toggle('active', btn.dataset.langCode === lang);
-    const check = btn.querySelector('i');
-    if(check) check.style.display = btn.dataset.langCode === lang ? 'inline' : 'none';
-  });
-  toast('Language changed to ' + (lang === 'en' ? 'English' : 'فارسی'), 'ok');
+function setLanguage(lang) {
+    currentLang = lang;
+    localStorage.setItem('CBeeNet-lang', lang);
+    applyLanguage();
+    document.querySelectorAll('.btn-lang').forEach(btn => {
+        btn.classList.toggle('active', btn.dataset.langCode === lang);
+        const check = btn.querySelector('i');
+        if(check) check.style.display = btn.dataset.langCode === lang ? 'inline' : 'none';
+    });
+    toast('Language changed to ' + (lang === 'en' ? 'English' : 'فارسی'), 'ok');
 }
 
-function applyLanguage(){
-  const dict = LANG[currentLang] || LANG['en'];
-  document.documentElement.dir = currentLang === 'fa' ? 'rtl' : 'ltr';
-  document.documentElement.lang = currentLang;
-  
-  document.querySelectorAll('[data-lang]').forEach(el => {
-    const key = el.getAttribute('data-lang');
-    if(dict[key] !== undefined){
-      el.textContent = dict[key];
-    }
-  });
-  
-  document.querySelectorAll('[data-lang-placeholder]').forEach(el => {
-    const key = el.getAttribute('data-lang-placeholder');
-    if(dict[key] !== undefined){
-      el.placeholder = dict[key];
-    }
-  });
+function applyLanguage() {
+    try {
+        const dict = LANG[currentLang] || LANG['en'];
+        document.documentElement.dir = currentLang === 'fa' ? 'rtl' : 'ltr';
+        document.documentElement.lang = currentLang;
+        document.querySelectorAll('[data-lang]').forEach(el => {
+            const key = el.getAttribute('data-lang');
+            if(dict[key] !== undefined) el.textContent = dict[key];
+        });
+        document.querySelectorAll('[data-lang-placeholder]').forEach(el => {
+            const key = el.getAttribute('data-lang-placeholder');
+            if(dict[key] !== undefined) el.placeholder = dict[key];
+        });
+    } catch(e) { console.warn('applyLanguage error:', e); }
 }
 
-// ===== Theme =====
+// ===== تم =====
 let currentTheme = localStorage.getItem('CBeeNet-theme') || 'dark-blue';
 
-function applyTheme(theme){
-  document.documentElement.setAttribute('data-theme', theme);
-  localStorage.setItem('CBeeNet-theme', theme);
-  currentTheme = theme;
-  
-  const disp = document.getElementById('current-theme-display');
-  if(disp) disp.textContent = theme;
-  
-  document.querySelectorAll('.theme-btn-select').forEach(btn => {
-    btn.classList.toggle('active', btn.dataset.theme === theme);
-    btn.style.outline = btn.dataset.theme === theme ? '2px solid var(--accent)' : 'none';
-    btn.style.outlineOffset = btn.dataset.theme === theme ? '2px' : '0';
-  });
-  
-  const isLight = theme.startsWith('light');
-  const icon = isLight ? 'ti-moon' : 'ti-sun';
-  const labelKey = isLight ? 'light_theme' : 'dark_theme';
-  const dict = LANG[currentLang] || LANG['en'];
-  const themeIcon = document.getElementById('theme-icon');
-  const themeLabel = document.getElementById('theme-label');
-  const mobIcon = document.getElementById('theme-mob-icon');
-  if(themeIcon) themeIcon.className = 'ti ' + icon;
-  if(themeLabel) themeLabel.textContent = dict[labelKey] || (isLight ? 'Light Theme' : 'Dark Theme');
-  if(mobIcon) mobIcon.className = 'ti ' + icon;
+function applyTheme(theme) {
+    try {
+        document.documentElement.setAttribute('data-theme', theme);
+        localStorage.setItem('CBeeNet-theme', theme);
+        currentTheme = theme;
+        const disp = document.getElementById('current-theme-display');
+        if(disp) disp.textContent = theme;
+        document.querySelectorAll('.theme-btn-select').forEach(btn => {
+            btn.classList.toggle('active', btn.dataset.theme === theme);
+            btn.style.outline = btn.dataset.theme === theme ? '2px solid var(--accent)' : 'none';
+            btn.style.outlineOffset = btn.dataset.theme === theme ? '2px' : '0';
+        });
+        const isLight = theme.startsWith('light');
+        const icon = isLight ? 'ti-moon' : 'ti-sun';
+        const labelKey = isLight ? 'light_theme' : 'dark_theme';
+        const dict = LANG[currentLang] || LANG['en'];
+        const themeIcon = document.getElementById('theme-icon');
+        const themeLabel = document.getElementById('theme-label');
+        const mobIcon = document.getElementById('theme-mob-icon');
+        if(themeIcon) themeIcon.className = 'ti ' + icon;
+        if(themeLabel) themeLabel.textContent = dict[labelKey] || (isLight ? 'Light Theme' : 'Dark Theme');
+        if(mobIcon) mobIcon.className = 'ti ' + icon;
+    } catch(e) { console.warn('applyTheme error:', e); }
 }
 
-function setTheme(theme){
-  applyTheme(theme);
-  toast('Theme changed to ' + theme, 'ok');
+function setTheme(theme) { applyTheme(theme); toast('Theme changed to ' + theme, 'ok'); }
+function toggleTheme() {
+    const isLight = currentTheme.startsWith('light');
+    const color = currentTheme.split('-')[1] || 'blue';
+    applyTheme(isLight ? 'dark-' + color : 'light-' + color);
 }
 
-function toggleTheme(){
-  const isLight = currentTheme.startsWith('light');
-  const color = currentTheme.split('-')[1] || 'blue';
-  const newTheme = isLight ? 'dark-' + color : 'light-' + color;
-  applyTheme(newTheme);
+// ===== توابع کمکی =====
+function toast(msg, type='') {
+    const t = document.getElementById('toast');
+    if(!t) return;
+    t.textContent = msg;
+    t.className = 'toast show' + (type ? ' ' + type : '');
+    setTimeout(() => t.classList.remove('show'), 2400);
 }
 
-// ===== Utility Functions =====
-function toast(msg, type=''){
-  const t = document.getElementById('toast');
-  if(!t) return;
-  t.textContent = msg;
-  t.className = 'toast show' + (type ? ' ' + type : '');
-  setTimeout(() => t.classList.remove('show'), 2400);
+function fmtB(b) {
+    if(!b || b === 0) return '0 B';
+    if(b < 1024) return b + ' B';
+    if(b < 1024**2) return (b/1024).toFixed(1) + ' KB';
+    if(b < 1024**3) return (b/1024**2).toFixed(2) + ' MB';
+    return (b/1024**3).toFixed(2) + ' GB';
 }
 
-function fmtB(b){
-  if(!b || b === 0) return '0 B';
-  if(b < 1024) return b + ' B';
-  if(b < 1024**2) return (b/1024).toFixed(1) + ' KB';
-  if(b < 1024**3) return (b/1024**2).toFixed(2) + ' MB';
-  return (b/1024**3).toFixed(2) + ' GB';
+function toFa(n) { return String(n).replace(/\d/g, d => '۰۱۲۳۴۵۶۷۸۹'[d]); }
+function esc(s) { return String(s || '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+function daysLeft(exp) { if(!exp) return null; return Math.ceil((new Date(exp) - Date.now()) / 864e5); }
+
+function expChip(exp, expired) {
+    const dict = LANG[currentLang] || LANG['en'];
+    if(expired) return '<span class="exp-chip ec-exp"><i class="ti ti-calendar-x"></i> ' + dict.expired + '</span>';
+    if(!exp) return '<span class="exp-chip ec-inf"><i class="ti ti-infinity"></i> ' + dict.unlimited_short + '</span>';
+    const d = daysLeft(exp);
+    if(d <= 0) return '<span class="exp-chip ec-exp"><i class="ti ti-calendar-x"></i> ' + dict.expired + '</span>';
+    if(d <= 3) return `<span class="exp-chip ec-warn"><i class="ti ti-alert-triangle"></i> ${toFa(d)} ${dict.days} ` + dict.remaining_days + `</span>`;
+    return `<span class="exp-chip ec-ok"><i class="ti ti-calendar-check"></i> ${toFa(d)} ${dict.days} ` + dict.remaining_days + `</span>`;
 }
 
-function toFa(n){
-  return String(n).replace(/\d/g, d => '۰۱۲۳۴۵۶۷۸۹'[d]);
-}
-
-function esc(s){
-  return String(s || '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-}
-
-function daysLeft(exp){
-  if(!exp) return null;
-  return Math.ceil((new Date(exp) - Date.now()) / 864e5);
-}
-
-function expChip(exp, expired){
-  const dict = LANG[currentLang] || LANG['en'];
-  if(expired) return '<span class="exp-chip ec-exp"><i class="ti ti-calendar-x"></i> ' + dict.expired + '</span>';
-  if(!exp) return '<span class="exp-chip ec-inf"><i class="ti ti-infinity"></i> ' + dict.unlimited_short + '</span>';
-  const d = daysLeft(exp);
-  if(d <= 0) return '<span class="exp-chip ec-exp"><i class="ti ti-calendar-x"></i> ' + dict.expired + '</span>';
-  if(d <= 3) return `<span class="exp-chip ec-warn"><i class="ti ti-alert-triangle"></i> ${toFa(d)} ${dict.days} ` + dict.remaining_days + `</span>`;
-  return `<span class="exp-chip ec-ok"><i class="ti ti-calendar-check"></i> ${toFa(d)} ${dict.days} ` + dict.remaining_days + `</span>`;
-}
-
-function protoBadge(protocols){
-  if(!protocols || !protocols.length) protocols = ['vless-ws'];
-  const labels = {
-    'vless-ws': ['VLESS · WS', 'pc-ws'],
-    'xhttp-packet-up': ['XHTTP · packet-up', 'pc-xhttp'],
-    'xhttp-stream-up': ['XHTTP · stream-up', 'pc-xhttp'],
-    'xhttp-stream-one': ['XHTTP ULTRA', 'pc-ultra']
-  };
-  return protocols.map(p => {
-    const v = labels[p] || labels['vless-ws'];
-    return `<span class="proto-chip ${v[1]}">${v[0]}</span>`;
-  }).join('');
-}
-
-async function checkAuth(){
-  try{
-    const r = await fetch('/api/me');
-    const d = await r.json();
-    if(!d.authenticated) location.href = '/login';
-  }catch(e){ location.href = '/login'; }
-}
-
-async function logout(){
-  try{ await fetch('/api/logout', {method:'POST'}); }catch(e){}
-  location.href = '/login';
-}
-document.getElementById('logout-btn').addEventListener('click', logout);
-
-async function authF(url, opts={}){
-  const r = await fetch(url, opts);
-  if(r.status === 401){ location.href = '/login'; throw new Error('unauthorized'); }
-  return r;
-}
-
-// ===== Protocol Functions =====
-function toggleProtoBtn(el){ el.classList.toggle('active'); }
-
-function getSelectedProtocols(){
-  const btns = document.querySelectorAll('.proto-btn');
-  const selected = [];
-  btns.forEach(btn => { if(btn.classList.contains('active')) selected.push(btn.dataset.proto); });
-  return selected.length ? selected : ['vless-ws'];
-}
-
-function setQuota(val, unit, el){
-  document.getElementById('nl-val').value = val === 0 ? '' : val;
-  document.getElementById('nl-unit').value = unit;
-  document.querySelectorAll('#quota-chips .chip').forEach(c => c.classList.remove('active'));
-  el.classList.add('active');
-}
-
-function setExpiry(days, el){
-  document.getElementById('nl-exp').value = days === 0 ? '' : days;
-  document.querySelectorAll('#exp-chips .chip').forEach(c => c.classList.remove('active'));
-  el.classList.add('active');
-}
-
-function setCount(val, el){
-  document.getElementById('nl-count').value = val;
-  document.querySelectorAll('.count-chip').forEach(c => c.classList.remove('active'));
-  el.classList.add('active');
-}
-
-// ===== Server Settings =====
-async function loadServerSettings(){
-  try {
-    const r = await authF('/api/settings/server');
-    const data = await r.json();
-    const nameInput = document.getElementById('server-name-input');
-    const prefixInput = document.getElementById('server-prefix-input');
-    const templateInput = document.getElementById('link-name-template');
-    if(nameInput) nameInput.value = data.server_name || 'CBeeNet';
-    if(prefixInput) prefixInput.value = data.server_prefix || '';
-    if(templateInput) templateInput.value = data.link_template || '{server}-{label}';
-    localStorage.setItem('CBeeNet-server-name', data.server_name || 'CBeeNet');
-    localStorage.setItem('CBeeNet-server-prefix', data.server_prefix || '');
-    localStorage.setItem('CBeeNet-link-template', data.link_template || '{server}-{label}');
-  } catch(e) { console.warn('Could not load server settings:', e); }
-}
-
-async function saveServerSettings(){
-  const name = document.getElementById('server-name-input')?.value?.trim() || 'CBeeNet';
-  const prefix = document.getElementById('server-prefix-input')?.value?.trim() || '';
-  const template = document.getElementById('link-name-template')?.value?.trim() || '{server}-{label}';
-  try {
-    const r = await authF('/api/settings/server', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ server_name: name, server_prefix: prefix, link_template: template })
-    });
-    const result = await r.json();
-    if(result.ok){
-      localStorage.setItem('CBeeNet-server-name', name);
-      localStorage.setItem('CBeeNet-server-prefix', prefix);
-      localStorage.setItem('CBeeNet-link-template', template);
-      const saveResult = document.getElementById('server-save-result');
-      if(saveResult) {
-        saveResult.style.display = 'block';
-        setTimeout(() => saveResult.style.display = 'none', 3000);
-      }
-      toast('Settings saved ✓', 'ok');
-      loadLinks();
-    } else {
-      toast('Error saving settings', 'err');
-    }
-  } catch(e) { toast('Server connection error', 'err'); }
-}
-
-function formatLinkName(label, protocol){
-  const template = localStorage.getItem('CBeeNet-link-template') || '{server}-{label}';
-  const server = localStorage.getItem('CBeeNet-server-name') || 'CBeeNet';
-  const prefix = localStorage.getItem('CBeeNet-server-prefix') || '';
-  let result = template;
-  result = result.replace(/{server}/g, server);
-  result = result.replace(/{prefix}/g, prefix);
-  result = result.replace(/{label}/g, label);
-  if(template.includes('{protocol}')){
-    const protoMap = {
-      'vless-ws': 'VLESS-WS',
-      'xhttp-packet-up': 'XHTTP-packet',
-      'xhttp-stream-up': 'XHTTP-stream',
-      'xhttp-stream-one': 'XHTTP-ultra'
+function protoBadge(protocols) {
+    if(!protocols || !protocols.length) protocols = ['vless-ws'];
+    const labels = {
+        'vless-ws': ['VLESS · WS', 'pc-ws'],
+        'xhttp-packet-up': ['XHTTP · packet-up', 'pc-xhttp'],
+        'xhttp-stream-up': ['XHTTP · stream-up', 'pc-xhttp'],
+        'xhttp-stream-one': ['XHTTP ULTRA', 'pc-ultra']
     };
-    result = result.replace(/{protocol}/g, protoMap[protocol] || protocol);
-  }
-  return result;
+    return protocols.map(p => { const v = labels[p] || labels['vless-ws']; return `<span class="proto-chip ${v[1]}">${v[0]}</span>`; }).join('');
 }
 
-// ===== Navigation =====
+// ===== احراز هویت =====
+async function checkAuth() {
+    try {
+        const r = await fetch('/api/me');
+        const d = await r.json();
+        if(!d.authenticated) location.href = '/login';
+    } catch(e) { location.href = '/login'; }
+}
+
+async function logout() {
+    try { await fetch('/api/logout', {method:'POST'}); } catch(e) {}
+    location.href = '/login';
+}
+document.getElementById('logout-btn')?.addEventListener('click', logout);
+
+async function authF(url, opts={}) {
+    const r = await fetch(url, opts);
+    if(r.status === 401) { location.href = '/login'; throw new Error('unauthorized'); }
+    return r;
+}
+
+// ===== پروتکل‌ها =====
+function toggleProtoBtn(el) { el.classList.toggle('active'); }
+function getSelectedProtocols() {
+    const btns = document.querySelectorAll('.proto-btn');
+    const selected = [];
+    btns.forEach(btn => { if(btn.classList.contains('active')) selected.push(btn.dataset.proto); });
+    return selected.length ? selected : ['vless-ws'];
+}
+function setQuota(val, unit, el) {
+    const nlVal = document.getElementById('nl-val');
+    const nlUnit = document.getElementById('nl-unit');
+    if(nlVal) nlVal.value = val === 0 ? '' : val;
+    if(nlUnit) nlUnit.value = unit;
+    document.querySelectorAll('#quota-chips .chip').forEach(c => c.classList.remove('active'));
+    el.classList.add('active');
+}
+function setExpiry(days, el) {
+    const nlExp = document.getElementById('nl-exp');
+    if(nlExp) nlExp.value = days === 0 ? '' : days;
+    document.querySelectorAll('#exp-chips .chip').forEach(c => c.classList.remove('active'));
+    el.classList.add('active');
+}
+function setCount(val, el) {
+    const nlCount = document.getElementById('nl-count');
+    if(nlCount) nlCount.value = val;
+    document.querySelectorAll('.count-chip').forEach(c => c.classList.remove('active'));
+    el.classList.add('active');
+}
+
+// ===== تنظیمات سرور =====
+async function loadServerSettings() {
+    try {
+        const r = await authF('/api/settings/server');
+        const data = await r.json();
+        const nameInput = document.getElementById('server-name-input');
+        const prefixInput = document.getElementById('server-prefix-input');
+        const templateInput = document.getElementById('link-name-template');
+        if(nameInput) nameInput.value = data.server_name || 'CBeeNet';
+        if(prefixInput) prefixInput.value = data.server_prefix || '';
+        if(templateInput) templateInput.value = data.link_template || '{server}-{label}';
+        localStorage.setItem('CBeeNet-server-name', data.server_name || 'CBeeNet');
+        localStorage.setItem('CBeeNet-server-prefix', data.server_prefix || '');
+        localStorage.setItem('CBeeNet-link-template', data.link_template || '{server}-{label}');
+    } catch(e) { console.warn('loadServerSettings error:', e); }
+}
+
+async function saveServerSettings() {
+    const name = document.getElementById('server-name-input')?.value?.trim() || 'CBeeNet';
+    const prefix = document.getElementById('server-prefix-input')?.value?.trim() || '';
+    const template = document.getElementById('link-name-template')?.value?.trim() || '{server}-{label}';
+    try {
+        const r = await authF('/api/settings/server', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ server_name: name, server_prefix: prefix, link_template: template })
+        });
+        const result = await r.json();
+        if(result.ok) {
+            localStorage.setItem('CBeeNet-server-name', name);
+            localStorage.setItem('CBeeNet-server-prefix', prefix);
+            localStorage.setItem('CBeeNet-link-template', template);
+            const saveResult = document.getElementById('server-save-result');
+            if(saveResult) { saveResult.style.display = 'block'; setTimeout(() => saveResult.style.display = 'none', 3000); }
+            toast('Settings saved ✓', 'ok');
+            loadLinks();
+        } else {
+            toast('Error saving settings', 'err');
+        }
+    } catch(e) { toast('Server connection error', 'err'); }
+}
+
+function formatLinkName(label, protocol) {
+    const template = localStorage.getItem('CBeeNet-link-template') || '{server}-{label}';
+    const server = localStorage.getItem('CBeeNet-server-name') || 'CBeeNet';
+    const prefix = localStorage.getItem('CBeeNet-server-prefix') || '';
+    let result = template;
+    result = result.replace(/{server}/g, server);
+    result = result.replace(/{prefix}/g, prefix);
+    result = result.replace(/{label}/g, label);
+    if(template.includes('{protocol}')) {
+        const protoMap = { 'vless-ws': 'VLESS-WS', 'xhttp-packet-up': 'XHTTP-packet', 'xhttp-stream-up': 'XHTTP-stream', 'xhttp-stream-one': 'XHTTP-ultra' };
+        result = result.replace(/{protocol}/g, protoMap[protocol] || protocol);
+    }
+    return result;
+}
+
+// ===== ناوبری =====
 const sb = document.getElementById('sb'), overlay = document.getElementById('overlay');
-function openSb(){ if(sb) sb.classList.add('open'); if(overlay) overlay.classList.add('show'); }
-function closeSb(){ if(sb) sb.classList.remove('open'); if(overlay) overlay.classList.remove('show'); }
-const openSbBtn = document.getElementById('open-sb');
-const closeSbBtn = document.getElementById('close-sb');
-if(openSbBtn) openSbBtn.addEventListener('click', openSb);
-if(closeSbBtn) closeSbBtn.addEventListener('click', closeSb);
+function openSb() { if(sb) sb.classList.add('open'); if(overlay) overlay.classList.add('show'); }
+function closeSb() { if(sb) sb.classList.remove('open'); if(overlay) overlay.classList.remove('show'); }
+document.getElementById('open-sb')?.addEventListener('click', openSb);
+document.getElementById('close-sb')?.addEventListener('click', closeSb);
 if(overlay) overlay.addEventListener('click', closeSb);
 
-function navTo(name){
-  document.querySelectorAll('.nav-it').forEach(n => n.classList.toggle('on', n.dataset.pg === name));
-  document.querySelectorAll('.pg').forEach(p => p.classList.toggle('on', p.id === 'pg-' + name));
-  const loaders = {links: loadLinks, connections: loadConns, errors: loadErrs, subscriptions: loadSubsPage, subgroups: loadSubs, logs: loadActivity};
-  if(loaders[name]) loaders[name]();
-  closeSb();
-  window.scrollTo({top: 0, behavior: 'smooth'});
+function navTo(name) {
+    document.querySelectorAll('.nav-it').forEach(n => n.classList.toggle('on', n.dataset.pg === name));
+    document.querySelectorAll('.pg').forEach(p => p.classList.toggle('on', p.id === 'pg-' + name));
+    const loaders = {links: loadLinks, connections: loadConns, errors: loadErrs, subscriptions: loadSubsPage, subgroups: loadSubs, logs: loadActivity};
+    if(loaders[name]) loaders[name]();
+    closeSb();
+    window.scrollTo({top: 0, behavior: 'smooth'});
 }
 document.querySelectorAll('.nav-it').forEach(el => el.addEventListener('click', () => navTo(el.dataset.pg)));
 
-function openModal(id){ const el = document.getElementById(id); if(el) el.classList.add('open'); }
-function closeModal(id){ const el = document.getElementById(id); if(el) el.classList.remove('open'); }
+function openModal(id) { const el = document.getElementById(id); if(el) el.classList.add('open'); }
+function closeModal(id) { const el = document.getElementById(id); if(el) el.classList.remove('open'); }
 
-// ===== SPARKLINE CHARTS =====
+// ===== چارت‌های اسپارک‌لاین =====
 const sparkData = { load: [], traffic: [], conns: [] };
 const MAX_SPARK = 60;
 let sparkLoadChart, sparkTrafficChart, sparkConnsChart;
 
-function initSparklineCharts(){
-  try {
-    const accentColor = getComputedStyle(document.documentElement).getPropertyValue('--accent').trim() || '#1677ff';
-    const accentBg = getComputedStyle(document.documentElement).getPropertyValue('--accent-d').trim() || 'rgba(22,119,255,0.12)';
-    
-    const loadEl = document.getElementById('sparkLoad');
-    if(loadEl && typeof Chart !== 'undefined') {
-      const ctxLoad = loadEl.getContext('2d');
-      sparkLoadChart = new Chart(ctxLoad, {
-        type: 'line',
-        data: { labels: [], datasets: [{ data: [], borderColor: accentColor, backgroundColor: accentBg, borderWidth: 2, pointRadius: 0, fill: true, tension: 0.3 }] },
-        options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false }, tooltip: { enabled: false } }, scales: { x: { display: false, grid: { display: false } }, y: { display: false, grid: { display: false }, min: 0, max: 100 } }, animation: { duration: 100 } }
-      });
-    }
-    
-    const trafficEl = document.getElementById('sparkTraffic');
-    if(trafficEl && typeof Chart !== 'undefined') {
-      const ctxTraffic = trafficEl.getContext('2d');
-      sparkTrafficChart = new Chart(ctxTraffic, {
-        type: 'line',
-        data: { labels: [], datasets: [{ data: [], borderColor: accentColor, backgroundColor: accentBg, borderWidth: 2, pointRadius: 0, fill: true, tension: 0.3 }] },
-        options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false }, tooltip: { enabled: false } }, scales: { x: { display: false, grid: { display: false } }, y: { display: false, grid: { display: false }, min: 0 } }, animation: { duration: 100 } }
-      });
-    }
-    
-    const connsEl = document.getElementById('sparkConns');
-    if(connsEl && typeof Chart !== 'undefined') {
-      const ctxConns = connsEl.getContext('2d');
-      sparkConnsChart = new Chart(ctxConns, {
-        type: 'line',
-        data: { labels: [], datasets: [{ data: [], borderColor: accentColor, backgroundColor: accentBg, borderWidth: 2, pointRadius: 0, fill: true, tension: 0.3 }] },
-        options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false }, tooltip: { enabled: false } }, scales: { x: { display: false, grid: { display: false } }, y: { display: false, grid: { display: false }, min: 0 } }, animation: { duration: 100 } }
-      });
-    }
-  } catch(e) {
-    console.warn('Sparkline init error:', e);
-  }
-}
-
-function updateSparkline(chart, data, maxVal){
-  if(!chart) return;
-  if(data.length > MAX_SPARK) data.shift();
-  const labels = data.map((_, i) => i);
-  chart.data.labels = labels;
-  chart.data.datasets[0].data = data;
-  if(maxVal){
-    chart.options.scales.y.max = maxVal;
-  }
-  chart.update('none');
-}
-
-// ===== MAIN CHARTS =====
-let dashTrafficChart = null;
-let dashProtoChart = null;
-let dashBandwidthChart = null;
-let ch3 = null;
-
-function initCharts(){
-  try {
-    if(typeof Chart === 'undefined') return;
-    
-    const ctxProto = document.getElementById('dashProtoChart');
-    if(ctxProto){
-      dashProtoChart = new Chart(ctxProto.getContext('2d'), {
-        type: 'doughnut',
-        data: {
-          labels: ['VLESS/WS', 'XHTTP-packet', 'XHTTP-stream'],
-          datasets: [{ data: [0, 0, 0], backgroundColor: ['var(--accent)', 'var(--purple)', 'var(--green)'], borderWidth: 0 }]
-        },
-        options: { 
-          responsive: true, 
-          maintainAspectRatio: false, 
-          plugins: { 
-            legend: { position: 'bottom', labels: { color: 'var(--t2)', font: { size: 10 } } } 
-          }, 
-          cutout: '70%' 
+function initSparklineCharts() {
+    try {
+        if(typeof Chart === 'undefined') return;
+        const accentColor = getComputedStyle(document.documentElement).getPropertyValue('--accent').trim() || '#1677ff';
+        const accentBg = getComputedStyle(document.documentElement).getPropertyValue('--accent-d').trim() || 'rgba(22,119,255,0.12)';
+        const loadEl = document.getElementById('sparkLoad');
+        if(loadEl) {
+            const ctx = loadEl.getContext('2d');
+            sparkLoadChart = new Chart(ctx, {
+                type: 'line',
+                data: { labels: [], datasets: [{ data: [], borderColor: accentColor, backgroundColor: accentBg, borderWidth: 2, pointRadius: 0, fill: true, tension: 0.3 }] },
+                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false }, tooltip: { enabled: false } }, scales: { x: { display: false, grid: { display: false } }, y: { display: false, grid: { display: false }, min: 0, max: 100 } }, animation: { duration: 100 } }
+            });
         }
-      });
-    }
-    
-    const ctxBand = document.getElementById('dashBandwidthChart');
-    if(ctxBand){
-      dashBandwidthChart = new Chart(ctxBand.getContext('2d'), {
-        type: 'bar',
-        data: {
-          labels: ['VLESS', 'XHTTP', 'ULTRA'],
-          datasets: [{ data: [0, 0, 0], backgroundColor: ['var(--accent-d)', 'var(--purple-bg)', 'var(--green-bg)'], borderColor: ['var(--accent)', 'var(--purple)', 'var(--green)'], borderWidth: 1 }]
-        },
-        options: { 
-          responsive: true, 
-          maintainAspectRatio: false, 
-          plugins: { legend: { display: false } }, 
-          scales: { 
-            x: { grid: { display: false }, ticks: { color: 'var(--t3)', font: { size: 9 } } }, 
-            y: { grid: { color: 'var(--card-b)' }, ticks: { color: 'var(--t3)', font: { size: 9 }, callback: v => v + 'MB' } } 
-          } 
+        const trafficEl = document.getElementById('sparkTraffic');
+        if(trafficEl) {
+            const ctx = trafficEl.getContext('2d');
+            sparkTrafficChart = new Chart(ctx, {
+                type: 'line',
+                data: { labels: [], datasets: [{ data: [], borderColor: accentColor, backgroundColor: accentBg, borderWidth: 2, pointRadius: 0, fill: true, tension: 0.3 }] },
+                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false }, tooltip: { enabled: false } }, scales: { x: { display: false, grid: { display: false } }, y: { display: false, grid: { display: false }, min: 0 } }, animation: { duration: 100 } }
+            });
         }
-      });
-    }
-  } catch(e) {
-    console.warn('Chart init error:', e);
-  }
+        const connsEl = document.getElementById('sparkConns');
+        if(connsEl) {
+            const ctx = connsEl.getContext('2d');
+            sparkConnsChart = new Chart(ctx, {
+                type: 'line',
+                data: { labels: [], datasets: [{ data: [], borderColor: accentColor, backgroundColor: accentBg, borderWidth: 2, pointRadius: 0, fill: true, tension: 0.3 }] },
+                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false }, tooltip: { enabled: false } }, scales: { x: { display: false, grid: { display: false } }, y: { display: false, grid: { display: false }, min: 0 } }, animation: { duration: 100 } }
+            });
+        }
+    } catch(e) { console.warn('initSparklineCharts error:', e); }
 }
 
-// ===== Fetch Stats & Dashboard =====
-async function fetchStats(){
-  try{
-    const r = await authF('/stats');
-    const d = await r.json();
-    
-    // Sparklines
-    const pct = d.bw_pct || 0;
-    sparkData.load.push(pct);
-    const sparkLoadEl = document.getElementById('spark-load');
-    if(sparkLoadEl) sparkLoadEl.innerHTML = pct.toFixed(1) + '<span class="unit">%</span>';
-    updateSparkline(sparkLoadChart, sparkData.load, 100);
-    
-    const trafficVal = parseFloat((d.total_traffic_mb || 0).toFixed(2));
-    sparkData.traffic.push(trafficVal);
-    const sparkTrafficEl = document.getElementById('spark-traffic');
-    if(sparkTrafficEl) sparkTrafficEl.innerHTML = trafficVal.toFixed(1) + '<span class="unit">MB</span>';
-    const maxTraffic = Math.max(10, ...sparkData.traffic);
-    updateSparkline(sparkTrafficChart, sparkData.traffic, maxTraffic * 1.2);
-    
-    const connsVal = d.active_connections || 0;
-    sparkData.conns.push(connsVal);
-    const sparkConnsEl = document.getElementById('spark-conns');
-    if(sparkConnsEl) sparkConnsEl.textContent = connsVal;
-    const maxConns = Math.max(5, ...sparkData.conns);
-    updateSparkline(sparkConnsChart, sparkData.conns, maxConns * 1.2);
-    
-    // Stats
-    const dashConns = document.getElementById('dash-conns');
-    if(dashConns) dashConns.textContent = d.active_connections || 0;
-    const dashTraffic = document.getElementById('dash-traffic');
-    if(dashTraffic) dashTraffic.innerHTML = (d.total_traffic_mb || 0).toFixed(1) + ' <small style="font-size:14px;font-weight:400;">MB</small>';
-    const dashLinks = document.getElementById('dash-links');
-    if(dashLinks) dashLinks.textContent = d.links_count || 0;
-    const dashLinksSub = document.getElementById('dash-links-sub');
-    if(dashLinksSub) dashLinksSub.textContent = (d.active_links || 0) + ' / ' + (d.links_count || 0);
-    const dashUptime = document.getElementById('dash-uptime');
-    if(dashUptime) dashUptime.textContent = d.uptime || '00:00:00';
-    const uptimeBadge = document.getElementById('uptime-badge');
-    if(uptimeBadge) uptimeBadge.textContent = 'Railway · ' + (d.uptime || '00:00:00');
-    const lastUpd = document.getElementById('last-upd');
-    if(lastUpd) lastUpd.textContent = 'Last update: ' + new Date().toLocaleTimeString();
-    
-    // Top connections
-    const conns = d.connections || [];
-    const top = conns.slice(0, 5);
-    const container = document.getElementById('dash-top-conns');
-    if(container) {
-      if(!top.length){
-        container.innerHTML = '<span data-lang="no_connections">No connections</span>';
-      } else {
-        container.innerHTML = top.map(c => `
-          <div class="dash-conn-item">
-            <span class="ip">${esc(c.ip || 'Unknown')}</span>
-            <span class="proto">${esc(c.transport || 'vless')}</span>
-            <span class="traffic">${esc(c.bytes_fmt || '0 B')}</span>
-          </div>
-        `).join('');
-      }
-    }
-    
-    // Connections table
-    const tbody = document.getElementById('dash-conn-table-body');
-    if(tbody) {
-      if(!conns.length){
-        tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:var(--t3);padding:20px;" data-lang="no_connections">No connections</td></tr>';
-      } else {
-        tbody.innerHTML = conns.slice(0, 10).map(c => {
-          const secs = c.connected_at ? Math.max(0, Math.floor((Date.now() - new Date(c.connected_at).getTime()) / 1000)) : 0;
-          const dur = secs < 60 ? secs + 's' : secs < 3600 ? Math.floor(secs/60) + 'm' : Math.floor(secs/3600) + 'h';
-          const up = c.bytes_fmt || '0 B';
-          const down = c.bytes_fmt || '0 B';
-          return `<tr>
-            <td><span class="ip">${esc(c.ip || 'Unknown')}</span></td>
-            <td><span class="proto-badge">${esc(c.transport || 'vless')}</span></td>
-            <td>${up}</td>
-            <td>${down}</td>
-            <td>${dur}</td>
-            <td><span class="status-badge status-on-badge">● Online</span></td>
-          </tr>`;
-        }).join('');
-      }
-    }
-    
-    // Traffic chart
-    const hourly = d.hourly || {};
-    const labels = Object.keys(hourly).sort();
-    const data = labels.map(h => (hourly[h] || 0) / (1024*1024));
-    if(dashTrafficChart){
-      dashTrafficChart.data.labels = labels;
-      dashTrafficChart.data.datasets[0].data = data;
-      dashTrafficChart.update();
-    } else {
-      const ctx = document.getElementById('dashTrafficChart');
-      if(ctx && typeof Chart !== 'undefined') {
-        const c = ctx.getContext('2d');
-        const grad = c.createLinearGradient(0, 0, 0, 220);
-        grad.addColorStop(0, 'rgba(22,119,255,0.4)');
-        grad.addColorStop(1, 'rgba(22,119,255,0)');
-        dashTrafficChart = new Chart(c, {
-          type: 'line',
-          data: {
-            labels: labels,
-            datasets: [{
-              label: 'Usage (MB)',
-              data: data,
-              borderColor: 'var(--accent)',
-              backgroundColor: grad,
-              fill: true,
-              tension: 0.4,
-              pointRadius: 0,
-              borderWidth: 2
-            }]
-          },
-          options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: { legend: { display: false } },
-            scales: {
-              x: { grid: { display: false }, ticks: { color: 'var(--t3)', font: { size: 9 } } },
-              y: { grid: { color: 'var(--card-b)' }, ticks: { color: 'var(--t3)', font: { size: 9 }, callback: v => v + ' MB' } }
+function updateSparkline(chart, data, maxVal) {
+    if(!chart) return;
+    if(data.length > MAX_SPARK) data.shift();
+    chart.data.labels = data.map((_, i) => i);
+    chart.data.datasets[0].data = data;
+    if(maxVal) chart.options.scales.y.max = maxVal;
+    chart.update('none');
+}
+
+// ===== چارت‌های اصلی =====
+let dashTrafficChart = null, dashProtoChart = null, dashBandwidthChart = null;
+
+function initCharts() {
+    try {
+        if(typeof Chart === 'undefined') return;
+        const ctxProto = document.getElementById('dashProtoChart');
+        if(ctxProto) {
+            dashProtoChart = new Chart(ctxProto.getContext('2d'), {
+                type: 'doughnut',
+                data: { labels: ['VLESS/WS', 'XHTTP-packet', 'XHTTP-stream'], datasets: [{ data: [0,0,0], backgroundColor: ['var(--accent)','var(--purple)','var(--green)'], borderWidth: 0 }] },
+                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom', labels: { color: 'var(--t2)', font: { size: 10 } } } }, cutout: '70%' }
+            });
+        }
+        const ctxBand = document.getElementById('dashBandwidthChart');
+        if(ctxBand) {
+            dashBandwidthChart = new Chart(ctxBand.getContext('2d'), {
+                type: 'bar',
+                data: { labels: ['VLESS', 'XHTTP', 'ULTRA'], datasets: [{ data: [0,0,0], backgroundColor: ['var(--accent-d)','var(--purple-bg)','var(--green-bg)'], borderColor: ['var(--accent)','var(--purple)','var(--green)'], borderWidth: 1 }] },
+                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { x: { grid: { display: false }, ticks: { color: 'var(--t3)', font: { size: 9 } } }, y: { grid: { color: 'var(--card-b)' }, ticks: { color: 'var(--t3)', font: { size: 9 }, callback: v => v + 'MB' } } } }
+            });
+        }
+    } catch(e) { console.warn('initCharts error:', e); }
+}
+
+// ===== دریافت آمار =====
+async function fetchStats() {
+    try {
+        const r = await authF('/stats');
+        const d = await r.json();
+        
+        // Sparklines
+        const pct = d.bw_pct || 0;
+        sparkData.load.push(pct);
+        const sparkLoadEl = document.getElementById('spark-load');
+        if(sparkLoadEl) sparkLoadEl.innerHTML = pct.toFixed(1) + '<span class="unit">%</span>';
+        updateSparkline(sparkLoadChart, sparkData.load, 100);
+        
+        const trafficVal = parseFloat((d.total_traffic_mb || 0).toFixed(2));
+        sparkData.traffic.push(trafficVal);
+        const sparkTrafficEl = document.getElementById('spark-traffic');
+        if(sparkTrafficEl) sparkTrafficEl.innerHTML = trafficVal.toFixed(1) + '<span class="unit">MB</span>';
+        const maxTraffic = Math.max(10, ...sparkData.traffic);
+        updateSparkline(sparkTrafficChart, sparkData.traffic, maxTraffic * 1.2);
+        
+        const connsVal = d.active_connections || 0;
+        sparkData.conns.push(connsVal);
+        const sparkConnsEl = document.getElementById('spark-conns');
+        if(sparkConnsEl) sparkConnsEl.textContent = connsVal;
+        const maxConns = Math.max(5, ...sparkData.conns);
+        updateSparkline(sparkConnsChart, sparkData.conns, maxConns * 1.2);
+        
+        // Stats cards
+        const dashConns = document.getElementById('dash-conns');
+        if(dashConns) dashConns.textContent = d.active_connections || 0;
+        const dashTraffic = document.getElementById('dash-traffic');
+        if(dashTraffic) dashTraffic.innerHTML = (d.total_traffic_mb || 0).toFixed(1) + ' <small style="font-size:14px;font-weight:400;">MB</small>';
+        const dashLinks = document.getElementById('dash-links');
+        if(dashLinks) dashLinks.textContent = d.links_count || 0;
+        const dashLinksSub = document.getElementById('dash-links-sub');
+        if(dashLinksSub) dashLinksSub.textContent = (d.active_links || 0) + ' / ' + (d.links_count || 0);
+        const dashUptime = document.getElementById('dash-uptime');
+        if(dashUptime) dashUptime.textContent = d.uptime || '00:00:00';
+        const uptimeBadge = document.getElementById('uptime-badge');
+        if(uptimeBadge) uptimeBadge.textContent = 'Railway · ' + (d.uptime || '00:00:00');
+        const lastUpd = document.getElementById('last-upd');
+        if(lastUpd) lastUpd.textContent = 'Last update: ' + new Date().toLocaleTimeString();
+        
+        // Top connections
+        const conns = d.connections || [];
+        const top = conns.slice(0, 5);
+        const container = document.getElementById('dash-top-conns');
+        if(container) {
+            if(!top.length) container.innerHTML = '<span data-lang="no_connections">No connections</span>';
+            else container.innerHTML = top.map(c => `<div class="dash-conn-item"><span class="ip">${esc(c.ip || 'Unknown')}</span><span class="proto">${esc(c.transport || 'vless')}</span><span class="traffic">${esc(c.bytes_fmt || '0 B')}</span></div>`).join('');
+        }
+        
+        // Connections table
+        const tbody = document.getElementById('dash-conn-table-body');
+        if(tbody) {
+            if(!conns.length) tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:var(--t3);padding:20px;" data-lang="no_connections">No connections</td></tr>';
+            else {
+                tbody.innerHTML = conns.slice(0, 10).map(c => {
+                    const secs = c.connected_at ? Math.max(0, Math.floor((Date.now() - new Date(c.connected_at).getTime()) / 1000)) : 0;
+                    const dur = secs < 60 ? secs + 's' : secs < 3600 ? Math.floor(secs/60) + 'm' : Math.floor(secs/3600) + 'h';
+                    return `<tr><td><span class="ip">${esc(c.ip || 'Unknown')}</span></td><td><span class="proto-badge">${esc(c.transport || 'vless')}</span></td><td>${c.bytes_fmt || '0 B'}</td><td>${c.bytes_fmt || '0 B'}</td><td>${dur}</td><td><span class="status-badge status-on-badge">● Online</span></td></tr>`;
+                }).join('');
             }
-          }
-        });
-      }
-    }
-    
-    // Protocol chart - update from links
-    if(dashProtoChart){
-      try {
-        const lr = await authF('/api/links');
-        const ld = await lr.json();
-        const links = ld.links || [];
-        let vless = 0, xhttpPacket = 0, xhttpStream = 0;
-        links.forEach(l => {
-          const protocols = l.protocols || ['vless-ws'];
-          protocols.forEach(p => {
-            if(p === 'vless-ws') vless++;
-            else if(p === 'xhttp-packet-up') xhttpPacket++;
-            else if(p === 'xhttp-stream-up' || p === 'xhttp-stream-one') xhttpStream++;
-          });
-        });
-        const total = vless + xhttpPacket + xhttpStream || 1;
-        dashProtoChart.data.datasets[0].data = [vless/total*100, xhttpPacket/total*100, xhttpStream/total*100];
-        dashProtoChart.update();
-      } catch(e) { /* ignore */ }
-    }
-    
-    // Bandwidth chart
-    if(dashBandwidthChart){
-      const totalMB = d.total_traffic_mb || 0;
-      dashBandwidthChart.data.datasets[0].data = [totalMB * 0.6, totalMB * 0.25, totalMB * 0.15];
-      dashBandwidthChart.update();
-    }
-    
-  } catch(e){ console.error('fetchStats error:', e); }
+        }
+        
+        // Traffic chart
+        const hourly = d.hourly || {};
+        const labels = Object.keys(hourly).sort();
+        const data = labels.map(h => (hourly[h] || 0) / (1024*1024));
+        if(dashTrafficChart) {
+            dashTrafficChart.data.labels = labels;
+            dashTrafficChart.data.datasets[0].data = data;
+            dashTrafficChart.update();
+        } else {
+            const ctx = document.getElementById('dashTrafficChart');
+            if(ctx && typeof Chart !== 'undefined') {
+                const c = ctx.getContext('2d');
+                const grad = c.createLinearGradient(0, 0, 0, 220);
+                grad.addColorStop(0, 'rgba(22,119,255,0.4)');
+                grad.addColorStop(1, 'rgba(22,119,255,0)');
+                dashTrafficChart = new Chart(c, {
+                    type: 'line',
+                    data: { labels, datasets: [{ label: 'Usage (MB)', data, borderColor: 'var(--accent)', backgroundColor: grad, fill: true, tension: 0.4, pointRadius: 0, borderWidth: 2 }] },
+                    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { x: { grid: { display: false }, ticks: { color: 'var(--t3)', font: { size: 9 } } }, y: { grid: { color: 'var(--card-b)' }, ticks: { color: 'var(--t3)', font: { size: 9 }, callback: v => v + ' MB' } } } }
+                });
+            }
+        }
+        
+        // Protocol chart
+        if(dashProtoChart) {
+            try {
+                const lr = await authF('/api/links');
+                const ld = await lr.json();
+                const links = ld.links || [];
+                let vless = 0, xhttpPacket = 0, xhttpStream = 0;
+                links.forEach(l => {
+                    (l.protocols || ['vless-ws']).forEach(p => {
+                        if(p === 'vless-ws') vless++;
+                        else if(p === 'xhttp-packet-up') xhttpPacket++;
+                        else if(p === 'xhttp-stream-up' || p === 'xhttp-stream-one') xhttpStream++;
+                    });
+                });
+                const total = vless + xhttpPacket + xhttpStream || 1;
+                dashProtoChart.data.datasets[0].data = [vless/total*100, xhttpPacket/total*100, xhttpStream/total*100];
+                dashProtoChart.update();
+            } catch(e) { /* ignore */ }
+        }
+        if(dashBandwidthChart) {
+            const totalMB = d.total_traffic_mb || 0;
+            dashBandwidthChart.data.datasets[0].data = [totalMB * 0.6, totalMB * 0.25, totalMB * 0.15];
+            dashBandwidthChart.update();
+        }
+    } catch(e) { console.error('fetchStats error:', e); }
 }
 
-// ===== LINKS =====
-let allSubsList = [];
-let allLinksList = [];
+// ===== لینک‌ها (کانفیگ‌ها) =====
+let allSubsList = [], allLinksList = [];
 
-async function loadLinks(){
-  try{
-    const [lr, sr] = await Promise.all([authF('/api/links'), authF('/api/subs')]);
-    const {links = []} = await lr.json();
-    const {subs = []} = await sr.json();
-    allSubsList = subs;
-    allLinksList = links;
-    
-    const nlSub = document.getElementById('nl-sub');
-    if(nlSub) {
-      const curSub = nlSub.value;
-      const dict = LANG[currentLang] || LANG['en'];
-      nlSub.innerHTML = '<option value="">— ' + dict.no_group + ' —</option>' + subs.map(s => `<option value="${esc(s.sub_id)}">${esc(s.name)}</option>`).join('');
-      if(curSub) nlSub.value = curSub;
-    }
-    
-    const linksNb = document.getElementById('links-nb');
-    if(linksNb) linksNb.textContent = links.length;
-    const linksPgCnt = document.getElementById('links-pg-cnt');
-    if(linksPgCnt) {
-      const dict = LANG[currentLang] || LANG['en'];
-      linksPgCnt.textContent = links.length + ' ' + dict.configs;
-    }
-    
-    const grid = document.getElementById('links-grid');
-    const empty = document.getElementById('links-empty');
-    if(!links.length){ if(grid) grid.innerHTML = ''; if(empty) empty.style.display = 'block'; return; }
-    if(empty) empty.style.display = 'none';
-    
-    const serverName = localStorage.getItem('CBeeNet-server-name') || 'CBeeNet';
-    const serverPrefix = localStorage.getItem('CBeeNet-server-prefix') || '';
-    const linkTemplate = localStorage.getItem('CBeeNet-link-template') || '{server}-{label}';
-    
-    if(grid) {
-      grid.innerHTML = links.map(l => {
-        const lim = l.limit_bytes === 0 ? '∞' : fmtB(l.limit_bytes);
-        const pct = l.limit_bytes === 0 ? 0 : Math.min(100, l.used_bytes / l.limit_bytes * 100);
-        const bc = pct > 90 ? 'var(--red)' : pct > 70 ? 'var(--amber)' : 'var(--accent)';
-        const allowed = l.active && !l.expired;
-        const cardCls = !l.active ? 'is-off' : (l.expired ? 'is-exp' : '');
-        const proto = (l.protocols && l.protocols[0]) || 'vless-ws';
-        const protoLabel = proto === 'vless-ws' ? 'VLESS-WS' : proto.replace('xhttp-', '').toUpperCase();
-        const displayLabel = formatLinkName(l.label, protoLabel);
-        const dict = LANG[currentLang] || LANG['en'];
-        return `<div class="cfg-card ${cardCls}">
-          <div class="cfg-row">
-            <span class="cfg-status-dot ${allowed ? 'pulse' : ''}"></span>
-            <div class="cfg-identity">
-              <div class="cfg-label">${esc(displayLabel)}</div>
-              <div class="cfg-sub-meta">
-                <span class="cfg-uuid-mini" onclick="navigator.clipboard.writeText('${l.uuid}').then(()=>toast('UUID copied','ok'))" title="${l.uuid}"><i class="ti ti-fingerprint"></i> ${l.uuid.slice(0,10)}…</span>
-                <span>${new Date(l.created_at).toLocaleDateString()}</span>
-              </div>
-            </div>
-            <div class="cfg-divider-v"></div>
-            <div class="cfg-usage-col">
-              <div class="ubar"><div class="ubar-f" style="width:${pct}%;background:${bc}"></div></div>
-              <div class="utxt"><span>${fmtB(l.used_bytes)}</span><span>${dict.of} ${lim}</span></div>
-            </div>
-            <div class="cfg-divider-v"></div>
-            <div class="cfg-exp-col">${expChip(l.expires_at, l.expired)}</div>
-            <div class="cfg-divider-v"></div>
-            <div class="cfg-badges-col">
-              ${protoBadge(l.protocols || ['vless-ws'])}
-              ${l.sub_id && allSubsList.find(s => s.sub_id === l.sub_id) ? `<span class="cfg-sub-tag"><i class="ti ti-folder"></i> ${esc(allSubsList.find(s => s.sub_id === l.sub_id).name)}</span>` : ''}
-            </div>
-            <div class="cfg-divider-v"></div>
-            <div class="cfg-actions">
-              <button class="tog${allowed ? ' on' : ''}" onclick="toggleActive('${l.uuid}', ${!l.active})" title="${dict.toggle_status}"></button>
-              <button class="btn btn-sm btn-g btn-icon" onclick="navigator.clipboard.writeText('${esc(l.vless_link)}').then(()=>toast('${dict.copy_link}','ok'))" title="${dict.copy_link}"><i class="ti ti-copy"></i></button>
-              <button class="btn btn-sm btn-g btn-icon" onclick="navigator.clipboard.writeText('${esc(l.sub_url)}').then(()=>toast('${dict.sub_url}','ok'))" title="${dict.sub_url}"><i class="ti ti-rss"></i></button>
-              <button class="btn btn-sm btn-g btn-icon" onclick="showQR('${esc(l.vless_link)}')" title="${dict.qr_code}"><i class="ti ti-qrcode"></i></button>
-              <button class="btn btn-sm btn-amber btn-icon" onclick="openEditLink('${l.uuid}')" title="${dict.edit_config}"><i class="ti ti-edit"></i></button>
-              <button class="btn btn-sm btn-g btn-icon" onclick="resetUsage('${l.uuid}')" title="${dict.reset_usage_btn}"><i class="ti ti-rotate"></i></button>
-              <button class="btn btn-sm btn-d btn-icon" onclick="deleteLink('${l.uuid}')" title="${dict.delete_btn}"><i class="ti ti-trash"></i></button>
-            </div>
-          </div>
-        </div>`;
-      }).join('');
-    }
-  } catch(e){ console.error('loadLinks error:', e); }
+async function loadLinks() {
+    try {
+        const [lr, sr] = await Promise.all([authF('/api/links'), authF('/api/subs')]);
+        const {links = []} = await lr.json();
+        const {subs = []} = await sr.json();
+        allSubsList = subs;
+        allLinksList = links;
+        
+        const nlSub = document.getElementById('nl-sub');
+        if(nlSub) {
+            const curSub = nlSub.value;
+            const dict = LANG[currentLang] || LANG['en'];
+            nlSub.innerHTML = '<option value="">— ' + dict.no_group + ' —</option>' + subs.map(s => `<option value="${esc(s.sub_id)}">${esc(s.name)}</option>`).join('');
+            if(curSub) nlSub.value = curSub;
+        }
+        
+        const linksNb = document.getElementById('links-nb');
+        if(linksNb) linksNb.textContent = links.length;
+        const linksPgCnt = document.getElementById('links-pg-cnt');
+        if(linksPgCnt) {
+            const dict = LANG[currentLang] || LANG['en'];
+            linksPgCnt.textContent = links.length + ' ' + dict.configs;
+        }
+        
+        const grid = document.getElementById('links-grid');
+        const empty = document.getElementById('links-empty');
+        if(!links.length){ if(grid) grid.innerHTML = ''; if(empty) empty.style.display = 'block'; return; }
+        if(empty) empty.style.display = 'none';
+        
+        if(grid) {
+            grid.innerHTML = links.map(l => {
+                const lim = l.limit_bytes === 0 ? '∞' : fmtB(l.limit_bytes);
+                const pct = l.limit_bytes === 0 ? 0 : Math.min(100, l.used_bytes / l.limit_bytes * 100);
+                const bc = pct > 90 ? 'var(--red)' : pct > 70 ? 'var(--amber)' : 'var(--accent)';
+                const allowed = l.active && !l.expired;
+                const cardCls = !l.active ? 'is-off' : (l.expired ? 'is-exp' : '');
+                const proto = (l.protocols && l.protocols[0]) || 'vless-ws';
+                const protoLabel = proto === 'vless-ws' ? 'VLESS-WS' : proto.replace('xhttp-', '').toUpperCase();
+                const displayLabel = formatLinkName(l.label, protoLabel);
+                const dict = LANG[currentLang] || LANG['en'];
+                return `<div class="cfg-card ${cardCls}">
+                    <div class="cfg-row">
+                        <span class="cfg-status-dot ${allowed ? 'pulse' : ''}"></span>
+                        <div class="cfg-identity">
+                            <div class="cfg-label">${esc(displayLabel)}</div>
+                            <div class="cfg-sub-meta">
+                                <span class="cfg-uuid-mini" onclick="navigator.clipboard.writeText('${l.uuid}').then(()=>toast('UUID copied','ok'))" title="${l.uuid}"><i class="ti ti-fingerprint"></i> ${l.uuid.slice(0,10)}…</span>
+                                <span>${new Date(l.created_at).toLocaleDateString()}</span>
+                            </div>
+                        </div>
+                        <div class="cfg-divider-v"></div>
+                        <div class="cfg-usage-col">
+                            <div class="ubar"><div class="ubar-f" style="width:${pct}%;background:${bc}"></div></div>
+                            <div class="utxt"><span>${fmtB(l.used_bytes)}</span><span>${dict.of} ${lim}</span></div>
+                        </div>
+                        <div class="cfg-divider-v"></div>
+                        <div class="cfg-exp-col">${expChip(l.expires_at, l.expired)}</div>
+                        <div class="cfg-divider-v"></div>
+                        <div class="cfg-badges-col">
+                            ${protoBadge(l.protocols || ['vless-ws'])}
+                            ${l.sub_id && allSubsList.find(s => s.sub_id === l.sub_id) ? `<span class="cfg-sub-tag"><i class="ti ti-folder"></i> ${esc(allSubsList.find(s => s.sub_id === l.sub_id).name)}</span>` : ''}
+                        </div>
+                        <div class="cfg-divider-v"></div>
+                        <div class="cfg-actions">
+                            <button class="tog${allowed ? ' on' : ''}" onclick="toggleActive('${l.uuid}', ${!l.active})" title="${dict.toggle_status}"></button>
+                            <button class="btn btn-sm btn-g btn-icon" onclick="navigator.clipboard.writeText('${esc(l.vless_link)}').then(()=>toast('${dict.copy_link}','ok'))" title="${dict.copy_link}"><i class="ti ti-copy"></i></button>
+                            <button class="btn btn-sm btn-g btn-icon" onclick="navigator.clipboard.writeText('${esc(l.sub_url)}').then(()=>toast('${dict.sub_url}','ok'))" title="${dict.sub_url}"><i class="ti ti-rss"></i></button>
+                            <button class="btn btn-sm btn-g btn-icon" onclick="showQR('${esc(l.vless_link)}')" title="${dict.qr_code}"><i class="ti ti-qrcode"></i></button>
+                            <button class="btn btn-sm btn-amber btn-icon" onclick="openEditLink('${l.uuid}')" title="${dict.edit_config}"><i class="ti ti-edit"></i></button>
+                            <button class="btn btn-sm btn-g btn-icon" onclick="resetUsage('${l.uuid}')" title="${dict.reset_usage_btn}"><i class="ti ti-rotate"></i></button>
+                            <button class="btn btn-sm btn-d btn-icon" onclick="deleteLink('${l.uuid}')" title="${dict.delete_btn}"><i class="ti ti-trash"></i></button>
+                        </div>
+                    </div>
+                </div>`;
+            }).join('');
+        }
+    } catch(e) { console.error('loadLinks error:', e); }
 }
 
-async function createLink(){
-  const label = document.getElementById('nl-label')?.value?.trim() || 'New Config';
-  const val = document.getElementById('nl-val')?.value;
-  const unit = document.getElementById('nl-unit')?.value;
-  const exp = document.getElementById('nl-exp')?.value;
-  const note = document.getElementById('nl-note')?.value?.trim();
-  const sub_id = document.getElementById('nl-sub')?.value || null;
-  const protocols = getSelectedProtocols();
-  if(!protocols.length){ toast('Select at least one protocol', 'err'); return; }
-  const count = parseInt(document.getElementById('nl-count')?.value) || 1;
-  const body = { label, limit_value: val || 0, limit_unit: unit, expires_days: exp || 0, note, sub_id, protocols, count };
-  try{
-    let r, d;
-    if(count > 1){
-      r = await authF('/api/links/bulk', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
-      d = await r.json();
-      toast(count + ' configs created ✓', 'ok');
-    } else {
-      r = await authF('/api/links', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
-      d = await r.json();
-      toast('Config created ✓', 'ok');
-    }
-    const nlLabel = document.getElementById('nl-label');
-    const nlVal = document.getElementById('nl-val');
-    const nlExp = document.getElementById('nl-exp');
-    const nlNote = document.getElementById('nl-note');
-    if(nlLabel) nlLabel.value = '';
-    if(nlVal) nlVal.value = '';
-    if(nlExp) nlExp.value = '';
-    if(nlNote) nlNote.value = '';
-    document.querySelectorAll('.proto-btn').forEach(btn => btn.classList.remove('active'));
-    const defaultProto = document.querySelector('.proto-btn[data-proto="vless-ws"]');
-    if(defaultProto) defaultProto.classList.add('active');
-    const nlCount = document.getElementById('nl-count');
-    if(nlCount) nlCount.value = 1;
-    document.querySelectorAll('.count-chip').forEach(c => c.classList.remove('active'));
-    const firstChip = document.querySelector('.count-chip');
-    if(firstChip) firstChip.classList.add('active');
-    loadLinks();
-  } catch(e){ toast('Error creating config', 'err'); }
+async function createLink() {
+    const label = document.getElementById('nl-label')?.value?.trim() || 'New Config';
+    const val = document.getElementById('nl-val')?.value;
+    const unit = document.getElementById('nl-unit')?.value;
+    const exp = document.getElementById('nl-exp')?.value;
+    const note = document.getElementById('nl-note')?.value?.trim();
+    const sub_id = document.getElementById('nl-sub')?.value || null;
+    const protocols = getSelectedProtocols();
+    if(!protocols.length){ toast('Select at least one protocol', 'err'); return; }
+    const count = parseInt(document.getElementById('nl-count')?.value) || 1;
+    const body = { label, limit_value: val || 0, limit_unit: unit, expires_days: exp || 0, note, sub_id, protocols, count };
+    try {
+        let r, d;
+        if(count > 1) {
+            r = await authF('/api/links/bulk', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
+            d = await r.json();
+            toast(count + ' configs created ✓', 'ok');
+        } else {
+            r = await authF('/api/links', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
+            d = await r.json();
+            toast('Config created ✓', 'ok');
+        }
+        const nlLabel = document.getElementById('nl-label');
+        const nlVal = document.getElementById('nl-val');
+        const nlExp = document.getElementById('nl-exp');
+        const nlNote = document.getElementById('nl-note');
+        if(nlLabel) nlLabel.value = '';
+        if(nlVal) nlVal.value = '';
+        if(nlExp) nlExp.value = '';
+        if(nlNote) nlNote.value = '';
+        document.querySelectorAll('.proto-btn').forEach(btn => btn.classList.remove('active'));
+        const defaultProto = document.querySelector('.proto-btn[data-proto="vless-ws"]');
+        if(defaultProto) defaultProto.classList.add('active');
+        const nlCount = document.getElementById('nl-count');
+        if(nlCount) nlCount.value = 1;
+        document.querySelectorAll('.count-chip').forEach(c => c.classList.remove('active'));
+        const firstChip = document.querySelector('.count-chip');
+        if(firstChip) firstChip.classList.add('active');
+        loadLinks();
+    } catch(e) { toast('Error creating config', 'err'); }
 }
 
-function openEditLink(uuid){
-  const l = allLinksList.find(x => x.uuid === uuid);
-  if(!l) return;
-  const elUuid = document.getElementById('el-uuid');
-  const elLabel = document.getElementById('el-label');
-  const elNote = document.getElementById('el-note');
-  const elVal = document.getElementById('el-val');
-  const elUnit = document.getElementById('el-unit');
-  const elExp = document.getElementById('el-exp');
-  if(elUuid) elUuid.value = uuid;
-  if(elLabel) elLabel.value = l.label;
-  if(elNote) elNote.value = l.note || '';
-  if(l.limit_bytes === 0){ if(elVal) elVal.value = ''; if(elUnit) elUnit.value = 'GB'; }
-  else { if(elVal) elVal.value = (l.limit_bytes / 1024 / 1024).toFixed(0); if(elUnit) elUnit.value = 'MB'; }
-  if(elExp) elExp.value = '';
-  openModal('modal-edit-link');
+function openEditLink(uuid) {
+    const l = allLinksList.find(x => x.uuid === uuid);
+    if(!l) return;
+    const elUuid = document.getElementById('el-uuid');
+    const elLabel = document.getElementById('el-label');
+    const elNote = document.getElementById('el-note');
+    const elVal = document.getElementById('el-val');
+    const elUnit = document.getElementById('el-unit');
+    const elExp = document.getElementById('el-exp');
+    if(elUuid) elUuid.value = uuid;
+    if(elLabel) elLabel.value = l.label;
+    if(elNote) elNote.value = l.note || '';
+    if(l.limit_bytes === 0){ if(elVal) elVal.value = ''; if(elUnit) elUnit.value = 'GB'; }
+    else { if(elVal) elVal.value = (l.limit_bytes / 1024 / 1024).toFixed(0); if(elUnit) elUnit.value = 'MB'; }
+    if(elExp) elExp.value = '';
+    openModal('modal-edit-link');
 }
 
-async function saveEditLink(){
-  const uuid = document.getElementById('el-uuid')?.value;
-  const label = document.getElementById('el-label')?.value?.trim();
-  const note = document.getElementById('el-note')?.value?.trim();
-  const val = document.getElementById('el-val')?.value;
-  const unit = document.getElementById('el-unit')?.value;
-  const exp = document.getElementById('el-exp')?.value;
-  const body = { label, note, limit_value: val || 0, limit_unit: unit };
-  if(exp && Number(exp) > 0) body.expires_days = Number(exp);
-  try{
-    const r = await authF('/api/links/' + uuid, { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
-    if(!r.ok) throw new Error();
-    closeModal('modal-edit-link');
-    toast('Config updated ✓', 'ok');
-    loadLinks();
-  } catch(e){ toast('Error updating config', 'err'); }
+async function saveEditLink() {
+    const uuid = document.getElementById('el-uuid')?.value;
+    const label = document.getElementById('el-label')?.value?.trim();
+    const note = document.getElementById('el-note')?.value?.trim();
+    const val = document.getElementById('el-val')?.value;
+    const unit = document.getElementById('el-unit')?.value;
+    const exp = document.getElementById('el-exp')?.value;
+    const body = { label, note, limit_value: val || 0, limit_unit: unit };
+    if(exp && Number(exp) > 0) body.expires_days = Number(exp);
+    try {
+        const r = await authF('/api/links/' + uuid, { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
+        if(!r.ok) throw new Error();
+        closeModal('modal-edit-link');
+        toast('Config updated ✓', 'ok');
+        loadLinks();
+    } catch(e) { toast('Error updating config', 'err'); }
 }
 
-async function toggleActive(uuid, newState){
-  try{
-    const r = await authF('/api/links/' + uuid, { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ active: newState }) });
-    if(!r.ok) throw new Error();
-    toast(newState ? 'Activated ✓' : 'Deactivated', 'ok');
-    loadLinks();
-  } catch(e){ toast('Error', 'err'); }
+async function toggleActive(uuid, newState) {
+    try {
+        const r = await authF('/api/links/' + uuid, { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ active: newState }) });
+        if(!r.ok) throw new Error();
+        toast(newState ? 'Activated ✓' : 'Deactivated', 'ok');
+        loadLinks();
+    } catch(e) { toast('Error', 'err'); }
 }
 
-async function resetUsage(uuid){
-  try{
-    const r = await authF('/api/links/' + uuid, { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ reset_usage: true }) });
-    if(!r.ok) throw new Error();
-    toast('Usage reset ✓', 'ok');
-    loadLinks();
-  } catch(e){ toast('Error', 'err'); }
+async function resetUsage(uuid) {
+    try {
+        const r = await authF('/api/links/' + uuid, { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ reset_usage: true }) });
+        if(!r.ok) throw new Error();
+        toast('Usage reset ✓', 'ok');
+        loadLinks();
+    } catch(e) { toast('Error', 'err'); }
 }
 
-async function deleteLink(uuid){
-  if(!confirm('Delete this config?')) return;
-  try{
-    const r = await authF('/api/links/' + uuid, { method: 'DELETE' });
-    if(!r.ok) throw new Error();
-    toast('Deleted ✓', 'ok');
-    loadLinks();
-  } catch(e){ toast('Error', 'err'); }
+async function deleteLink(uuid) {
+    if(!confirm('Delete this config?')) return;
+    try {
+        const r = await authF('/api/links/' + uuid, { method: 'DELETE' });
+        if(!r.ok) throw new Error();
+        toast('Deleted ✓', 'ok');
+        loadLinks();
+    } catch(e) { toast('Error', 'err'); }
 }
 
-function showQR(link){ window.open('https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=' + encodeURIComponent(link), '_blank'); }
+function showQR(link) { window.open('https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=' + encodeURIComponent(link), '_blank'); }
 
-// ===== Sub Groups =====
+// ===== گروه‌های ساب =====
 let allSubsRaw = [];
 
-async function loadSubs(){
-  try{
-    const r = await authF('/api/subs');
-    const d = await r.json();
-    const subs = d.subs || [];
-    allSubsRaw = subs;
-    const subsNb = document.getElementById('subs-nb');
-    if(subsNb) subsNb.textContent = subs.length;
-    const subsPgCnt = document.getElementById('subs-pg-cnt');
-    if(subsPgCnt) subsPgCnt.textContent = subs.length + ' Groups';
+async function loadSubs() {
+    try {
+        const r = await authF('/api/subs');
+        const d = await r.json();
+        const subs = d.subs || [];
+        allSubsRaw = subs;
+        const subsNb = document.getElementById('subs-nb');
+        if(subsNb) subsNb.textContent = subs.length;
+        const subsPgCnt = document.getElementById('subs-pg-cnt');
+        if(subsPgCnt) subsPgCnt.textContent = subs.length + ' Groups';
+        const grid = document.getElementById('subs-grid');
+        if(!grid) return;
+        if(!subs.length) {
+            grid.innerHTML = '<div class="subs-empty-v2"><div class="subs-empty-v2-icon"><i class="ti ti-folders"></i></div><div class="subs-empty-v2-title">No groups yet</div><div class="subs-empty-v2-sub">Create a new group to organize your configs</div></div>';
+            return;
+        }
+        grid.innerHTML = subs.map(s => `
+            <div class="sub-card">
+                <div class="sub-card-top">
+                    <div class="sub-card-head-v2">
+                        <div class="sub-card-icon"><i class="ti ti-folder"></i></div>
+                        <div class="sub-card-titles"><div class="sub-card-name-v2">${esc(s.name)}</div><div class="sub-card-desc-v2">${s.desc || 'No description'}</div></div>
+                        <div class="sub-card-lock-badge ${s.has_password ? 'locked' : 'open'}"><i class="ti ${s.has_password ? 'ti-lock' : 'ti-lock-open'}"></i></div>
+                    </div>
+                    <div class="sub-card-stats">
+                        <div class="sub-card-stat"><div class="sub-card-stat-val">${toFa(s.links_count)}</div><div class="sub-card-stat-label">Configs</div></div>
+                        <div class="sub-card-stat"><div class="sub-card-stat-val" style="color:var(--green-t)">${toFa(s.active_count)}</div><div class="sub-card-stat-label">Active</div></div>
+                        <div class="sub-card-stat"><div class="sub-card-stat-val" style="font-size:12px">${esc(s.total_used_fmt)}</div><div class="sub-card-stat-label">Usage</div></div>
+                    </div>
+                </div>
+                <div class="sub-card-url-row"><span class="sub-card-url-text">${esc(s.public_url)}</span><button class="sub-card-url-copy" onclick="navigator.clipboard.writeText('${esc(s.public_url)}').then(()=>toast('Copied','ok'))"><i class="ti ti-copy"></i></button><button class="sub-card-url-copy" onclick="window.open('${esc(s.public_url)}','_blank')"><i class="ti ti-external-link"></i></button></div>
+                <div class="sub-card-bottom">
+                    <button class="btn btn-sm btn-g" onclick="openSubLinks('${esc(s.sub_id)}','${esc(s.name)}')"><i class="ti ti-link-plus"></i> Configs</button>
+                    <button class="btn btn-sm btn-pur" onclick="copyAllSubLinks('${esc(s.sub_id)}')"><i class="ti ti-copy"></i> Copy All</button>
+                    <button class="btn btn-sm btn-g btn-icon" onclick="showQR('${esc(s.sub_url)}')"><i class="ti ti-qrcode"></i></button>
+                    <button class="btn btn-sm btn-d btn-icon" onclick="deleteSub('${esc(s.sub_id)}')"><i class="ti ti-trash"></i></button>
+                </div>
+            </div>
+        `).join('');
+    } catch(e) { console.error('loadSubs error:', e); }
+}
+
+function filterSubs(q) {
+    q = q.trim().toLowerCase();
+    if(!q){ loadSubs(); return; }
+    const filtered = allSubsRaw.filter(s => s.name.toLowerCase().includes(q) || (s.desc || '').toLowerCase().includes(q));
     const grid = document.getElementById('subs-grid');
     if(!grid) return;
-    if(!subs.length){
-      grid.innerHTML = '<div class="subs-empty-v2"><div class="subs-empty-v2-icon"><i class="ti ti-folders"></i></div><div class="subs-empty-v2-title">No groups yet</div><div class="subs-empty-v2-sub">Create a new group to organize your configs</div></div>';
-      return;
+    if(!filtered.length) {
+        grid.innerHTML = '<div class="subs-empty-v2"><div class="subs-empty-v2-icon"><i class="ti ti-folders"></i></div><div class="subs-empty-v2-title">No groups found</div></div>';
+        return;
     }
-    grid.innerHTML = subs.map(s => `
-      <div class="sub-card">
-        <div class="sub-card-top">
-          <div class="sub-card-head-v2">
-            <div class="sub-card-icon"><i class="ti ti-folder"></i></div>
-            <div class="sub-card-titles"><div class="sub-card-name-v2">${esc(s.name)}</div><div class="sub-card-desc-v2">${s.desc || 'No description'}</div></div>
-            <div class="sub-card-lock-badge ${s.has_password ? 'locked' : 'open'}"><i class="ti ${s.has_password ? 'ti-lock' : 'ti-lock-open'}"></i></div>
-          </div>
-          <div class="sub-card-stats">
-            <div class="sub-card-stat"><div class="sub-card-stat-val">${toFa(s.links_count)}</div><div class="sub-card-stat-label">Configs</div></div>
-            <div class="sub-card-stat"><div class="sub-card-stat-val" style="color:var(--green-t)">${toFa(s.active_count)}</div><div class="sub-card-stat-label">Active</div></div>
-            <div class="sub-card-stat"><div class="sub-card-stat-val" style="font-size:12px">${esc(s.total_used_fmt)}</div><div class="sub-card-stat-label">Usage</div></div>
-          </div>
+    grid.innerHTML = filtered.map(s => `
+        <div class="sub-card">
+            <div class="sub-card-top">
+                <div class="sub-card-head-v2">
+                    <div class="sub-card-icon"><i class="ti ti-folder"></i></div>
+                    <div class="sub-card-titles"><div class="sub-card-name-v2">${esc(s.name)}</div><div class="sub-card-desc-v2">${s.desc || 'No description'}</div></div>
+                    <div class="sub-card-lock-badge ${s.has_password ? 'locked' : 'open'}"><i class="ti ${s.has_password ? 'ti-lock' : 'ti-lock-open'}"></i></div>
+                </div>
+                <div class="sub-card-stats">
+                    <div class="sub-card-stat"><div class="sub-card-stat-val">${toFa(s.links_count)}</div><div class="sub-card-stat-label">Configs</div></div>
+                    <div class="sub-card-stat"><div class="sub-card-stat-val" style="color:var(--green-t)">${toFa(s.active_count)}</div><div class="sub-card-stat-label">Active</div></div>
+                    <div class="sub-card-stat"><div class="sub-card-stat-val" style="font-size:12px">${esc(s.total_used_fmt)}</div><div class="sub-card-stat-label">Usage</div></div>
+                </div>
+            </div>
+            <div class="sub-card-url-row"><span class="sub-card-url-text">${esc(s.public_url)}</span><button class="sub-card-url-copy" onclick="navigator.clipboard.writeText('${esc(s.public_url)}').then(()=>toast('Copied','ok'))"><i class="ti ti-copy"></i></button><button class="sub-card-url-copy" onclick="window.open('${esc(s.public_url)}','_blank')"><i class="ti ti-external-link"></i></button></div>
+            <div class="sub-card-bottom">
+                <button class="btn btn-sm btn-g" onclick="openSubLinks('${esc(s.sub_id)}','${esc(s.name)}')"><i class="ti ti-link-plus"></i> Configs</button>
+                <button class="btn btn-sm btn-pur" onclick="copyAllSubLinks('${esc(s.sub_id)}')"><i class="ti ti-copy"></i> Copy All</button>
+                <button class="btn btn-sm btn-g btn-icon" onclick="showQR('${esc(s.sub_url)}')"><i class="ti ti-qrcode"></i></button>
+                <button class="btn btn-sm btn-d btn-icon" onclick="deleteSub('${esc(s.sub_id)}')"><i class="ti ti-trash"></i></button>
+            </div>
         </div>
-        <div class="sub-card-url-row"><span class="sub-card-url-text">${esc(s.public_url)}</span><button class="sub-card-url-copy" onclick="navigator.clipboard.writeText('${esc(s.public_url)}').then(()=>toast('Copied','ok'))"><i class="ti ti-copy"></i></button><button class="sub-card-url-copy" onclick="window.open('${esc(s.public_url)}','_blank')"><i class="ti ti-external-link"></i></button></div>
-        <div class="sub-card-bottom">
-          <button class="btn btn-sm btn-g" onclick="openSubLinks('${esc(s.sub_id)}','${esc(s.name)}')"><i class="ti ti-link-plus"></i> Configs</button>
-          <button class="btn btn-sm btn-pur" onclick="copyAllSubLinks('${esc(s.sub_id)}')"><i class="ti ti-copy"></i> Copy All</button>
-          <button class="btn btn-sm btn-g btn-icon" onclick="showQR('${esc(s.sub_url)}')"><i class="ti ti-qrcode"></i></button>
-          <button class="btn btn-sm btn-d btn-icon" onclick="deleteSub('${esc(s.sub_id)}')"><i class="ti ti-trash"></i></button>
-        </div>
-      </div>
     `).join('');
-  } catch(e){ console.error('loadSubs error:', e); }
 }
 
-function filterSubs(q){
-  q = q.trim().toLowerCase();
-  if(!q){ loadSubs(); return; }
-  const filtered = allSubsRaw.filter(s => s.name.toLowerCase().includes(q) || (s.desc || '').toLowerCase().includes(q));
-  const grid = document.getElementById('subs-grid');
-  if(!grid) return;
-  if(!filtered.length){
-    grid.innerHTML = '<div class="subs-empty-v2"><div class="subs-empty-v2-icon"><i class="ti ti-folders"></i></div><div class="subs-empty-v2-title">No groups found</div></div>';
-    return;
-  }
-  grid.innerHTML = filtered.map(s => `
-    <div class="sub-card">
-      <div class="sub-card-top">
-        <div class="sub-card-head-v2">
-          <div class="sub-card-icon"><i class="ti ti-folder"></i></div>
-          <div class="sub-card-titles"><div class="sub-card-name-v2">${esc(s.name)}</div><div class="sub-card-desc-v2">${s.desc || 'No description'}</div></div>
-          <div class="sub-card-lock-badge ${s.has_password ? 'locked' : 'open'}"><i class="ti ${s.has_password ? 'ti-lock' : 'ti-lock-open'}"></i></div>
-        </div>
-        <div class="sub-card-stats">
-          <div class="sub-card-stat"><div class="sub-card-stat-val">${toFa(s.links_count)}</div><div class="sub-card-stat-label">Configs</div></div>
-          <div class="sub-card-stat"><div class="sub-card-stat-val" style="color:var(--green-t)">${toFa(s.active_count)}</div><div class="sub-card-stat-label">Active</div></div>
-          <div class="sub-card-stat"><div class="sub-card-stat-val" style="font-size:12px">${esc(s.total_used_fmt)}</div><div class="sub-card-stat-label">Usage</div></div>
-        </div>
-      </div>
-      <div class="sub-card-url-row"><span class="sub-card-url-text">${esc(s.public_url)}</span><button class="sub-card-url-copy" onclick="navigator.clipboard.writeText('${esc(s.public_url)}').then(()=>toast('Copied','ok'))"><i class="ti ti-copy"></i></button><button class="sub-card-url-copy" onclick="window.open('${esc(s.public_url)}','_blank')"><i class="ti ti-external-link"></i></button></div>
-      <div class="sub-card-bottom">
-        <button class="btn btn-sm btn-g" onclick="openSubLinks('${esc(s.sub_id)}','${esc(s.name)}')"><i class="ti ti-link-plus"></i> Configs</button>
-        <button class="btn btn-sm btn-pur" onclick="copyAllSubLinks('${esc(s.sub_id)}')"><i class="ti ti-copy"></i> Copy All</button>
-        <button class="btn btn-sm btn-g btn-icon" onclick="showQR('${esc(s.sub_url)}')"><i class="ti ti-qrcode"></i></button>
-        <button class="btn btn-sm btn-d btn-icon" onclick="deleteSub('${esc(s.sub_id)}')"><i class="ti ti-trash"></i></button>
-      </div>
-    </div>
-  `).join('');
+async function createSub() {
+    const name = document.getElementById('ns-name')?.value?.trim() || 'New Group';
+    const desc = document.getElementById('ns-desc')?.value?.trim();
+    const pw = document.getElementById('ns-pw')?.value;
+    try {
+        const r = await authF('/api/subs', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ name, desc, password: pw }) });
+        if(!r.ok) throw new Error('failed');
+        const nsName = document.getElementById('ns-name');
+        const nsDesc = document.getElementById('ns-desc');
+        const nsPw = document.getElementById('ns-pw');
+        if(nsName) nsName.value = '';
+        if(nsDesc) nsDesc.value = '';
+        if(nsPw) nsPw.value = '';
+        closeModal('modal-create-sub');
+        toast('Group created ✓', 'ok');
+        loadSubs();
+    } catch(e) { toast('Error creating group', 'err'); }
 }
 
-async function createSub(){
-  const name = document.getElementById('ns-name')?.value?.trim() || 'New Group';
-  const desc = document.getElementById('ns-desc')?.value?.trim();
-  const pw = document.getElementById('ns-pw')?.value;
-  try{
-    const r = await authF('/api/subs', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ name, desc, password: pw }) });
-    if(!r.ok) throw new Error('failed');
-    const nsName = document.getElementById('ns-name');
-    const nsDesc = document.getElementById('ns-desc');
-    const nsPw = document.getElementById('ns-pw');
-    if(nsName) nsName.value = '';
-    if(nsDesc) nsDesc.value = '';
-    if(nsPw) nsPw.value = '';
-    closeModal('modal-create-sub');
-    toast('Group created ✓', 'ok');
-    loadSubs();
-  } catch(e){ toast('Error creating group', 'err'); }
-}
-
-async function deleteSub(sub_id){
-  if(!confirm('Delete this group?')) return;
-  try{
-    const r = await authF('/api/subs/' + sub_id, { method: 'DELETE' });
-    if(!r.ok) throw new Error();
-    toast('Group deleted ✓', 'ok');
-    loadSubs();
-    loadLinks();
-  } catch(e){ toast('Error', 'err'); }
+async function deleteSub(sub_id) {
+    if(!confirm('Delete this group?')) return;
+    try {
+        const r = await authF('/api/subs/' + sub_id, { method: 'DELETE' });
+        if(!r.ok) throw new Error();
+        toast('Group deleted ✓', 'ok');
+        loadSubs();
+        loadLinks();
+    } catch(e) { toast('Error', 'err'); }
 }
 
 let lmodalLinks = [], lmodalInSub = new Set(), currentSubId = '';
 
-async function openSubLinks(sub_id, name){
-  currentSubId = sub_id;
-  const titleEl = document.querySelector('#modal-links .lmodal-title-v2');
-  if(titleEl) titleEl.textContent = 'Select configs for group: ' + name;
-  const bodyEl = document.getElementById('modal-links-body');
-  if(bodyEl) bodyEl.innerHTML = '<div style="padding:20px;text-align:center">Loading...</div>';
-  openModal('modal-links');
-  try{
-    const [lr, sr] = await Promise.all([authF('/api/links'), authF('/api/subs')]);
-    const {links = []} = await lr.json();
-    const {subs = []} = await sr.json();
-    const thisSub = subs.find(s => s.sub_id === sub_id);
-    lmodalInSub = new Set(thisSub?.link_ids || []);
-    lmodalLinks = links;
-    renderLmodalList(links);
-  } catch(e){ toast('Error loading', 'err'); }
+async function openSubLinks(sub_id, name) {
+    currentSubId = sub_id;
+    const titleEl = document.querySelector('#modal-links .lmodal-title-v2');
+    if(titleEl) titleEl.textContent = 'Select configs for group: ' + name;
+    const bodyEl = document.getElementById('modal-links-body');
+    if(bodyEl) bodyEl.innerHTML = '<div style="padding:20px;text-align:center">Loading...</div>';
+    openModal('modal-links');
+    try {
+        const [lr, sr] = await Promise.all([authF('/api/links'), authF('/api/subs')]);
+        const {links = []} = await lr.json();
+        const {subs = []} = await sr.json();
+        const thisSub = subs.find(s => s.sub_id === sub_id);
+        lmodalInSub = new Set(thisSub?.link_ids || []);
+        lmodalLinks = links;
+        renderLmodalList(links);
+    } catch(e) { toast('Error loading', 'err'); }
 }
 
-function renderLmodalList(links){
-  const body = document.getElementById('modal-links-body');
-  if(!body) return;
-  if(!links.length){ body.innerHTML = '<div class="empty">No configs</div>'; updateLmodalCount(); return; }
-  body.innerHTML = links.map(l => {
-    const checked = lmodalInSub.has(l.uuid);
-    const on = l.active && !l.expired;
-    return `<div class="lrow-v2 ${checked ? 'checked' : ''}" data-uuid="${l.uuid}" data-name="${esc(l.label).toLowerCase()}" onclick="toggleLrow('${l.uuid}', this)">
-      <div class="lrow-v2-check"><i class="ti ti-check"></i></div>
-      <div class="lrow-v2-avatar"><i class="ti ti-key"></i></div>
-      <div class="lrow-v2-info"><div class="lrow-v2-name">${esc(l.label)}</div><div class="lrow-v2-meta">${fmtB(l.used_bytes)}</div></div>
-      <span class="lrow-v2-status ${on ? 'on' : 'off'}">${on ? 'Active' : 'Inactive'}</span>
-    </div>`;
-  }).join('');
-  updateLmodalCount();
-}
-
-function toggleLrow(uuid, el){
-  if(lmodalInSub.has(uuid)){ lmodalInSub.delete(uuid); el.classList.remove('checked'); }
-  else { lmodalInSub.add(uuid); el.classList.add('checked'); }
-  updateLmodalCount();
-}
-
-function lmodalSelectAll(state){
-  lmodalLinks.forEach(l => { if(state) lmodalInSub.add(l.uuid); else lmodalInSub.delete(l.uuid); });
-  renderLmodalList(lmodalLinks);
-}
-
-function updateLmodalCount(){
-  const countEl = document.getElementById('lmodal-count');
-  if(countEl) countEl.textContent = lmodalInSub.size + ' selected';
-}
-
-function filterLmodal(q){
-  q = q.trim().toLowerCase();
-  document.querySelectorAll('#modal-links-body .lrow-v2').forEach(row => {
-    row.style.display = !q || row.dataset.name.includes(q) ? '' : 'none';
-  });
-}
-
-async function saveSubLinks(){
-  if(!currentSubId) return;
-  const link_ids = [...lmodalInSub];
-  try{
-    const r = await authF('/api/subs/' + currentSubId, { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ link_ids }) });
-    if(!r.ok) throw new Error();
-    await Promise.all(lmodalLinks.map(l => authF('/api/links/' + l.uuid, { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ sub_id: lmodalInSub.has(l.uuid) ? currentSubId : null }) })));
-    closeModal('modal-links');
-    toast('Group configs saved ✓', 'ok');
-    loadSubs();
-    loadLinks();
-  } catch(e){ toast('Error saving', 'err'); }
-}
-
-// ===== Subscriptions =====
-async function loadSubsPage(){
-  const subAllUrl = document.getElementById('sub-all-url');
-  if(subAllUrl) subAllUrl.textContent = location.protocol + '//' + location.host + '/sub-all';
-  try{
-    const r = await authF('/api/subs');
-    const d = await r.json();
-    const subs = d.subs || [];
-    const el = document.getElementById('sub-groups-list');
-    if(!el) return;
-    if(!subs.length){ el.innerHTML = '<div class="empty">No groups yet</div>'; return; }
-    el.innerHTML = subs.map(s => `
-      <div style="padding:13px 15px;background:var(--accent-d);border:1px solid var(--card-b);border-radius:10px;margin-bottom:8px;display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap">
-        <div><div style="font-weight:700;font-size:13px">${esc(s.name)}</div><div style="font-size:10px;color:var(--accent)">${esc(s.sub_url)}</div><div style="font-size:10px;color:var(--t3)">${toFa(s.links_count)} configs · ${esc(s.total_used_fmt)}</div></div>
-        <div style="display:flex;gap:5px"><button class="btn btn-sm btn-pur" onclick="navigator.clipboard.writeText('${esc(s.sub_url)}')"><i class="ti ti-copy"></i> Sub</button><button class="btn btn-sm btn-g" onclick="showQR('${esc(s.sub_url)}')"><i class="ti ti-qrcode"></i></button></div>
-      </div>
-    `).join('');
-  } catch(e){ console.error('loadSubsPage error:', e); }
-}
-
-function cpSubAll(){ navigator.clipboard.writeText(location.protocol + '//' + location.host + '/sub-all').then(() => toast('Copied ✓', 'ok')); }
-
-// ===== Connections =====
-async function loadConns(){
-  try{
-    const r = await authF('/api/connections');
-    const d = await r.json();
-    const grid = document.getElementById('conns-grid');
-    const ce = document.getElementById('conns-empty');
-    const chCount = document.getElementById('ch-count');
-    if(chCount) chCount.textContent = toFa(d.count);
-    const conns = d.connections || [];
-    if(!d.count){ if(grid) grid.innerHTML = ''; if(ce) ce.style.display = 'block'; 
-      const chTraffic = document.getElementById('ch-traffic'); if(chTraffic) chTraffic.textContent = '—';
-      const chAvgdur = document.getElementById('ch-avgdur'); if(chAvgdur) chAvgdur.textContent = '—';
-      const chUniq = document.getElementById('ch-uniq'); if(chUniq) chUniq.textContent = '—';
-      return; }
-    if(ce) ce.style.display = 'none';
-    const totalBytes = conns.reduce((s, c) => s + parseBytesFmt(c.bytes_fmt), 0);
-    const chTraffic = document.getElementById('ch-traffic'); if(chTraffic) chTraffic.textContent = fmtB(totalBytes);
-    const uniqIps = new Set(conns.map(c => c.ip)).size;
-    const chUniq = document.getElementById('ch-uniq'); if(chUniq) chUniq.textContent = toFa(uniqIps);
-    const durs = conns.map(c => c.connected_at ? Math.max(0, Math.floor((Date.now() - new Date(c.connected_at).getTime()) / 1000)) : 0);
-    const avgSec = durs.length ? Math.floor(durs.reduce((a,b) => a+b, 0) / durs.length) : 0;
-    const chAvgdur = document.getElementById('ch-avgdur');
-    if(chAvgdur) chAvgdur.textContent = avgSec < 60 ? avgSec + 's' : avgSec < 3600 ? Math.floor(avgSec/60) + 'm' : Math.floor(avgSec/3600) + 'h';
-    const maxDur = Math.max(...durs, 1);
-    if(grid) {
-      grid.innerHTML = conns.map(c => {
-        const secs = c.connected_at ? Math.max(0, Math.floor((Date.now() - new Date(c.connected_at).getTime()) / 1000)) : 0;
-        const dur = secs < 60 ? secs + 's' : secs < 3600 ? Math.floor(secs/60) + 'm' : Math.floor(secs/3600) + 'h';
-        const durPct = Math.min(100, Math.round((secs / maxDur) * 100));
-        const protoVal = c.transport === 'vless-ws' ? 'vless-ws' : (c.transport || '').replace('xhttp-', 'xhttp-');
-        return `<div class="conn-card-v2">
-          <div class="conn-card-v2-glow"></div>
-          <div class="conn-card-v2-top">
-            <div class="conn-avatar"><i class="ti ti-device-desktop"></i></div>
-            <div class="conn-card-v2-id"><div class="conn-ip-v2">${esc(c.ip)}<button class="conn-ip-copy" onclick="navigator.clipboard.writeText('${esc(c.ip)}')"><i class="ti ti-copy"></i></button></div><div class="conn-label-v2">${esc(c.label)}</div></div>
-            <span class="conn-status-pill"><span class="dot dg pulse"></span> Live</span>
-          </div>
-          <div class="conn-card-v2-divider"></div>
-          <div class="conn-card-v2-body">
-            <div class="conn-proto-row">${protoBadge([protoVal])}</div>
-            <div class="conn-stat-row">
-              <div class="conn-stat-box"><div class="conn-stat-icon"><i class="ti ti-transfer"></i></div><div><div class="conn-stat-text-label">Traffic</div><div class="conn-stat-text-val">${esc(c.bytes_fmt)}</div></div></div>
-              <div class="conn-stat-box"><div class="conn-stat-icon time"><i class="ti ti-clock"></i></div><div><div class="conn-stat-text-label">Duration</div><div class="conn-stat-text-val">${dur}</div></div></div>
-            </div>
-            <div class="conn-duration-track"><div class="conn-duration-fill" style="width:${durPct}%"></div></div>
-          </div>
+function renderLmodalList(links) {
+    const body = document.getElementById('modal-links-body');
+    if(!body) return;
+    if(!links.length){ body.innerHTML = '<div class="empty">No configs</div>'; updateLmodalCount(); return; }
+    body.innerHTML = links.map(l => {
+        const checked = lmodalInSub.has(l.uuid);
+        const on = l.active && !l.expired;
+        return `<div class="lrow-v2 ${checked ? 'checked' : ''}" data-uuid="${l.uuid}" data-name="${esc(l.label).toLowerCase()}" onclick="toggleLrow('${l.uuid}', this)">
+            <div class="lrow-v2-check"><i class="ti ti-check"></i></div>
+            <div class="lrow-v2-avatar"><i class="ti ti-key"></i></div>
+            <div class="lrow-v2-info"><div class="lrow-v2-name">${esc(l.label)}</div><div class="lrow-v2-meta">${fmtB(l.used_bytes)}</div></div>
+            <span class="lrow-v2-status ${on ? 'on' : 'off'}">${on ? 'Active' : 'Inactive'}</span>
         </div>`;
-      }).join('');
-    }
-  } catch(e){ console.error('loadConns error:', e); }
+    }).join('');
+    updateLmodalCount();
+}
+
+function toggleLrow(uuid, el) {
+    if(lmodalInSub.has(uuid)){ lmodalInSub.delete(uuid); el.classList.remove('checked'); }
+    else { lmodalInSub.add(uuid); el.classList.add('checked'); }
+    updateLmodalCount();
+}
+
+function lmodalSelectAll(state) {
+    lmodalLinks.forEach(l => { if(state) lmodalInSub.add(l.uuid); else lmodalInSub.delete(l.uuid); });
+    renderLmodalList(lmodalLinks);
+}
+
+function updateLmodalCount() {
+    const countEl = document.getElementById('lmodal-count');
+    if(countEl) countEl.textContent = lmodalInSub.size + ' selected';
+}
+
+function filterLmodal(q) {
+    q = q.trim().toLowerCase();
+    document.querySelectorAll('#modal-links-body .lrow-v2').forEach(row => {
+        row.style.display = !q || row.dataset.name.includes(q) ? '' : 'none';
+    });
+}
+
+async function saveSubLinks() {
+    if(!currentSubId) return;
+    const link_ids = [...lmodalInSub];
+    try {
+        const r = await authF('/api/subs/' + currentSubId, { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ link_ids }) });
+        if(!r.ok) throw new Error();
+        await Promise.all(lmodalLinks.map(l => authF('/api/links/' + l.uuid, { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ sub_id: lmodalInSub.has(l.uuid) ? currentSubId : null }) })));
+        closeModal('modal-links');
+        toast('Group configs saved ✓', 'ok');
+        loadSubs();
+        loadLinks();
+    } catch(e) { toast('Error saving', 'err'); }
+}
+
+// ===== سابسکریپشن‌ها =====
+async function loadSubsPage() {
+    const subAllUrl = document.getElementById('sub-all-url');
+    if(subAllUrl) subAllUrl.textContent = location.protocol + '//' + location.host + '/sub-all';
+    try {
+        const r = await authF('/api/subs');
+        const d = await r.json();
+        const subs = d.subs || [];
+        const el = document.getElementById('sub-groups-list');
+        if(!el) return;
+        if(!subs.length){ el.innerHTML = '<div class="empty">No groups yet</div>'; return; }
+        el.innerHTML = subs.map(s => `
+            <div style="padding:13px 15px;background:var(--accent-d);border:1px solid var(--card-b);border-radius:10px;margin-bottom:8px;display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap">
+                <div><div style="font-weight:700;font-size:13px">${esc(s.name)}</div><div style="font-size:10px;color:var(--accent)">${esc(s.sub_url)}</div><div style="font-size:10px;color:var(--t3)">${toFa(s.links_count)} configs · ${esc(s.total_used_fmt)}</div></div>
+                <div style="display:flex;gap:5px"><button class="btn btn-sm btn-pur" onclick="navigator.clipboard.writeText('${esc(s.sub_url)}')"><i class="ti ti-copy"></i> Sub</button><button class="btn btn-sm btn-g" onclick="showQR('${esc(s.sub_url)}')"><i class="ti ti-qrcode"></i></button></div>
+            </div>
+        `).join('');
+    } catch(e) { console.error('loadSubsPage error:', e); }
+}
+
+function cpSubAll() { navigator.clipboard.writeText(location.protocol + '//' + location.host + '/sub-all').then(() => toast('Copied ✓', 'ok')); }
+
+// ===== اتصالات =====
+async function loadConns() {
+    try {
+        const r = await authF('/api/connections');
+        const d = await r.json();
+        const grid = document.getElementById('conns-grid');
+        const ce = document.getElementById('conns-empty');
+        const chCount = document.getElementById('ch-count');
+        if(chCount) chCount.textContent = toFa(d.count);
+        const conns = d.connections || [];
+        if(!d.count){ if(grid) grid.innerHTML = ''; if(ce) ce.style.display = 'block'; 
+            const chTraffic = document.getElementById('ch-traffic'); if(chTraffic) chTraffic.textContent = '—';
+            const chAvgdur = document.getElementById('ch-avgdur'); if(chAvgdur) chAvgdur.textContent = '—';
+            const chUniq = document.getElementById('ch-uniq'); if(chUniq) chUniq.textContent = '—';
+            return; }
+        if(ce) ce.style.display = 'none';
+        const totalBytes = conns.reduce((s, c) => s + parseBytesFmt(c.bytes_fmt), 0);
+        const chTraffic = document.getElementById('ch-traffic'); if(chTraffic) chTraffic.textContent = fmtB(totalBytes);
+        const uniqIps = new Set(conns.map(c => c.ip)).size;
+        const chUniq = document.getElementById('ch-uniq'); if(chUniq) chUniq.textContent = toFa(uniqIps);
+        const durs = conns.map(c => c.connected_at ? Math.max(0, Math.floor((Date.now() - new Date(c.connected_at).getTime()) / 1000)) : 0);
+        const avgSec = durs.length ? Math.floor(durs.reduce((a,b) => a+b, 0) / durs.length) : 0;
+        const chAvgdur = document.getElementById('ch-avgdur');
+        if(chAvgdur) chAvgdur.textContent = avgSec < 60 ? avgSec + 's' : avgSec < 3600 ? Math.floor(avgSec/60) + 'm' : Math.floor(avgSec/3600) + 'h';
+        const maxDur = Math.max(...durs, 1);
+        if(grid) {
+            grid.innerHTML = conns.map(c => {
+                const secs = c.connected_at ? Math.max(0, Math.floor((Date.now() - new Date(c.connected_at).getTime()) / 1000)) : 0;
+                const dur = secs < 60 ? secs + 's' : secs < 3600 ? Math.floor(secs/60) + 'm' : Math.floor(secs/3600) + 'h';
+                const durPct = Math.min(100, Math.round((secs / maxDur) * 100));
+                const protoVal = c.transport === 'vless-ws' ? 'vless-ws' : (c.transport || '').replace('xhttp-', 'xhttp-');
+                return `<div class="conn-card-v2">
+                    <div class="conn-card-v2-glow"></div>
+                    <div class="conn-card-v2-top">
+                        <div class="conn-avatar"><i class="ti ti-device-desktop"></i></div>
+                        <div class="conn-card-v2-id"><div class="conn-ip-v2">${esc(c.ip)}<button class="conn-ip-copy" onclick="navigator.clipboard.writeText('${esc(c.ip)}')"><i class="ti ti-copy"></i></button></div><div class="conn-label-v2">${esc(c.label)}</div></div>
+                        <span class="conn-status-pill"><span class="dot dg pulse"></span> Live</span>
+                    </div>
+                    <div class="conn-card-v2-divider"></div>
+                    <div class="conn-card-v2-body">
+                        <div class="conn-proto-row">${protoBadge([protoVal])}</div>
+                        <div class="conn-stat-row">
+                            <div class="conn-stat-box"><div class="conn-stat-icon"><i class="ti ti-transfer"></i></div><div><div class="conn-stat-text-label">Traffic</div><div class="conn-stat-text-val">${esc(c.bytes_fmt)}</div></div></div>
+                            <div class="conn-stat-box"><div class="conn-stat-icon time"><i class="ti ti-clock"></i></div><div><div class="conn-stat-text-label">Duration</div><div class="conn-stat-text-val">${dur}</div></div></div>
+                        </div>
+                        <div class="conn-duration-track"><div class="conn-duration-fill" style="width:${durPct}%"></div></div>
+                    </div>
+                </div>`;
+            }).join('');
+        }
+    } catch(e) { console.error('loadConns error:', e); }
 }
 
 function parseBytesFmt(s){ if(!s) return 0; const m = String(s).match(/([\d.]+)\s*([A-Za-z]+)/); if(!m) return 0; const n = parseFloat(m[1]), u = m[2].toUpperCase(); const mult = { B:1, KB:1024, MB:1024**2, GB:1024**3, TB:1024**4 }; return n * (mult[u] || 0); }
 
-// ===== Logs & Errors =====
-async function loadActivity(){
-  try{
-    const r = await authF('/api/activity');
-    const d = await r.json();
-    const logs = (d.logs || []).slice().reverse();
-    const el = document.getElementById('logs-list');
-    const em = document.getElementById('logs-empty');
-    if(!logs.length){ if(el) el.innerHTML = ''; if(em) em.style.display = 'block'; return; }
-    if(em) em.style.display = 'none';
-    const icMap = { ok: 'ti-circle-check', err: 'ti-circle-x', warn: 'ti-alert-triangle', info: 'ti-info-circle' };
-    const kindFa = { link: 'Config', sub: 'Group', auth: 'Login', connection: 'Connection', system: 'System' };
-    if(el) {
-      el.innerHTML = logs.map(l => `
-        <div class="log-item">
-          <div class="log-ic ${l.level}"><i class="ti ${icMap[l.level] || 'ti-info-circle'}"></i></div>
-          <div class="log-body">
-            <div class="log-msg">${esc(l.message)}</div>
-            <div class="log-time"><i class="ti ti-clock"></i> ${new Date(l.time).toLocaleString()} <span class="log-kind">${kindFa[l.kind] || l.kind}</span></div>
-          </div>
-        </div>
-      `).join('');
-    }
-  } catch(e){ console.error('loadActivity error:', e); }
+// ===== لاگ‌ها و خطاها =====
+async function loadActivity() {
+    try {
+        const r = await authF('/api/activity');
+        const d = await r.json();
+        const logs = (d.logs || []).slice().reverse();
+        const el = document.getElementById('logs-list');
+        const em = document.getElementById('logs-empty');
+        if(!logs.length){ if(el) el.innerHTML = ''; if(em) em.style.display = 'block'; return; }
+        if(em) em.style.display = 'none';
+        const icMap = { ok: 'ti-circle-check', err: 'ti-circle-x', warn: 'ti-alert-triangle', info: 'ti-info-circle' };
+        const kindFa = { link: 'Config', sub: 'Group', auth: 'Login', connection: 'Connection', system: 'System' };
+        if(el) {
+            el.innerHTML = logs.map(l => `
+                <div class="log-item">
+                    <div class="log-ic ${l.level}"><i class="ti ${icMap[l.level] || 'ti-info-circle'}"></i></div>
+                    <div class="log-body">
+                        <div class="log-msg">${esc(l.message)}</div>
+                        <div class="log-time"><i class="ti ti-clock"></i> ${new Date(l.time).toLocaleString()} <span class="log-kind">${kindFa[l.kind] || l.kind}</span></div>
+                    </div>
+                </div>
+            `).join('');
+        }
+    } catch(e) { console.error('loadActivity error:', e); }
 }
 
-async function loadErrs(){
-  try{
-    const r = await authF('/stats');
-    const d = await r.json();
-    renderErrs(d.recent_errors || []);
-  } catch(e){ console.error('loadErrs error:', e); }
+async function loadErrs() {
+    try {
+        const r = await authF('/stats');
+        const d = await r.json();
+        renderErrs(d.recent_errors || []);
+    } catch(e) { console.error('loadErrs error:', e); }
 }
 
-function renderErrs(errs){
-  const el = document.getElementById('errs-full');
-  if(!el) return;
-  if(!errs.length){ el.innerHTML = '<div style="color:var(--green-t);padding:10px;font-size:12px;display:flex;align-items:center;gap:5px"><i class="ti ti-circle-check"></i> No errors</div>'; return; }
-  el.innerHTML = errs.slice().reverse().map(e => `<div class="erow"><div class="etime"><i class="ti ti-clock"></i> ${new Date(e.time).toLocaleString()}</div><div class="emsg">${esc(e.error)}${e.url ? ' — ' + esc(e.url) : ''}</div></div>`).join('');
+function renderErrs(errs) {
+    const el = document.getElementById('errs-full');
+    if(!el) return;
+    if(!errs.length){ el.innerHTML = '<div style="color:var(--green-t);padding:10px;font-size:12px;display:flex;align-items:center;gap:5px"><i class="ti ti-circle-check"></i> No errors</div>'; return; }
+    el.innerHTML = errs.slice().reverse().map(e => `<div class="erow"><div class="etime"><i class="ti ti-clock"></i> ${new Date(e.time).toLocaleString()}</div><div class="emsg">${esc(e.error)}${e.url ? ' — ' + esc(e.url) : ''}</div></div>`).join('');
 }
 
-// ===== WebSocket =====
+// ===== وب‌سوکت =====
 let ws = null;
-function wsLog(c, m){
-  const l = document.getElementById('ws-log');
-  if(!l) return;
-  const p = document.createElement('p');
-  const colors = { ok: '#10b981', err: '#ef4444', info: '#8b949e', sent: '#1677ff' };
-  p.style.color = colors[c] || '#fff';
-  p.textContent = '[' + new Date().toLocaleTimeString() + '] ' + m;
-  l.appendChild(p);
-  l.scrollTop = l.scrollHeight;
+function wsLog(c, m) {
+    const l = document.getElementById('ws-log');
+    if(!l) return;
+    const p = document.createElement('p');
+    const colors = { ok: '#10b981', err: '#ef4444', info: '#8b949e', sent: '#1677ff' };
+    p.style.color = colors[c] || '#fff';
+    p.textContent = '[' + new Date().toLocaleTimeString() + '] ' + m;
+    l.appendChild(p);
+    l.scrollTop = l.scrollHeight;
 }
-function wsConn(){
-  const u = document.getElementById('ws-uuid')?.value?.trim();
-  if(!u){ toast('Enter UUID', 'err'); return; }
-  const url = (location.protocol === 'https:' ? 'wss' : 'ws') + '://' + location.host + '/ws/' + u;
-  wsLog('info', 'Connecting: ' + url);
-  ws = new WebSocket(url);
-  ws.onopen = () => wsLog('ok', '✓ Connected');
-  ws.onerror = () => wsLog('err', '✗ Error');
-  ws.onmessage = m => wsLog('info', 'Received ' + m.data.length + ' bytes');
-  ws.onclose = e => wsLog('err', 'Disconnected (' + e.code + ')');
+function wsConn() {
+    const u = document.getElementById('ws-uuid')?.value?.trim();
+    if(!u){ toast('Enter UUID', 'err'); return; }
+    const url = (location.protocol === 'https:' ? 'wss' : 'ws') + '://' + location.host + '/ws/' + u;
+    wsLog('info', 'Connecting: ' + url);
+    ws = new WebSocket(url);
+    ws.onopen = () => wsLog('ok', '✓ Connected');
+    ws.onerror = () => wsLog('err', '✗ Error');
+    ws.onmessage = m => wsLog('info', 'Received ' + m.data.length + ' bytes');
+    ws.onclose = e => wsLog('err', 'Disconnected (' + e.code + ')');
 }
-function wsSend(){
-  const m = document.getElementById('ws-msg')?.value;
-  if(!m || !ws || ws.readyState !== 1) return;
-  ws.send(m);
-  wsLog('sent', 'Sent: ' + m);
-  const wsMsg = document.getElementById('ws-msg');
-  if(wsMsg) wsMsg.value = '';
+function wsSend() {
+    const m = document.getElementById('ws-msg')?.value;
+    if(!m || !ws || ws.readyState !== 1) return;
+    ws.send(m);
+    wsLog('sent', 'Sent: ' + m);
+    const wsMsg = document.getElementById('ws-msg');
+    if(wsMsg) wsMsg.value = '';
 }
-function wsDisc(){ if(ws) ws.close(); }
+function wsDisc() { if(ws) ws.close(); }
 
-// ===== Password =====
-async function changePw(){
-  const cur = document.getElementById('cp-cur')?.value;
-  const nw = document.getElementById('cp-new')?.value;
-  const cf = document.getElementById('cp-cf')?.value;
-  if(!cur || !nw || !cf){ toast('Fill all fields', 'err'); return; }
-  if(nw.length < 4){ toast('Min 4 characters', 'err'); return; }
-  if(nw !== cf){ toast('Passwords do not match', 'err'); return; }
-  try{
-    const r = await authF('/api/change-password', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ current_password: cur, new_password: nw }) });
-    const d = await r.json().catch(() => ({}));
-    if(!r.ok) throw new Error(d.detail || 'Error');
-    toast('Password changed ✓', 'ok');
-    const cpCur = document.getElementById('cp-cur');
-    const cpNew = document.getElementById('cp-new');
-    const cpCf = document.getElementById('cp-cf');
-    if(cpCur) cpCur.value = '';
-    if(cpNew) cpNew.value = '';
-    if(cpCf) cpCf.value = '';
-  } catch(e){ toast('✗ ' + e.message, 'err'); }
-}
-
-function togglePwField(id, btn){
-  const inp = document.getElementById(id);
-  if(!inp) return;
-  const icon = btn.querySelector('i');
-  const toText = inp.type === 'password';
-  inp.type = toText ? 'text' : 'password';
-  if(icon) icon.className = 'ti ' + (toText ? 'ti-eye-off' : 'ti-eye');
+// ===== تغییر رمز =====
+async function changePw() {
+    const cur = document.getElementById('cp-cur')?.value;
+    const nw = document.getElementById('cp-new')?.value;
+    const cf = document.getElementById('cp-cf')?.value;
+    if(!cur || !nw || !cf){ toast('Fill all fields', 'err'); return; }
+    if(nw.length < 4){ toast('Min 4 characters', 'err'); return; }
+    if(nw !== cf){ toast('Passwords do not match', 'err'); return; }
+    try {
+        const r = await authF('/api/change-password', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ current_password: cur, new_password: nw }) });
+        const d = await r.json().catch(() => ({}));
+        if(!r.ok) throw new Error(d.detail || 'Error');
+        toast('Password changed ✓', 'ok');
+        const cpCur = document.getElementById('cp-cur');
+        const cpNew = document.getElementById('cp-new');
+        const cpCf = document.getElementById('cp-cf');
+        if(cpCur) cpCur.value = '';
+        if(cpNew) cpNew.value = '';
+        if(cpCf) cpCf.value = '';
+    } catch(e) { toast('✗ ' + e.message, 'err'); }
 }
 
-function checkPwStrength(val){
-  const segs = document.querySelectorAll('#pw-strength-bar .pw-strength-seg');
-  const label = document.getElementById('pw-strength-label');
-  const reqLen = document.getElementById('req-len');
-  const reqNum = document.getElementById('req-num');
-  const reqCase = document.getElementById('req-case');
-  const hasLen = val.length >= 4;
-  const hasNum = /\d/.test(val);
-  const hasCase = /[a-z]/.test(val) && /[A-Z]/.test(val);
-  const hasLong = val.length >= 8;
-  if(reqLen) reqLen.classList.toggle('met', hasLen);
-  if(reqNum) reqNum.classList.toggle('met', hasNum);
-  if(reqCase) reqCase.classList.toggle('met', hasCase);
-  let score = 0; if(hasLen) score++; if(hasNum) score++; if(hasCase) score++; if(hasLong) score++;
-  const colors = ['#1677ff', '#4096ff', '#0050b3', '#003a8c'];
-  const labels = ['Very Weak', 'Weak', 'Medium', 'Strong'];
-  segs.forEach((s, i) => { s.style.background = i < score ? colors[Math.max(0, score-1)] : 'rgba(100,116,139,.2)'; });
-  if(!label) return;
-  if(val.length === 0){ label.innerHTML = '<i class="ti ti-shield"></i> Password Strength'; return; }
-  label.innerHTML = `<i class="ti ti-shield-check" style="color:${colors[Math.max(0, score-1)]}"></i> ${labels[Math.max(0, score-1)]}`;
+function togglePwField(id, btn) {
+    const inp = document.getElementById(id);
+    if(!inp) return;
+    const icon = btn.querySelector('i');
+    const toText = inp.type === 'password';
+    inp.type = toText ? 'text' : 'password';
+    if(icon) icon.className = 'ti ' + (toText ? 'ti-eye-off' : 'ti-eye');
 }
 
-// ===== Refresh =====
-function refreshAll(){
-  fetchStats();
-  if(document.getElementById('pg-links')?.classList?.contains('on')) loadLinks();
-  if(document.getElementById('pg-subgroups')?.classList?.contains('on')) loadSubs();
-  if(document.getElementById('pg-subscriptions')?.classList?.contains('on')) loadSubsPage();
-  if(document.getElementById('pg-connections')?.classList?.contains('on')) loadConns();
-  if(document.getElementById('pg-logs')?.classList?.contains('on')) loadActivity();
-  toast('Refreshed ✓', 'ok');
+function checkPwStrength(val) {
+    const segs = document.querySelectorAll('#pw-strength-bar .pw-strength-seg');
+    const label = document.getElementById('pw-strength-label');
+    const reqLen = document.getElementById('req-len');
+    const reqNum = document.getElementById('req-num');
+    const reqCase = document.getElementById('req-case');
+    const hasLen = val.length >= 4;
+    const hasNum = /\d/.test(val);
+    const hasCase = /[a-z]/.test(val) && /[A-Z]/.test(val);
+    const hasLong = val.length >= 8;
+    if(reqLen) reqLen.classList.toggle('met', hasLen);
+    if(reqNum) reqNum.classList.toggle('met', hasNum);
+    if(reqCase) reqCase.classList.toggle('met', hasCase);
+    let score = 0; if(hasLen) score++; if(hasNum) score++; if(hasCase) score++; if(hasLong) score++;
+    const colors = ['#1677ff', '#4096ff', '#0050b3', '#003a8c'];
+    const labels = ['Very Weak', 'Weak', 'Medium', 'Strong'];
+    segs.forEach((s, i) => { s.style.background = i < score ? colors[Math.max(0, score-1)] : 'rgba(100,116,139,.2)'; });
+    if(!label) return;
+    if(val.length === 0){ label.innerHTML = '<i class="ti ti-shield"></i> Password Strength'; return; }
+    label.innerHTML = `<i class="ti ti-shield-check" style="color:${colors[Math.max(0, score-1)]}"></i> ${labels[Math.max(0, score-1)]}`;
 }
 
-async function copyAllSubLinks(subId){
-  const r = await authF('/api/links');
-  const d = await r.json();
-  const links = d.links || [];
-  const sub = allSubsRaw.find(s => s.sub_id === subId);
-  if(!sub){ toast('Group not found', 'err'); return; }
-  const subLinkIds = sub.link_ids || [];
-  const urls = links.filter(l => subLinkIds.includes(l.uuid) && l.active && !l.expired).map(l => l.sub_url);
-  if(!urls.length){ toast('No active configs', 'err'); return; }
-  navigator.clipboard.writeText(urls.join('\n')).then(() => toast(urls.length + ' links copied ✓', 'ok'));
+// ===== رفرش =====
+function refreshAll() {
+    try { fetchStats(); } catch(e) {}
+    if(document.getElementById('pg-links')?.classList?.contains('on')) loadLinks();
+    if(document.getElementById('pg-subgroups')?.classList?.contains('on')) loadSubs();
+    if(document.getElementById('pg-subscriptions')?.classList?.contains('on')) loadSubsPage();
+    if(document.getElementById('pg-connections')?.classList?.contains('on')) loadConns();
+    if(document.getElementById('pg-logs')?.classList?.contains('on')) loadActivity();
+    toast('Refreshed ✓', 'ok');
 }
 
-// ===== Init =====
-document.addEventListener('DOMContentLoaded', async () => {
-  try {
-    await checkAuth();
-    
-    applyLanguage();
-    document.querySelectorAll('.btn-lang').forEach(btn => {
-      btn.classList.toggle('active', btn.dataset.langCode === currentLang);
-      const check = btn.querySelector('i');
-      if(check) check.style.display = btn.dataset.langCode === currentLang ? 'inline' : 'none';
-    });
-    
-    applyTheme(currentTheme);
-    initSparklineCharts();
-    initCharts();
-    
-    const setHost = document.getElementById('set-host');
-    if(setHost) setHost.textContent = location.host;
-    const subAllUrl = document.getElementById('sub-all-url');
-    if(subAllUrl) subAllUrl.textContent = location.protocol + '//' + location.host + '/sub-all';
-    
-    // Ensure nl-count exists
-    if(!document.getElementById('nl-count')) {
-      const hidden = document.createElement('input');
-      hidden.type = 'hidden';
-      hidden.id = 'nl-count';
-      hidden.value = 1;
-      const cpBody = document.querySelector('.cp-body');
-      if(cpBody) cpBody.appendChild(hidden);
+async function copyAllSubLinks(subId) {
+    const r = await authF('/api/links');
+    const d = await r.json();
+    const links = d.links || [];
+    const sub = allSubsRaw.find(s => s.sub_id === subId);
+    if(!sub){ toast('Group not found', 'err'); return; }
+    const subLinkIds = sub.link_ids || [];
+    const urls = links.filter(l => subLinkIds.includes(l.uuid) && l.active && !l.expired).map(l => l.sub_url);
+    if(!urls.length){ toast('No active configs', 'err'); return; }
+    navigator.clipboard.writeText(urls.join('\n')).then(() => toast(urls.length + ' links copied ✓', 'ok'));
+}
+
+// ===== مقداردهی اولیه =====
+document.addEventListener('DOMContentLoaded', function() {
+    try {
+        checkAuth().then(() => {
+            applyLanguage();
+            document.querySelectorAll('.btn-lang').forEach(btn => {
+                btn.classList.toggle('active', btn.dataset.langCode === currentLang);
+                const check = btn.querySelector('i');
+                if(check) check.style.display = btn.dataset.langCode === currentLang ? 'inline' : 'none';
+            });
+            applyTheme(currentTheme);
+            initSparklineCharts();
+            initCharts();
+            
+            const setHost = document.getElementById('set-host');
+            if(setHost) setHost.textContent = location.host;
+            const subAllUrl = document.getElementById('sub-all-url');
+            if(subAllUrl) subAllUrl.textContent = location.protocol + '//' + location.host + '/sub-all';
+            
+            if(!document.getElementById('nl-count')) {
+                const hidden = document.createElement('input');
+                hidden.type = 'hidden';
+                hidden.id = 'nl-count';
+                hidden.value = 1;
+                const cpBody = document.querySelector('.cp-body');
+                if(cpBody) cpBody.appendChild(hidden);
+            }
+            
+            // بارگذاری داده‌ها با تأخیر
+            setTimeout(() => { try { loadServerSettings(); } catch(e) {} }, 50);
+            setTimeout(() => { try { fetchStats(); } catch(e) {} }, 100);
+            setTimeout(() => { try { loadLinks(); } catch(e) {} }, 150);
+            setTimeout(() => { try { loadSubs(); } catch(e) {} }, 200);
+            setTimeout(() => { try { loadSubsPage(); } catch(e) {} }, 250);
+            
+            setInterval(() => { try { fetchStats(); } catch(e) {} }, 5000);
+            setInterval(() => {
+                try {
+                    if(document.getElementById('pg-connections')?.classList?.contains('on')) loadConns();
+                    if(document.getElementById('pg-logs')?.classList?.contains('on')) loadActivity();
+                } catch(e) {}
+            }, 10000);
+        }).catch(e => console.error('checkAuth error:', e));
+    } catch(e) {
+        console.error('Init error:', e);
+        toast('Error loading panel, check console', 'err');
     }
-    
-    await loadServerSettings();
-    fetchStats();
-    loadLinks();
-    loadSubs();
-    loadSubsPage();
-    
-    setInterval(fetchStats, 5000);
-    setInterval(() => {
-      if(document.getElementById('pg-connections')?.classList?.contains('on')) loadConns();
-      if(document.getElementById('pg-logs')?.classList?.contains('on')) loadActivity();
-    }, 10000);
-  } catch(e) {
-    console.error('Init error:', e);
-    toast('Error loading panel, check console', 'err');
-  }
 });
 </script>
 </body></html>"""
