@@ -638,7 +638,6 @@ input:focus + .ic { color: #1677ff; }
   gap: 6px;
   margin-bottom: 16px;
   justify-content: center;
-  /* ثابت نگه‌داشتن ترتیب دکمه‌ها مستقل از راست‌چینی */
   direction: ltr;
 }
 .lang-btn {
@@ -1710,7 +1709,7 @@ a{color:inherit;text-decoration:none}
     </div>
   </div>
 
-  <!-- ===== SPARKLINE CARDS (top of dashboard) ===== -->
+  <!-- ===== SPARKLINE CARDS ===== -->
   <div class="sparkline-row">
     <div class="sparkline-card">
       <div class="sparkline-top">
@@ -1790,7 +1789,7 @@ a{color:inherit;text-decoration:none}
     </div>
   </div>
 
-  <!-- ===== PROTOCOL DISTRIBUTION + BANDWIDTH USAGE (like 3x-UI) ===== -->
+  <!-- ===== PROTOCOL DISTRIBUTION + BANDWIDTH USAGE ===== -->
   <div class="dash-charts-second">
     <div class="dash-protocol-card">
       <div class="chart-title"><i class="ti ti-chart-pie"></i> <span data-lang="protocol_distribution">Protocol Distribution</span></div>
@@ -1828,8 +1827,7 @@ a{color:inherit;text-decoration:none}
   </div>
 </section>
 
-<!-- ===== بقیه صفحات (با data-lang) ===== -->
-<!-- LINKS -->
+<!-- ===== LINKS ===== -->
 <section class="pg" id="pg-links">
   <div class="topbar">
     <div><div class="tb-title"><i class="ti ti-link-plus"></i> <span data-lang="configs">Configs</span></div><div class="tb-sub" data-lang="traffic_analysis">Create and manage configs with quota, expiry and grouping</div></div>
@@ -2887,13 +2885,11 @@ function filterSubs(q){
   q = q.trim().toLowerCase();
   if(!q){ loadSubs(); return; }
   const filtered = allSubsRaw.filter(s => s.name.toLowerCase().includes(q) || (s.desc || '').toLowerCase().includes(q));
-  // Re-render with filtered data
   const grid = document.getElementById('subs-grid');
   if(!filtered.length){
     grid.innerHTML = '<div class="subs-empty-v2"><div class="subs-empty-v2-icon"><i class="ti ti-folders"></i></div><div class="subs-empty-v2-title">No groups found</div></div>';
     return;
   }
-  // Reuse rendering logic (simplified for brevity)
   grid.innerHTML = filtered.map(s => `
     <div class="sub-card">
       <div class="sub-card-top">
@@ -2950,7 +2946,9 @@ let lmodalLinks = [], lmodalInSub = new Set(), currentSubId = '';
 
 async function openSubLinks(sub_id, name){
   currentSubId = sub_id;
-  document.getElementById('modal-sub-name').textContent = name;
+  // Update modal title with group name
+  const titleEl = document.querySelector('#modal-links .lmodal-title-v2');
+  if(titleEl) titleEl.textContent = 'Select configs for group: ' + name;
   document.getElementById('modal-links-body').innerHTML = '<div style="padding:20px;text-align:center">Loading...</div>';
   openModal('modal-links');
   try{
@@ -3243,6 +3241,15 @@ document.addEventListener('DOMContentLoaded', async () => {
     document.getElementById('set-host').textContent = location.host;
     document.getElementById('sub-all-url').textContent = location.protocol + '//' + location.host + '/sub-all';
     
+    // Ensure nl-count exists
+    if(!document.getElementById('nl-count')) {
+      const hidden = document.createElement('input');
+      hidden.type = 'hidden';
+      hidden.id = 'nl-count';
+      hidden.value = 1;
+      document.querySelector('.cp-body').appendChild(hidden);
+    }
+    
     await loadServerSettings();
     fetchStats();
     loadLinks();
@@ -3257,17 +3264,6 @@ document.addEventListener('DOMContentLoaded', async () => {
   } catch(e) {
     console.error('Init error:', e);
     toast('Error loading panel, check console', 'err');
-  }
-});
-
-// ===== Hidden count input =====
-document.addEventListener('DOMContentLoaded', function() {
-  if(!document.getElementById('nl-count')) {
-    const hidden = document.createElement('input');
-    hidden.type = 'hidden';
-    hidden.id = 'nl-count';
-    hidden.value = 1;
-    document.querySelector('.cp-body').appendChild(hidden);
   }
 });
 </script>
