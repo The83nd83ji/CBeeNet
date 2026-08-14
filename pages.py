@@ -1,4 +1,4 @@
-# pages.py - CBee Gateway v1.0.0 (3x-UI Style Dashboard + Multi-Language + Sparklines)
+# pages.py - CBee Gateway v1.0.0 (Imperial Theme + Full Responsive)
 import json
 
 # ===== دیکشنری ترجمه کامل =====
@@ -66,10 +66,10 @@ LANG = {
         "websocket_test": "WebSocket Test",
         "dark_theme": "Dark Theme",
         "light_theme": "Light Theme",
-        "royal_theme": "Royal Theme",
+        "imperial_theme": "Imperial Theme",
         "blue": "Blue",
         "red": "Red",
-        "yellow": "Yellow",
+        "gold": "Gold",
         "current_theme": "Current Theme",
         "server_settings": "Server & Link Settings",
         "server_name": "Server Name",
@@ -195,6 +195,8 @@ LANG = {
         "password_current": "Current Password",
         "password_new": "New Password",
         "password_confirm": "Confirm New Password",
+        "protocol_distribution": "Protocol Distribution",
+        "bandwidth_usage": "Bandwidth Usage",
     },
     "fa": {
         "login_title": "ورود به پنل",
@@ -259,10 +261,10 @@ LANG = {
         "websocket_test": "تست WebSocket",
         "dark_theme": "تم تاریک",
         "light_theme": "تم روشن",
-        "royal_theme": "تم شاهی",
+        "imperial_theme": "تم امپراتوری",
         "blue": "آبی",
         "red": "قرمز",
-        "yellow": "زرد",
+        "gold": "طلایی",
         "current_theme": "تم پیش‌فرض",
         "server_settings": "تنظیمات سرور و نام لینک‌ها",
         "server_name": "نام سرور",
@@ -387,6 +389,8 @@ LANG = {
         "password_current": "رمز فعلی",
         "password_new": "رمز جدید",
         "password_confirm": "تکرار رمز جدید",
+        "protocol_distribution": "تقسیم‌بندی پروتکل‌ها",
+        "bandwidth_usage": "مصرف پهنای باند",
     }
 }
 
@@ -754,7 +758,7 @@ document.getElementById('form').addEventListener('submit', async e => {
 DASHBOARD_HTML = r"""<!DOCTYPE html>
 <html lang="en" dir="ltr">
 <head>
-<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
 <title>CBee · Gateway</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@300;400;500;600;700;800;900&family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
@@ -794,11 +798,37 @@ DASHBOARD_HTML = r"""<!DOCTYPE html>
 }
 [data-theme="dark-blue"]{--accent:#1677ff;--accent2:#4096ff;--accent-d:rgba(22,119,255,0.12);--accent-glow:rgba(22,119,255,0.35);--card-bh:rgba(22,119,255,0.20);}
 [data-theme="dark-red"]{--accent:#ef4444;--accent2:#f87171;--accent-d:rgba(239,68,68,0.12);--accent-glow:rgba(239,68,68,0.35);--card-bh:rgba(239,68,68,0.20);}
-[data-theme="dark-yellow"]{--accent:#f59e0b;--accent2:#fbbf24;--accent-d:rgba(245,158,11,0.12);--accent-glow:rgba(245,158,11,0.35);--card-bh:rgba(245,158,11,0.20);}
-[data-theme="dark-royal"]{--bg:#0a0618;--bg2:#140f26;--bg3:#1e1638;--card:#140f26;--card-b:#2d1f5a;--card-bh:rgba(139,92,246,0.30);--accent:#8b5cf6;--accent2:#a78bfa;--accent-d:rgba(139,92,246,0.15);--accent-glow:rgba(139,92,246,0.45);--green:#34d399;--green-bg:rgba(52,211,153,0.10);--green-t:#6ee7b7;--red:#f87171;--red-bg:rgba(248,113,113,0.10);--red-t:#fca5a5;--amber:#fbbf24;--amber-bg:rgba(251,191,36,0.10);--amber-t:#fcd34d;--purple:#8b5cf6;--purple-bg:rgba(139,92,246,0.15);--t1:#f0f0ff;--t2:#b4b0d1;--t3:#8985a6;--shadow:0 8px 32px rgba(0,0,0,0.6);}
+[data-theme="dark-gold"]{--accent:#C9A84C;--accent2:#D4AF37;--accent-d:rgba(201,168,76,0.15);--accent-glow:rgba(201,168,76,0.35);--card-bh:rgba(201,168,76,0.25);}
+[data-theme="imperial"]{
+  --bg:#0A0718;
+  --bg2:#110D24;
+  --bg3:#1A1438;
+  --card:#110D24;
+  --card-b:#2D1F5A;
+  --card-bh:rgba(201,168,76,0.25);
+  --accent:#C9A84C;
+  --accent2:#D4AF37;
+  --accent-d:rgba(201,168,76,0.15);
+  --accent-glow:rgba(201,168,76,0.30);
+  --green:#10b981;
+  --green-bg:rgba(16,185,129,0.10);
+  --green-t:#34d399;
+  --red:#ef4444;
+  --red-bg:rgba(239,68,68,0.10);
+  --red-t:#f87171;
+  --amber:#f59e0b;
+  --amber-bg:rgba(245,158,11,0.10);
+  --amber-t:#fbbf24;
+  --purple:#8B5CF6;
+  --purple-bg:rgba(139,92,246,0.15);
+  --t1:#F0EDFF;
+  --t2:#B8B0D8;
+  --t3:#8A82A8;
+  --shadow:0 8px 32px rgba(0,0,0,0.6);
+}
 [data-theme="light-blue"]{--bg:#f6f8fa;--bg2:#ffffff;--bg3:#eaeef2;--card:#ffffff;--card-b:#d0d7de;--card-bh:rgba(22,119,255,0.25);--accent:#1677ff;--accent2:#4096ff;--accent-d:rgba(22,119,255,0.08);--accent-glow:rgba(22,119,255,0.25);--t1:#24292f;--t2:#57606a;--t3:#8b949e;--shadow:0 8px 28px rgba(0,0,0,0.08);}
 [data-theme="light-red"]{--bg:#f6f8fa;--bg2:#ffffff;--bg3:#eaeef2;--card:#ffffff;--card-b:#d0d7de;--card-bh:rgba(239,68,68,0.25);--accent:#ef4444;--accent2:#f87171;--accent-d:rgba(239,68,68,0.08);--accent-glow:rgba(239,68,68,0.25);--t1:#24292f;--t2:#57606a;--t3:#8b949e;--shadow:0 8px 28px rgba(0,0,0,0.08);}
-[data-theme="light-yellow"]{--bg:#f6f8fa;--bg2:#ffffff;--bg3:#eaeef2;--card:#ffffff;--card-b:#d0d7de;--card-bh:rgba(245,158,11,0.25);--accent:#f59e0b;--accent2:#fbbf24;--accent-d:rgba(245,158,11,0.08);--accent-glow:rgba(245,158,11,0.25);--t1:#24292f;--t2:#57606a;--t3:#8b949e;--shadow:0 8px 28px rgba(0,0,0,0.08);}
+[data-theme="light-gold"]{--bg:#fcf9f0;--bg2:#ffffff;--bg3:#f5efe0;--card:#ffffff;--card-b:#e0d5b8;--card-bh:rgba(201,168,76,0.25);--accent:#C9A84C;--accent2:#D4AF37;--accent-d:rgba(201,168,76,0.10);--accent-glow:rgba(201,168,76,0.20);--t1:#2d2a1a;--t2:#6a6548;--t3:#9a9578;--shadow:0 8px 28px rgba(0,0,0,0.08);}
 
 html,body{height:100%}
 body{font-family:var(--font-family);background:var(--bg);color:var(--t1);min-height:100vh;display:flex;font-size:14px;transition:background .3s,color .3s,border-color .3s}
@@ -936,7 +966,7 @@ a{color:inherit;text-decoration:none}
 }
 @media(max-width:768px){.sparkline-row{grid-template-columns:1fr;gap:12px}}
 
-/* ===== DASHBOARD 3x-UI STYLE ===== */
+/* ===== DASHBOARD STATS ===== */
 .dash-stats-grid{
   display:grid;
   grid-template-columns:repeat(4,1fr);
@@ -988,6 +1018,10 @@ a{color:inherit;text-decoration:none}
   opacity:.3;
 }
 [dir="ltr"] .dash-stat-card .icon{left:auto;right:16px}
+@media(max-width:768px){.dash-stats-grid{grid-template-columns:1fr 1fr;gap:10px}}
+@media(max-width:480px){.dash-stats-grid{grid-template-columns:1fr}}
+
+/* ===== MAIN CHART ROW ===== */
 .dash-chart-row{
   display:grid;
   grid-template-columns:2fr 1fr;
@@ -1043,11 +1077,15 @@ a{color:inherit;text-decoration:none}
 .dash-conn-item .ip{font-family:monospace;color:var(--t1);}
 .dash-conn-item .proto{font-size:9px;padding:2px 7px;border-radius:5px;background:var(--accent-d);color:var(--accent2);}
 .dash-conn-item .traffic{color:var(--t2);}
-.dash-conn-item .status-dot{width:6px;height:6px;border-radius:50%;display:inline-block;}
-.status-on{background:var(--green);}
-.status-off{background:var(--red);}
+@media(max-width:768px){.dash-chart-row{grid-template-columns:1fr;}}
 
-/* ===== PROTOCOL CHART ===== */
+/* ===== PROTOCOL & BANDWIDTH CHARTS (2 columns) ===== */
+.dash-charts-second{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:16px;
+  margin-bottom:22px;
+}
 .dash-protocol-card{
   background:var(--card);
   border:1px solid var(--card-b);
@@ -1064,7 +1102,8 @@ a{color:inherit;text-decoration:none}
   gap:6px;
 }
 .dash-protocol-card .chart-title i{color:var(--accent);}
-.dash-protocol-card .chart-wrap{height:160px;position:relative;}
+.dash-protocol-card .chart-wrap{height:150px;position:relative;}
+@media(max-width:768px){.dash-charts-second{grid-template-columns:1fr;}}
 
 /* ===== CONNECTIONS TABLE ===== */
 .dash-conn-table-wrap{
@@ -1089,6 +1128,7 @@ a{color:inherit;text-decoration:none}
   width:100%;
   border-collapse:collapse;
   font-size:11.5px;
+  min-width:500px;
 }
 .dash-conn-table th{
   text-align:right;
@@ -1124,18 +1164,21 @@ a{color:inherit;text-decoration:none}
 .df-text{font-size:10px;color:var(--t3)}
 .df-link{font-size:11.5px;color:var(--accent2);display:flex;align-items:center;gap:5px;font-weight:600}
 
-@media(max-width:1024px){.dash-stats-grid{grid-template-columns:1fr 1fr;}}
-@media(max-width:768px){
-  .dash-chart-row{grid-template-columns:1fr;}
-  .dash-stats-grid{grid-template-columns:1fr;}
-  .main{padding:62px 12px 50px;}
+/* ===== SIDEBAR RESPONSIVE ===== */
+@media(max-width:1050px){
   .sidebar{transform:translateX(100%);}
   [dir="ltr"] .sidebar{transform:translateX(-100%);}
   .sidebar.open{transform:translateX(0);}
   .sb-close{display:flex;}
-  .main{margin-right:0;padding-top:70px;}
+  .main{margin-right:0;padding-top:70px;padding-left:12px;padding-right:12px;}
   [dir="ltr"] .main{margin-left:0;}
   .mob-top{display:flex;}
+}
+@media(max-width:480px){
+  .main{padding:62px 10px 50px;}
+  .topbar .tb-title{font-size:15px;}
+  .dash-stat-card .value{font-size:20px;}
+  .sparkline-value{font-size:20px;}
 }
 
 /* ===== بقیه استایل‌های قبلی ===== */
@@ -1661,7 +1704,7 @@ a{color:inherit;text-decoration:none}
     </div>
   </div>
 
-  <!-- ===== SPARKLINE CARDS (first row - top of dashboard) ===== -->
+  <!-- ===== SPARKLINE CARDS (top of dashboard) ===== -->
   <div class="sparkline-row">
     <div class="sparkline-card">
       <div class="sparkline-top">
@@ -1717,7 +1760,7 @@ a{color:inherit;text-decoration:none}
     </div>
   </div>
 
-  <!-- ===== MAIN CHART + PROTOCOL CHART ===== -->
+  <!-- ===== MAIN CHART + SERVICE STATUS ===== -->
   <div class="dash-chart-row">
     <div class="dash-chart-card">
       <div class="card-title"><i class="ti ti-activity"></i> <span data-lang="traffic_trend">Traffic Usage Trend (Hourly)</span></div>
@@ -1741,14 +1784,14 @@ a{color:inherit;text-decoration:none}
     </div>
   </div>
 
-  <!-- ===== PROTOCOL DISTRIBUTION (like 3x-UI) ===== -->
-  <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:22px;">
+  <!-- ===== PROTOCOL DISTRIBUTION + BANDWIDTH USAGE (like 3x-UI) ===== -->
+  <div class="dash-charts-second">
     <div class="dash-protocol-card">
-      <div class="chart-title"><i class="ti ti-chart-pie"></i> <span data-lang="protocols">Protocol Distribution</span></div>
+      <div class="chart-title"><i class="ti ti-chart-pie"></i> <span data-lang="protocol_distribution">Protocol Distribution</span></div>
       <div class="chart-wrap"><canvas id="dashProtoChart"></canvas></div>
     </div>
     <div class="dash-protocol-card">
-      <div class="chart-title"><i class="ti ti-arrow-up-right"></i> <span data-lang="bandwidth">Bandwidth Usage</span></div>
+      <div class="chart-title"><i class="ti ti-chart-bar"></i> <span data-lang="bandwidth_usage">Bandwidth Usage</span></div>
       <div class="chart-wrap"><canvas id="dashBandwidthChart"></canvas></div>
     </div>
   </div>
@@ -1780,7 +1823,7 @@ a{color:inherit;text-decoration:none}
 </section>
 
 <!-- ===== بقیه صفحات (با data-lang) ===== -->
-<!-- ===== LINKS ===== -->
+<!-- LINKS -->
 <section class="pg" id="pg-links">
   <div class="topbar">
     <div><div class="tb-title"><i class="ti ti-link-plus"></i> <span data-lang="configs">Configs</span></div><div class="tb-sub" data-lang="traffic_analysis">Create and manage configs with quota, expiry and grouping</div></div>
@@ -1859,7 +1902,7 @@ a{color:inherit;text-decoration:none}
   <div class="empty" id="links-empty" style="display:none"><i class="ti ti-link-off"></i><p data-lang="no_configs">No configs yet</p></div>
 </section>
 
-<!-- ===== SUB GROUPS ===== -->
+<!-- SUB GROUPS -->
 <section class="pg" id="pg-subgroups">
   <div class="topbar">
     <div><div class="tb-title"><i class="ti ti-folders"></i> <span data-lang="sub_groups">Sub Groups</span></div><div class="tb-sub" data-lang="create_group_msg">Each group has its own public page with its configs</div></div>
@@ -1879,7 +1922,7 @@ a{color:inherit;text-decoration:none}
   </div>
 </section>
 
-<!-- ===== SUBSCRIPTION ===== -->
+<!-- SUBSCRIPTION -->
 <section class="pg" id="pg-subscriptions">
   <div class="topbar"><div><div class="tb-title"><i class="ti ti-rss"></i> <span data-lang="subscription">Subscription</span></div><div class="tb-sub" data-lang="subscription">Subscription links for v2ray apps</div></div></div>
   <div class="g2">
@@ -1900,7 +1943,7 @@ a{color:inherit;text-decoration:none}
   </div>
 </section>
 
-<!-- ===== TRAFFIC ===== -->
+<!-- TRAFFIC -->
 <section class="pg" id="pg-traffic">
   <div class="topbar">
     <div><div class="tb-title"><i class="ti ti-chart-area"></i> <span data-lang="traffic_usage">Traffic</span></div><div class="tb-sub" data-lang="traffic_analysis">Bandwidth usage analysis & monitoring</div></div>
@@ -1940,7 +1983,7 @@ a{color:inherit;text-decoration:none}
   </div>
 </section>
 
-<!-- ===== CONNECTIONS ===== -->
+<!-- CONNECTIONS -->
 <section class="pg" id="pg-connections">
   <div class="topbar">
     <div><div class="tb-title"><i class="ti ti-plug-connected"></i> <span data-lang="connections">Active Connections</span></div><div class="tb-sub" data-lang="connections_list">Live IP and traffic monitoring per connection</div></div>
@@ -1964,7 +2007,7 @@ a{color:inherit;text-decoration:none}
   </div>
 </section>
 
-<!-- ===== SECURITY ===== -->
+<!-- SECURITY -->
 <section class="pg" id="pg-security">
   <div class="topbar"><div><div class="tb-title"><i class="ti ti-shield-lock"></i> <span data-lang="security">Security</span></div></div></div>
   <div class="g2">
@@ -1985,19 +2028,19 @@ a{color:inherit;text-decoration:none}
   </div>
 </section>
 
-<!-- ===== LOGS ===== -->
+<!-- LOGS -->
 <section class="pg" id="pg-logs">
   <div class="topbar"><div><div class="tb-title"><i class="ti ti-history"></i> <span data-lang="activity_logs">Activity Logs</span></div><div class="tb-sub" data-lang="activity_logs">Complete event history</div></div><div class="tb-right"><button class="btn btn-p btn-sm" onclick="loadActivity()"><i class="ti ti-refresh"></i></button></div></div>
   <div class="card"><div class="log-timeline" id="logs-list">—</div><div class="empty" id="logs-empty" style="display:none"><i class="ti ti-history-toggle"></i><p data-lang="no_logs">No logs yet</p></div></div>
 </section>
 
-<!-- ===== ERRORS ===== -->
+<!-- ERRORS -->
 <section class="pg" id="pg-errors">
   <div class="topbar"><div><div class="tb-title"><i class="ti ti-alert-triangle"></i> <span data-lang="errors">Errors</span></div></div><div class="tb-right"><span class="badge bg-red" id="errs-badge">0</span><button class="btn btn-p btn-sm" onclick="refreshAll()"><i class="ti ti-refresh"></i></button></div></div>
   <div class="card"><div class="card-title"><i class="ti ti-bug"></i> <span data-lang="error_logs">Error Logs</span></div><div id="errs-full">—</div></div>
 </section>
 
-<!-- ===== WEBSOCKET TEST ===== -->
+<!-- WEBSOCKET TEST -->
 <section class="pg" id="pg-testws">
   <div class="topbar"><div><div class="tb-title"><i class="ti ti-wifi"></i> <span data-lang="websocket_test">WebSocket Test</span></div></div></div>
   <div class="card" style="max-width:660px">
@@ -2017,7 +2060,7 @@ a{color:inherit;text-decoration:none}
   </div>
 </section>
 
-<!-- ===== SETTINGS ===== -->
+<!-- SETTINGS -->
 <section class="pg" id="pg-settings">
   <div class="topbar">
     <div><div class="tb-title"><i class="ti ti-settings"></i> <span data-lang="settings">Settings</span></div><div class="tb-sub" data-lang="settings">Panel configuration</div></div>
@@ -2033,8 +2076,8 @@ a{color:inherit;text-decoration:none}
           <div style="display:flex;gap:10px;flex-wrap:wrap" id="dark-themes">
             <button class="btn btn-p theme-btn-select" data-theme="dark-blue" style="background:#1677ff;color:#fff;box-shadow:0 2px 8px rgba(22,119,255,0.4)" onclick="setTheme('dark-blue')"><i class="ti ti-circle"></i> <span data-lang="blue">Blue</span></button>
             <button class="btn btn-p theme-btn-select" data-theme="dark-red" style="background:#ef4444;color:#fff;box-shadow:0 2px 8px rgba(239,68,68,0.4)" onclick="setTheme('dark-red')"><i class="ti ti-circle"></i> <span data-lang="red">Red</span></button>
-            <button class="btn btn-p theme-btn-select" data-theme="dark-yellow" style="background:#f59e0b;color:#000;box-shadow:0 2px 8px rgba(245,158,11,0.4)" onclick="setTheme('dark-yellow')"><i class="ti ti-circle"></i> <span data-lang="yellow">Yellow</span></button>
-            <button class="btn btn-p theme-btn-select" data-theme="dark-royal" style="background:linear-gradient(135deg,#8b5cf6,#d946ef);color:#fff;box-shadow:0 2px 8px rgba(139,92,246,0.5)" onclick="setTheme('dark-royal')"><i class="ti ti-circle"></i> <span data-lang="royal_theme">Royal</span></button>
+            <button class="btn btn-p theme-btn-select" data-theme="dark-gold" style="background:#C9A84C;color:#fff;box-shadow:0 2px 8px rgba(201,168,76,0.4)" onclick="setTheme('dark-gold')"><i class="ti ti-circle"></i> <span data-lang="gold">Gold</span></button>
+            <button class="btn btn-p theme-btn-select" data-theme="imperial" style="background:linear-gradient(135deg,#6C2BD9,#C9A84C);color:#fff;box-shadow:0 2px 8px rgba(108,43,217,0.5)" onclick="setTheme('imperial')"><i class="ti ti-circle"></i> <span data-lang="imperial_theme">Imperial</span></button>
           </div>
         </div>
         <div>
@@ -2042,7 +2085,7 @@ a{color:inherit;text-decoration:none}
           <div style="display:flex;gap:10px;flex-wrap:wrap" id="light-themes">
             <button class="btn btn-p theme-btn-select" data-theme="light-blue" style="background:#1677ff;color:#fff;box-shadow:0 2px 8px rgba(22,119,255,0.3)" onclick="setTheme('light-blue')"><i class="ti ti-circle"></i> <span data-lang="blue">Blue</span></button>
             <button class="btn btn-p theme-btn-select" data-theme="light-red" style="background:#ef4444;color:#fff;box-shadow:0 2px 8px rgba(239,68,68,0.3)" onclick="setTheme('light-red')"><i class="ti ti-circle"></i> <span data-lang="red">Red</span></button>
-            <button class="btn btn-p theme-btn-select" data-theme="light-yellow" style="background:#f59e0b;color:#000;box-shadow:0 2px 8px rgba(245,158,11,0.3)" onclick="setTheme('light-yellow')"><i class="ti ti-circle"></i> <span data-lang="yellow">Yellow</span></button>
+            <button class="btn btn-p theme-btn-select" data-theme="light-gold" style="background:#C9A84C;color:#fff;box-shadow:0 2px 8px rgba(201,168,76,0.3)" onclick="setTheme('light-gold')"><i class="ti ti-circle"></i> <span data-lang="gold">Gold</span></button>
           </div>
         </div>
         <div class="cl"><i class="ti ti-info-circle"></i><span data-lang="current_theme">Current Theme</span>: <strong id="current-theme-display">dark-blue</strong></div>
@@ -2056,7 +2099,7 @@ a{color:inherit;text-decoration:none}
         <button class="btn-lang active" data-lang-code="en" onclick="setLanguage('en')"><i class="ti ti-check" style="display:none"></i> English</button>
         <button class="btn-lang" data-lang-code="fa" onclick="setLanguage('fa')"><i class="ti ti-check" style="display:none"></i> فارسی</button>
       </div>
-      <div class="cl" style="margin-top:12px"><i class="ti ti-info-circle"></i><span data-lang="settings">Default language is English. Page will refresh after change.</span></div>
+      <div class="cl" style="margin-top:12px"><i class="ti ti-info-circle"></i><span data-lang="settings">Default language is English.</span></div>
     </div>
 
     <!-- Server Settings -->
@@ -2130,7 +2173,7 @@ a{color:inherit;text-decoration:none}
 </main>
 
 <script>
-// ===== MULTI-LANGUAGE (using the same LANG dict from Python) =====
+// ===== MULTI-LANGUAGE =====
 const LANG_DATA = """ + json.dumps(LANG, ensure_ascii=False) + """;
 const LANG = JSON.parse(LANG_DATA);
 let currentLang = localStorage.getItem('CBeeNet-lang') || 'en';
@@ -2145,8 +2188,6 @@ function setLanguage(lang){
     if(check) check.style.display = btn.dataset.langCode === lang ? 'inline' : 'none';
   });
   toast('Language changed to ' + (lang === 'en' ? 'English' : 'فارسی'), 'ok');
-  // Refresh page to apply all changes properly
-  setTimeout(() => location.reload(), 500);
 }
 
 function applyLanguage(){
@@ -2439,7 +2480,6 @@ let dashBandwidthChart = null;
 let ch3 = null;
 
 function initCharts(){
-  // Proto chart (Doughnut - like 3x-UI)
   const ctxProto = document.getElementById('dashProtoChart');
   if(ctxProto){
     dashProtoChart = new Chart(ctxProto.getContext('2d'), {
@@ -2459,7 +2499,6 @@ function initCharts(){
     });
   }
   
-  // Bandwidth chart (Bar)
   const ctxBand = document.getElementById('dashBandwidthChart');
   if(ctxBand){
     dashBandwidthChart = new Chart(ctxBand.getContext('2d'), {
@@ -2489,7 +2528,7 @@ async function fetchStats(){
     const r = await authF('/stats');
     const d = await r.json();
     
-    // Update sparklines
+    // Sparklines
     const pct = d.bw_pct || 0;
     sparkData.load.push(pct);
     document.getElementById('spark-load').innerHTML = pct.toFixed(1) + '<span class="unit">%</span>';
@@ -2507,7 +2546,7 @@ async function fetchStats(){
     const maxConns = Math.max(5, ...sparkData.conns);
     updateSparkline(sparkConnsChart, sparkData.conns, maxConns * 1.2);
     
-    // Update stats cards
+    // Stats
     document.getElementById('dash-conns').textContent = d.active_connections || 0;
     document.getElementById('dash-traffic').innerHTML = (d.total_traffic_mb || 0).toFixed(1) + ' <small style="font-size:14px;font-weight:400;">MB</small>';
     document.getElementById('dash-links').textContent = d.links_count || 0;
@@ -2553,7 +2592,7 @@ async function fetchStats(){
       }).join('');
     }
     
-    // Traffic chart (hourly)
+    // Traffic chart
     const hourly = d.hourly || {};
     const labels = Object.keys(hourly).sort();
     const data = labels.map(h => (hourly[h] || 0) / (1024*1024));
@@ -2593,9 +2632,8 @@ async function fetchStats(){
       });
     }
     
-    // Update protocol chart with real data
+    // Protocol chart - update from links
     if(dashProtoChart){
-      // Try to get protocol distribution from links
       try {
         const lr = await authF('/api/links');
         const ld = await lr.json();
@@ -2615,9 +2653,8 @@ async function fetchStats(){
       } catch(e) { /* ignore */ }
     }
     
-    // Update bandwidth chart
+    // Bandwidth chart
     if(dashBandwidthChart){
-      // Use traffic data
       const totalMB = d.total_traffic_mb || 0;
       dashBandwidthChart.data.datasets[0].data = [totalMB * 0.6, totalMB * 0.25, totalMB * 0.15];
       dashBandwidthChart.update();
@@ -2626,7 +2663,7 @@ async function fetchStats(){
   } catch(e){ console.error(e); }
 }
 
-// ===== Links (same as before with minor fixes) =====
+// ===== LINKS =====
 let allSubsList = [];
 let allLinksList = [];
 
@@ -2738,10 +2775,448 @@ async function createLink(){
   } catch(e){ toast('Error creating config', 'err'); }
 }
 
-// ===== Rest of functions (same as before, but with language support) =====
-// ... (saveEditLink, toggleActive, resetUsage, deleteLink, showQR, loadSubs, etc.)
-// The remaining functions are identical to the previous version but with
-// language support using the LANG dict. I've kept them concise here.
+function openEditLink(uuid){
+  const l = allLinksList.find(x => x.uuid === uuid);
+  if(!l) return;
+  document.getElementById('el-uuid').value = uuid;
+  document.getElementById('el-label').value = l.label;
+  document.getElementById('el-note').value = l.note || '';
+  if(l.limit_bytes === 0){ document.getElementById('el-val').value = ''; document.getElementById('el-unit').value = 'GB'; }
+  else { document.getElementById('el-val').value = (l.limit_bytes / 1024 / 1024).toFixed(0); document.getElementById('el-unit').value = 'MB'; }
+  document.getElementById('el-exp').value = '';
+  openModal('modal-edit-link');
+}
+
+async function saveEditLink(){
+  const uuid = document.getElementById('el-uuid').value;
+  const label = document.getElementById('el-label').value.trim();
+  const note = document.getElementById('el-note').value.trim();
+  const val = document.getElementById('el-val').value;
+  const unit = document.getElementById('el-unit').value;
+  const exp = document.getElementById('el-exp').value;
+  const body = { label, note, limit_value: val || 0, limit_unit: unit };
+  if(exp && Number(exp) > 0) body.expires_days = Number(exp);
+  try{
+    const r = await authF('/api/links/' + uuid, { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
+    if(!r.ok) throw new Error();
+    closeModal('modal-edit-link');
+    toast('Config updated ✓', 'ok');
+    loadLinks();
+  } catch(e){ toast('Error updating config', 'err'); }
+}
+
+async function toggleActive(uuid, newState){
+  try{
+    const r = await authF('/api/links/' + uuid, { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ active: newState }) });
+    if(!r.ok) throw new Error();
+    toast(newState ? 'Activated ✓' : 'Deactivated', 'ok');
+    loadLinks();
+  } catch(e){ toast('Error', 'err'); }
+}
+
+async function resetUsage(uuid){
+  try{
+    const r = await authF('/api/links/' + uuid, { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ reset_usage: true }) });
+    if(!r.ok) throw new Error();
+    toast('Usage reset ✓', 'ok');
+    loadLinks();
+  } catch(e){ toast('Error', 'err'); }
+}
+
+async function deleteLink(uuid){
+  if(!confirm('Delete this config?')) return;
+  try{
+    const r = await authF('/api/links/' + uuid, { method: 'DELETE' });
+    if(!r.ok) throw new Error();
+    toast('Deleted ✓', 'ok');
+    loadLinks();
+  } catch(e){ toast('Error', 'err'); }
+}
+
+function showQR(link){ window.open('https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=' + encodeURIComponent(link), '_blank'); }
+
+// ===== Sub Groups =====
+let allSubsRaw = [];
+
+async function loadSubs(){
+  try{
+    const r = await authF('/api/subs');
+    const d = await r.json();
+    const subs = d.subs || [];
+    allSubsRaw = subs;
+    document.getElementById('subs-nb').textContent = subs.length;
+    document.getElementById('subs-pg-cnt').textContent = subs.length + ' Groups';
+    const grid = document.getElementById('subs-grid');
+    if(!subs.length){
+      grid.innerHTML = '<div class="subs-empty-v2"><div class="subs-empty-v2-icon"><i class="ti ti-folders"></i></div><div class="subs-empty-v2-title">No groups yet</div><div class="subs-empty-v2-sub">Create a new group to organize your configs</div></div>';
+      return;
+    }
+    grid.innerHTML = subs.map(s => `
+      <div class="sub-card">
+        <div class="sub-card-top">
+          <div class="sub-card-head-v2">
+            <div class="sub-card-icon"><i class="ti ti-folder"></i></div>
+            <div class="sub-card-titles"><div class="sub-card-name-v2">${esc(s.name)}</div><div class="sub-card-desc-v2">${s.desc || 'No description'}</div></div>
+            <div class="sub-card-lock-badge ${s.has_password ? 'locked' : 'open'}"><i class="ti ${s.has_password ? 'ti-lock' : 'ti-lock-open'}"></i></div>
+          </div>
+          <div class="sub-card-stats">
+            <div class="sub-card-stat"><div class="sub-card-stat-val">${toFa(s.links_count)}</div><div class="sub-card-stat-label">Configs</div></div>
+            <div class="sub-card-stat"><div class="sub-card-stat-val" style="color:var(--green-t)">${toFa(s.active_count)}</div><div class="sub-card-stat-label">Active</div></div>
+            <div class="sub-card-stat"><div class="sub-card-stat-val" style="font-size:12px">${esc(s.total_used_fmt)}</div><div class="sub-card-stat-label">Usage</div></div>
+          </div>
+        </div>
+        <div class="sub-card-url-row"><span class="sub-card-url-text">${esc(s.public_url)}</span><button class="sub-card-url-copy" onclick="navigator.clipboard.writeText('${esc(s.public_url)}').then(()=>toast('Copied','ok'))"><i class="ti ti-copy"></i></button><button class="sub-card-url-copy" onclick="window.open('${esc(s.public_url)}','_blank')"><i class="ti ti-external-link"></i></button></div>
+        <div class="sub-card-bottom">
+          <button class="btn btn-sm btn-g" onclick="openSubLinks('${esc(s.sub_id)}','${esc(s.name)}')"><i class="ti ti-link-plus"></i> Configs</button>
+          <button class="btn btn-sm btn-pur" onclick="copyAllSubLinks('${esc(s.sub_id)}')"><i class="ti ti-copy"></i> Copy All</button>
+          <button class="btn btn-sm btn-g btn-icon" onclick="showQR('${esc(s.sub_url)}')"><i class="ti ti-qrcode"></i></button>
+          <button class="btn btn-sm btn-d btn-icon" onclick="deleteSub('${esc(s.sub_id)}')"><i class="ti ti-trash"></i></button>
+        </div>
+      </div>
+    `).join('');
+  } catch(e){ console.error(e); }
+}
+
+function filterSubs(q){
+  q = q.trim().toLowerCase();
+  if(!q){ loadSubs(); return; }
+  const filtered = allSubsRaw.filter(s => s.name.toLowerCase().includes(q) || (s.desc || '').toLowerCase().includes(q));
+  // Re-render with filtered data
+  const grid = document.getElementById('subs-grid');
+  if(!filtered.length){
+    grid.innerHTML = '<div class="subs-empty-v2"><div class="subs-empty-v2-icon"><i class="ti ti-folders"></i></div><div class="subs-empty-v2-title">No groups found</div></div>';
+    return;
+  }
+  // Reuse rendering logic (simplified for brevity)
+  grid.innerHTML = filtered.map(s => `
+    <div class="sub-card">
+      <div class="sub-card-top">
+        <div class="sub-card-head-v2">
+          <div class="sub-card-icon"><i class="ti ti-folder"></i></div>
+          <div class="sub-card-titles"><div class="sub-card-name-v2">${esc(s.name)}</div><div class="sub-card-desc-v2">${s.desc || 'No description'}</div></div>
+          <div class="sub-card-lock-badge ${s.has_password ? 'locked' : 'open'}"><i class="ti ${s.has_password ? 'ti-lock' : 'ti-lock-open'}"></i></div>
+        </div>
+        <div class="sub-card-stats">
+          <div class="sub-card-stat"><div class="sub-card-stat-val">${toFa(s.links_count)}</div><div class="sub-card-stat-label">Configs</div></div>
+          <div class="sub-card-stat"><div class="sub-card-stat-val" style="color:var(--green-t)">${toFa(s.active_count)}</div><div class="sub-card-stat-label">Active</div></div>
+          <div class="sub-card-stat"><div class="sub-card-stat-val" style="font-size:12px">${esc(s.total_used_fmt)}</div><div class="sub-card-stat-label">Usage</div></div>
+        </div>
+      </div>
+      <div class="sub-card-url-row"><span class="sub-card-url-text">${esc(s.public_url)}</span><button class="sub-card-url-copy" onclick="navigator.clipboard.writeText('${esc(s.public_url)}').then(()=>toast('Copied','ok'))"><i class="ti ti-copy"></i></button><button class="sub-card-url-copy" onclick="window.open('${esc(s.public_url)}','_blank')"><i class="ti ti-external-link"></i></button></div>
+      <div class="sub-card-bottom">
+        <button class="btn btn-sm btn-g" onclick="openSubLinks('${esc(s.sub_id)}','${esc(s.name)}')"><i class="ti ti-link-plus"></i> Configs</button>
+        <button class="btn btn-sm btn-pur" onclick="copyAllSubLinks('${esc(s.sub_id)}')"><i class="ti ti-copy"></i> Copy All</button>
+        <button class="btn btn-sm btn-g btn-icon" onclick="showQR('${esc(s.sub_url)}')"><i class="ti ti-qrcode"></i></button>
+        <button class="btn btn-sm btn-d btn-icon" onclick="deleteSub('${esc(s.sub_id)}')"><i class="ti ti-trash"></i></button>
+      </div>
+    </div>
+  `).join('');
+}
+
+async function createSub(){
+  const name = document.getElementById('ns-name').value.trim() || 'New Group';
+  const desc = document.getElementById('ns-desc').value.trim();
+  const pw = document.getElementById('ns-pw').value;
+  try{
+    const r = await authF('/api/subs', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ name, desc, password: pw }) });
+    if(!r.ok) throw new Error('failed');
+    document.getElementById('ns-name').value = '';
+    document.getElementById('ns-desc').value = '';
+    document.getElementById('ns-pw').value = '';
+    closeModal('modal-create-sub');
+    toast('Group created ✓', 'ok');
+    loadSubs();
+  } catch(e){ toast('Error creating group', 'err'); }
+}
+
+async function deleteSub(sub_id){
+  if(!confirm('Delete this group?')) return;
+  try{
+    const r = await authF('/api/subs/' + sub_id, { method: 'DELETE' });
+    if(!r.ok) throw new Error();
+    toast('Group deleted ✓', 'ok');
+    loadSubs();
+    loadLinks();
+  } catch(e){ toast('Error', 'err'); }
+}
+
+let lmodalLinks = [], lmodalInSub = new Set(), currentSubId = '';
+
+async function openSubLinks(sub_id, name){
+  currentSubId = sub_id;
+  document.getElementById('modal-sub-name').textContent = name;
+  document.getElementById('modal-links-body').innerHTML = '<div style="padding:20px;text-align:center">Loading...</div>';
+  openModal('modal-links');
+  try{
+    const [lr, sr] = await Promise.all([authF('/api/links'), authF('/api/subs')]);
+    const {links = []} = await lr.json();
+    const {subs = []} = await sr.json();
+    const thisSub = subs.find(s => s.sub_id === sub_id);
+    lmodalInSub = new Set(thisSub?.link_ids || []);
+    lmodalLinks = links;
+    renderLmodalList(links);
+  } catch(e){ toast('Error loading', 'err'); }
+}
+
+function renderLmodalList(links){
+  const body = document.getElementById('modal-links-body');
+  if(!links.length){ body.innerHTML = '<div class="empty">No configs</div>'; updateLmodalCount(); return; }
+  body.innerHTML = links.map(l => {
+    const checked = lmodalInSub.has(l.uuid);
+    const on = l.active && !l.expired;
+    return `<div class="lrow-v2 ${checked ? 'checked' : ''}" data-uuid="${l.uuid}" data-name="${esc(l.label).toLowerCase()}" onclick="toggleLrow('${l.uuid}', this)">
+      <div class="lrow-v2-check"><i class="ti ti-check"></i></div>
+      <div class="lrow-v2-avatar"><i class="ti ti-key"></i></div>
+      <div class="lrow-v2-info"><div class="lrow-v2-name">${esc(l.label)}</div><div class="lrow-v2-meta">${fmtB(l.used_bytes)}</div></div>
+      <span class="lrow-v2-status ${on ? 'on' : 'off'}">${on ? 'Active' : 'Inactive'}</span>
+    </div>`;
+  }).join('');
+  updateLmodalCount();
+}
+
+function toggleLrow(uuid, el){
+  if(lmodalInSub.has(uuid)){ lmodalInSub.delete(uuid); el.classList.remove('checked'); }
+  else { lmodalInSub.add(uuid); el.classList.add('checked'); }
+  updateLmodalCount();
+}
+
+function lmodalSelectAll(state){
+  lmodalLinks.forEach(l => { if(state) lmodalInSub.add(l.uuid); else lmodalInSub.delete(l.uuid); });
+  renderLmodalList(lmodalLinks);
+}
+
+function updateLmodalCount(){
+  document.getElementById('lmodal-count').textContent = lmodalInSub.size + ' selected';
+}
+
+function filterLmodal(q){
+  q = q.trim().toLowerCase();
+  document.querySelectorAll('#modal-links-body .lrow-v2').forEach(row => {
+    row.style.display = !q || row.dataset.name.includes(q) ? '' : 'none';
+  });
+}
+
+async function saveSubLinks(){
+  if(!currentSubId) return;
+  const link_ids = [...lmodalInSub];
+  try{
+    const r = await authF('/api/subs/' + currentSubId, { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ link_ids }) });
+    if(!r.ok) throw new Error();
+    await Promise.all(lmodalLinks.map(l => authF('/api/links/' + l.uuid, { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ sub_id: lmodalInSub.has(l.uuid) ? currentSubId : null }) })));
+    closeModal('modal-links');
+    toast('Group configs saved ✓', 'ok');
+    loadSubs();
+    loadLinks();
+  } catch(e){ toast('Error saving', 'err'); }
+}
+
+// ===== Subscriptions =====
+async function loadSubsPage(){
+  document.getElementById('sub-all-url').textContent = location.protocol + '//' + location.host + '/sub-all';
+  try{
+    const r = await authF('/api/subs');
+    const d = await r.json();
+    const subs = d.subs || [];
+    const el = document.getElementById('sub-groups-list');
+    if(!subs.length){ el.innerHTML = '<div class="empty">No groups yet</div>'; return; }
+    el.innerHTML = subs.map(s => `
+      <div style="padding:13px 15px;background:var(--accent-d);border:1px solid var(--card-b);border-radius:10px;margin-bottom:8px;display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap">
+        <div><div style="font-weight:700;font-size:13px">${esc(s.name)}</div><div style="font-size:10px;color:var(--accent)">${esc(s.sub_url)}</div><div style="font-size:10px;color:var(--t3)">${toFa(s.links_count)} configs · ${esc(s.total_used_fmt)}</div></div>
+        <div style="display:flex;gap:5px"><button class="btn btn-sm btn-pur" onclick="navigator.clipboard.writeText('${esc(s.sub_url)}')"><i class="ti ti-copy"></i> Sub</button><button class="btn btn-sm btn-g" onclick="showQR('${esc(s.sub_url)}')"><i class="ti ti-qrcode"></i></button></div>
+      </div>
+    `).join('');
+  } catch(e){}
+}
+
+function cpSubAll(){ navigator.clipboard.writeText(location.protocol + '//' + location.host + '/sub-all').then(() => toast('Copied ✓', 'ok')); }
+
+// ===== Connections =====
+async function loadConns(){
+  try{
+    const r = await authF('/api/connections');
+    const d = await r.json();
+    const grid = document.getElementById('conns-grid');
+    const ce = document.getElementById('conns-empty');
+    document.getElementById('ch-count').textContent = toFa(d.count);
+    const conns = d.connections || [];
+    if(!d.count){ grid.innerHTML = ''; ce.style.display = 'block'; document.getElementById('ch-traffic').textContent = '—'; document.getElementById('ch-avgdur').textContent = '—'; document.getElementById('ch-uniq').textContent = '—'; return; }
+    ce.style.display = 'none';
+    const totalBytes = conns.reduce((s, c) => s + parseBytesFmt(c.bytes_fmt), 0);
+    document.getElementById('ch-traffic').textContent = fmtB(totalBytes);
+    const uniqIps = new Set(conns.map(c => c.ip)).size;
+    document.getElementById('ch-uniq').textContent = toFa(uniqIps);
+    const durs = conns.map(c => c.connected_at ? Math.max(0, Math.floor((Date.now() - new Date(c.connected_at).getTime()) / 1000)) : 0);
+    const avgSec = durs.length ? Math.floor(durs.reduce((a,b) => a+b, 0) / durs.length) : 0;
+    document.getElementById('ch-avgdur').textContent = avgSec < 60 ? avgSec + 's' : avgSec < 3600 ? Math.floor(avgSec/60) + 'm' : Math.floor(avgSec/3600) + 'h';
+    const maxDur = Math.max(...durs, 1);
+    grid.innerHTML = conns.map(c => {
+      const secs = c.connected_at ? Math.max(0, Math.floor((Date.now() - new Date(c.connected_at).getTime()) / 1000)) : 0;
+      const dur = secs < 60 ? secs + 's' : secs < 3600 ? Math.floor(secs/60) + 'm' : Math.floor(secs/3600) + 'h';
+      const durPct = Math.min(100, Math.round((secs / maxDur) * 100));
+      const protoVal = c.transport === 'vless-ws' ? 'vless-ws' : (c.transport || '').replace('xhttp-', 'xhttp-');
+      return `<div class="conn-card-v2">
+        <div class="conn-card-v2-glow"></div>
+        <div class="conn-card-v2-top">
+          <div class="conn-avatar"><i class="ti ti-device-desktop"></i></div>
+          <div class="conn-card-v2-id"><div class="conn-ip-v2">${esc(c.ip)}<button class="conn-ip-copy" onclick="navigator.clipboard.writeText('${esc(c.ip)}')"><i class="ti ti-copy"></i></button></div><div class="conn-label-v2">${esc(c.label)}</div></div>
+          <span class="conn-status-pill"><span class="dot dg pulse"></span> Live</span>
+        </div>
+        <div class="conn-card-v2-divider"></div>
+        <div class="conn-card-v2-body">
+          <div class="conn-proto-row">${protoBadge([protoVal])}</div>
+          <div class="conn-stat-row">
+            <div class="conn-stat-box"><div class="conn-stat-icon"><i class="ti ti-transfer"></i></div><div><div class="conn-stat-text-label">Traffic</div><div class="conn-stat-text-val">${esc(c.bytes_fmt)}</div></div></div>
+            <div class="conn-stat-box"><div class="conn-stat-icon time"><i class="ti ti-clock"></i></div><div><div class="conn-stat-text-label">Duration</div><div class="conn-stat-text-val">${dur}</div></div></div>
+          </div>
+          <div class="conn-duration-track"><div class="conn-duration-fill" style="width:${durPct}%"></div></div>
+        </div>
+      </div>`;
+    }).join('');
+  } catch(e){ console.error(e); }
+}
+
+function parseBytesFmt(s){ if(!s) return 0; const m = String(s).match(/([\d.]+)\s*([A-Za-z]+)/); if(!m) return 0; const n = parseFloat(m[1]), u = m[2].toUpperCase(); const mult = { B:1, KB:1024, MB:1024**2, GB:1024**3, TB:1024**4 }; return n * (mult[u] || 0); }
+
+// ===== Logs & Errors =====
+async function loadActivity(){
+  try{
+    const r = await authF('/api/activity');
+    const d = await r.json();
+    const logs = (d.logs || []).slice().reverse();
+    const el = document.getElementById('logs-list');
+    const em = document.getElementById('logs-empty');
+    if(!logs.length){ el.innerHTML = ''; em.style.display = 'block'; return; }
+    em.style.display = 'none';
+    const icMap = { ok: 'ti-circle-check', err: 'ti-circle-x', warn: 'ti-alert-triangle', info: 'ti-info-circle' };
+    const kindFa = { link: 'Config', sub: 'Group', auth: 'Login', connection: 'Connection', system: 'System' };
+    el.innerHTML = logs.map(l => `
+      <div class="log-item">
+        <div class="log-ic ${l.level}"><i class="ti ${icMap[l.level] || 'ti-info-circle'}"></i></div>
+        <div class="log-body">
+          <div class="log-msg">${esc(l.message)}</div>
+          <div class="log-time"><i class="ti ti-clock"></i> ${new Date(l.time).toLocaleString()} <span class="log-kind">${kindFa[l.kind] || l.kind}</span></div>
+        </div>
+      </div>
+    `).join('');
+  } catch(e){ console.error(e); }
+}
+
+async function loadErrs(){
+  try{
+    const r = await authF('/stats');
+    const d = await r.json();
+    renderErrs(d.recent_errors || []);
+  } catch(e){}
+}
+
+function renderErrs(errs){
+  const el = document.getElementById('errs-full');
+  if(!el) return;
+  if(!errs.length){ el.innerHTML = '<div style="color:var(--green-t);padding:10px;font-size:12px;display:flex;align-items:center;gap:5px"><i class="ti ti-circle-check"></i> No errors</div>'; return; }
+  el.innerHTML = errs.slice().reverse().map(e => `<div class="erow"><div class="etime"><i class="ti ti-clock"></i> ${new Date(e.time).toLocaleString()}</div><div class="emsg">${esc(e.error)}${e.url ? ' — ' + esc(e.url) : ''}</div></div>`).join('');
+}
+
+// ===== WebSocket =====
+let ws = null;
+function wsLog(c, m){
+  const l = document.getElementById('ws-log');
+  const p = document.createElement('p');
+  const colors = { ok: '#10b981', err: '#ef4444', info: '#8b949e', sent: '#1677ff' };
+  p.style.color = colors[c] || '#fff';
+  p.textContent = '[' + new Date().toLocaleTimeString() + '] ' + m;
+  l.appendChild(p);
+  l.scrollTop = l.scrollHeight;
+}
+function wsConn(){
+  const u = document.getElementById('ws-uuid').value.trim();
+  if(!u){ toast('Enter UUID', 'err'); return; }
+  const url = (location.protocol === 'https:' ? 'wss' : 'ws') + '://' + location.host + '/ws/' + u;
+  wsLog('info', 'Connecting: ' + url);
+  ws = new WebSocket(url);
+  ws.onopen = () => wsLog('ok', '✓ Connected');
+  ws.onerror = () => wsLog('err', '✗ Error');
+  ws.onmessage = m => wsLog('info', 'Received ' + m.data.length + ' bytes');
+  ws.onclose = e => wsLog('err', 'Disconnected (' + e.code + ')');
+}
+function wsSend(){
+  const m = document.getElementById('ws-msg').value;
+  if(!m || !ws || ws.readyState !== 1) return;
+  ws.send(m);
+  wsLog('sent', 'Sent: ' + m);
+  document.getElementById('ws-msg').value = '';
+}
+function wsDisc(){ if(ws) ws.close(); }
+
+// ===== Password =====
+async function changePw(){
+  const cur = document.getElementById('cp-cur').value;
+  const nw = document.getElementById('cp-new').value;
+  const cf = document.getElementById('cp-cf').value;
+  if(!cur || !nw || !cf){ toast('Fill all fields', 'err'); return; }
+  if(nw.length < 4){ toast('Min 4 characters', 'err'); return; }
+  if(nw !== cf){ toast('Passwords do not match', 'err'); return; }
+  try{
+    const r = await authF('/api/change-password', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ current_password: cur, new_password: nw }) });
+    const d = await r.json().catch(() => ({}));
+    if(!r.ok) throw new Error(d.detail || 'Error');
+    toast('Password changed ✓', 'ok');
+    document.getElementById('cp-cur').value = '';
+    document.getElementById('cp-new').value = '';
+    document.getElementById('cp-cf').value = '';
+  } catch(e){ toast('✗ ' + e.message, 'err'); }
+}
+
+function togglePwField(id, btn){
+  const inp = document.getElementById(id);
+  const icon = btn.querySelector('i');
+  const toText = inp.type === 'password';
+  inp.type = toText ? 'text' : 'password';
+  icon.className = 'ti ' + (toText ? 'ti-eye-off' : 'ti-eye');
+}
+
+function checkPwStrength(val){
+  const segs = document.querySelectorAll('#pw-strength-bar .pw-strength-seg');
+  const label = document.getElementById('pw-strength-label');
+  const reqLen = document.getElementById('req-len');
+  const reqNum = document.getElementById('req-num');
+  const reqCase = document.getElementById('req-case');
+  const hasLen = val.length >= 4;
+  const hasNum = /\d/.test(val);
+  const hasCase = /[a-z]/.test(val) && /[A-Z]/.test(val);
+  const hasLong = val.length >= 8;
+  reqLen.classList.toggle('met', hasLen);
+  reqNum.classList.toggle('met', hasNum);
+  reqCase.classList.toggle('met', hasCase);
+  let score = 0; if(hasLen) score++; if(hasNum) score++; if(hasCase) score++; if(hasLong) score++;
+  const colors = ['#1677ff', '#4096ff', '#0050b3', '#003a8c'];
+  const labels = ['Very Weak', 'Weak', 'Medium', 'Strong'];
+  segs.forEach((s, i) => { s.style.background = i < score ? colors[Math.max(0, score-1)] : 'rgba(100,116,139,.2)'; });
+  if(val.length === 0){ label.innerHTML = '<i class="ti ti-shield"></i> Password Strength'; return; }
+  label.innerHTML = `<i class="ti ti-shield-check" style="color:${colors[Math.max(0, score-1)]}"></i> ${labels[Math.max(0, score-1)]}`;
+}
+
+// ===== Refresh =====
+function refreshAll(){
+  fetchStats();
+  if(document.getElementById('pg-links').classList.contains('on')) loadLinks();
+  if(document.getElementById('pg-subgroups').classList.contains('on')) loadSubs();
+  if(document.getElementById('pg-subscriptions').classList.contains('on')) loadSubsPage();
+  if(document.getElementById('pg-connections').classList.contains('on')) loadConns();
+  if(document.getElementById('pg-logs').classList.contains('on')) loadActivity();
+  toast('Refreshed ✓', 'ok');
+}
+
+async function copyAllSubLinks(subId){
+  const r = await authF('/api/links');
+  const d = await r.json();
+  const links = d.links || [];
+  const sub = allSubsRaw.find(s => s.sub_id === subId);
+  if(!sub){ toast('Group not found', 'err'); return; }
+  const subLinkIds = sub.link_ids || [];
+  const urls = links.filter(l => subLinkIds.includes(l.uuid) && l.active && !l.expired).map(l => l.sub_url);
+  if(!urls.length){ toast('No active configs', 'err'); return; }
+  navigator.clipboard.writeText(urls.join('\n')).then(() => toast(urls.length + ' links copied ✓', 'ok'));
+}
 
 // ===== Init =====
 document.addEventListener('DOMContentLoaded', async () => {
@@ -2784,16 +3259,6 @@ document.addEventListener('DOMContentLoaded', function() {
     document.querySelector('.cp-body').appendChild(hidden);
   }
 });
-
-// ===== Placeholder for missing functions =====
-async function loadSubs(){}
-async function loadSubsPage(){}
-async function loadConns(){}
-async function loadActivity(){}
-async function loadErrs(){}
-function showQR(link){ window.open('https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=' + encodeURIComponent(link), '_blank'); }
-function refreshAll(){ fetchStats(); toast('Refreshed ✓', 'ok'); }
-// ... (other functions from previous version)
 </script>
 </body></html>"""
 
