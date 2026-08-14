@@ -1,4 +1,4 @@
-# pages.py - CBee Gateway v1.0.0 - Premium Dashboard with Smart Alerts
+# pages.py - CBee Gateway v1.0.0 - Premium Dashboard with Fixed Login, Smart Alerts & Professional Chart
 import json
 
 LOGIN_HTML = r"""<!DOCTYPE html>
@@ -892,11 +892,11 @@ a{color:inherit;text-decoration:none}
 .dash-spark-card .spark-chart canvas{width:100% !important;height:100% !important}
 .dash-spark-card .spark-sub{font-size:9.5px;color:var(--t3);margin-top:4px;display:flex;align-items:center;gap:4px}
 .dash-spark-card .spark-sub .dot{width:5px;height:5px;border-radius:50%;display:inline-block;background:var(--accent)}
-.dash-chart-row{display:grid;grid-template-columns:2fr 1fr;gap:16px;margin-bottom:22px}
+.dash-chart-row{display:grid;grid-template-columns:1fr;gap:16px;margin-bottom:22px}
 .dash-chart-card{background:var(--card);border:1px solid var(--card-b);border-radius:var(--radius);padding:18px 20px}
 .dash-chart-card .card-title{font-size:12.5px;font-weight:700;color:var(--t1);margin-bottom:12px;display:flex;align-items:center;gap:7px}
 .dash-chart-card .card-title i{color:var(--accent)}
-.dash-chart-wrap{height:220px;position:relative}
+.dash-chart-wrap{height:260px;position:relative}
 .dash-right-panel{display:flex;flex-direction:column;gap:16px}
 .dash-right-card{background:var(--card);border:1px solid var(--card-b);border-radius:var(--radius);padding:16px 18px;flex:1}
 .dash-right-card .mini-title{font-size:10.5px;color:var(--t3);font-weight:600;text-transform:uppercase;letter-spacing:.05em;margin-bottom:8px}
@@ -1502,22 +1502,6 @@ a{color:inherit;text-decoration:none}
       <div class="card-title"><i class="ti ti-activity"></i> <span data-lang="bandwidth_usage">Bandwidth Usage</span></div>
       <div class="dash-chart-wrap"><canvas id="dashTrafficChart"></canvas></div>
     </div>
-    <div class="dash-right-panel">
-      <div class="dash-right-card">
-        <div class="mini-title"><i class="ti ti-server"></i> <span data-lang="service_status">Service Status</span></div>
-        <div id="dash-service-status">
-          <div class="dash-conn-item"><span>UUID Auth</span><span style="color:var(--green-t)">● <span data-lang="active">Active</span></span></div>
-          <div class="dash-conn-item"><span>VLESS / WS</span><span style="color:var(--green-t)">● <span data-lang="active">Active</span></span></div>
-          <div class="dash-conn-item"><span>XHTTP Ultra</span><span style="color:var(--green-t)">● <span data-lang="active">Active</span></span></div>
-          <div class="dash-conn-item"><span>Sub Groups</span><span style="color:var(--green-t)">● <span data-lang="active">Active</span></span></div>
-          <div class="dash-conn-item"><span>Subscription API</span><span style="color:var(--green-t)">● <span data-lang="active">Active</span></span></div>
-        </div>
-      </div>
-      <div class="dash-right-card">
-        <div class="mini-title"><i class="ti ti-plug-connected"></i> <span data-lang="live_connections">Live Connections</span></div>
-        <div id="dash-top-conns">—</div>
-      </div>
-    </div>
   </div>
   <div class="dash-charts-second">
     <div class="dash-small-chart">
@@ -1535,7 +1519,6 @@ a{color:inherit;text-decoration:none}
   </div>
 </section>
 <section class="pg" id="pg-links">
-  <!-- links content same as before - truncated for brevity -->
   <div class="topbar">
     <div><div class="tb-title"><i class="ti ti-link-plus"></i> <span data-lang="configs">Configs</span></div><div class="tb-sub" data-lang="configs_management">Create and manage configs with quota, expiry and grouping</div></div>
     <div class="tb-right"><span class="badge bg-blue" id="links-pg-cnt">0 <span data-lang="configs">Configs</span></span></div>
@@ -1613,7 +1596,6 @@ a{color:inherit;text-decoration:none}
   <div class="empty" id="links-empty" style="display:none"><i class="ti ti-link-off"></i><p data-lang="no_configs">No configs yet</p></div>
 </section>
 <section class="pg" id="pg-subgroups">
-  <!-- subgroups content same as before - truncated -->
   <div class="topbar">
     <div><div class="tb-title"><i class="ti ti-folders"></i> <span data-lang="sub_groups_short">Sub Groups</span></div><div class="tb-sub" data-lang="each_group_public">Each group has its own public page with its configs</div></div>
     <div class="tb-right">
@@ -1632,7 +1614,6 @@ a{color:inherit;text-decoration:none}
   </div>
 </section>
 <section class="pg" id="pg-subscriptions">
-  <!-- subscriptions content same as before - truncated -->
   <div class="topbar"><div><div class="tb-title"><i class="ti ti-rss"></i> <span data-lang="subscription">Subscription</span></div><div class="tb-sub" data-lang="subscription_links">Subscription links for v2ray apps</div></div></div>
   <div class="g2">
     <div class="card">
@@ -1652,7 +1633,6 @@ a{color:inherit;text-decoration:none}
   </div>
 </section>
 <section class="pg" id="pg-traffic">
-  <!-- traffic content same as before - truncated -->
   <div class="topbar">
     <div><div class="tb-title"><i class="ti ti-chart-area"></i> <span data-lang="traffic">Traffic</span></div><div class="tb-sub" data-lang="traffic_analysis">Bandwidth usage analysis & monitoring</div></div>
     <div class="tb-right"><button class="btn btn-p btn-sm" onclick="refreshAll()"><i class="ti ti-refresh"></i> <span data-lang="refresh">Refresh</span></button></div>
@@ -1691,7 +1671,6 @@ a{color:inherit;text-decoration:none}
   </div>
 </section>
 <section class="pg" id="pg-connections">
-  <!-- connections content same as before - truncated -->
   <div class="topbar">
     <div><div class="tb-title"><i class="ti ti-plug-connected"></i> <span data-lang="connections">Connections</span></div><div class="tb-sub" data-lang="connections_monitor">Live IP and traffic monitoring per connection</div></div>
     <div class="tb-right"><span class="badge bg-green" id="conns-live">—</span><button class="btn btn-p btn-sm" onclick="refreshAll()"><i class="ti ti-refresh"></i> <span data-lang="refresh">Refresh</span></button></div>
@@ -1729,7 +1708,6 @@ a{color:inherit;text-decoration:none}
   </div>
 </section>
 <section class="pg" id="pg-security">
-  <!-- security content same as before - truncated -->
   <div class="topbar"><div><div class="tb-title"><i class="ti ti-shield-lock"></i> <span data-lang="security">Security</span></div></div></div>
   <div class="g2">
     <div class="card"><div class="card-title"><i class="ti ti-lock"></i> <span data-lang="encryption">Encryption</span></div>
@@ -1749,17 +1727,14 @@ a{color:inherit;text-decoration:none}
   </div>
 </section>
 <section class="pg" id="pg-logs">
-  <!-- logs content same as before - truncated -->
   <div class="topbar"><div><div class="tb-title"><i class="ti ti-history"></i> <span data-lang="activity_logs">Activity Logs</span></div><div class="tb-sub" data-lang="activity_logs_full">Complete event history</div></div><div class="tb-right"><button class="btn btn-p btn-sm" onclick="loadActivity()"><i class="ti ti-refresh"></i></button></div></div>
   <div class="card"><div class="log-timeline" id="logs-list">—</div><div class="empty" id="logs-empty" style="display:none"><i class="ti ti-history-toggle"></i><p data-lang="no_logs">No logs yet</p></div></div>
 </section>
 <section class="pg" id="pg-errors">
-  <!-- errors content same as before - truncated -->
   <div class="topbar"><div><div class="tb-title"><i class="ti ti-alert-triangle"></i> <span data-lang="errors">Errors</span></div></div><div class="tb-right"><span class="badge bg-red" id="errs-badge">0</span><button class="btn btn-p btn-sm" onclick="refreshAll()"><i class="ti ti-refresh"></i></button></div></div>
   <div class="card"><div class="card-title"><i class="ti ti-bug"></i> <span data-lang="error_logs">Error Logs</span></div><div id="errs-full">—</div></div>
 </section>
 <section class="pg" id="pg-testws">
-  <!-- websocket test content same as before - truncated -->
   <div class="topbar"><div><div class="tb-title"><i class="ti ti-wifi"></i> <span data-lang="websocket_test">WebSocket Test</span></div></div></div>
   <div class="card" style="max-width:660px">
     <div class="cl amber" style="margin-top:0;margin-bottom:12px"><i class="ti ti-alert-triangle"></i><span data-lang="ws_note">Only registered and active UUIDs can connect.</span></div>
@@ -1778,7 +1753,6 @@ a{color:inherit;text-decoration:none}
   </div>
 </section>
 <section class="pg" id="pg-settings">
-  <!-- settings content same as before - truncated -->
   <div class="topbar">
     <div><div class="tb-title"><i class="ti ti-settings"></i> <span data-lang="settings">Settings</span></div><div class="tb-sub" data-lang="system_settings">System configuration</div></div>
     <div class="tb-right"><span class="badge bg-blue">v1.0.0</span></div>
@@ -1889,10 +1863,12 @@ const LANG_DICT = {
     "dashboard":"داشبورد","dashboard_sub":"نمای کلی سیستم","active_connections":"اتصالات فعال","total_traffic":"کل ترافیک","total_links":"کانفیگ‌ها","uptime":"آپتایم","since_start":"از راه‌اندازی","active":"فعال","inactive":"غیرفعال","refresh":"رفرش","traffic_trend":"مصرف پهنای باند","service_status":"وضعیت سرویس","top_connections":"اتصال‌های لحظه‌ای","no_connections":"هیچ اتصالی","server":"سرور","settings":"تنظیمات","language":"زبان","farsi":"فارسی","english":"انگلیسی","save":"ذخیره","cancel":"انصراف","delete":"حذف","edit":"ویرایش","copy":"کپی","created":"ساخته شده","expires":"انقضا","unlimited":"نامحدود","used":"مصرف","of":"از","daily":"روزانه","hourly":"ساعتی","bandwidth":"پهنای باند","connections":"اتصالات","protocol":"پروتکل","ip_address":"آدرس آی‌پی","port":"پورت","upload":"آپلود","download":"دانلود","duration":"مدت","status":"وضعیت","online":"آنلاین","offline":"آفلاین","total":"کل","users":"کاربران","protocols":"پروتکل‌ها","traffic_usage":"مصرف ترافیک","links":"کانفیگ‌ها","sub_groups":"گروه‌های ساب","subscription":"سابسکریپشن","security":"امنیت","logs":"لاگ فعالیت‌ها","errors":"خطاها","test_websocket":"تست WebSocket","dark_theme":"تم تاریک","light_theme":"تم روشن","prestige_theme":"تم پرستیژ","blue":"آبی","red":"قرمز","yellow":"زرد","current_theme":"تم پیش‌فرض","server_settings":"تنظیمات سرور و نام لینک‌ها","server_name":"نام سرور","server_prefix":"پیشوند لینک‌ها","link_template":"قالب نام کانفیگ‌ها","template_vars":"متغیرهای قابل استفاده","template_note":"اگر `{protocol}` در قالب نباشد، پروتکل در نام نمایش داده نمی‌شود.","change_password":"تغییر رمز عبور","current_password":"رمز فعلی","new_password":"رمز جدید","confirm_password":"تکرار رمز جدید","password_strength":"قدرت رمز","min_chars":"حداقل ۴ کاراکتر","contains_number":"شامل عدد","contains_case":"حروف بزرگ/کوچک","weak":"خیلی ضعیف","medium":"متوسط","strong":"قوی","save_password":"ذخیره رمز جدید","login":"ورود","logout":"خروج","login_title":"ورود به پنل","login_sub":"رمز عبور را برای دسترسی به داشبورد وارد کنید","password":"رمز عبور","login_button":"ورود به داشبورد","telegram_channel":"کانال تلگرام","panel":"پنل","system":"سیستم","configs":"کانفیگ‌ها","sub_groups_short":"گروه‌های ساب","activity_logs":"لاگ فعالیت‌ها","config_id":"شناسه کانفیگ","sub_group_expiry":"گروه ساب و انقضا","no_group":"بدون گروه","days":"روز","traffic_quota":"سهمیه ترافیک","transport_protocols":"پروتکل‌های انتقال","bulk_count":"تعداد ساخت هم‌زمان","create_config":"ساخت کانفیگ","no_configs":"هنوز کانفیگی وجود ندارد","new_group":"گروه جدید","no_groups":"هنوز گروهی وجود ندارد","create_group":"یک گروه جدید بسازید تا کانفیگ‌ها را دسته‌بندی کنید","single_sub":"سابسکریپشن تکی (هر کانفیگ)","full_sub":"سابسکریپشن کامل (ادمین)","full_sub_desc":"شامل تمام کانفیگ‌های فعال.","group_sub_links":"لینک سابسکریپشن گروه‌ها","loading":"در حال بارگذاری...","traffic_analysis":"تحلیل و مانیتورینگ مصرف پهنای باند","total_traffic_used":"کل ترافیک مصرفی","hourly_average":"میانگین ساعتی","per_hour":"در ساعت","peak_usage":"پیک مصرف","peak_hour":"بالاترین ساعت","lowest_usage":"کمترین مصرف","live_connections":"اتصالات زنده","total_traffic_live":"مجموع ترافیک لحظه‌ای","avg_duration":"میانگین مدت اتصال","unique_ips":"آی‌پی‌های یکتا","connections_list":"لیست اتصالات","auto_update":"بروزرسانی خودکار هر ۵ ثانیه","no_active_connections":"هیچ اتصال فعالی نیست","will_appear":"به محض اتصال کلاینت‌ها، اینجا نمایش داده می‌شوند","encryption":"رمزنگاری","access_control":"کنترل دسترسی","hash":"هش رمز","session":"سشن","active_inactive":"فعال/غیرفعال","expiry_date":"تاریخ انقضا","public_page_pw":"رمز صفحه پابلیک","optional":"اختیاری","activity_logs_full":"تاریخچه‌ی کامل رخدادهای پنل","no_logs":"هنوز لاگی ثبت نشده","error_logs":"لاگ خطاها","websocket_test":"تست WebSocket","ws_note":"فقط UUID‌های ثبت‌شده و فعال اتصال برقرار می‌کنند.","connect":"اتصال","disconnect":"قطع","send":"ارسال","waiting_ws":"منتظر اتصال...","change_theme":"تغییر تم","server_link_settings":"تنظیمات سرور و نام لینک‌ها","save_settings":"ذخیره تنظیمات","saved":"ذخیره شد","online_status":"آنلاین","version":"نسخه","framework":"فریم‌ورک","platform":"پلتفرم","storage":"ذخیره‌سازی","change_password_title":"تغییر رمز عبور","change_password_sub":"رمز قوی انتخاب کنید و آن را جایی امن نگه دارید","current_pw":"رمز فعلی","new_pw":"رمز جدید","confirm_pw":"تکرار رمز جدید","save_new_pw":"ذخیره رمز جدید","min_4_chars":"حداقل ۴ کاراکتر","contains_num":"شامل عدد","contains_case_letters":"حروف بزرگ/کوچک","very_weak":"خیلی ضعیف","medium_strength":"متوسط","strong_strength":"قوی","logout_btn":"خروج","telegram_btn":"کانال تلگرام","load":"بار نسبی","connections_live":"اتصالات لحظه‌ای","traffic_chart":"نمودار ترافیک","protocol_distribution":"توزیع پروتکل","daily_usage":"مصرف روزانه","active_conns_table":"اتصالات فعال","configs_management":"مدیریت کانفیگ‌ها","sub_groups_management":"مدیریت گروه‌های ساب","subscription_links":"لینک‌های سابسکریپشن","traffic_monitor":"مانیتورینگ ترافیک","connections_monitor":"مانیتورینگ اتصالات","security_settings":"تنظیمات امنیتی","activity_logs_title":"لاگ فعالیت‌ها","error_logs_title":"لاگ خطاها","websocket_tester":"تست WebSocket","system_settings":"تنظیمات سیستم","language_settings":"تنظیمات زبان","theme_settings":"تنظیمات تم","server_info":"اطلاعات سرور","password_change":"تغییر رمز عبور","save_changes":"ذخیره تغییرات","cancel_changes":"انصراف","live":"لحظه‌ای","running_time":"مدت روشن بودن","manage_configs":"مدیریت کانفیگ‌های","select_configs":"کانفیگ‌هایی که می‌خواهید در این گروه باشند را انتخاب کنید","select_all":"انتخاب همه","deselect_all":"لغو همه","changes_apply":"تغییرات بلافاصله اعمال می‌شود","new_group_title":"ساخت گروه جدید","new_group_sub":"یک صفحه پابلیک مجزا برای مدیریت کانفیگ‌ها بسازید","group_name":"نام گروه","description_optional":"توضیحات (اختیاری)","public_page_password":"رمز صفحه پابلیک (اختیاری)","public_page_info":"صفحه پابلیک این گروه با یک لینک منحصر‌به‌فرد در اینترنت در دسترس خواهد بود.","edit_config":"ویرایش کانفیگ","quota_0_unlimited":"سهمیه (0 = نامحدود)","expiry_days":"انقضا (روز از الان، 0 = بدون تغییر/نامحدود)","expiry_note":"برای حفظ انقضای فعلی، فیلد انقضا را صفر بگذارید.","random_uuid":"UUID تصادفی · سهمیه، انقضا و پروتکل رو انتخاب کن","uuid_note":"UUID کاملاً رندوم تولید می‌شود · فقط UUID‌های ثبت‌شده اجازه اتصال دارند · پروتکل پس از ساخت قابل تغییر نیست.","each_group_public":"هر گروه یک صفحه پابلیک مجزا با کانفیگ‌های خودش دارد","single_sub_desc":"هر کانفیگ URL سابسکریپشن مخصوص دارد. از کارت کانفیگ روی آیکون","icon_on_card":"کلیک کنید.","full_sub_note":"این آدرس فقط در مرورگری که به پنل وارد شده کار می‌کند (نیاز به کوکی سشن).","based_on_mb":"بر اساس مگابایت در هر ساعت","lang_note":"زبان پیش‌فرض انگلیسی است. پس از تغییر، صفحه رفرش می‌شود.","groups":"گروه","usage":"مصرف","average":"میانگین","protocols_legend":"پروتکل‌ها","daily_legend":"روزانه","hourly_legend":"ساعتی","bandwidth_usage":"مصرف پهنای باند","smart_alerts":"هشدارهای هوشمند","alerts_sub":"رویدادها و اعلان‌های مهم","priority":"اولویت","critical":"بحرانی","warning":"هشدار","info":"اطلاعات","dismiss":"رد کردن","filter_all":"همه","filter_critical":"بحرانی","filter_warning":"هشدار","filter_info":"اطلاعات","alert_expiry":"انقضای نزدیک کانفیگ","alert_quota":"مصرف ترافیک بیش از ۸۰٪","alert_errors":"خطاهای مکرر اتصال","alert_new_ip":"آی‌پی جدید متصل شد","no_alerts":"هیچ هشداری وجود ندارد"
   }
 };
-// --- JavaScript ---
 let currentLang = localStorage.getItem('CBeeNet-lang') || 'en';
 let currentTheme = localStorage.getItem('CBeeNet-theme') || 'dark-prestige';
+let alertsData = [];
+let currentAlertFilter = 'all';
 
+// ========== Language & Theme ==========
 function setLanguage(lang){
   currentLang = lang;
   localStorage.setItem('CBeeNet-lang', lang);
@@ -2223,6 +2199,7 @@ function updateCharts(statsData, linksData){
     const hourly = statsData.hourly || {};
     const labels = Object.keys(hourly).sort();
     if(labels.length > 0){
+      // Convert bytes to GB
       const downloadData = labels.map(h => (hourly[h]?.download || 0) / (1024 * 1024 * 1024));
       const uploadData = labels.map(h => (hourly[h]?.upload || 0) / (1024 * 1024 * 1024));
       const totalData = labels.map((h, i) => downloadData[i] + uploadData[i]);
@@ -2231,13 +2208,15 @@ function updateCharts(statsData, linksData){
       dashTrafficChart.data.datasets[1].data = uploadData;
       dashTrafficChart.data.datasets[2].data = totalData;
       const maxVal = Math.max(...totalData, ...downloadData, ...uploadData, 0.001);
-      dashTrafficChart.options.scales.y.max = Math.ceil((maxVal * 1.2) * 100) / 100;
+      dashTrafficChart.options.scales.y.max = Math.ceil((maxVal * 1.2) * 1000) / 1000;
       dashTrafficChart.update('none');
     } else {
-      dashTrafficChart.data.labels = ['00:00','02:00','04:00','06:00','08:00','10:00','12:00','14:00','16:00','18:00','20:00','22:00','24:00'];
-      dashTrafficChart.data.datasets[0].data = new Array(13).fill(0);
-      dashTrafficChart.data.datasets[1].data = new Array(13).fill(0);
-      dashTrafficChart.data.datasets[2].data = new Array(13).fill(0);
+      // No data -> flat zero line with default 24h labels
+      const defaultLabels = Array.from({length: 24}, (_,i) => String(i).padStart(2,'0')+':00');
+      dashTrafficChart.data.labels = defaultLabels;
+      dashTrafficChart.data.datasets[0].data = new Array(24).fill(0);
+      dashTrafficChart.data.datasets[1].data = new Array(24).fill(0);
+      dashTrafficChart.data.datasets[2].data = new Array(24).fill(0);
       dashTrafficChart.options.scales.y.max = 1.0;
       dashTrafficChart.update('none');
     }
@@ -2268,18 +2247,23 @@ let prevTraf = 0;
 let allLinksList = [];
 async function fetchStats(){
   try{
-    const r = await authF('/stats');
-    const d = await r.json();
-    const conns = d.connections || [];
+    // Get connections list from /api/connections
+    const connResp = await authF('/api/connections');
+    const connData = await connResp.json();
+    const conns = connData.connections || [];
     const uniqueIps = new Set(conns.map(c => c.ip));
     const activeCount = uniqueIps.size;
     document.getElementById('dash-conns').textContent = activeCount;
+    // Get stats from /stats
+    const statsResp = await authF('/stats');
+    const d = await statsResp.json();
     document.getElementById('dash-traffic').innerHTML = (d.total_traffic_mb || 0).toFixed(1) + ' <small style="font-size:14px;font-weight:400;">MB</small>';
     document.getElementById('dash-links').textContent = d.links_count || 0;
     document.getElementById('dash-links-sub').textContent = (d.active_links || 0) + ' / ' + (d.links_count || 0);
     document.getElementById('dash-uptime').textContent = d.uptime || '00:00:00';
     document.getElementById('uptime-badge').textContent = 'Railway · ' + (d.uptime || '00:00:00');
     document.getElementById('last-upd').textContent = 'Last update: ' + new Date().toLocaleTimeString();
+    // Sparklines
     const delta = d.total_traffic_mb - prevTraf;
     const pct = Math.min(100, Math.max(0, Math.round((delta / 50) * 100 * 10) / 10));
     prevTraf = d.total_traffic_mb;
@@ -2296,9 +2280,11 @@ async function fetchStats(){
     document.getElementById('spark-conns').textContent = connsVal;
     const maxConns = Math.max(5, ...sparkData.conns);
     updateSparkline(sparkConnsChart, sparkData.conns, maxConns * 1.2);
+    // Top connections (unique IPs count)
     document.getElementById('dash-top-conns').innerHTML = '<div style="font-size:24px;font-weight:800;color:var(--t1)">' + uniqueIps.size + '</div><div style="font-size:10px;color:var(--t3)" data-lang="unique_ips">Unique IPs</div>';
+    // Update charts with stats data and links
     updateCharts(d, allLinksList);
-  } catch(e){ console.error(e); }
+  } catch(e){ console.error('fetchStats error:', e); }
 }
 async function loadLinks(){
   try{
@@ -2755,12 +2741,10 @@ async function copyAllSubLinks(subId){
 }
 
 // ========== Smart Alerts Module ==========
-let alertsData = [];
-let currentAlertFilter = 'all';
 function generateAlertsFromData(stats, links){
   const alerts = [];
   const now = new Date();
-  // Alert: Configs expiring in <=3 days
+  // Configs expiring in <=3 days
   links.forEach(l => {
     if(l.expires_at && !l.expired){
       const d = daysLeft(l.expires_at);
@@ -2778,7 +2762,7 @@ function generateAlertsFromData(stats, links){
         });
       }
     }
-    // Alert: Quota usage > 80%
+    // Quota usage > 80%
     if(l.limit_bytes > 0){
       const pct = l.used_bytes / l.limit_bytes * 100;
       if(pct > 80){
@@ -2796,7 +2780,7 @@ function generateAlertsFromData(stats, links){
       }
     }
   });
-  // Alert: Recent errors > 3 in last 5 minutes
+  // Recent errors > 3 in last 5 minutes
   const recentErrors = stats.recent_errors || [];
   const fiveMinAgo = Date.now() - 300000;
   const recent = recentErrors.filter(e => new Date(e.time).getTime() > fiveMinAgo);
@@ -2813,10 +2797,9 @@ function generateAlertsFromData(stats, links){
       dismissable: true
     });
   }
-  // Alert: New IPs connected (simulate based on connections count increase)
+  // New IP connected (simple simulation)
   const connCount = stats.active_connections || 0;
   if(connCount > 0){
-    // Only show if we have no recent "new ip" alerts
     const lastAlert = alertsData.find(a => a.id && a.id.startsWith('newip-'));
     if(!lastAlert || (new Date() - new Date(lastAlert.time) > 3600000)){
       alerts.push({
@@ -2841,14 +2824,11 @@ async function loadAlerts(){
     const linksResp = await authF('/api/links');
     const {links = []} = await linksResp.json();
     const newAlerts = generateAlertsFromData(stats, links);
-    // Merge with existing dismissed alerts
     const dismissedIds = alertsData.filter(a => a.dismissed).map(a => a.id);
     alertsData = newAlerts.map(a => ({
       ...a,
       dismissed: dismissedIds.includes(a.id)
     }));
-    // Also keep old alerts that are still relevant if they were dismissed and still exist
-    // For simplicity, we just render new ones
     renderAlerts(currentAlertFilter);
     document.getElementById('alerts-badge').textContent = alertsData.filter(a => !a.dismissed).length;
     document.getElementById('alerts-count-badge').textContent = alertsData.filter(a => !a.dismissed).length;
@@ -2890,7 +2870,6 @@ function dismissAlert(id){
   document.getElementById('alerts-badge').textContent = alertsData.filter(a => !a.dismissed).length;
   document.getElementById('alerts-count-badge').textContent = alertsData.filter(a => !a.dismissed).length;
 }
-// Auto-refresh alerts every 30s
 setInterval(() => {
   if(document.getElementById('pg-alerts')?.classList.contains('on')){
     loadAlerts();
