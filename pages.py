@@ -1,4 +1,4 @@
-# pages.py - CBee Gateway v1.0.0 (Custom Link Name Template)
+# pages.py - CBee Gateway v1.0.0 (Fixed Theme & Sidebar)
 import json
 
 LOGIN_HTML = r"""<!DOCTYPE html>
@@ -428,16 +428,16 @@ a{color:inherit;text-decoration:none}
 .nav-it.on{background:var(--accent-d);color:var(--t1);border-right-color:var(--accent);font-weight:600}
 .nav-badge{margin-right:auto;background:rgba(245,158,11,0.15);color:var(--accent2);font-size:9px;padding:1px 6px;border-radius:20px;font-weight:700}
 .sb-foot{padding:12px 14px;border-top:1px solid var(--card-b)}
-.tg-btn{display:flex;align-items:center;justify-content:center;gap:8px;background:linear-gradient(135deg,#1DA1F2,#0D8BD9);color:#fff;border-radius:9px;padding:10px;font-size:12.5px;font-weight:600;font-family:inherit;border:none;cursor:pointer;width:100%;transition:.15s}
-.tg-btn:hover{filter:brightness(1.1)}
 .theme-btn{display:flex;align-items:center;justify-content:center;gap:7px;background:var(--accent-d);color:var(--t2);border-radius:9px;padding:8px;font-size:12px;font-weight:500;font-family:inherit;border:1px solid var(--card-b);cursor:pointer;width:100%;transition:.15s;margin-bottom:7px}
 .theme-btn:hover{background:var(--card-b);color:var(--t1)}
+.tg-btn{display:flex;align-items:center;justify-content:center;gap:8px;background:linear-gradient(135deg,#1DA1F2,#0D8BD9);color:#fff;border-radius:9px;padding:10px;font-size:12.5px;font-weight:600;font-family:inherit;border:none;cursor:pointer;width:100%;transition:.15s}
+.tg-btn:hover{filter:brightness(1.1)}
 .logout-btn{display:flex;align-items:center;justify-content:center;gap:7px;background:var(--red-bg);color:var(--red-t);border-radius:9px;padding:8px;font-size:12px;font-weight:500;font-family:inherit;border:1px solid rgba(239,68,68,0.2);cursor:pointer;width:100%;transition:.15s;margin-top:6px}
 .logout-btn:hover{background:rgba(239,68,68,0.2)}
-.mob-top{display:none;position:fixed;top:0;right:0;left:0;height:52px;background:var(--bg2);border-bottom:1px solid var(--card-b);z-index:150;align-items:center;justify-content:center;padding:0 14px;transition:background .3s}
+.mob-top{display:none;position:fixed;top:0;right:0;left:0;height:52px;background:var(--bg2);border-bottom:1px solid var(--card-b);z-index:150;align-items:center;justify-content:space-between;padding:0 14px;transition:background .3s}
 .mob-top .ml{display:flex;align-items:center;gap:9px}
 .mob-title{color:var(--t1);font-size:16px;font-weight:900;font-family:'Vazirmatn',sans-serif}
-.mob-right{display:none;gap:6px}
+.mob-right{display:flex;gap:6px}
 .menu-btn,.theme-mob{background:var(--accent-d);border:1px solid var(--card-b);color:var(--t2);width:34px;height:34px;border-radius:8px;font-size:17px;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:.15s}
 .overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.65);z-index:190;backdrop-filter:blur(3px)}
 .overlay.show{display:block}
@@ -943,7 +943,7 @@ a{color:inherit;text-decoration:none}
   <div class="ml">
     <span class="mob-title">CBee</span>
   </div>
-  <div class="mob-right" style="display:none">
+  <div class="mob-right">
     <button class="theme-mob" id="theme-mob-btn" onclick="toggleTheme()"><i class="ti ti-sun" id="theme-mob-icon"></i></button>
     <button class="menu-btn" id="open-sb"><i class="ti ti-menu-2"></i></button>
   </div>
@@ -1381,20 +1381,28 @@ a{color:inherit;text-decoration:none}
 
 <script>
 // ========== متغیرهای سراسری ==========
-let isDark = localStorage.getItem('CBeeNet-theme') || 'dark-yellow';
-let currentTheme = isDark;
+let currentTheme = localStorage.getItem('CBeeNet-theme') || 'dark-yellow';
 
-// ========== توابع تم ==========
+// ========== توابع تم (اصلاح‌شده) ==========
 function applyTheme(theme){
   document.documentElement.setAttribute('data-theme', theme);
   localStorage.setItem('CBeeNet-theme', theme);
   currentTheme = theme;
-  document.getElementById('current-theme-display').textContent = theme;
+  
+  // بروزرسانی نمایش در تنظیمات
+  const display = document.getElementById('current-theme-display');
+  if(display) display.textContent = theme;
+  
+  // بروزرسانی دکمه تم در سایدبار
   const isLight = theme.startsWith('light');
   const icon = isLight ? 'ti-moon' : 'ti-sun';
   const label = isLight ? 'تم تاریک' : 'تم روشن';
-  document.getElementById('theme-icon').className = 'ti ' + icon;
-  document.getElementById('theme-label').textContent = label;
+  const themeIcon = document.getElementById('theme-icon');
+  const themeLabel = document.getElementById('theme-label');
+  if(themeIcon) themeIcon.className = 'ti ' + icon;
+  if(themeLabel) themeLabel.textContent = label;
+  
+  // بروزرسانی دکمه تم در موبایل
   const mobIcon = document.getElementById('theme-mob-icon');
   if(mobIcon) mobIcon.className = 'ti ' + icon;
 }
@@ -1411,6 +1419,7 @@ function toggleTheme(){
   applyTheme(newTheme);
 }
 
+// اعمال تم ذخیره‌شده
 applyTheme(localStorage.getItem('CBeeNet-theme') || 'dark-yellow');
 
 // ========== توابع کمکی ==========
@@ -1489,9 +1498,12 @@ document.addEventListener('DOMContentLoaded', function() {
   const savedServer = localStorage.getItem('CBeeNet-server-name') || 'CBeeNet';
   const savedPrefix = localStorage.getItem('CBeeNet-server-prefix') || '';
   const savedTemplate = localStorage.getItem('CBeeNet-link-template') || '[{server}][{prefix}][{protocol}]';
-  document.getElementById('server-name-input').value = savedServer;
-  document.getElementById('server-prefix-input').value = savedPrefix;
-  document.getElementById('link-name-template').value = savedTemplate;
+  const nameInput = document.getElementById('server-name-input');
+  const prefixInput = document.getElementById('server-prefix-input');
+  const templateInput = document.getElementById('link-name-template');
+  if(nameInput) nameInput.value = savedServer;
+  if(prefixInput) prefixInput.value = savedPrefix;
+  if(templateInput) templateInput.value = savedTemplate;
 });
 
 // ========== ذخیره تنظیمات سرور ==========
@@ -1510,8 +1522,11 @@ async function saveServerSettings(){
       localStorage.setItem('CBeeNet-server-name', name);
       localStorage.setItem('CBeeNet-server-prefix', prefix);
       localStorage.setItem('CBeeNet-link-template', template);
-      document.getElementById('server-save-result').style.display = 'block';
-      setTimeout(() => document.getElementById('server-save-result').style.display = 'none', 3000);
+      const saveResult = document.getElementById('server-save-result');
+      if(saveResult) {
+        saveResult.style.display = 'block';
+        setTimeout(() => saveResult.style.display = 'none', 3000);
+      }
       toast('تنظیمات سرور ذخیره شد ✓', 'ok');
     } else {
       toast('خطا در ذخیره تنظیمات', 'err');
