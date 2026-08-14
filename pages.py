@@ -1,4 +1,4 @@
-# pages.py - CBee Gateway v1.0.0 (3X-UI Style, Unified Color, No Profile, Advanced Server Name)
+# pages.py - CBee Gateway v1.0.0 (Custom Link Name Template)
 import json
 
 LOGIN_HTML = r"""<!DOCTYPE html>
@@ -417,9 +417,7 @@ body{font-family:'Vazirmatn',sans-serif;background:var(--bg);color:var(--t1);min
 a{color:inherit;text-decoration:none}
 .sidebar{width:var(--sidebar-w);min-height:100vh;background:var(--bg2);border-left:1px solid var(--card-b);display:flex;flex-direction:column;flex-shrink:0;position:fixed;right:0;top:0;bottom:0;z-index:200;transition:transform .25s cubic-bezier(.4,0,.2,1),background .3s,border-color .3s}
 .logo{display:flex;align-items:center;gap:12px;padding:20px 16px 16px;border-bottom:1px solid var(--card-b)}
-.logo-img{width:38px;height:38px;border-radius:50%;overflow:hidden;border:1px solid var(--card-b);flex-shrink:0;background:linear-gradient(135deg,var(--accent),var(--accent2));display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:900;color:#fff;font-family:'Vazirmatn',sans-serif;display:none}
-.logo-img img{width:100%;height:100%;object-fit:cover}
-.logo-name{font-size:24px;font-weight:900;color:var(--t1);font-family:'Vazirmatn',sans-serif;letter-spacing:-0.02em}
+.logo-text{font-size:20px;font-weight:900;color:var(--t1);font-family:'Vazirmatn',sans-serif;letter-spacing:-0.02em}
 .logo-sub{font-size:10px;color:var(--t3);margin-top:1px}
 .sb-close{display:none;position:absolute;left:12px;top:20px;background:var(--accent-d);border:1px solid var(--card-b);color:var(--t2);width:30px;height:30px;border-radius:8px;font-size:16px;align-items:center;justify-content:center;cursor:pointer}
 .nav-wrap{flex:1;overflow-y:auto;padding:6px 0 8px}
@@ -438,9 +436,7 @@ a{color:inherit;text-decoration:none}
 .logout-btn:hover{background:rgba(239,68,68,0.2)}
 .mob-top{display:none;position:fixed;top:0;right:0;left:0;height:52px;background:var(--bg2);border-bottom:1px solid var(--card-b);z-index:150;align-items:center;justify-content:center;padding:0 14px;transition:background .3s}
 .mob-top .ml{display:flex;align-items:center;gap:9px}
-.mob-logo{width:28px;height:28px;border-radius:50%;overflow:hidden;background:linear-gradient(135deg,var(--accent),var(--accent2));display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:900;color:#fff;font-family:'Vazirmatn',sans-serif;display:none}
-.mob-logo img{width:100%;height:100%;object-fit:cover}
-.mob-title{color:var(--t1);font-size:18px;font-weight:900;font-family:'Vazirmatn',sans-serif}
+.mob-title{color:var(--t1);font-size:16px;font-weight:900;font-family:'Vazirmatn',sans-serif}
 .mob-right{display:none;gap:6px}
 .menu-btn,.theme-mob{background:var(--accent-d);border:1px solid var(--card-b);color:var(--t2);width:34px;height:34px;border-radius:8px;font-size:17px;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:.15s}
 .overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.65);z-index:190;backdrop-filter:blur(3px)}
@@ -945,7 +941,6 @@ a{color:inherit;text-decoration:none}
 </div>
 <div class="mob-top">
   <div class="ml">
-    <div class="mob-logo" style="display:none">CB</div>
     <span class="mob-title">CBee</span>
   </div>
   <div class="mob-right" style="display:none">
@@ -957,8 +952,8 @@ a{color:inherit;text-decoration:none}
 <aside class="sidebar" id="sb">
   <button class="sb-close" id="close-sb"><i class="ti ti-x"></i></button>
   <div class="logo">
-    <div class="logo-img" style="display:none">CB</div>
-    <div><div class="logo-name">CBee</div><div class="logo-sub">Gateway · v1.0.0</div></div>
+    <span class="logo-text">CBee</span>
+    <div style="font-size:10px;color:var(--t3);margin-top:1px">Gateway · v1.0.0</div>
   </div>
   <div class="nav-wrap">
     <div class="nav-sec">پنل</div>
@@ -1316,27 +1311,30 @@ a{color:inherit;text-decoration:none}
       </div>
     </div>
 
-    <!-- بخش تنظیمات نام سرور (پیشرفته) -->
+    <!-- بخش تغییر اسم سرور و قالب نام لینک‌ها -->
     <div class="card">
-      <div class="card-title"><i class="ti ti-server-2"></i> تنظیمات نام سرور</div>
+      <div class="card-title"><i class="ti ti-server-2"></i> تنظیمات سرور و نام لینک‌ها</div>
       <div style="display:flex;flex-direction:column;gap:12px">
         <div class="fg">
-          <label>نام اصلی سرور (Server Name)</label>
+          <label>نام سرور (برای سابسکریپشن)</label>
           <input class="fi" id="server-name-input" placeholder="مثلاً: CBeeNet" style="width:100%">
-          <span style="font-size:9px;color:var(--t3)">این نام در قالب <code>{name}</code> استفاده می‌شود</span>
         </div>
         <div class="fg">
-          <label>پیشوند (Prefix) - اختیاری</label>
+          <label>پیشوند لینک‌ها (اختیاری)</label>
           <input class="fi" id="server-prefix-input" placeholder="مثلاً: MyServer" style="width:100%">
-          <span style="font-size:9px;color:var(--t3)">در قالب <code>{prefix}</code> استفاده می‌شود</span>
         </div>
         <div class="fg">
-          <label>قالب نمایش (Template)</label>
-          <input class="fi" id="server-template-input" placeholder="مثلاً: [{name}][{prefix}][{protocol}]" style="width:100%" value="[{name}][{prefix}][{protocol}]">
-          <span style="font-size:9px;color:var(--t3)">از <code>{name}</code>، <code>{prefix}</code>، <code>{protocol}</code> استفاده کنید</span>
+          <label>قالب نام کانفیگ‌ها (از متغیرهای زیر استفاده کنید)</label>
+          <input class="fi" id="link-name-template" placeholder="مثلاً: [{server}][{label}]" style="width:100%">
+          <div style="font-size:9.5px;color:var(--t3);margin-top:4px;display:flex;flex-wrap:wrap;gap:6px">
+            <span style="background:var(--accent-d);padding:2px 8px;border-radius:4px">{server}</span>
+            <span style="background:var(--accent-d);padding:2px 8px;border-radius:4px">{prefix}</span>
+            <span style="background:var(--accent-d);padding:2px 8px;border-radius:4px">{label}</span>
+            <span style="background:var(--accent-d);padding:2px 8px;border-radius:4px">{protocol}</span>
+          </div>
         </div>
-        <div class="cl"><i class="ti ti-info-circle"></i><span>پیش‌نمایش: <code id="server-format-preview">[CBeeNet][MyServer][Protocol]</code></span></div>
-        <button class="btn btn-p" onclick="saveServerSettings()"><i class="ti ti-device-floppy"></i> ذخیره تنظیمات سرور</button>
+        <div class="cl"><i class="ti ti-info-circle"></i><span>مثال‌های قالب: <code>{server}-{label}</code> ، <code>{label}</code> ، <code>[{server}][{protocol}]</code></span></div>
+        <button class="btn btn-p" onclick="saveServerSettings()"><i class="ti ti-device-floppy"></i> ذخیره تنظیمات</button>
         <div id="server-save-result" style="font-size:11px;color:var(--green-t);display:none">✓ ذخیره شد</div>
       </div>
     </div>
@@ -1487,43 +1485,31 @@ document.addEventListener('DOMContentLoaded', function() {
     hidden.value = 1;
     document.querySelector('.cp-body').appendChild(hidden);
   }
-  // بارگذاری تنظیمات سرور از localStorage
+  // بارگذاری تنظیمات ذخیره‌شده
   const savedServer = localStorage.getItem('CBeeNet-server-name') || 'CBeeNet';
   const savedPrefix = localStorage.getItem('CBeeNet-server-prefix') || '';
-  const savedTemplate = localStorage.getItem('CBeeNet-server-template') || '[{name}][{prefix}][{protocol}]';
+  const savedTemplate = localStorage.getItem('CBeeNet-link-template') || '[{server}][{prefix}][{protocol}]';
   document.getElementById('server-name-input').value = savedServer;
   document.getElementById('server-prefix-input').value = savedPrefix;
-  document.getElementById('server-template-input').value = savedTemplate;
-  updateServerFormatPreview();
+  document.getElementById('link-name-template').value = savedTemplate;
 });
-function updateServerFormatPreview(){
-  const name = document.getElementById('server-name-input').value.trim() || 'CBeeNet';
-  const prefix = document.getElementById('server-prefix-input').value.trim() || '';
-  const template = document.getElementById('server-template-input').value.trim() || '[{name}][{prefix}][{protocol}]';
-  const preview = template
-    .replace(/{name}/g, name)
-    .replace(/{prefix}/g, prefix)
-    .replace(/{protocol}/g, 'Protocol');
-  document.getElementById('server-format-preview').textContent = preview;
-}
-document.getElementById('server-name-input').addEventListener('input', updateServerFormatPreview);
-document.getElementById('server-prefix-input').addEventListener('input', updateServerFormatPreview);
-document.getElementById('server-template-input').addEventListener('input', updateServerFormatPreview);
+
+// ========== ذخیره تنظیمات سرور ==========
 async function saveServerSettings(){
   const name = document.getElementById('server-name-input').value.trim() || 'CBeeNet';
   const prefix = document.getElementById('server-prefix-input').value.trim() || '';
-  const template = document.getElementById('server-template-input').value.trim() || '[{name}][{prefix}][{protocol}]';
+  const template = document.getElementById('link-name-template').value.trim() || '[{server}][{prefix}][{protocol}]';
   try {
     const r = await authF('/api/settings/server', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ server_name: name, server_prefix: prefix, server_template: template })
+      body: JSON.stringify({ server_name: name, server_prefix: prefix, link_template: template })
     });
     const result = await r.json();
     if(result.ok){
       localStorage.setItem('CBeeNet-server-name', name);
       localStorage.setItem('CBeeNet-server-prefix', prefix);
-      localStorage.setItem('CBeeNet-server-template', template);
+      localStorage.setItem('CBeeNet-link-template', template);
       document.getElementById('server-save-result').style.display = 'block';
       setTimeout(() => document.getElementById('server-save-result').style.display = 'none', 3000);
       toast('تنظیمات سرور ذخیره شد ✓', 'ok');
@@ -1672,21 +1658,33 @@ async function loadLinks(){
     const grid=document.getElementById('links-grid'),empty=document.getElementById('links-empty');
     if(!links.length){grid.innerHTML='';empty.style.display='block';document.getElementById('lsummary').innerHTML='<div class="empty"><i class="ti ti-link-off"></i><p>کانفیگی وجود ندارد</p></div>';return}
     empty.style.display='none';
-    // استفاده از تنظیمات سرور برای نمایش نام
+    // گرفتن تنظیمات از localStorage
     const serverName = localStorage.getItem('CBeeNet-server-name') || 'CBeeNet';
     const serverPrefix = localStorage.getItem('CBeeNet-server-prefix') || '';
-    const serverTemplate = localStorage.getItem('CBeeNet-server-template') || '[{name}][{prefix}][{protocol}]';
+    const linkTemplate = localStorage.getItem('CBeeNet-link-template') || '[{server}][{prefix}][{protocol}]';
+    // تابع جایگزین‌کننده متغیرها
+    function formatLinkName(label, protocol){
+      let result = linkTemplate;
+      result = result.replace(/{server}/g, serverName);
+      result = result.replace(/{prefix}/g, serverPrefix);
+      result = result.replace(/{label}/g, label);
+      result = result.replace(/{protocol}/g, protocol);
+      return result;
+    }
     grid.innerHTML=links.map(l=>{
       const lim=l.limit_bytes===0?'∞':fmtB(l.limit_bytes);
       const pct=l.limit_bytes===0?0:Math.min(100,l.used_bytes/l.limit_bytes*100);
       const bc=pct>90?'var(--red)':pct>70?'var(--amber)':'var(--accent)';
       const allowed=l.active&&!l.expired;
       const cardCls=!l.active?'is-off':(l.expired?'is-exp':'');
+      const proto = (l.protocols && l.protocols[0]) || 'vless-ws';
+      const protoLabel = proto === 'vless-ws' ? 'VLESS-WS' : proto.replace('xhttp-', '').toUpperCase();
+      const displayLabel = formatLinkName(l.label, protoLabel);
       return `<div class="cfg-card ${cardCls}">
         <div class="cfg-row">
           <span class="cfg-status-dot ${allowed?'pulse':''}"></span>
           <div class="cfg-identity">
-            <div class="cfg-label">${esc(l.label)}</div>
+            <div class="cfg-label">${esc(displayLabel)}</div>
             <div class="cfg-sub-meta">
               <span class="cfg-uuid-mini" onclick="navigator.clipboard.writeText('${l.uuid}').then(()=>toast('UUID کپی شد','ok'))" title="${l.uuid}"><i class="ti ti-fingerprint"></i> ${l.uuid.slice(0,10)}…</span>
               <span>${new Date(l.created_at).toLocaleDateString('fa-IR')}</span>
