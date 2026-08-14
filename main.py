@@ -172,7 +172,7 @@ async def startup():
     timeout = httpx.Timeout(30.0, connect=10.0)
     http_client = httpx.AsyncClient(limits=limits, timeout=timeout, follow_redirects=True)
     await load_state()
-    log_activity("system", "سرور راه‌اندازی شد", "ok")
+    log_activity("system", "Server started", "ok")
     logger.info(f"CBeeNet Gateway started on port {CONFIG['port']}")
 
 @app.on_event("shutdown")
@@ -205,7 +205,6 @@ async def fetch_ip_flag(ip: str) -> str:
     return ""
 
 def format_link_remark(label: str, protocol: str) -> str:
-    """Generates remark based on global template and settings."""
     template = GLOBAL_SETTINGS.get("link_template", "{server}-{label}")
     server_name = GLOBAL_SETTINGS.get("server_name", "CBeeNet")
     server_prefix = GLOBAL_SETTINGS.get("server_prefix", "")
@@ -213,15 +212,14 @@ def format_link_remark(label: str, protocol: str) -> str:
     result = result.replace("{server}", server_name)
     result = result.replace("{prefix}", server_prefix)
     result = result.replace("{label}", label)
-    # Protocol mapping for cleaner display
-    proto_map = {
-        "vless-ws": "VLESS-WS",
-        "xhttp-packet-up": "XHTTP-packet",
-        "xhttp-stream-up": "XHTTP-stream",
-        "xhttp-stream-one": "XHTTP-ultra"
-    }
-    proto_display = proto_map.get(protocol, protocol)
-    result = result.replace("{protocol}", proto_display)
+    if "{protocol}" in template:
+        proto_map = {
+            "vless-ws": "VLESS-WS",
+            "xhttp-packet-up": "XHTTP-packet",
+            "xhttp-stream-up": "XHTTP-stream",
+            "xhttp-stream-one": "XHTTP-ultra"
+        }
+        result = result.replace("{protocol}", proto_map.get(protocol, protocol))
     return result
 
 def _format_vless_uri(uuid: str, ip: str, port: int, remark: str, protocol: str, original_host: str) -> str:
@@ -253,11 +251,11 @@ def generate_vless_links(link_data: dict, uuid: str, host: str) -> list[str]:
         port = 443
 
     label = link_data['label']
+    template = GLOBAL_SETTINGS.get("link_template", "{server}-{label}")
     for ip in ips:
         for proto in protocols:
             remark = format_link_remark(label, proto)
-            # If multiple IPs or protocols, add suffix to distinguish
-            if len(ips) > 1 or len(protocols) > 1:
+            if (len(ips) > 1 or len(protocols) > 1) and "{protocol}" not in template:
                 suffix = f"-{proto}" if len(protocols) > 1 else ""
                 if len(ips) > 1:
                     suffix += f"-{ip.replace('.', '-')}"
@@ -302,7 +300,7 @@ def client_ip(request: Request) -> str:
     if fwd: return fwd.split(",")[0].strip()
     real_ip = request.headers.get("x-real-ip")
     if real_ip: return real_ip.strip()
-    return request.client.host if request.client else "نامشخص"
+    return request.client.host if request.client else "unknown"
 
 # ── Default link ──────────────────────────────────────────────────────────────
 _default_link_created = False
@@ -315,7 +313,7 @@ async def ensure_default_link():
             uid = f"{uid[:8]}-{uid[8:12]}-{uid[12:16]}-{uid[16:20]}-{uid[20:32]}"
             if uid not in LINKS:
                 LINKS[uid] = {
-                    "label": "لینک پیش‌فرض", "limit_bytes": 0, "used_bytes": 0,
+                    "label": "Default Link", "limit_bytes": 0, "used_bytes": 0,
                     "created_at": datetime.now().isoformat(), "active": True,
                     "expires_at": None, "note": "", "is_default": True, "sub_id": None,
                     "protocols": [DEFAULT_PROTOCOL], "ips": [], "port": None, "is_personal": False
@@ -326,18 +324,18 @@ async def ensure_default_link():
 # ── Reseller Capacity ─────────────────────────────────────────────────────────
 async def check_reseller_capacity(reseller_id: str, new_limit_bytes: int):
     if new_limit_bytes == 0:
-        raise HTTPException(status_code=400, detail="نماینده نمی‌تواند کانفیگ با حجم نامحدود بسازد.")
+        raise HTTPException(status_code=400, detail="Reseller cannot create unlimited config.")
     async with RESELLERS_LOCK:
         res = RESELLERS.get(reseller_id)
         if not res or not res.get("active", True):
-            raise HTTPException(status_code=403, detail="اکانت نماینده غیرفعال است")
+            raise HTTPException(status_code=403, detail="Reseller account is inactive")
         allocated = 0
         async with LINKS_LOCK:
             for d in LINKS.values():
                 if d.get("creator_id") == reseller_id:
                     allocated += d.get("limit_bytes", 0)
         if allocated + new_limit_bytes > res.get("total_bytes", 0):
-            raise HTTPException(status_code=400, detail="حجم مجاز شما برای ساخت کانفیگ به پایان رسیده است.")
+            raise HTTPException(status_code=400, detail="Reseller quota exceeded.")
 
 # ── Basic endpoints ───────────────────────────────────────────────────────────
 @app.get("/")
@@ -411,7 +409,7 @@ async def sub_group_subscription(uuid_key: str, request: Request):
 @app.post("/api/subs")
 async def create_sub(request: Request, _=Depends(require_auth)):
     body = await request.json()
-    name = (body.get("name") or "گروه جدید").strip()[:60]
+    name = (body.get("name") or "New Group").strip()[:60]
     desc = (body.get("desc") or "").strip()[:200]
     password = (body.get("password") or "").strip()
     sub_id = generate_uuid()
@@ -421,7 +419,7 @@ async def create_sub(request: Request, _=Depends(require_auth)):
             "password_hash": hash_password(password) if password else None,
             "uuid_key": uuid_key, "created_at": datetime.now().isoformat(), "link_ids": []}
     asyncio.create_task(save_state())
-    log_activity("sub", f"گروه «{name}» ساخته شد", "ok")
+    log_activity("sub", f"Group '{name}' created", "ok")
     host = get_host()
     return {"sub_id": sub_id, **SUBS[sub_id],
         "public_url": f"https://{host}/p/{uuid_key}", "sub_url": f"https://{host}/sub-group/{uuid_key}"}
@@ -470,7 +468,7 @@ async def delete_sub(sub_id: str, _=Depends(require_auth)):
         for link in LINKS.values():
             if link.get("sub_id") == sub_id: link["sub_id"] = None
     asyncio.create_task(save_state())
-    log_activity("sub", f"گروه «{name}» حذف شد", "warn")
+    log_activity("sub", f"Group '{name}' deleted", "warn")
     return {"ok": True, "deleted": sub_id}
 
 @app.post("/api/subs/{sub_id}/links")
@@ -500,7 +498,7 @@ async def api_login(request: Request):
     
     if hash_password(pw) == AUTH["password_hash"]:
         token = await create_session("admin", "admin")
-        log_activity("auth", f"ورود ادمین از {ip}", "ok")
+        log_activity("auth", f"Admin login from {ip}", "ok")
         resp = JSONResponse({"ok": True, "role": "admin"})
         resp.set_cookie(SESSION_COOKIE, token, max_age=SESSION_TTL, httponly=True, samesite="lax", path="/")
         return resp
@@ -509,13 +507,13 @@ async def api_login(request: Request):
         for rid, res in RESELLERS.items():
             if res.get("active", True) and res.get("password_hash") == hash_password(pw):
                 token = await create_session("reseller", rid)
-                log_activity("auth", f"ورود نماینده {res['name']} از {ip}", "ok")
+                log_activity("auth", f"Reseller {res['name']} login from {ip}", "ok")
                 resp = JSONResponse({"ok": True, "role": "reseller"})
                 resp.set_cookie(SESSION_COOKIE, token, max_age=SESSION_TTL, httponly=True, samesite="lax", path="/")
                 return resp
     
-    log_activity("auth", f"تلاش ورود ناموفق از {ip}", "err")
-    raise HTTPException(status_code=401, detail="رمز عبور اشتباه است")
+    log_activity("auth", f"Failed login attempt from {ip}", "err")
+    raise HTTPException(status_code=401, detail="Wrong password")
 
 @app.post("/api/logout")
 async def api_logout(request: Request):
@@ -533,15 +531,15 @@ async def api_me(request: Request):
 async def api_change_password(request: Request, token=Depends(require_auth)):
     body = await request.json()
     if hash_password(str(body.get("current_password", ""))) != AUTH["password_hash"]:
-        raise HTTPException(status_code=400, detail="رمز فعلی اشتباه است")
+        raise HTTPException(status_code=400, detail="Current password is incorrect")
     new = str(body.get("new_password", ""))
-    if len(new) < 4: raise HTTPException(status_code=400, detail="رمز جدید باید حداقل ۴ کاراکتر باشد")
+    if len(new) < 4: raise HTTPException(status_code=400, detail="New password must be at least 4 characters")
     AUTH["password_hash"] = hash_password(new)
     async with SESSIONS_LOCK:
         SESSIONS.clear()
         SESSIONS[token] = time.time() + SESSION_TTL
     await save_state()
-    log_activity("auth", "رمز عبور پنل تغییر کرد", "ok")
+    log_activity("auth", "Panel password changed", "ok")
     return {"ok": True}
 
 # ── Global IP Settings ────────────────────────────────────────────────────────
@@ -555,7 +553,7 @@ async def update_global_ips(request: Request, _=Depends(require_auth)):
     GLOBAL_SETTINGS["ips"] = [ip.strip() for ip in body.get("ips", []) if ip.strip()]
     GLOBAL_SETTINGS["port"] = int(body.get("port")) if body.get("port") else None
     asyncio.create_task(save_state())
-    log_activity("system", "تنظیمات IP/پورت سراسری بروزرسانی شد", "info")
+    log_activity("system", "Global IP/port settings updated", "info")
     return {"ok": True, "settings": dict(GLOBAL_SETTINGS)}
 
 # ── Server Settings (server name, prefix, template) ────────────────────────
@@ -574,7 +572,7 @@ async def update_server_settings(request: Request, _=Depends(require_auth)):
     GLOBAL_SETTINGS["server_prefix"] = str(body.get("server_prefix", "")).strip()
     GLOBAL_SETTINGS["link_template"] = str(body.get("link_template", "{server}-{label}")).strip() or "{server}-{label}"
     asyncio.create_task(save_state())
-    log_activity("system", "تنظیمات سرور بروزرسانی شد", "info")
+    log_activity("system", "Server settings updated", "info")
     return {"ok": True, "settings": dict(GLOBAL_SETTINGS)}
 
 # ── Stats ─────────────────────────────────────────────────────────────────────
@@ -600,9 +598,9 @@ async def get_connections(_=Depends(require_auth)):
     async with LINKS_LOCK: snap = dict(LINKS)
     grouped: dict[str, dict] = {}
     for conn_id, c in connections.items():
-        ip = c.get("ip", "نامشخص")
+        ip = c.get("ip", "unknown")
         link = snap.get(c.get("uuid"))
-        label = link.get("label") if link else "نامشخص"
+        label = link.get("label") if link else "unknown"
         g = grouped.get(ip)
         if g is None:
             g = {"ip": ip, "sessions": 0, "bytes": 0, "labels": set(), "transports": set(),
@@ -615,7 +613,7 @@ async def get_connections(_=Depends(require_auth)):
             if not g["first_connected_at"] or ca < g["first_connected_at"]: g["first_connected_at"] = ca
             if not g["last_connected_at"] or ca > g["last_connected_at"]: g["last_connected_at"] = ca
     result = [{"ip": k, "sessions": v["sessions"], "labels": sorted(v["labels"]),
-        "label": " · ".join(sorted(v["labels"])) if v["labels"] else "نامشخص",
+        "label": " · ".join(sorted(v["labels"])) if v["labels"] else "unknown",
         "transports": sorted(v["transports"]), "bytes": v["bytes"],
         "bytes_fmt": fmt_bytes(v["bytes"]), "connected_at": v["first_connected_at"],
         "last_connected_at": v["last_connected_at"]} for k, v in grouped.items()]
@@ -628,7 +626,7 @@ async def create_link(request: Request):
     s = await require_reseller_auth(request)
     body = await request.json()
     
-    label = (body.get("label") or "لینک جدید").strip()[:60]
+    label = (body.get("label") or "New Link").strip()[:60]
     lv = float(body.get("limit_value") or 0)
     lu = body.get("limit_unit") or "GB"
     limit_bytes = 0 if lv <= 0 else parse_size_to_bytes(lv, lu)
@@ -671,7 +669,7 @@ async def create_link(request: Request):
                     ids = SUBS[sub_id].setdefault("link_ids", [])
                     if uid not in ids: ids.append(uid)
     asyncio.create_task(save_state())
-    log_activity("link", f"کانفیگ «{label}» توسط {s['user_id']} ساخته شد", "ok")
+    log_activity("link", f"Link '{label}' created by {s['user_id']}", "ok")
     host = get_host()
     vless_list = generate_vless_links(LINKS[uid], uid, host)
     return {"uuid": uid, **LINKS[uid], "vless_link": "\n".join(vless_list),
@@ -748,7 +746,7 @@ async def create_links_bulk(request: Request):
                 sub_obj["link_ids"].append(uid)
     
     asyncio.create_task(save_state())
-    log_activity("link", f"{count} کانفیگ {base_label} ساخته شد", "ok")
+    log_activity("link", f"{count} bulk links '{base_label}' created", "ok")
     
     host = get_host()
     all_vless = []
@@ -822,7 +820,7 @@ async def delete_link(uid: str, request: Request):
                     ids = SUBS[sub_id].get("link_ids", [])
                     if uid in ids: ids.remove(uid)
     asyncio.create_task(save_state())
-    log_activity("link", f"کانفیگ {uid[:8]}... حذف شد", "err")
+    log_activity("link", f"Link {uid[:8]}... deleted", "err")
     return {"ok": True, "deleted": uid}
 
 # ── Reset Reseller Token ──────────────────────────────────────────────────────
@@ -863,8 +861,8 @@ async def create_reseller(request: Request, _=Depends(require_auth)):
     name = str(body.get("name", "")).strip()
     pw = str(body.get("password", "")).strip()
     limit_gb = float(body.get("limit_gb") or 0)
-    if not name or not pw: raise HTTPException(400, "نام و رمز عبور الزامی است")
-    if limit_gb <= 0: raise HTTPException(400, "حجم باید بیشتر از ۰ باشد")
+    if not name or not pw: raise HTTPException(400, "Name and password are required")
+    if limit_gb <= 0: raise HTTPException(400, "Limit must be greater than 0")
     rid = secrets.token_hex(8)
     async with RESELLERS_LOCK:
         RESELLERS[rid] = {
@@ -875,26 +873,26 @@ async def create_reseller(request: Request, _=Depends(require_auth)):
             "created_at": datetime.now().isoformat()
         }
     asyncio.create_task(save_state())
-    log_activity("system", f"نماینده «{name}» با {limit_gb}GB ساخته شد", "ok")
+    log_activity("system", f"Reseller '{name}' created with {limit_gb}GB", "ok")
     return {"ok": True, "id": rid, "name": name, "limit_gb": limit_gb}
 
 @app.patch("/api/resellers/{rid}")
 async def update_reseller(rid: str, request: Request, _=Depends(require_auth)):
     body = await request.json()
     async with RESELLERS_LOCK:
-        if rid not in RESELLERS: raise HTTPException(404, "نماینده یافت نشد")
+        if rid not in RESELLERS: raise HTTPException(404, "Reseller not found")
         r = RESELLERS[rid]
         if "name" in body and str(body["name"]).strip():
             r["name"] = str(body["name"]).strip()
         if "active" in body:
             r["active"] = bool(body["active"])
-            log_activity("system", f"نماینده «{r['name']}» {'فعال' if r['active'] else 'غیرفعال'} شد", "info")
+            log_activity("system", f"Reseller '{r['name']}' {'activated' if r['active'] else 'deactivated'}", "info")
         if "limit_gb" in body:
             r["total_bytes"] = parse_size_to_bytes(float(body["limit_gb"]), "GB")
-            log_activity("system", f"حجم نماینده «{r['name']}» به {body['limit_gb']}GB تغییر کرد", "info")
+            log_activity("system", f"Reseller '{r['name']}' limit changed to {body['limit_gb']}GB", "info")
         if "password" in body and str(body["password"]).strip():
             r["password_hash"] = hash_password(str(body["password"]).strip())
-            log_activity("system", f"رمز نماینده «{r['name']}» تغییر کرد", "info")
+            log_activity("system", f"Reseller '{r['name']}' password changed", "info")
     asyncio.create_task(save_state())
     return {"ok": True}
 
@@ -904,7 +902,7 @@ async def delete_reseller(rid: str, _=Depends(require_auth)):
         if rid not in RESELLERS: raise HTTPException(404)
         del RESELLERS[rid]
     asyncio.create_task(save_state())
-    log_activity("system", f"نماینده {rid[:8]}... حذف شد", "warn")
+    log_activity("system", f"Reseller {rid[:8]}... deleted", "warn")
     return {"ok": True, "deleted": rid}
 
 # ── Reseller Report (Admin) ───────────────────────────────────────────────────
@@ -921,11 +919,11 @@ async def reseller_token_login(login_token: str):
         for rid, res in RESELLERS.items():
             if res.get("login_token") == login_token and res.get("active", True):
                 token = await create_session("reseller", rid)
-                log_activity("auth", f"ورود {res['name']} با لینک اختصاصی", "ok")
+                log_activity("auth", f"Reseller {res['name']} logged in via token", "ok")
                 resp = RedirectResponse(url="/CFOX")
                 resp.set_cookie(SESSION_COOKIE, token, max_age=SESSION_TTL, httponly=True, samesite="lax", path="/")
                 return resp
-    return HTMLResponse("<h2 style='padding:40px;font-family:sans-serif'>لینک نامعتبر است</h2>", status_code=404)
+    return HTMLResponse("<h2 style='padding:40px;font-family:sans-serif'>Invalid link</h2>", status_code=404)
 
 # ── VLESS Relay ───────────────────────────────────────────────────────────────
 from relay_vless import RELAY_BUF, parse_vless_header, check_and_use, relay_ws_to_tcp, relay_tcp_to_ws, websocket_tunnel
@@ -960,7 +958,7 @@ async def public_sub_page(uuid_key: str, request: Request):
     from public_page import get_public_page_html
     async with SUBS_LOCK:
         sub = next(({"sub_id": sid, **s} for sid, s in SUBS.items() if s.get("uuid_key") == uuid_key), None)
-        if not sub: return HTMLResponse("<h2 style='font-family:sans-serif;padding:40px'>گروه پیدا نشد</h2>", status_code=404)
+        if not sub: return HTMLResponse("<h2 style='font-family:sans-serif;padding:40px'>Group not found</h2>", status_code=404)
     return HTMLResponse(content=get_public_page_html(uuid_key))
 
 @app.get("/api/public/sub/{uuid_key}")
