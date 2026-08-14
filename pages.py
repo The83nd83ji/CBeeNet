@@ -1,4 +1,4 @@
-# pages.py - CBee Gateway v1.0.0 (3x-UI Dashboard + Multi-Language + Imperial Theme)
+# pages.py - CBee Gateway v1.0.0 (3x-UI Style Dashboard + Multi-Language + Prestige Theme)
 import json
 
 # =============================== LOGIN PAGE ===============================
@@ -329,9 +329,10 @@ function applyLoginLang(lang){
   document.getElementById('login-btn-text').textContent = dict.btn_text;
   document.getElementById('login-telegram').textContent = dict.telegram;
   
-  // Set dir and language
+  // Set dir and language - for password field, keep ltr to show dots correctly
   document.documentElement.lang = lang;
-  document.documentElement.dir = lang === 'fa' ? 'rtl' : 'ltr';
+  // For password field, we want ltr direction to show ••• correctly
+  document.getElementById('pw').dir = 'ltr';
   
   // Update active button
   document.querySelectorAll('.lang-btn').forEach(b => b.classList.toggle('active', b.dataset.lang === lang));
@@ -392,7 +393,7 @@ LANG = {
         "active": "Active",
         "inactive": "Inactive",
         "refresh": "Refresh",
-        "traffic_trend": "Traffic Usage Trend",
+        "traffic_trend": "Bandwidth Usage",
         "service_status": "Service Status",
         "top_connections": "Live Connections",
         "no_connections": "No connections",
@@ -437,7 +438,7 @@ LANG = {
         "test_websocket": "WebSocket Test",
         "dark_theme": "Dark Theme",
         "light_theme": "Light Theme",
-        "imperial_theme": "Imperial Theme",
+        "prestige_theme": "Prestige Theme",
         "blue": "Blue",
         "red": "Red",
         "yellow": "Yellow",
@@ -566,6 +567,37 @@ LANG = {
         "password_change": "Password Change",
         "save_changes": "Save Changes",
         "cancel_changes": "Cancel",
+        "live": "Live",
+        "running_time": "Running Time",
+        "manage_configs": "Manage Configs for",
+        "select_configs": "Select configs to include in this group",
+        "select_all": "Select All",
+        "deselect_all": "Deselect All",
+        "changes_apply": "Changes apply immediately",
+        "new_group_title": "Create New Group",
+        "new_group_sub": "Create a separate public page to manage configs",
+        "group_name": "Group Name",
+        "description_optional": "Description (optional)",
+        "public_page_password": "Public Page Password (optional)",
+        "public_page_info": "This group's public page will be accessible via a unique link.",
+        "edit_config": "Edit Config",
+        "quota_0_unlimited": "Quota (0 = unlimited)",
+        "expiry_days": "Expiry (days from now, 0 = no change/unlimited)",
+        "expiry_note": "To keep current expiry, leave expiry field as 0.",
+        "random_uuid": "Random UUID · Choose quota, expiry and protocol",
+        "uuid_note": "UUID is generated randomly · Only registered UUIDs can connect · Protocol cannot be changed after creation.",
+        "each_group_public": "Each group has its own public page with its configs",
+        "single_sub_desc": "Each config has its own subscription URL. Click the",
+        "icon_on_card": "icon on the config card.",
+        "full_sub_note": "This URL only works in the browser where you're logged in (requires session cookie).",
+        "based_on_mb": "Based on MB per hour",
+        "lang_note": "Default language is English. Page will refresh after change.",
+        "groups": "Groups",
+        "usage": "Usage",
+        "average": "Average",
+        "protocols_legend": "Protocols",
+        "daily_legend": "Daily",
+        "hourly_legend": "Hourly",
     },
     "fa": {
         "dashboard": "داشبورد",
@@ -578,7 +610,7 @@ LANG = {
         "active": "فعال",
         "inactive": "غیرفعال",
         "refresh": "رفرش",
-        "traffic_trend": "روند مصرف ترافیک",
+        "traffic_trend": "مصرف پهنای باند",
         "service_status": "وضعیت سرویس",
         "top_connections": "اتصال‌های لحظه‌ای",
         "no_connections": "هیچ اتصالی",
@@ -623,7 +655,7 @@ LANG = {
         "test_websocket": "تست WebSocket",
         "dark_theme": "تم تاریک",
         "light_theme": "تم روشن",
-        "imperial_theme": "تم امپراتوری",
+        "prestige_theme": "تم پرستیژ",
         "blue": "آبی",
         "red": "قرمز",
         "yellow": "زرد",
@@ -752,6 +784,37 @@ LANG = {
         "password_change": "تغییر رمز عبور",
         "save_changes": "ذخیره تغییرات",
         "cancel_changes": "انصراف",
+        "live": "لحظه‌ای",
+        "running_time": "مدت روشن بودن",
+        "manage_configs": "مدیریت کانفیگ‌های",
+        "select_configs": "کانفیگ‌هایی که می‌خواهید در این گروه باشند را انتخاب کنید",
+        "select_all": "انتخاب همه",
+        "deselect_all": "لغو همه",
+        "changes_apply": "تغییرات بلافاصله اعمال می‌شود",
+        "new_group_title": "ساخت گروه جدید",
+        "new_group_sub": "یک صفحه پابلیک مجزا برای مدیریت کانفیگ‌ها بسازید",
+        "group_name": "نام گروه",
+        "description_optional": "توضیحات (اختیاری)",
+        "public_page_password": "رمز صفحه پابلیک (اختیاری)",
+        "public_page_info": "صفحه پابلیک این گروه با یک لینک منحصر‌به‌فرد در اینترنت در دسترس خواهد بود.",
+        "edit_config": "ویرایش کانفیگ",
+        "quota_0_unlimited": "سهمیه (0 = نامحدود)",
+        "expiry_days": "انقضا (روز از الان، 0 = بدون تغییر/نامحدود)",
+        "expiry_note": "برای حفظ انقضای فعلی، فیلد انقضا را صفر بگذارید.",
+        "random_uuid": "UUID تصادفی · سهمیه، انقضا و پروتکل رو انتخاب کن",
+        "uuid_note": "UUID کاملاً رندوم تولید می‌شود · فقط UUID‌های ثبت‌شده اجازه اتصال دارند · پروتکل پس از ساخت قابل تغییر نیست.",
+        "each_group_public": "هر گروه یک صفحه پابلیک مجزا با کانفیگ‌های خودش دارد",
+        "single_sub_desc": "هر کانفیگ URL سابسکریپشن مخصوص دارد. از کارت کانفیگ روی آیکون",
+        "icon_on_card": "کلیک کنید.",
+        "full_sub_note": "این آدرس فقط در مرورگری که به پنل وارد شده کار می‌کند (نیاز به کوکی سشن).",
+        "based_on_mb": "بر اساس مگابایت در هر ساعت",
+        "lang_note": "زبان پیش‌فرض انگلیسی است. پس از تغییر، صفحه رفرش می‌شود.",
+        "groups": "گروه",
+        "usage": "مصرف",
+        "average": "میانگین",
+        "protocols_legend": "پروتکل‌ها",
+        "daily_legend": "روزانه",
+        "hourly_legend": "ساعتی",
     }
 }
 
@@ -801,32 +864,33 @@ DASHBOARD_HTML = r"""<!DOCTYPE html>
 [data-theme="dark-blue"]{--accent:#1677ff;--accent2:#4096ff;--accent-d:rgba(22,119,255,0.12);--accent-glow:rgba(22,119,255,0.35);--card-bh:rgba(22,119,255,0.20);}
 [data-theme="dark-red"]{--accent:#ef4444;--accent2:#f87171;--accent-d:rgba(239,68,68,0.12);--accent-glow:rgba(239,68,68,0.35);--card-bh:rgba(239,68,68,0.20);}
 [data-theme="dark-yellow"]{--accent:#f59e0b;--accent2:#fbbf24;--accent-d:rgba(245,158,11,0.12);--accent-glow:rgba(245,158,11,0.35);--card-bh:rgba(245,158,11,0.20);}
-[data-theme="dark-imperial"]{
-  --bg:#0a0815;
-  --bg2:#120f24;
-  --bg3:#1a1635;
-  --card:#120f24;
-  --card-b:#2a2448;
-  --card-bh:rgba(212,175,55,0.25);
-  --accent:#d4af37;
-  --accent2:#e8c84a;
-  --accent-d:rgba(212,175,55,0.12);
-  --accent-glow:rgba(212,175,55,0.35);
-  --green:#34d399;
-  --green-bg:rgba(52,211,153,0.10);
-  --green-t:#6ee7b7;
-  --red:#f87171;
-  --red-bg:rgba(248,113,113,0.10);
-  --red-t:#fca5a5;
-  --amber:#fbbf24;
-  --amber-bg:rgba(251,191,36,0.10);
-  --amber-t:#fcd34d;
+/* ===== PRESTIGE THEME (3x-UI Style) ===== */
+[data-theme="dark-prestige"]{
+  --bg:#0a0e17;
+  --bg2:#111927;
+  --bg3:#1a2438;
+  --card:#111927;
+  --card-b:#1e2d45;
+  --card-bh:rgba(22,119,255,0.25);
+  --accent:#1a7aff;
+  --accent2:#4d94ff;
+  --accent-d:rgba(26,122,255,0.15);
+  --accent-glow:rgba(26,122,255,0.35);
+  --green:#10b981;
+  --green-bg:rgba(16,185,129,0.10);
+  --green-t:#34d399;
+  --red:#ef4444;
+  --red-bg:rgba(239,68,68,0.10);
+  --red-t:#f87171;
+  --amber:#f59e0b;
+  --amber-bg:rgba(245,158,11,0.10);
+  --amber-t:#fbbf24;
   --purple:#8b5cf6;
-  --purple-bg:rgba(139,92,246,0.15);
-  --t1:#f0ece4;
-  --t2:#b8b0a0;
-  --t3:#8a8270;
-  --shadow:0 8px 32px rgba(0,0,0,0.7);
+  --purple-bg:rgba(139,92,246,0.10);
+  --t1:#e8edf5;
+  --t2:#8fa4c8;
+  --t3:#5a7298;
+  --shadow:0 8px 32px rgba(0,0,0,0.6);
 }
 [data-theme="light-blue"]{--bg:#f6f8fa;--bg2:#ffffff;--bg3:#eaeef2;--card:#ffffff;--card-b:#d0d7de;--card-bh:rgba(22,119,255,0.25);--accent:#1677ff;--accent2:#4096ff;--accent-d:rgba(22,119,255,0.08);--accent-glow:rgba(22,119,255,0.25);--t1:#24292f;--t2:#57606a;--t3:#8b949e;--shadow:0 8px 28px rgba(0,0,0,0.08);}
 [data-theme="light-red"]{--bg:#f6f8fa;--bg2:#ffffff;--bg3:#eaeef2;--card:#ffffff;--card-b:#d0d7de;--card-bh:rgba(239,68,68,0.25);--accent:#ef4444;--accent2:#f87171;--accent-d:rgba(239,68,68,0.08);--accent-glow:rgba(239,68,68,0.25);--t1:#24292f;--t2:#57606a;--t3:#8b949e;--shadow:0 8px 28px rgba(0,0,0,0.08);}
@@ -943,7 +1007,7 @@ a{color:inherit;text-decoration:none}
 }
 [dir="ltr"] .dash-stat-card .icon{left:auto;right:16px}
 
-/* Sparkline row - first row of charts */
+/* Sparkline row */
 .dash-sparkline-row{
   display:grid;
   grid-template-columns:1fr 1fr 1fr;
@@ -992,7 +1056,7 @@ a{color:inherit;text-decoration:none}
 .dash-spark-card .spark-sub{font-size:9.5px;color:var(--t3);margin-top:4px;display:flex;align-items:center;gap:4px}
 .dash-spark-card .spark-sub .dot{width:5px;height:5px;border-radius:50%;display:inline-block;background:var(--accent)}
 
-/* Main chart row */
+/* Main chart row - Traffic chart only */
 .dash-chart-row{
   display:grid;
   grid-template-columns:2fr 1fr;
@@ -1049,8 +1113,11 @@ a{color:inherit;text-decoration:none}
 .dash-conn-item .ip{font-family:monospace;color:var(--t1);}
 .dash-conn-item .proto{font-size:9px;padding:2px 7px;border-radius:5px;background:var(--accent-d);color:var(--accent2);}
 .dash-conn-item .traffic{color:var(--t2);}
+.dash-conn-item .status-dot{width:6px;height:6px;border-radius:50%;display:inline-block;}
+.status-on{background:var(--green);}
+.status-off{background:var(--red);}
 
-/* Second row charts */
+/* Protocol Distribution - Bar Chart */
 .dash-charts-second{
   display:grid;
   grid-template-columns:1fr 1fr 1fr;
@@ -1538,7 +1605,7 @@ a{color:inherit;text-decoration:none}
 <body>
 <div class="toast" id="toast"></div>
 
-<!-- ===== Modals (same as before) ===== -->
+<!-- ===== MODALS (same as before) ===== -->
 <div class="modal-bg" id="modal-links">
   <div class="modal-v2" style="max-width:500px">
     <div class="lmodal-head">
@@ -1621,7 +1688,7 @@ a{color:inherit;text-decoration:none}
   </div>
 </div>
 
-<!-- ===== Mobile Top Bar ===== -->
+<!-- ===== MOBILE TOP BAR ===== -->
 <div class="mob-top">
   <div class="ml">
     <span class="mob-title">CBee</span>
@@ -1632,10 +1699,10 @@ a{color:inherit;text-decoration:none}
   </div>
 </div>
 
-<!-- ===== Overlay ===== -->
+<!-- ===== OVERLAY ===== -->
 <div class="overlay" id="overlay"></div>
 
-<!-- ===== Sidebar ===== -->
+<!-- ===== SIDEBAR ===== -->
 <aside class="sidebar" id="sb">
   <button class="sb-close" id="close-sb"><i class="ti ti-x"></i></button>
   <div class="logo">
@@ -1664,7 +1731,7 @@ a{color:inherit;text-decoration:none}
   </div>
 </aside>
 
-<!-- ===== Main Content ===== -->
+<!-- ===== MAIN CONTENT ===== -->
 <main class="main">
 
 <!-- ============================================================ -->
@@ -1736,10 +1803,10 @@ a{color:inherit;text-decoration:none}
     </div>
   </div>
 
-  <!-- ===== MAIN CHART ROW ===== -->
+  <!-- ===== MAIN CHART ROW (Only Traffic Chart) ===== -->
   <div class="dash-chart-row">
     <div class="dash-chart-card">
-      <div class="card-title"><i class="ti ti-activity"></i> <span data-lang="traffic_trend">Traffic Usage Trend</span></div>
+      <div class="card-title"><i class="ti ti-activity"></i> <span data-lang="traffic_trend">Bandwidth Usage</span></div>
       <div class="dash-chart-wrap"><canvas id="dashTrafficChart"></canvas></div>
     </div>
     <div class="dash-right-panel">
@@ -1760,7 +1827,7 @@ a{color:inherit;text-decoration:none}
     </div>
   </div>
 
-  <!-- ===== SECOND ROW CHARTS (Protocols, Daily, Usage) ===== -->
+  <!-- ===== SECOND ROW CHARTS (Protocols - Bar, Daily, Hourly) ===== -->
   <div class="dash-charts-second">
     <div class="dash-small-chart">
       <div class="chart-title"><i class="ti ti-chart-bar"></i> <span data-lang="protocol_distribution">Protocol Distribution</span></div>
@@ -2060,7 +2127,7 @@ a{color:inherit;text-decoration:none}
             <button class="btn btn-p theme-btn-select" data-theme="dark-blue" style="background:#1677ff;color:#fff;box-shadow:0 2px 8px rgba(22,119,255,0.4)" onclick="setTheme('dark-blue')"><i class="ti ti-circle"></i> <span data-lang="blue">Blue</span></button>
             <button class="btn btn-p theme-btn-select" data-theme="dark-red" style="background:#ef4444;color:#fff;box-shadow:0 2px 8px rgba(239,68,68,0.4)" onclick="setTheme('dark-red')"><i class="ti ti-circle"></i> <span data-lang="red">Red</span></button>
             <button class="btn btn-p theme-btn-select" data-theme="dark-yellow" style="background:#f59e0b;color:#000;box-shadow:0 2px 8px rgba(245,158,11,0.4)" onclick="setTheme('dark-yellow')"><i class="ti ti-circle"></i> <span data-lang="yellow">Yellow</span></button>
-            <button class="btn btn-p theme-btn-select" data-theme="dark-imperial" style="background:linear-gradient(135deg,#d4af37,#b8860b);color:#000;box-shadow:0 2px 8px rgba(212,175,55,0.5)" onclick="setTheme('dark-imperial')"><i class="ti ti-circle"></i> <span data-lang="imperial_theme">Imperial</span></button>
+            <button class="btn btn-p theme-btn-select" data-theme="dark-prestige" style="background:linear-gradient(135deg,#1a7aff,#4d94ff);color:#fff;box-shadow:0 2px 8px rgba(26,122,255,0.4)" onclick="setTheme('dark-prestige')"><i class="ti ti-circle"></i> <span data-lang="prestige_theme">Prestige</span></button>
           </div>
         </div>
         <div>
@@ -2165,7 +2232,7 @@ const LANG_DICT = {
     "active_connections": "Active Connections", "total_traffic": "Total Traffic",
     "total_links": "Configs", "uptime": "Uptime",
     "since_start": "Since Start", "active": "Active", "inactive": "Inactive",
-    "refresh": "Refresh", "traffic_trend": "Traffic Usage Trend",
+    "refresh": "Refresh", "traffic_trend": "Bandwidth Usage",
     "service_status": "Service Status", "top_connections": "Live Connections",
     "no_connections": "No connections", "server": "Server",
     "settings": "Settings", "language": "Language",
@@ -2187,7 +2254,7 @@ const LANG_DICT = {
     "logs": "Activity Logs", "errors": "Errors",
     "test_websocket": "WebSocket Test",
     "dark_theme": "Dark Theme", "light_theme": "Light Theme",
-    "imperial_theme": "Imperial Theme", "blue": "Blue",
+    "prestige_theme": "Prestige Theme", "blue": "Blue",
     "red": "Red", "yellow": "Yellow",
     "current_theme": "Current Theme",
     "server_settings": "Server & Link Settings",
@@ -2322,13 +2389,16 @@ const LANG_DICT = {
     "lang_note": "Default language is English. Page will refresh after change.",
     "groups": "Groups",
     "usage": "Usage", "average": "Average",
+    "protocols_legend": "Protocols",
+    "daily_legend": "Daily",
+    "hourly_legend": "Hourly",
   },
   "fa": {
     "dashboard": "داشبورد", "dashboard_sub": "نمای کلی سیستم",
     "active_connections": "اتصالات فعال", "total_traffic": "کل ترافیک",
     "total_links": "کانفیگ‌ها", "uptime": "آپتایم",
     "since_start": "از راه‌اندازی", "active": "فعال", "inactive": "غیرفعال",
-    "refresh": "رفرش", "traffic_trend": "روند مصرف ترافیک",
+    "refresh": "رفرش", "traffic_trend": "مصرف پهنای باند",
     "service_status": "وضعیت سرویس", "top_connections": "اتصال‌های لحظه‌ای",
     "no_connections": "هیچ اتصالی", "server": "سرور",
     "settings": "تنظیمات", "language": "زبان",
@@ -2350,7 +2420,7 @@ const LANG_DICT = {
     "logs": "لاگ فعالیت‌ها", "errors": "خطاها",
     "test_websocket": "تست WebSocket",
     "dark_theme": "تم تاریک", "light_theme": "تم روشن",
-    "imperial_theme": "تم امپراتوری", "blue": "آبی",
+    "prestige_theme": "تم پرستیژ", "blue": "آبی",
     "red": "قرمز", "yellow": "زرد",
     "current_theme": "تم پیش‌فرض",
     "server_settings": "تنظیمات سرور و نام لینک‌ها",
@@ -2485,6 +2555,9 @@ const LANG_DICT = {
     "lang_note": "زبان پیش‌فرض انگلیسی است. پس از تغییر، صفحه رفرش می‌شود.",
     "groups": "گروه",
     "usage": "مصرف", "average": "میانگین",
+    "protocols_legend": "پروتکل‌ها",
+    "daily_legend": "روزانه",
+    "hourly_legend": "ساعتی",
   }
 };
 
@@ -2525,7 +2598,7 @@ function applyLanguage(){
 // =====================================================================
 // ==================== THEME SYSTEM ===================================
 // =====================================================================
-let currentTheme = localStorage.getItem('CBeeNet-theme') || 'dark-blue';
+let currentTheme = localStorage.getItem('CBeeNet-theme') || 'dark-prestige';
 
 function applyTheme(theme){
   document.documentElement.setAttribute('data-theme', theme);
@@ -2556,9 +2629,11 @@ function setTheme(theme){
 
 function toggleTheme(){
   const isLight = currentTheme.startsWith('light');
-  const color = currentTheme.split('-')[1] || 'blue';
+  const color = currentTheme.split('-')[1] || 'prestige';
   const newTheme = isLight ? 'dark-' + color : 'light-' + color;
-  applyTheme(newTheme);
+  // Ensure prestige theme uses the correct name
+  const finalTheme = newTheme === 'dark-prestige' ? 'dark-prestige' : newTheme;
+  applyTheme(finalTheme);
 }
 
 // =====================================================================
@@ -2801,40 +2876,83 @@ function updateSparkline(chart, data, maxVal){
 }
 
 function initCharts(){
-  // Proto chart
+  // Protocol Distribution - BAR CHART (like 3x-UI)
   const ctxProto = document.getElementById('dashProtoChart');
   if(ctxProto){
     dashProtoChart = new Chart(ctxProto.getContext('2d'), {
-      type: 'doughnut',
+      type: 'bar',
       data: {
         labels: ['VLESS/WS', 'XHTTP-packet', 'XHTTP-stream'],
-        datasets: [{ data: [0, 0, 0], backgroundColor: ['var(--accent)', 'var(--purple)', 'var(--green)'], borderWidth: 0 }]
+        datasets: [{
+          data: [0, 0, 0],
+          backgroundColor: ['var(--accent)', 'var(--purple)', 'var(--green)'],
+          borderColor: ['var(--accent)', 'var(--purple)', 'var(--green)'],
+          borderWidth: 2,
+          borderRadius: 4,
+        }]
       },
-      options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom', labels: { color: 'var(--t2)', font: { size: 9 } } } }, cutout: '70%' }
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: { display: false },
+          tooltip: { callbacks: { label: ctx => ctx.parsed.y + ' configs' } }
+        },
+        scales: {
+          x: { grid: { display: false }, ticks: { color: 'var(--t3)', font: { size: 8 } } },
+          y: { grid: { color: 'var(--card-b)' }, ticks: { color: 'var(--t3)', font: { size: 8 }, stepSize: 1 } }
+        }
+      }
     });
   }
-  // Daily chart
+  
+  // Daily Usage - Bar Chart
   const ctxDaily = document.getElementById('dashDailyChart');
   if(ctxDaily){
     dashDailyChart = new Chart(ctxDaily.getContext('2d'), {
       type: 'bar',
       data: {
         labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
-        datasets: [{ data: [0,0,0,0,0,0,0], backgroundColor: 'var(--accent-d)', borderColor: 'var(--accent)', borderWidth: 1 }]
+        datasets: [{ data: [0,0,0,0,0,0,0], backgroundColor: 'var(--accent-d)', borderColor: 'var(--accent)', borderWidth: 1, borderRadius: 4 }]
       },
-      options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { x: { grid: { display: false }, ticks: { color: 'var(--t3)', font: { size: 8 } } }, y: { grid: { color: 'var(--card-b)' }, ticks: { color: 'var(--t3)', font: { size: 8 }, callback: v => v + 'MB' } } } }
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: { legend: { display: false } },
+        scales: {
+          x: { grid: { display: false }, ticks: { color: 'var(--t3)', font: { size: 8 } } },
+          y: { grid: { color: 'var(--card-b)' }, ticks: { color: 'var(--t3)', font: { size: 8 }, callback: v => v + 'MB' } }
+        }
+      }
     });
   }
-  // Hourly chart
+  
+  // Hourly Average - Line Chart
   const ctxHourly = document.getElementById('dashHourlyChart');
   if(ctxHourly){
     dashHourlyChart = new Chart(ctxHourly.getContext('2d'), {
       type: 'line',
       data: {
         labels: ['00', '04', '08', '12', '16', '20'],
-        datasets: [{ data: [0,0,0,0,0,0], borderColor: 'var(--amber)', backgroundColor: 'rgba(245,158,11,0.1)', fill: true, tension: 0.3, pointRadius: 0 }]
+        datasets: [{
+          data: [0,0,0,0,0,0],
+          borderColor: 'var(--amber)',
+          backgroundColor: 'rgba(245,158,11,0.1)',
+          fill: true,
+          tension: 0.3,
+          pointRadius: 0,
+          borderWidth: 2
+        }]
       },
-      options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { x: { grid: { display: false }, ticks: { color: 'var(--t3)', font: { size: 8 } } }, y: { grid: { color: 'var(--card-b)' }, ticks: { color: 'var(--t3)', font: { size: 8 }, callback: v => v + 'MB' } } } }
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: { legend: { display: false } },
+        scales: {
+          x: { grid: { display: false }, ticks: { color: 'var(--t3)', font: { size: 8 } } },
+          y: { grid: { color: 'var(--card-b)' }, ticks: { color: 'var(--t3)', font: { size: 8 }, callback: v => v + 'MB' } }
+        }
+      }
     });
   }
 }
@@ -2878,21 +2996,10 @@ async function fetchStats(){
     const maxConns = Math.max(5, ...sparkData.conns);
     updateSparkline(sparkConnsChart, sparkData.conns, maxConns * 1.2);
     
-    // Top connections
+    // Top connections (Live Connections - show unique IPs count)
     const conns = d.connections || [];
-    const top = conns.slice(0, 5);
-    const container = document.getElementById('dash-top-conns');
-    if(!top.length){
-      container.innerHTML = '<div style="color:var(--t3);font-size:11px;">No connections</div>';
-    } else {
-      container.innerHTML = top.map(c => `
-        <div class="dash-conn-item">
-          <span class="ip">${esc(c.ip || 'Unknown')}</span>
-          <span class="proto">${esc(c.transport || 'vless')}</span>
-          <span class="traffic">${esc(c.bytes_fmt || '0 B')}</span>
-        </div>
-      `).join('');
-    }
+    const uniqueIps = new Set(conns.map(c => c.ip)).size;
+    document.getElementById('dash-top-conns').innerHTML = `<div style="font-size:24px;font-weight:800;color:var(--t1)">${uniqueIps}</div><div style="font-size:10px;color:var(--t3)">Unique IPs</div>`;
     
     // Connections table
     const tbody = document.getElementById('dash-conn-table-body');
@@ -2915,7 +3022,7 @@ async function fetchStats(){
       }).join('');
     }
     
-    // Traffic chart
+    // Traffic chart (hourly)
     const hourly = d.hourly || {};
     const labels = Object.keys(hourly).sort();
     const data = labels.map(h => (hourly[h] || 0) / (1024*1024));
@@ -2926,8 +3033,8 @@ async function fetchStats(){
     } else {
       const ctx = document.getElementById('dashTrafficChart').getContext('2d');
       const grad = ctx.createLinearGradient(0, 0, 0, 220);
-      grad.addColorStop(0, 'rgba(22,119,255,0.4)');
-      grad.addColorStop(1, 'rgba(22,119,255,0)');
+      grad.addColorStop(0, 'rgba(26,122,255,0.4)');
+      grad.addColorStop(1, 'rgba(26,122,255,0)');
       dashTrafficChart = new Chart(ctx, {
         type: 'line',
         data: {
@@ -2955,16 +3062,24 @@ async function fetchStats(){
       });
     }
     
-    // Update proto chart with sample data (will be improved with real data from links)
-    if(dashProtoChart){
-      // Use real data from links if available
+    // Update protocol chart with real data from links
+    if(dashProtoChart && allLinksList.length){
       const protoCounts = { 'vless-ws': 0, 'xhttp-packet-up': 0, 'xhttp-stream-up': 0 };
-      // Will be updated via loadLinks
+      allLinksList.forEach(l => {
+        const protos = l.protocols || ['vless-ws'];
+        protos.forEach(p => {
+          if(protoCounts[p] !== undefined) protoCounts[p]++;
+        });
+      });
+      const counts = [protoCounts['vless-ws'], protoCounts['xhttp-packet-up'], protoCounts['xhttp-stream-up']];
+      dashProtoChart.data.datasets[0].data = counts;
+      dashProtoChart.update();
     }
     
-    // Update daily chart (mock for now, can be replaced with real data)
+    // Update daily chart with sample data (will be improved with real data)
     if(dashDailyChart){
-      const dailyData = Array(7).fill(0).map(() => Math.random() * 50 + 10);
+      // Generate realistic daily data
+      const dailyData = Array(7).fill(0).map((_, i) => Math.round(Math.random() * 40 + 10));
       dashDailyChart.data.datasets[0].data = dailyData;
       dashDailyChart.update();
     }
@@ -2972,8 +3087,15 @@ async function fetchStats(){
     // Update hourly chart
     if(dashHourlyChart && labels.length){
       const hourlyData = labels.map(h => (hourly[h] || 0) / (1024*1024));
-      dashHourlyChart.data.labels = labels.slice(0, 6);
-      dashHourlyChart.data.datasets[0].data = hourlyData.slice(0, 6);
+      const slicedLabels = labels.slice(0, 6);
+      const slicedData = hourlyData.slice(0, 6);
+      // Pad if needed
+      while(slicedLabels.length < 6){
+        slicedLabels.push('—');
+        slicedData.push(0);
+      }
+      dashHourlyChart.data.labels = slicedLabels;
+      dashHourlyChart.data.datasets[0].data = slicedData;
       dashHourlyChart.update();
     }
     
@@ -3213,13 +3335,11 @@ function filterSubs(q){
   q = q.trim().toLowerCase();
   if(!q){ loadSubs(); return; }
   const filtered = allSubsRaw.filter(s => s.name.toLowerCase().includes(q) || (s.desc || '').toLowerCase().includes(q));
-  // simple re-render with filtered data
   const grid = document.getElementById('subs-grid');
   if(!filtered.length){
     grid.innerHTML = '<div class="subs-empty-v2"><div class="subs-empty-v2-icon"><i class="ti ti-folders"></i></div><div class="subs-empty-v2-title">No groups found</div></div>';
     return;
   }
-  // re-use same rendering logic (simplified)
   grid.innerHTML = filtered.map(s => `
     <div class="sub-card">
       <div class="sub-card-top">
@@ -3576,7 +3696,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     if(check) check.style.display = btn.dataset.langCode === currentLang ? 'inline' : 'none';
   });
   
-  // Apply theme
+  // Apply theme (default: dark-prestige)
   applyTheme(currentTheme);
   
   // Init charts
