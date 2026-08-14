@@ -1,4 +1,4 @@
-# pages.py - CBee Gateway v1.0.0
+# pages.py - CBee Gateway v1.0.0 (3X-UI Style, Unified Color, No Profile, Advanced Server Name)
 import json
 
 LOGIN_HTML = r"""<!DOCTYPE html>
@@ -417,9 +417,9 @@ body{font-family:'Vazirmatn',sans-serif;background:var(--bg);color:var(--t1);min
 a{color:inherit;text-decoration:none}
 .sidebar{width:var(--sidebar-w);min-height:100vh;background:var(--bg2);border-left:1px solid var(--card-b);display:flex;flex-direction:column;flex-shrink:0;position:fixed;right:0;top:0;bottom:0;z-index:200;transition:transform .25s cubic-bezier(.4,0,.2,1),background .3s,border-color .3s}
 .logo{display:flex;align-items:center;gap:12px;padding:20px 16px 16px;border-bottom:1px solid var(--card-b)}
-.logo-img{width:38px;height:38px;border-radius:50%;overflow:hidden;border:1px solid var(--card-b);box-shadow:0 0 0 1px var(--accent-glow);flex-shrink:0;background:linear-gradient(135deg,var(--accent),var(--accent2));display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:900;color:#fff;font-family:'Vazirmatn',sans-serif}
+.logo-img{width:38px;height:38px;border-radius:50%;overflow:hidden;border:1px solid var(--card-b);flex-shrink:0;background:linear-gradient(135deg,var(--accent),var(--accent2));display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:900;color:#fff;font-family:'Vazirmatn',sans-serif;display:none}
 .logo-img img{width:100%;height:100%;object-fit:cover}
-.logo-name{font-size:20px;font-weight:900;color:var(--t1);font-family:'Vazirmatn',sans-serif;letter-spacing:-0.02em}
+.logo-name{font-size:24px;font-weight:900;color:var(--t1);font-family:'Vazirmatn',sans-serif;letter-spacing:-0.02em}
 .logo-sub{font-size:10px;color:var(--t3);margin-top:1px}
 .sb-close{display:none;position:absolute;left:12px;top:20px;background:var(--accent-d);border:1px solid var(--card-b);color:var(--t2);width:30px;height:30px;border-radius:8px;font-size:16px;align-items:center;justify-content:center;cursor:pointer}
 .nav-wrap{flex:1;overflow-y:auto;padding:6px 0 8px}
@@ -436,13 +436,13 @@ a{color:inherit;text-decoration:none}
 .theme-btn:hover{background:var(--card-b);color:var(--t1)}
 .logout-btn{display:flex;align-items:center;justify-content:center;gap:7px;background:var(--red-bg);color:var(--red-t);border-radius:9px;padding:8px;font-size:12px;font-weight:500;font-family:inherit;border:1px solid rgba(239,68,68,0.2);cursor:pointer;width:100%;transition:.15s;margin-top:6px}
 .logout-btn:hover{background:rgba(239,68,68,0.2)}
-.mob-top{display:none;position:fixed;top:0;right:0;left:0;height:52px;background:var(--bg2);border-bottom:1px solid var(--card-b);z-index:150;align-items:center;justify-content:space-between;padding:0 14px;transition:background .3s}
+.mob-top{display:none;position:fixed;top:0;right:0;left:0;height:52px;background:var(--bg2);border-bottom:1px solid var(--card-b);z-index:150;align-items:center;justify-content:center;padding:0 14px;transition:background .3s}
 .mob-top .ml{display:flex;align-items:center;gap:9px}
-/* دایره پروفایل حذف شد - فقط متن CBee */
-.mob-title{color:var(--t1);font-size:16px;font-weight:900;font-family:'Vazirmatn',sans-serif}
-.mob-right{display:flex;gap:6px;align-items:center}
+.mob-logo{width:28px;height:28px;border-radius:50%;overflow:hidden;background:linear-gradient(135deg,var(--accent),var(--accent2));display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:900;color:#fff;font-family:'Vazirmatn',sans-serif;display:none}
+.mob-logo img{width:100%;height:100%;object-fit:cover}
+.mob-title{color:var(--t1);font-size:18px;font-weight:900;font-family:'Vazirmatn',sans-serif}
+.mob-right{display:none;gap:6px}
 .menu-btn,.theme-mob{background:var(--accent-d);border:1px solid var(--card-b);color:var(--t2);width:34px;height:34px;border-radius:8px;font-size:17px;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:.15s}
-.menu-btn:hover,.theme-mob:hover{background:var(--card-b);color:var(--t1)}
 .overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.65);z-index:190;backdrop-filter:blur(3px)}
 .overlay.show{display:block}
 .main{margin-right:var(--sidebar-w);flex:1;padding:28px 28px 60px;min-width:0;transition:margin .25s}
@@ -464,7 +464,6 @@ a{color:inherit;text-decoration:none}
 .dg{background:var(--green)}.dr{background:var(--red)}.da{background:var(--amber)}.db{background:var(--accent)}
 .pulse{animation:pulse 2s infinite}
 @keyframes pulse{0%,100%{opacity:1}50%{opacity:.25}}
-/* ===== 3X-UI Style Sparkline Cards ===== */
 .sparkline-row{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-bottom:22px}
 .sparkline-card{background:var(--card);border:1px solid var(--card-b);border-radius:var(--radius);padding:16px 18px 14px;transition:all .2s;position:relative;overflow:hidden}
 .sparkline-card:hover{border-color:var(--card-bh);transform:translateY(-2px);box-shadow:var(--shadow)}
@@ -946,10 +945,10 @@ a{color:inherit;text-decoration:none}
 </div>
 <div class="mob-top">
   <div class="ml">
-    <!-- دایره پروفایل حذف شد -->
+    <div class="mob-logo" style="display:none">CB</div>
     <span class="mob-title">CBee</span>
   </div>
-  <div class="mob-right">
+  <div class="mob-right" style="display:none">
     <button class="theme-mob" id="theme-mob-btn" onclick="toggleTheme()"><i class="ti ti-sun" id="theme-mob-icon"></i></button>
     <button class="menu-btn" id="open-sb"><i class="ti ti-menu-2"></i></button>
   </div>
@@ -958,7 +957,7 @@ a{color:inherit;text-decoration:none}
 <aside class="sidebar" id="sb">
   <button class="sb-close" id="close-sb"><i class="ti ti-x"></i></button>
   <div class="logo">
-    <div class="logo-img">CB</div>
+    <div class="logo-img" style="display:none">CB</div>
     <div><div class="logo-name">CBee</div><div class="logo-sub">Gateway · v1.0.0</div></div>
   </div>
   <div class="nav-wrap">
@@ -994,7 +993,7 @@ a{color:inherit;text-decoration:none}
     </div>
   </div>
 
-  <!-- 3 Sparkline Cards - 3X-UI Style -->
+  <!-- 3 Sparkline Cards - Unified Color -->
   <div class="sparkline-row">
     <div class="sparkline-card">
       <div class="sparkline-top">
@@ -1048,7 +1047,8 @@ a{color:inherit;text-decoration:none}
   </div>
 </section>
 
-<!-- ========== سایر صفحات (کامل) ========== -->
+<!-- ========== سایر صفحات (همانند قبل) ========== -->
+<!-- لینک‌ها -->
 <section class="pg" id="pg-links">
   <div class="topbar">
     <div><div class="tb-title"><i class="ti ti-link-plus"></i> کانفیگ‌ها</div><div class="tb-sub">ساخت و مدیریت کانفیگ با سهمیه، انقضا و گروه‌بندی</div></div>
@@ -1285,14 +1285,14 @@ a{color:inherit;text-decoration:none}
   </div>
 </section>
 
-<!-- تنظیمات -->
+<!-- ========== صفحه تنظیمات (پیشرفته) ========== -->
 <section class="pg" id="pg-settings">
   <div class="topbar">
     <div><div class="tb-title"><i class="ti ti-settings"></i> تنظیمات</div><div class="tb-sub">مدیریت پیکربندی پنل</div></div>
     <div class="tb-right"><span class="badge bg-blue">v1.0.0</span></div>
   </div>
   <div class="g2">
-    <!-- تغییر تم -->
+    <!-- بخش تغییر تم -->
     <div class="card">
       <div class="card-title"><i class="ti ti-palette"></i> تغییر تم</div>
       <div style="display:flex;flex-direction:column;gap:12px">
@@ -1316,56 +1316,32 @@ a{color:inherit;text-decoration:none}
       </div>
     </div>
 
-    <!-- فرمت لینک -->
+    <!-- بخش تنظیمات نام سرور (پیشرفته) -->
     <div class="card">
-      <div class="card-title"><i class="ti ti-link"></i> فرمت لینک‌ها</div>
+      <div class="card-title"><i class="ti ti-server-2"></i> تنظیمات نام سرور</div>
       <div style="display:flex;flex-direction:column;gap:12px">
         <div class="fg">
-          <label>نام سرور</label>
+          <label>نام اصلی سرور (Server Name)</label>
           <input class="fi" id="server-name-input" placeholder="مثلاً: CBeeNet" style="width:100%">
+          <span style="font-size:9px;color:var(--t3)">این نام در قالب <code>{name}</code> استفاده می‌شود</span>
         </div>
         <div class="fg">
-          <label>پیشوند (اختیاری)</label>
+          <label>پیشوند (Prefix) - اختیاری</label>
           <input class="fi" id="server-prefix-input" placeholder="مثلاً: MyServer" style="width:100%">
+          <span style="font-size:9px;color:var(--t3)">در قالب <code>{prefix}</code> استفاده می‌شود</span>
         </div>
-        <div style="display:flex;gap:12px;flex-wrap:wrap">
-          <div class="fg" style="flex:1">
-            <label>نمایش نام سرور</label>
-            <select class="fs" id="show-server" style="width:100%">
-              <option value="true">فعال</option>
-              <option value="false">غیرفعال</option>
-            </select>
-          </div>
-          <div class="fg" style="flex:1">
-            <label>نمایش پیشوند</label>
-            <select class="fs" id="show-prefix" style="width:100%">
-              <option value="true">فعال</option>
-              <option value="false">غیرفعال</option>
-            </select>
-          </div>
-          <div class="fg" style="flex:1">
-            <label>نمایش پروتکل</label>
-            <select class="fs" id="show-protocol" style="width:100%">
-              <option value="true">فعال</option>
-              <option value="false">غیرفعال</option>
-            </select>
-          </div>
-          <div class="fg" style="flex:1">
-            <label>نمایش نام کانفیگ</label>
-            <select class="fs" id="show-label" style="width:100%">
-              <option value="true">فعال</option>
-              <option value="false">غیرفعال</option>
-            </select>
-          </div>
+        <div class="fg">
+          <label>قالب نمایش (Template)</label>
+          <input class="fi" id="server-template-input" placeholder="مثلاً: [{name}][{prefix}][{protocol}]" style="width:100%" value="[{name}][{prefix}][{protocol}]">
+          <span style="font-size:9px;color:var(--t3)">از <code>{name}</code>، <code>{prefix}</code>، <code>{protocol}</code> استفاده کنید</span>
         </div>
-        <div class="cl"><i class="ti ti-info-circle"></i><span>فرمت نهایی: <code id="link-format-preview">[CBeeNet][MyServer][Name][Protocol]</code></span></div>
-        <button class="btn btn-p" onclick="saveLinkFormat()"><i class="ti ti-device-floppy"></i> ذخیره فرمت لینک</button>
-        <div id="link-format-result" style="font-size:11px;color:var(--green-t);display:none">✓ ذخیره شد</div>
+        <div class="cl"><i class="ti ti-info-circle"></i><span>پیش‌نمایش: <code id="server-format-preview">[CBeeNet][MyServer][Protocol]</code></span></div>
+        <button class="btn btn-p" onclick="saveServerSettings()"><i class="ti ti-device-floppy"></i> ذخیره تنظیمات سرور</button>
+        <div id="server-save-result" style="font-size:11px;color:var(--green-t);display:none">✓ ذخیره شد</div>
       </div>
     </div>
   </div>
-
-  <!-- تنظیمات دیگر -->
+  <!-- بخش تنظیمات دیگر (همان تغییر رمز) -->
   <div class="g2" style="margin-top:16px">
     <div class="srv-panel">
       <div class="srv-hero">
@@ -1423,7 +1399,6 @@ function applyTheme(theme){
   document.getElementById('theme-label').textContent = label;
   const mobIcon = document.getElementById('theme-mob-icon');
   if(mobIcon) mobIcon.className = 'ti ' + icon;
-  updateSparklineColors();
 }
 
 function setTheme(theme){
@@ -1438,6 +1413,8 @@ function toggleTheme(){
   applyTheme(newTheme);
 }
 
+applyTheme(localStorage.getItem('CBeeNet-theme') || 'dark-yellow');
+
 // ========== توابع کمکی ==========
 function toast(msg,type=''){
   const t=document.getElementById('toast');
@@ -1447,6 +1424,28 @@ function toast(msg,type=''){
 function fmtB(b){if(!b||b===0)return '0 B';if(b<1024)return b+' B';if(b<1024**2)return (b/1024).toFixed(1)+' KB';if(b<1024**3)return (b/1024**2).toFixed(2)+' MB';return (b/1024**3).toFixed(2)+' GB'}
 function toFa(n){return String(n).replace(/\d/g,d=>'۰۱۲۳۴۵۶۷۸۹'[d])}
 function esc(s){return String(s||'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
+function daysLeft(exp){if(!exp)return null;return Math.ceil((new Date(exp)-Date.now())/(864e5))}
+function expChip(exp,expired){
+  if(expired)return '<span class="exp-chip ec-exp"><i class="ti ti-calendar-x"></i> منقضی</span>';
+  if(!exp)return '<span class="exp-chip ec-inf"><i class="ti ti-infinity"></i> نامحدود</span>';
+  const d=daysLeft(exp);
+  if(d<=0)return '<span class="exp-chip ec-exp"><i class="ti ti-calendar-x"></i> منقضی</span>';
+  if(d<=3)return `<span class="exp-chip ec-warn"><i class="ti ti-alert-triangle"></i> ${toFa(d)} روز مانده</span>`;
+  return `<span class="exp-chip ec-ok"><i class="ti ti-calendar-check"></i> ${toFa(d)} روز مانده</span>`;
+}
+function protoBadge(protocols){
+  if(!protocols || !protocols.length) protocols = ['vless-ws'];
+  const labels = {
+    'vless-ws': ['VLESS · WS', 'pc-ws'],
+    'xhttp-packet-up': ['XHTTP · packet-up', 'pc-xhttp'],
+    'xhttp-stream-up': ['XHTTP · stream-up', 'pc-xhttp'],
+    'xhttp-stream-one': ['XHTTP ULTRA', 'pc-ultra']
+  };
+  return protocols.map(p => {
+    const v = labels[p] || labels['vless-ws'];
+    return `<span class="proto-chip ${v[1]}">${v[0]}</span>`;
+  }).join('');
+}
 async function checkAuth(){try{const r=await fetch('/api/me');const d=await r.json();if(!d.authenticated)location.href='/login';}catch(e){location.href='/login'}}
 async function logout(){try{await fetch('/api/logout',{method:'POST'})}catch(e){}location.href='/login'}
 document.getElementById('logout-btn').addEventListener('click',logout);
@@ -1480,138 +1479,107 @@ function setCount(val,el){
   document.querySelectorAll('.count-chip').forEach(c=>c.classList.remove('active'));
   el.classList.add('active');
 }
-
-// ========== فرمت لینک ==========
-let linkFormatSettings = {
-  server_name: 'CBeeNet',
-  server_prefix: '',
-  show_server: true,
-  show_prefix: true,
-  show_protocol: true,
-  show_label: true
-};
-
-function loadLinkFormatSettings(){
-  try {
-    const saved = localStorage.getItem('CBeeNet-link-format');
-    if(saved) {
-      const parsed = JSON.parse(saved);
-      linkFormatSettings = { ...linkFormatSettings, ...parsed };
-    }
-  } catch(e) {}
-  document.getElementById('server-name-input').value = linkFormatSettings.server_name || 'CBeeNet';
-  document.getElementById('server-prefix-input').value = linkFormatSettings.server_prefix || '';
-  document.getElementById('show-server').value = linkFormatSettings.show_server ? 'true' : 'false';
-  document.getElementById('show-prefix').value = linkFormatSettings.show_prefix ? 'true' : 'false';
-  document.getElementById('show-protocol').value = linkFormatSettings.show_protocol ? 'true' : 'false';
-  document.getElementById('show-label').value = linkFormatSettings.show_label ? 'true' : 'false';
-  updateLinkFormatPreview();
-}
-
-function updateLinkFormatPreview(){
+document.addEventListener('DOMContentLoaded', function() {
+  if(!document.getElementById('nl-count')) {
+    const hidden = document.createElement('input');
+    hidden.type = 'hidden';
+    hidden.id = 'nl-count';
+    hidden.value = 1;
+    document.querySelector('.cp-body').appendChild(hidden);
+  }
+  // بارگذاری تنظیمات سرور از localStorage
+  const savedServer = localStorage.getItem('CBeeNet-server-name') || 'CBeeNet';
+  const savedPrefix = localStorage.getItem('CBeeNet-server-prefix') || '';
+  const savedTemplate = localStorage.getItem('CBeeNet-server-template') || '[{name}][{prefix}][{protocol}]';
+  document.getElementById('server-name-input').value = savedServer;
+  document.getElementById('server-prefix-input').value = savedPrefix;
+  document.getElementById('server-template-input').value = savedTemplate;
+  updateServerFormatPreview();
+});
+function updateServerFormatPreview(){
   const name = document.getElementById('server-name-input').value.trim() || 'CBeeNet';
   const prefix = document.getElementById('server-prefix-input').value.trim() || '';
-  const showServer = document.getElementById('show-server').value === 'true';
-  const showPrefix = document.getElementById('show-prefix').value === 'true';
-  const showProtocol = document.getElementById('show-protocol').value === 'true';
-  const showLabel = document.getElementById('show-label').value === 'true';
-  let parts = [];
-  if(showServer) parts.push(name);
-  if(showPrefix && prefix) parts.push(prefix);
-  if(showLabel) parts.push('[Name]');
-  if(showProtocol) parts.push('[Protocol]');
-  const preview = parts.join('][');
-  document.getElementById('link-format-preview').textContent = preview ? '[' + preview + ']' : '(خالی)';
+  const template = document.getElementById('server-template-input').value.trim() || '[{name}][{prefix}][{protocol}]';
+  const preview = template
+    .replace(/{name}/g, name)
+    .replace(/{prefix}/g, prefix)
+    .replace(/{protocol}/g, 'Protocol');
+  document.getElementById('server-format-preview').textContent = preview;
 }
-
-document.getElementById('server-name-input').addEventListener('input', updateLinkFormatPreview);
-document.getElementById('server-prefix-input').addEventListener('input', updateLinkFormatPreview);
-document.getElementById('show-server').addEventListener('change', updateLinkFormatPreview);
-document.getElementById('show-prefix').addEventListener('change', updateLinkFormatPreview);
-document.getElementById('show-protocol').addEventListener('change', updateLinkFormatPreview);
-document.getElementById('show-label').addEventListener('change', updateLinkFormatPreview);
-
-async function saveLinkFormat(){
-  const settings = {
-    server_name: document.getElementById('server-name-input').value.trim() || 'CBeeNet',
-    server_prefix: document.getElementById('server-prefix-input').value.trim() || '',
-    show_server: document.getElementById('show-server').value === 'true',
-    show_prefix: document.getElementById('show-prefix').value === 'true',
-    show_protocol: document.getElementById('show-protocol').value === 'true',
-    show_label: document.getElementById('show-label').value === 'true'
-  };
+document.getElementById('server-name-input').addEventListener('input', updateServerFormatPreview);
+document.getElementById('server-prefix-input').addEventListener('input', updateServerFormatPreview);
+document.getElementById('server-template-input').addEventListener('input', updateServerFormatPreview);
+async function saveServerSettings(){
+  const name = document.getElementById('server-name-input').value.trim() || 'CBeeNet';
+  const prefix = document.getElementById('server-prefix-input').value.trim() || '';
+  const template = document.getElementById('server-template-input').value.trim() || '[{name}][{prefix}][{protocol}]';
   try {
-    const r = await authF('/api/settings/link-format', {
+    const r = await authF('/api/settings/server', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(settings)
+      body: JSON.stringify({ server_name: name, server_prefix: prefix, server_template: template })
     });
     const result = await r.json();
     if(result.ok){
-      localStorage.setItem('CBeeNet-link-format', JSON.stringify(settings));
-      linkFormatSettings = settings;
-      document.getElementById('link-format-result').style.display = 'block';
-      setTimeout(() => document.getElementById('link-format-result').style.display = 'none', 3000);
-      toast('فرمت لینک ذخیره شد ✓', 'ok');
+      localStorage.setItem('CBeeNet-server-name', name);
+      localStorage.setItem('CBeeNet-server-prefix', prefix);
+      localStorage.setItem('CBeeNet-server-template', template);
+      document.getElementById('server-save-result').style.display = 'block';
+      setTimeout(() => document.getElementById('server-save-result').style.display = 'none', 3000);
+      toast('تنظیمات سرور ذخیره شد ✓', 'ok');
     } else {
-      toast('خطا در ذخیره فرمت', 'err');
+      toast('خطا در ذخیره تنظیمات', 'err');
     }
   } catch(e) {
     toast('خطا در ارتباط با سرور', 'err');
   }
 }
 
+// ========== ناوبری و سایدبار ==========
+const sb=document.getElementById('sb'),overlay=document.getElementById('overlay');
+function openSb(){sb.classList.add('open');overlay.classList.add('show')}
+function closeSb(){sb.classList.remove('open');overlay.classList.remove('show')}
+document.getElementById('open-sb').addEventListener('click',openSb);
+document.getElementById('close-sb').addEventListener('click',closeSb);
+overlay.addEventListener('click',closeSb);
+function navTo(name){
+  document.querySelectorAll('.nav-it').forEach(n=>n.classList.toggle('on',n.dataset.pg===name));
+  document.querySelectorAll('.pg').forEach(p=>p.classList.toggle('on',p.id==='pg-'+name));
+  const loaders={links:loadLinks,connections:loadConns,errors:loadErrs,subscriptions:loadSubsPage,subgroups:loadSubs,logs:loadActivity};
+  if(loaders[name])loaders[name]();
+  closeSb();window.scrollTo({top:0,behavior:'smooth'});
+}
+document.querySelectorAll('.nav-it').forEach(el=>el.addEventListener('click',()=>navTo(el.dataset.pg)));
+function openModal(id){document.getElementById(id).classList.add('open')}
+function closeModal(id){document.getElementById(id).classList.remove('open')}
+
 // ========== اسپارک‌لاین‌ها ==========
 const sparkData = { load: [], traffic: [], conns: [] };
 const MAX_SPARK = 60;
 let sparkLoadChart, sparkTrafficChart, sparkConnsChart;
-let ch3;
-
-function getAccentColor(){
-  return getComputedStyle(document.documentElement).getPropertyValue('--accent').trim() || '#1677ff';
-}
-function getAccentBg(){
-  return getComputedStyle(document.documentElement).getPropertyValue('--accent-d').trim() || 'rgba(22,119,255,0.12)';
-}
-
-function updateSparklineColors(){
-  const accent = getAccentColor();
-  const bg = getAccentBg();
-  [sparkLoadChart, sparkTrafficChart, sparkConnsChart].forEach(chart => {
-    if(chart){
-      chart.data.datasets[0].borderColor = accent;
-      chart.data.datasets[0].backgroundColor = bg;
-      chart.update('none');
-    }
-  });
-}
-
+let ch1, ch2, ch3;
 function initSparklineCharts(){
-  const accent = getAccentColor();
-  const bg = getAccentBg();
-  
+  const accentColor = getComputedStyle(document.documentElement).getPropertyValue('--accent').trim() || '#1677ff';
+  const accentBg = getComputedStyle(document.documentElement).getPropertyValue('--accent-d').trim() || 'rgba(22,119,255,0.12)';
   const ctxLoad = document.getElementById('sparkLoad').getContext('2d');
   sparkLoadChart = new Chart(ctxLoad, {
     type: 'line',
-    data: { labels: [], datasets: [{ data: [], borderColor: accent, backgroundColor: bg, borderWidth: 2, pointRadius: 0, fill: true, tension: 0.3 }] },
+    data: { labels: [], datasets: [{ data: [], borderColor: accentColor, backgroundColor: accentBg, borderWidth: 2, pointRadius: 0, fill: true, tension: 0.3 }] },
     options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false }, tooltip: { enabled: false } }, scales: { x: { display: false, grid: { display: false } }, y: { display: false, grid: { display: false }, min: 0, max: 100 } }, animation: { duration: 100 } }
   });
-  
   const ctxTraffic = document.getElementById('sparkTraffic').getContext('2d');
   sparkTrafficChart = new Chart(ctxTraffic, {
     type: 'line',
-    data: { labels: [], datasets: [{ data: [], borderColor: accent, backgroundColor: bg, borderWidth: 2, pointRadius: 0, fill: true, tension: 0.3 }] },
+    data: { labels: [], datasets: [{ data: [], borderColor: accentColor, backgroundColor: accentBg, borderWidth: 2, pointRadius: 0, fill: true, tension: 0.3 }] },
     options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false }, tooltip: { enabled: false } }, scales: { x: { display: false, grid: { display: false } }, y: { display: false, grid: { display: false }, min: 0 } }, animation: { duration: 100 } }
   });
-  
   const ctxConns = document.getElementById('sparkConns').getContext('2d');
   sparkConnsChart = new Chart(ctxConns, {
     type: 'line',
-    data: { labels: [], datasets: [{ data: [], borderColor: accent, backgroundColor: bg, borderWidth: 2, pointRadius: 0, fill: true, tension: 0.3 }] },
+    data: { labels: [], datasets: [{ data: [], borderColor: accentColor, backgroundColor: accentBg, borderWidth: 2, pointRadius: 0, fill: true, tension: 0.3 }] },
     options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false }, tooltip: { enabled: false } }, scales: { x: { display: false, grid: { display: false } }, y: { display: false, grid: { display: false }, min: 0 } }, animation: { duration: 100 } }
   });
 }
-
 function updateSparkline(chart, data, maxVal){
   if(!chart) return;
   if(data.length > MAX_SPARK) data.shift();
@@ -1704,31 +1672,16 @@ async function loadLinks(){
     const grid=document.getElementById('links-grid'),empty=document.getElementById('links-empty');
     if(!links.length){grid.innerHTML='';empty.style.display='block';document.getElementById('lsummary').innerHTML='<div class="empty"><i class="ti ti-link-off"></i><p>کانفیگی وجود ندارد</p></div>';return}
     empty.style.display='none';
-    const formatSettings = linkFormatSettings;
-    const serverName = formatSettings.server_name || 'CBeeNet';
-    const serverPrefix = formatSettings.server_prefix || '';
-    const showServer = formatSettings.show_server !== false;
-    const showPrefix = formatSettings.show_prefix !== false;
-    const showProtocol = formatSettings.show_protocol !== false;
-    const showLabel = formatSettings.show_label !== false;
-    
+    // استفاده از تنظیمات سرور برای نمایش نام
+    const serverName = localStorage.getItem('CBeeNet-server-name') || 'CBeeNet';
+    const serverPrefix = localStorage.getItem('CBeeNet-server-prefix') || '';
+    const serverTemplate = localStorage.getItem('CBeeNet-server-template') || '[{name}][{prefix}][{protocol}]';
     grid.innerHTML=links.map(l=>{
-      let parts = [];
-      if(showServer) parts.push(serverName);
-      if(showPrefix && serverPrefix) parts.push(serverPrefix);
-      if(showLabel) parts.push(l.label);
-      if(showProtocol) {
-        const proto = (l.protocols && l.protocols.length) ? l.protocols[0] : 'vless-ws';
-        const protoLabel = proto === 'vless-ws' ? 'WS' : proto.replace('xhttp-', '').toUpperCase();
-        parts.push(protoLabel);
-      }
-      const remark = '[' + parts.join('][') + ']';
       const lim=l.limit_bytes===0?'∞':fmtB(l.limit_bytes);
       const pct=l.limit_bytes===0?0:Math.min(100,l.used_bytes/l.limit_bytes*100);
       const bc=pct>90?'var(--red)':pct>70?'var(--amber)':'var(--accent)';
       const allowed=l.active&&!l.expired;
       const cardCls=!l.active?'is-off':(l.expired?'is-exp':'');
-      const vlessLink = l.vless_link ? l.vless_link.replace(/#.*$/, '#' + encodeURIComponent(remark)) : '';
       return `<div class="cfg-card ${cardCls}">
         <div class="cfg-row">
           <span class="cfg-status-dot ${allowed?'pulse':''}"></span>
@@ -1754,9 +1707,9 @@ async function loadLinks(){
           <div class="cfg-divider-v"></div>
           <div class="cfg-actions">
             <button class="tog${allowed?' on':''}" onclick="toggleActive('${l.uuid}',${!l.active})" title="فعال/غیرفعال"></button>
-            <button class="btn btn-sm btn-g btn-icon" onclick="navigator.clipboard.writeText('${esc(vlessLink || l.vless_link)}').then(()=>toast('لینک کپی شد','ok'))" title="کپی لینک"><i class="ti ti-copy"></i></button>
+            <button class="btn btn-sm btn-g btn-icon" onclick="navigator.clipboard.writeText('${esc(l.vless_link)}').then(()=>toast('لینک کپی شد','ok'))" title="کپی لینک"><i class="ti ti-copy"></i></button>
             <button class="btn btn-sm btn-g btn-icon" onclick="navigator.clipboard.writeText('${esc(l.sub_url)}').then(()=>toast('Sub کپی شد','ok'))" title="Sub URL"><i class="ti ti-rss"></i></button>
-            <button class="btn btn-sm btn-g btn-icon" onclick="showQR('${esc(vlessLink || l.vless_link)}')" title="QR"><i class="ti ti-qrcode"></i></button>
+            <button class="btn btn-sm btn-g btn-icon" onclick="showQR('${esc(l.vless_link)}')" title="QR"><i class="ti ti-qrcode"></i></button>
             <button class="btn btn-sm btn-amber btn-icon" onclick="openEditLink('${l.uuid}')" title="ویرایش"><i class="ti ti-edit"></i></button>
             <button class="btn btn-sm btn-g btn-icon" onclick="resetUsage('${l.uuid}')" title="ریست مصرف"><i class="ti ti-rotate"></i></button>
             <button class="btn btn-sm btn-d btn-icon" onclick="deleteLink('${l.uuid}')" title="حذف"><i class="ti ti-trash"></i></button>
@@ -2073,7 +2026,6 @@ async function copyAllSubLinks(subId){
 }
 document.addEventListener('DOMContentLoaded',async()=>{
   await checkAuth();
-  loadLinkFormatSettings();
   initSparklineCharts();
   initCharts();
   document.getElementById('set-host').textContent=location.host;
