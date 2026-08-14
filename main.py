@@ -1,4 +1,3 @@
-# main.py - CBeeNet Gateway - Full Backend
 import asyncio
 import json
 import os
@@ -38,6 +37,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+# ── Persistence ───────────────────────────────────────────────────────────────
 DATA_DIR = Path(os.environ.get("DATA_DIR", "/app/data"))
 DATA_FILE = DATA_DIR / "rvg_state.json"
 SAVE_LOCK = asyncio.Lock()
@@ -81,6 +81,7 @@ async def save_state():
     except Exception as e:
         logger.error(f"Error saving state: {e}")
 
+# ── In-memory state ───────────────────────────────────────────────────────────
 connections: dict = {}
 stats = {"total_bytes": 0, "total_requests": 0, "total_errors": 0, "start_time": time.time()}
 error_logs: deque = deque(maxlen=50)
@@ -114,6 +115,7 @@ def log_activity(kind: str, message: str, level: str = "info"):
         "time": datetime.now().isoformat(),
     })
 
+# ── Auth ──────────────────────────────────────────────────────────────────────
 SESSION_COOKIE = "rvg_session"
 SESSION_TTL = 60 * 60 * 24 * 7
 
@@ -162,6 +164,7 @@ async def require_reseller_auth(request: Request):
         raise HTTPException(status_code=401, detail="unauthorized")
     return s
 
+# ── Startup / Shutdown ────────────────────────────────────────────────────────
 @app.on_event("startup")
 async def startup():
     global http_client
@@ -178,6 +181,7 @@ async def shutdown():
     if http_client:
         await http_client.aclose()
 
+# ── Helpers ───────────────────────────────────────────────────────────────────
 def get_host() -> str:
     return os.environ.get("RAILWAY_PUBLIC_DOMAIN", CONFIG["host"])
 
@@ -233,16 +237,19 @@ def generate_vless_links(link_data: dict, uuid: str, host: str) -> list[str]:
     links = []
     protocols = link_data.get("protocols", [DEFAULT_PROTOCOL])
     is_personal = link_data.get("is_personal", False)
+    
     ips = link_data.get("ips") or []
     if not is_personal and GLOBAL_SETTINGS.get("ips"):
         ips = GLOBAL_SETTINGS["ips"]
     if not ips:
         ips = [host]
+        
     port = link_data.get("port")
     if not is_personal and GLOBAL_SETTINGS.get("port"):
         port = GLOBAL_SETTINGS["port"]
     if not port:
         port = 443
+
     label = link_data['label']
     template = GLOBAL_SETTINGS.get("link_template", "{server}-{label}")
     for ip in ips:
@@ -295,6 +302,7 @@ def client_ip(request: Request) -> str:
     if real_ip: return real_ip.strip()
     return request.client.host if request.client else "unknown"
 
+# ── Default link ──────────────────────────────────────────────────────────────
 _default_link_created = False
 async def ensure_default_link():
     global _default_link_created
@@ -313,21 +321,23 @@ async def ensure_default_link():
     asyncio.create_task(save_state())
     _default_link_created = True
 
+# ── Reseller Capacity ─────────────────────────────────────────────────────────
 async def check_reseller_capacity(reseller_id: str, new_limit_bytes: int):
     if new_limit_bytes == 0:
         raise HTTPException(status_code=400, detail="Reseller cannot create unlimited config.")
     async with RESELLERS_LOCK:
         res = RESELLERS.get(reseller_id)
         if not res or not res.get("active", True):
-            raise HTTPException(status_code=403, detail="Reseller account inactive")
+            raise HTTPException(status_code=403, detail="Reseller account is inactive")
         allocated = 0
         async with LINKS_LOCK:
             for d in LINKS.values():
                 if d.get("creator_id") == reseller_id:
                     allocated += d.get("limit_bytes", 0)
         if allocated + new_limit_bytes > res.get("total_bytes", 0):
-            raise HTTPException(status_code=400, detail="Reseller capacity exceeded.")
+            raise HTTPException(status_code=400, detail="Reseller quota exceeded.")
 
+# ── Basic endpoints ───────────────────────────────────────────────────────────
 @app.get("/")
 async def root():
     return {"service": "CBeeNet Gateway", "version": "9.2", "status": "active", "channel": "https://t.me/CBeeNet"}
@@ -336,6 +346,7 @@ async def root():
 async def health():
     return {"status": "ok", "connections": len(connections), "uptime": uptime()}
 
+# ── Subscriptions ─────────────────────────────────────────────────────────────
 @app.get("/sub/{uuid}")
 async def subscription_single(uuid: str, request: Request):
     import base64
@@ -343,10 +354,12 @@ async def subscription_single(uuid: str, request: Request):
         link = LINKS.get(uuid)
         if not link or not is_link_allowed(link):
             raise HTTPException(status_code=404, detail="not found or inactive")
+    
     ua = request.headers.get("user-agent", "").lower()
     if any(b in ua for b in ["mozilla", "chrome", "safari", "firefox", "edge", "opera"]):
         from public_page import get_single_sub_page_html
         return HTMLResponse(content=get_single_sub_page_html(uuid))
+
     host = get_host()
     lines = generate_vless_links(link, uuid, host)
     content = base64.b64encode("\n".join(lines).encode()).decode()
@@ -374,10 +387,12 @@ async def sub_group_subscription(uuid_key: str, request: Request):
         if sub.get("password_hash"):
             if hash_password(request.query_params.get("pw", "")) != sub["password_hash"]:
                 raise HTTPException(status_code=403, detail="wrong password")
+    
     ua = request.headers.get("user-agent", "").lower()
     if any(b in ua for b in ["mozilla", "chrome", "safari", "firefox", "edge", "opera"]):
         from public_page import get_public_page_html
         return HTMLResponse(content=get_public_page_html(uuid_key))
+    
     host = get_host()
     link_ids = sub.get("link_ids", [])
     lines = []
@@ -390,6 +405,7 @@ async def sub_group_subscription(uuid_key: str, request: Request):
     return Response(content=content, media_type="text/plain",
         headers={"profile-title": quote(sub["name"]), "support-url": "https://t.me/CBeeNet", "profile-update-interval": "12"})
 
+# ── Sub Groups (Admin) ────────────────────────────────────────────────────────
 @app.post("/api/subs")
 async def create_sub(request: Request, _=Depends(require_auth)):
     body = await request.json()
@@ -403,7 +419,7 @@ async def create_sub(request: Request, _=Depends(require_auth)):
             "password_hash": hash_password(password) if password else None,
             "uuid_key": uuid_key, "created_at": datetime.now().isoformat(), "link_ids": []}
     asyncio.create_task(save_state())
-    log_activity("sub", f"Group «{name}» created", "ok")
+    log_activity("sub", f"Group '{name}' created", "ok")
     host = get_host()
     return {"sub_id": sub_id, **SUBS[sub_id],
         "public_url": f"https://{host}/p/{uuid_key}", "sub_url": f"https://{host}/sub-group/{uuid_key}"}
@@ -452,7 +468,7 @@ async def delete_sub(sub_id: str, _=Depends(require_auth)):
         for link in LINKS.values():
             if link.get("sub_id") == sub_id: link["sub_id"] = None
     asyncio.create_task(save_state())
-    log_activity("sub", f"Group «{name}» deleted", "warn")
+    log_activity("sub", f"Group '{name}' deleted", "warn")
     return {"ok": True, "deleted": sub_id}
 
 @app.post("/api/subs/{sub_id}/links")
@@ -473,17 +489,20 @@ async def assign_link_to_sub(sub_id: str, request: Request, _=Depends(require_au
     asyncio.create_task(save_state())
     return {"ok": True}
 
+# ── Auth ──────────────────────────────────────────────────────────────────────
 @app.post("/api/login")
 async def api_login(request: Request):
     body = await request.json()
     ip = client_ip(request)
     pw = str(body.get("password", ""))
+    
     if hash_password(pw) == AUTH["password_hash"]:
         token = await create_session("admin", "admin")
         log_activity("auth", f"Admin login from {ip}", "ok")
         resp = JSONResponse({"ok": True, "role": "admin"})
         resp.set_cookie(SESSION_COOKIE, token, max_age=SESSION_TTL, httponly=True, samesite="lax", path="/")
         return resp
+    
     async with RESELLERS_LOCK:
         for rid, res in RESELLERS.items():
             if res.get("active", True) and res.get("password_hash") == hash_password(pw):
@@ -492,6 +511,7 @@ async def api_login(request: Request):
                 resp = JSONResponse({"ok": True, "role": "reseller"})
                 resp.set_cookie(SESSION_COOKIE, token, max_age=SESSION_TTL, httponly=True, samesite="lax", path="/")
                 return resp
+    
     log_activity("auth", f"Failed login attempt from {ip}", "err")
     raise HTTPException(status_code=401, detail="Wrong password")
 
@@ -522,6 +542,7 @@ async def api_change_password(request: Request, token=Depends(require_auth)):
     log_activity("auth", "Panel password changed", "ok")
     return {"ok": True}
 
+# ── Global IP Settings ────────────────────────────────────────────────────────
 @app.get("/api/settings/global-ips")
 async def get_global_ips(_=Depends(require_auth)):
     return GLOBAL_SETTINGS
@@ -535,6 +556,7 @@ async def update_global_ips(request: Request, _=Depends(require_auth)):
     log_activity("system", "Global IP/port settings updated", "info")
     return {"ok": True, "settings": dict(GLOBAL_SETTINGS)}
 
+# ── Server Settings (server name, prefix, template) ────────────────────────
 @app.get("/api/settings/server")
 async def get_server_settings(_=Depends(require_auth)):
     return {
@@ -553,6 +575,7 @@ async def update_server_settings(request: Request, _=Depends(require_auth)):
     log_activity("system", "Server settings updated", "info")
     return {"ok": True, "settings": dict(GLOBAL_SETTINGS)}
 
+# ── Stats ─────────────────────────────────────────────────────────────────────
 @app.get("/stats")
 async def get_stats(_=Depends(require_auth)):
     async with LINKS_LOCK: snap = dict(LINKS)
@@ -564,7 +587,6 @@ async def get_stats(_=Depends(require_auth)):
         "links_count": len(snap), "active_links": sum(1 for l in snap.values() if is_link_allowed(l)),
         "expired_links": sum(1 for l in snap.values() if is_link_expired(l)), "subs_count": len(SUBS),
         "resellers_count": len(RESELLERS),
-        "connections": list(connections.values())[:50]
     }
 
 @app.get("/api/activity")
@@ -598,10 +620,12 @@ async def get_connections(_=Depends(require_auth)):
     result.sort(key=lambda x: x.get("last_connected_at") or "", reverse=True)
     return {"connections": result, "count": len(result), "raw_count": len(connections)}
 
+# ── Link Management ───────────────────────────────────────────────────────────
 @app.post("/api/links")
 async def create_link(request: Request):
     s = await require_reseller_auth(request)
     body = await request.json()
+    
     label = (body.get("label") or "New Link").strip()[:60]
     lv = float(body.get("limit_value") or 0)
     lu = body.get("limit_unit") or "GB"
@@ -613,6 +637,7 @@ async def create_link(request: Request):
     port = int(body.get("port")) if body.get("port") else None
     is_personal = bool(body.get("is_personal", False))
     sub_id = body.get("sub_id")
+    
     protocols = body.get("protocols")
     if not protocols:
         proto = body.get("protocol", DEFAULT_PROTOCOL)
@@ -620,12 +645,15 @@ async def create_link(request: Request):
     protocols = [p for p in protocols if p in PROTOCOLS]
     if not protocols:
         protocols = [DEFAULT_PROTOCOL]
+
     if s["role"] == "reseller":
         await check_reseller_capacity(s["user_id"], limit_bytes)
         is_personal = True
+
     flag = ""
     if ips: flag = await fetch_ip_flag(ips[0])
     if flag: label = f"{label} {flag}"
+
     uid = generate_uuid()
     async with LINKS_LOCK:
         LINKS[uid] = {
@@ -641,7 +669,7 @@ async def create_link(request: Request):
                     ids = SUBS[sub_id].setdefault("link_ids", [])
                     if uid not in ids: ids.append(uid)
     asyncio.create_task(save_state())
-    log_activity("link", f"Config «{label}» created by {s['user_id']}", "ok")
+    log_activity("link", f"Link '{label}' created by {s['user_id']}", "ok")
     host = get_host()
     vless_list = generate_vless_links(LINKS[uid], uid, host)
     return {"uuid": uid, **LINKS[uid], "vless_link": "\n".join(vless_list),
@@ -651,11 +679,13 @@ async def create_link(request: Request):
 async def create_links_bulk(request: Request):
     s = await require_reseller_auth(request)
     body = await request.json()
+    
     try:
         count = int(body.get("count", 1))
     except (ValueError, TypeError):
         count = 1
     count = max(1, min(count, 100))
+    
     base_label = (body.get("label") or "Bulk").strip()[:40]
     lv = float(body.get("limit_value") or 0)
     lu = body.get("limit_unit") or "GB"
@@ -666,6 +696,7 @@ async def create_links_bulk(request: Request):
     port = int(body.get("port")) if body.get("port") else None
     is_personal = bool(body.get("is_personal", False))
     sub_id = body.get("sub_id")
+    
     protocols = body.get("protocols")
     if not protocols:
         proto = body.get("protocol", DEFAULT_PROTOCOL)
@@ -673,13 +704,16 @@ async def create_links_bulk(request: Request):
     protocols = [p for p in protocols if p in PROTOCOLS]
     if not protocols:
         protocols = [DEFAULT_PROTOCOL]
+
     if s["role"] == "reseller":
         await check_reseller_capacity(s["user_id"], limit_bytes * count)
         is_personal = True
+
     ip_flags = {}
     for ip in ips:
         if ip not in ip_flags:
             ip_flags[ip] = await fetch_ip_flag(ip) if ip else ""
+
     created_uids = []
     async with LINKS_LOCK:
         sub_obj = None
@@ -710,12 +744,15 @@ async def create_links_bulk(request: Request):
             created_uids.append(uid)
             if sub_obj:
                 sub_obj["link_ids"].append(uid)
+    
     asyncio.create_task(save_state())
-    log_activity("link", f"{count} configs {base_label} created", "ok")
+    log_activity("link", f"{count} bulk links '{base_label}' created", "ok")
+    
     host = get_host()
     all_vless = []
     for uid in created_uids:
         all_vless.extend(generate_vless_links(LINKS[uid], uid, host))
+    
     sub_url = ""
     if sub_id:
         async with SUBS_LOCK:
@@ -723,6 +760,7 @@ async def create_links_bulk(request: Request):
                 uuid_key = SUBS[sub_id].get("uuid_key", "")
                 if uuid_key:
                     sub_url = f"https://{host}/sub-group/{uuid_key}"
+    
     return {"ok": True, "count": count, "created_uids": created_uids,
             "sub_url": sub_url, "vless_bulk": "\n".join(all_vless)}
 
@@ -782,9 +820,10 @@ async def delete_link(uid: str, request: Request):
                     ids = SUBS[sub_id].get("link_ids", [])
                     if uid in ids: ids.remove(uid)
     asyncio.create_task(save_state())
-    log_activity("link", f"Config {uid[:8]}... deleted", "err")
+    log_activity("link", f"Link {uid[:8]}... deleted", "err")
     return {"ok": True, "deleted": uid}
 
+# ── Reset Reseller Token ──────────────────────────────────────────────────────
 @app.post("/api/resellers/{rid}/reset-token")
 async def reset_reseller_token(rid: str, _=Depends(require_auth)):
     async with RESELLERS_LOCK:
@@ -793,6 +832,7 @@ async def reset_reseller_token(rid: str, _=Depends(require_auth)):
     asyncio.create_task(save_state())
     return {"ok": True, "login_token": RESELLERS[rid]["login_token"]}
 
+# ── Reseller Management (Admin Only) ──────────────────────────────────────────
 @app.get("/api/resellers")
 async def list_resellers(_=Depends(require_auth)):
     host = get_host()
@@ -821,19 +861,19 @@ async def create_reseller(request: Request, _=Depends(require_auth)):
     name = str(body.get("name", "")).strip()
     pw = str(body.get("password", "")).strip()
     limit_gb = float(body.get("limit_gb") or 0)
-    if not name or not pw: raise HTTPException(400, "Name and password required")
+    if not name or not pw: raise HTTPException(400, "Name and password are required")
     if limit_gb <= 0: raise HTTPException(400, "Limit must be greater than 0")
     rid = secrets.token_hex(8)
     async with RESELLERS_LOCK:
         RESELLERS[rid] = {
             "name": name, "password_hash": hash_password(pw),
             "total_bytes": parse_size_to_bytes(limit_gb, "GB"),
-            "active": True,
+            "active": True, 
             "login_token": secrets.token_urlsafe(16),
             "created_at": datetime.now().isoformat()
         }
     asyncio.create_task(save_state())
-    log_activity("system", f"Reseller «{name}» with {limit_gb}GB created", "ok")
+    log_activity("system", f"Reseller '{name}' created with {limit_gb}GB", "ok")
     return {"ok": True, "id": rid, "name": name, "limit_gb": limit_gb}
 
 @app.patch("/api/resellers/{rid}")
@@ -846,13 +886,13 @@ async def update_reseller(rid: str, request: Request, _=Depends(require_auth)):
             r["name"] = str(body["name"]).strip()
         if "active" in body:
             r["active"] = bool(body["active"])
-            log_activity("system", f"Reseller «{r['name']}» {'activated' if r['active'] else 'deactivated'}", "info")
+            log_activity("system", f"Reseller '{r['name']}' {'activated' if r['active'] else 'deactivated'}", "info")
         if "limit_gb" in body:
             r["total_bytes"] = parse_size_to_bytes(float(body["limit_gb"]), "GB")
-            log_activity("system", f"Reseller «{r['name']}» limit changed to {body['limit_gb']}GB", "info")
+            log_activity("system", f"Reseller '{r['name']}' limit changed to {body['limit_gb']}GB", "info")
         if "password" in body and str(body["password"]).strip():
             r["password_hash"] = hash_password(str(body["password"]).strip())
-            log_activity("system", f"Reseller «{r['name']}» password changed", "info")
+            log_activity("system", f"Reseller '{r['name']}' password changed", "info")
     asyncio.create_task(save_state())
     return {"ok": True}
 
@@ -865,12 +905,14 @@ async def delete_reseller(rid: str, _=Depends(require_auth)):
     log_activity("system", f"Reseller {rid[:8]}... deleted", "warn")
     return {"ok": True, "deleted": rid}
 
+# ── Reseller Report (Admin) ───────────────────────────────────────────────────
 @app.get("/api/resellers/{rid}/links")
 async def reseller_links(rid: str, _=Depends(require_auth)):
     async with LINKS_LOCK:
         result = [{"uuid": uid, **d} for uid, d in LINKS.items() if d.get("creator_id") == rid]
     return {"links": result}
 
+# ── Reseller Token Login ──────────────────────────────────────────────────────
 @app.get("/r/{login_token}")
 async def reseller_token_login(login_token: str):
     async with RESELLERS_LOCK:
@@ -883,12 +925,15 @@ async def reseller_token_login(login_token: str):
                 return resp
     return HTMLResponse("<h2 style='padding:40px;font-family:sans-serif'>Invalid link</h2>", status_code=404)
 
+# ── VLESS Relay ───────────────────────────────────────────────────────────────
 from relay_vless import RELAY_BUF, parse_vless_header, check_and_use, relay_ws_to_tcp, relay_tcp_to_ws, websocket_tunnel
 app.add_api_websocket_route("/ws/{uuid}", websocket_tunnel)
 
+# ── XHTTP ─────────────────────────────────────────────────────────────────────
 from xhttp_siz10 import router as xhttp_router
 app.include_router(xhttp_router)
 
+# ── HTTP Proxy ────────────────────────────────────────────────────────────────
 _HOP = {"connection","keep-alive","proxy-authenticate","proxy-authorization","te","trailers","transfer-encoding","upgrade","content-encoding","content-length"}
 @app.api_route("/proxy/{target_url:path}", methods=["GET","POST","PUT","DELETE","PATCH","HEAD","OPTIONS"])
 async def http_proxy(target_url: str, request: Request):
@@ -907,6 +952,7 @@ async def http_proxy(target_url: str, request: Request):
         error_logs.append({"error": str(exc), "url": target_url, "time": datetime.now().isoformat()})
         raise HTTPException(status_code=502, detail=f"Proxy error: {exc}")
 
+# ── Public Sub Page ───────────────────────────────────────────────────────────
 @app.get("/p/{uuid_key}", response_class=HTMLResponse)
 async def public_sub_page(uuid_key: str, request: Request):
     from public_page import get_public_page_html
@@ -996,7 +1042,7 @@ async def dashboard(request: Request):
     await ensure_default_link()
     return HTMLResponse(content=DASHBOARD_HTML)
 
-@app.get("/Cbee", response_class=HTMLResponse)
+@app.get("/CFOX", response_class=HTMLResponse)
 async def cfox_dashboard(request: Request):
     s = await get_session_data(request.cookies.get(SESSION_COOKIE))
     if not s or s["role"] != "admin": return RedirectResponse(url="/login")
