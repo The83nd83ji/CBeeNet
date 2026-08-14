@@ -1,7 +1,6 @@
-# pages.py - CBee Gateway v1.0.0 (3x-UI Style Dashboard + Multi-Language + Prestige Theme)
+# pages.py - CBee Gateway v1.0.0 - Full Dashboard with Premium Charts
 import json
 
-# =============================== LOGIN PAGE ===============================
 LOGIN_HTML = r"""<!DOCTYPE html>
 <html lang="en" dir="ltr">
 <head>
@@ -296,7 +295,6 @@ input:focus + .ic { color: #1677ff; }
   </div>
 </div>
 <script>
-// ===== Login Language =====
 const loginLang = {
   en: {
     title: 'Login to Panel',
@@ -317,9 +315,7 @@ const loginLang = {
     error_default: 'رمز عبور اشتباه است'
   }
 };
-
 let currentLoginLang = localStorage.getItem('CBeeNet-login-lang') || 'en';
-
 function applyLoginLang(lang){
   const dict = loginLang[lang] || loginLang.en;
   document.getElementById('login-title').textContent = dict.title;
@@ -328,27 +324,14 @@ function applyLoginLang(lang){
   document.getElementById('pw').placeholder = dict.pw_placeholder;
   document.getElementById('login-btn-text').textContent = dict.btn_text;
   document.getElementById('login-telegram').textContent = dict.telegram;
-  
-  // Set dir and language - for password field, keep ltr to show dots correctly
   document.documentElement.lang = lang;
-  // For password field, we want ltr direction to show ••• correctly
   document.getElementById('pw').dir = 'ltr';
-  
-  // Update active button
   document.querySelectorAll('.lang-btn').forEach(b => b.classList.toggle('active', b.dataset.lang === lang));
-  
   localStorage.setItem('CBeeNet-login-lang', lang);
   currentLoginLang = lang;
 }
-
-function setLoginLang(lang){
-  applyLoginLang(lang);
-}
-
-// Apply saved language on load
+function setLoginLang(lang){ applyLoginLang(lang); }
 applyLoginLang(localStorage.getItem('CBeeNet-login-lang') || 'en');
-
-// ===== Login Form =====
 document.getElementById('form').addEventListener('submit', async e => {
   e.preventDefault();
   const btn = document.getElementById('btn');
@@ -380,445 +363,343 @@ document.getElementById('form').addEventListener('submit', async e => {
 </script>
 </body></html>"""
 
-# =============================== LANGUAGE DICTIONARY ===============================
 LANG = {
-    "en": {
-        "dashboard": "Dashboard",
-        "dashboard_sub": "System Overview",
-        "active_connections": "Active Connections",
-        "total_traffic": "Total Traffic",
-        "total_links": "Configs",
-        "uptime": "Uptime",
-        "since_start": "Since Start",
-        "active": "Active",
-        "inactive": "Inactive",
-        "refresh": "Refresh",
-        "traffic_trend": "Bandwidth Usage",
-        "service_status": "Service Status",
-        "top_connections": "Live Connections",
-        "no_connections": "No connections",
-        "server": "Server",
-        "settings": "Settings",
-        "language": "Language",
-        "farsi": "Persian",
-        "english": "English",
-        "save": "Save",
-        "cancel": "Cancel",
-        "delete": "Delete",
-        "edit": "Edit",
-        "copy": "Copy",
-        "created": "Created",
-        "expires": "Expires",
-        "unlimited": "Unlimited",
-        "used": "Used",
-        "of": "of",
-        "daily": "Daily",
-        "hourly": "Hourly",
-        "bandwidth": "Bandwidth",
-        "connections": "Connections",
-        "protocol": "Protocol",
-        "ip_address": "IP Address",
-        "port": "Port",
-        "upload": "Upload",
-        "download": "Download",
-        "duration": "Duration",
-        "status": "Status",
-        "online": "Online",
-        "offline": "Offline",
-        "total": "Total",
-        "users": "Users",
-        "protocols": "Protocols",
-        "traffic_usage": "Traffic Usage",
-        "links": "Configs",
-        "sub_groups": "Sub Groups",
-        "subscription": "Subscription",
-        "security": "Security",
-        "logs": "Activity Logs",
-        "errors": "Errors",
-        "test_websocket": "WebSocket Test",
-        "dark_theme": "Dark Theme",
-        "light_theme": "Light Theme",
-        "prestige_theme": "Prestige Theme",
-        "blue": "Blue",
-        "red": "Red",
-        "yellow": "Yellow",
-        "current_theme": "Current Theme",
-        "server_settings": "Server & Link Settings",
-        "server_name": "Server Name",
-        "server_prefix": "Link Prefix",
-        "link_template": "Link Name Template",
-        "template_vars": "Available Variables",
-        "template_note": "If `{protocol}` is not in the template, the protocol will not be shown.",
-        "change_password": "Change Password",
-        "current_password": "Current Password",
-        "new_password": "New Password",
-        "confirm_password": "Confirm Password",
-        "password_strength": "Password Strength",
-        "min_chars": "At least 4 characters",
-        "contains_number": "Contains number",
-        "contains_case": "Uppercase/Lowercase",
-        "weak": "Very Weak",
-        "medium": "Medium",
-        "strong": "Strong",
-        "save_password": "Save New Password",
-        "login": "Login",
-        "logout": "Logout",
-        "login_title": "Login to Panel",
-        "login_sub": "Enter password to access the dashboard",
-        "password": "Password",
-        "login_button": "Login to Dashboard",
-        "telegram_channel": "Telegram Channel",
-        "panel": "Panel",
-        "system": "System",
-        "configs": "Configs",
-        "sub_groups_short": "Sub Groups",
-        "activity_logs": "Activity Logs",
-        "config_id": "Config ID",
-        "sub_group_expiry": "Sub Group & Expiry",
-        "no_group": "No Group",
-        "days": "Days",
-        "traffic_quota": "Traffic Quota",
-        "transport_protocols": "Transport Protocols",
-        "bulk_count": "Bulk Count",
-        "create_config": "Create Config",
-        "no_configs": "No configs yet",
-        "new_group": "New Group",
-        "no_groups": "No groups yet",
-        "create_group": "Create a new group to organize your configs",
-        "single_sub": "Single Subscription (per config)",
-        "full_sub": "Full Subscription (Admin)",
-        "full_sub_desc": "Includes all active configs.",
-        "group_sub_links": "Group Subscription Links",
-        "loading": "Loading...",
-        "traffic_analysis": "Bandwidth usage analysis & monitoring",
-        "total_traffic_used": "Total Traffic Used",
-        "hourly_average": "Hourly Average",
-        "per_hour": "/h",
-        "peak_usage": "Peak Usage",
-        "peak_hour": "Peak Hour",
-        "lowest_usage": "Lowest Usage",
-        "live_connections": "Live Connections",
-        "total_traffic_live": "Total Traffic",
-        "avg_duration": "Avg Duration",
-        "unique_ips": "Unique IPs",
-        "connections_list": "Connections List",
-        "auto_update": "Auto-update every 5s",
-        "no_active_connections": "No active connections",
-        "will_appear": "They will appear here as soon as clients connect",
-        "encryption": "Encryption",
-        "access_control": "Access Control",
-        "hash": "Hash",
-        "session": "Session",
-        "active_inactive": "Active/Inactive",
-        "expiry_date": "Expiry Date",
-        "public_page_pw": "Public Page Password",
-        "optional": "Optional",
-        "activity_logs_full": "Complete event history",
-        "no_logs": "No logs yet",
-        "error_logs": "Error Logs",
-        "websocket_test": "WebSocket Test",
-        "ws_note": "Only registered and active UUIDs can connect.",
-        "connect": "Connect",
-        "disconnect": "Disconnect",
-        "send": "Send",
-        "waiting_ws": "Waiting for connection...",
-        "change_theme": "Change Theme",
-        "server_link_settings": "Server & Link Settings",
-        "save_settings": "Save Settings",
-        "saved": "Saved",
-        "online_status": "Online",
-        "version": "Version",
-        "framework": "Framework",
-        "platform": "Platform",
-        "storage": "Storage",
-        "change_password_title": "Change Password",
-        "change_password_sub": "Choose a strong password and keep it safe",
-        "current_pw": "Current Password",
-        "new_pw": "New Password",
-        "confirm_pw": "Confirm Password",
-        "save_new_pw": "Save New Password",
-        "min_4_chars": "At least 4 chars",
-        "contains_num": "Contains number",
-        "contains_case_letters": "Uppercase/Lowercase",
-        "very_weak": "Very Weak",
-        "medium_strength": "Medium",
-        "strong_strength": "Strong",
-        "logout_btn": "Logout",
-        "telegram_btn": "Telegram Channel",
-        "load": "Load",
-        "connections_live": "Live Connections",
-        "traffic_chart": "Traffic Chart",
-        "protocol_distribution": "Protocol Distribution",
-        "daily_usage": "Daily Usage",
-        "active_conns_table": "Active Connections",
-        "configs_management": "Configs Management",
-        "sub_groups_management": "Sub Groups Management",
-        "subscription_links": "Subscription Links",
-        "traffic_monitor": "Traffic Monitor",
-        "connections_monitor": "Connections Monitor",
-        "security_settings": "Security Settings",
-        "activity_logs_title": "Activity Logs",
-        "error_logs_title": "Error Logs",
-        "websocket_tester": "WebSocket Tester",
-        "system_settings": "System Settings",
-        "language_settings": "Language Settings",
-        "theme_settings": "Theme Settings",
-        "server_info": "Server Info",
-        "password_change": "Password Change",
-        "save_changes": "Save Changes",
-        "cancel_changes": "Cancel",
-        "live": "Live",
-        "running_time": "Running Time",
-        "manage_configs": "Manage Configs for",
-        "select_configs": "Select configs to include in this group",
-        "select_all": "Select All",
-        "deselect_all": "Deselect All",
-        "changes_apply": "Changes apply immediately",
-        "new_group_title": "Create New Group",
-        "new_group_sub": "Create a separate public page to manage configs",
-        "group_name": "Group Name",
-        "description_optional": "Description (optional)",
-        "public_page_password": "Public Page Password (optional)",
-        "public_page_info": "This group's public page will be accessible via a unique link.",
-        "edit_config": "Edit Config",
-        "quota_0_unlimited": "Quota (0 = unlimited)",
-        "expiry_days": "Expiry (days from now, 0 = no change/unlimited)",
-        "expiry_note": "To keep current expiry, leave expiry field as 0.",
-        "random_uuid": "Random UUID · Choose quota, expiry and protocol",
-        "uuid_note": "UUID is generated randomly · Only registered UUIDs can connect · Protocol cannot be changed after creation.",
-        "each_group_public": "Each group has its own public page with its configs",
-        "single_sub_desc": "Each config has its own subscription URL. Click the",
-        "icon_on_card": "icon on the config card.",
-        "full_sub_note": "This URL only works in the browser where you're logged in (requires session cookie).",
-        "based_on_mb": "Based on MB per hour",
-        "lang_note": "Default language is English. Page will refresh after change.",
-        "groups": "Groups",
-        "usage": "Usage",
-        "average": "Average",
-        "protocols_legend": "Protocols",
-        "daily_legend": "Daily",
-        "hourly_legend": "Hourly",
-    },
-    "fa": {
-        "dashboard": "داشبورد",
-        "dashboard_sub": "نمای کلی سیستم",
-        "active_connections": "اتصالات فعال",
-        "total_traffic": "کل ترافیک",
-        "total_links": "کانفیگ‌ها",
-        "uptime": "آپتایم",
-        "since_start": "از راه‌اندازی",
-        "active": "فعال",
-        "inactive": "غیرفعال",
-        "refresh": "رفرش",
-        "traffic_trend": "مصرف پهنای باند",
-        "service_status": "وضعیت سرویس",
-        "top_connections": "اتصال‌های لحظه‌ای",
-        "no_connections": "هیچ اتصالی",
-        "server": "سرور",
-        "settings": "تنظیمات",
-        "language": "زبان",
-        "farsi": "فارسی",
-        "english": "انگلیسی",
-        "save": "ذخیره",
-        "cancel": "انصراف",
-        "delete": "حذف",
-        "edit": "ویرایش",
-        "copy": "کپی",
-        "created": "ساخته شده",
-        "expires": "انقضا",
-        "unlimited": "نامحدود",
-        "used": "مصرف",
-        "of": "از",
-        "daily": "روزانه",
-        "hourly": "ساعتی",
-        "bandwidth": "پهنای باند",
-        "connections": "اتصالات",
-        "protocol": "پروتکل",
-        "ip_address": "آدرس آی‌پی",
-        "port": "پورت",
-        "upload": "آپلود",
-        "download": "دانلود",
-        "duration": "مدت",
-        "status": "وضعیت",
-        "online": "آنلاین",
-        "offline": "آفلاین",
-        "total": "کل",
-        "users": "کاربران",
-        "protocols": "پروتکل‌ها",
-        "traffic_usage": "مصرف ترافیک",
-        "links": "کانفیگ‌ها",
-        "sub_groups": "گروه‌های ساب",
-        "subscription": "سابسکریپشن",
-        "security": "امنیت",
-        "logs": "لاگ فعالیت‌ها",
-        "errors": "خطاها",
-        "test_websocket": "تست WebSocket",
-        "dark_theme": "تم تاریک",
-        "light_theme": "تم روشن",
-        "prestige_theme": "تم پرستیژ",
-        "blue": "آبی",
-        "red": "قرمز",
-        "yellow": "زرد",
-        "current_theme": "تم پیش‌فرض",
-        "server_settings": "تنظیمات سرور و نام لینک‌ها",
-        "server_name": "نام سرور",
-        "server_prefix": "پیشوند لینک‌ها",
-        "link_template": "قالب نام کانفیگ‌ها",
-        "template_vars": "متغیرهای قابل استفاده",
-        "template_note": "اگر `{protocol}` در قالب نباشد، پروتکل در نام نمایش داده نمی‌شود.",
-        "change_password": "تغییر رمز عبور",
-        "current_password": "رمز فعلی",
-        "new_password": "رمز جدید",
-        "confirm_password": "تکرار رمز جدید",
-        "password_strength": "قدرت رمز",
-        "min_chars": "حداقل ۴ کاراکتر",
-        "contains_number": "شامل عدد",
-        "contains_case": "حروف بزرگ/کوچک",
-        "weak": "خیلی ضعیف",
-        "medium": "متوسط",
-        "strong": "قوی",
-        "save_password": "ذخیره رمز جدید",
-        "login": "ورود",
-        "logout": "خروج",
-        "login_title": "ورود به پنل",
-        "login_sub": "رمز عبور را برای دسترسی به داشبورد وارد کنید",
-        "password": "رمز عبور",
-        "login_button": "ورود به داشبورد",
-        "telegram_channel": "کانال تلگرام",
-        "panel": "پنل",
-        "system": "سیستم",
-        "configs": "کانفیگ‌ها",
-        "sub_groups_short": "گروه‌های ساب",
-        "activity_logs": "لاگ فعالیت‌ها",
-        "config_id": "شناسه کانفیگ",
-        "sub_group_expiry": "گروه ساب و انقضا",
-        "no_group": "بدون گروه",
-        "days": "روز",
-        "traffic_quota": "سهمیه ترافیک",
-        "transport_protocols": "پروتکل‌های انتقال",
-        "bulk_count": "تعداد ساخت هم‌زمان",
-        "create_config": "ساخت کانفیگ",
-        "no_configs": "هنوز کانفیگی وجود ندارد",
-        "new_group": "گروه جدید",
-        "no_groups": "هنوز گروهی وجود ندارد",
-        "create_group": "یک گروه جدید بسازید تا کانفیگ‌ها را دسته‌بندی کنید",
-        "single_sub": "سابسکریپشن تکی (هر کانفیگ)",
-        "full_sub": "سابسکریپشن کامل (ادمین)",
-        "full_sub_desc": "شامل تمام کانفیگ‌های فعال.",
-        "group_sub_links": "لینک سابسکریپشن گروه‌ها",
-        "loading": "در حال بارگذاری...",
-        "traffic_analysis": "تحلیل و مانیتورینگ مصرف پهنای باند",
-        "total_traffic_used": "کل ترافیک مصرفی",
-        "hourly_average": "میانگین ساعتی",
-        "per_hour": "در ساعت",
-        "peak_usage": "پیک مصرف",
-        "peak_hour": "بالاترین ساعت",
-        "lowest_usage": "کمترین مصرف",
-        "live_connections": "اتصالات زنده",
-        "total_traffic_live": "مجموع ترافیک لحظه‌ای",
-        "avg_duration": "میانگین مدت اتصال",
-        "unique_ips": "آی‌پی‌های یکتا",
-        "connections_list": "لیست اتصالات",
-        "auto_update": "بروزرسانی خودکار هر ۵ ثانیه",
-        "no_active_connections": "هیچ اتصال فعالی نیست",
-        "will_appear": "به محض اتصال کلاینت‌ها، اینجا نمایش داده می‌شوند",
-        "encryption": "رمزنگاری",
-        "access_control": "کنترل دسترسی",
-        "hash": "هش رمز",
-        "session": "سشن",
-        "active_inactive": "فعال/غیرفعال",
-        "expiry_date": "تاریخ انقضا",
-        "public_page_pw": "رمز صفحه پابلیک",
-        "optional": "اختیاری",
-        "activity_logs_full": "تاریخچه‌ی کامل رخدادهای پنل",
-        "no_logs": "هنوز لاگی ثبت نشده",
-        "error_logs": "لاگ خطاها",
-        "websocket_test": "تست WebSocket",
-        "ws_note": "فقط UUID‌های ثبت‌شده و فعال اتصال برقرار می‌کنند.",
-        "connect": "اتصال",
-        "disconnect": "قطع",
-        "send": "ارسال",
-        "waiting_ws": "منتظر اتصال...",
-        "change_theme": "تغییر تم",
-        "server_link_settings": "تنظیمات سرور و نام لینک‌ها",
-        "save_settings": "ذخیره تنظیمات",
-        "saved": "ذخیره شد",
-        "online_status": "آنلاین",
-        "version": "نسخه",
-        "framework": "فریم‌ورک",
-        "platform": "پلتفرم",
-        "storage": "ذخیره‌سازی",
-        "change_password_title": "تغییر رمز عبور",
-        "change_password_sub": "رمز قوی انتخاب کنید و آن را جایی امن نگه دارید",
-        "current_pw": "رمز فعلی",
-        "new_pw": "رمز جدید",
-        "confirm_pw": "تکرار رمز جدید",
-        "save_new_pw": "ذخیره رمز جدید",
-        "min_4_chars": "حداقل ۴ کاراکتر",
-        "contains_num": "شامل عدد",
-        "contains_case_letters": "حروف بزرگ/کوچک",
-        "very_weak": "خیلی ضعیف",
-        "medium_strength": "متوسط",
-        "strong_strength": "قوی",
-        "logout_btn": "خروج",
-        "telegram_btn": "کانال تلگرام",
-        "load": "بار نسبی",
-        "connections_live": "اتصالات لحظه‌ای",
-        "traffic_chart": "نمودار ترافیک",
-        "protocol_distribution": "توزیع پروتکل",
-        "daily_usage": "مصرف روزانه",
-        "active_conns_table": "اتصالات فعال",
-        "configs_management": "مدیریت کانفیگ‌ها",
-        "sub_groups_management": "مدیریت گروه‌های ساب",
-        "subscription_links": "لینک‌های سابسکریپشن",
-        "traffic_monitor": "مانیتورینگ ترافیک",
-        "connections_monitor": "مانیتورینگ اتصالات",
-        "security_settings": "تنظیمات امنیتی",
-        "activity_logs_title": "لاگ فعالیت‌ها",
-        "error_logs_title": "لاگ خطاها",
-        "websocket_tester": "تست WebSocket",
-        "system_settings": "تنظیمات سیستم",
-        "language_settings": "تنظیمات زبان",
-        "theme_settings": "تنظیمات تم",
-        "server_info": "اطلاعات سرور",
-        "password_change": "تغییر رمز عبور",
-        "save_changes": "ذخیره تغییرات",
-        "cancel_changes": "انصراف",
-        "live": "لحظه‌ای",
-        "running_time": "مدت روشن بودن",
-        "manage_configs": "مدیریت کانفیگ‌های",
-        "select_configs": "کانفیگ‌هایی که می‌خواهید در این گروه باشند را انتخاب کنید",
-        "select_all": "انتخاب همه",
-        "deselect_all": "لغو همه",
-        "changes_apply": "تغییرات بلافاصله اعمال می‌شود",
-        "new_group_title": "ساخت گروه جدید",
-        "new_group_sub": "یک صفحه پابلیک مجزا برای مدیریت کانفیگ‌ها بسازید",
-        "group_name": "نام گروه",
-        "description_optional": "توضیحات (اختیاری)",
-        "public_page_password": "رمز صفحه پابلیک (اختیاری)",
-        "public_page_info": "صفحه پابلیک این گروه با یک لینک منحصر‌به‌فرد در اینترنت در دسترس خواهد بود.",
-        "edit_config": "ویرایش کانفیگ",
-        "quota_0_unlimited": "سهمیه (0 = نامحدود)",
-        "expiry_days": "انقضا (روز از الان، 0 = بدون تغییر/نامحدود)",
-        "expiry_note": "برای حفظ انقضای فعلی، فیلد انقضا را صفر بگذارید.",
-        "random_uuid": "UUID تصادفی · سهمیه، انقضا و پروتکل رو انتخاب کن",
-        "uuid_note": "UUID کاملاً رندوم تولید می‌شود · فقط UUID‌های ثبت‌شده اجازه اتصال دارند · پروتکل پس از ساخت قابل تغییر نیست.",
-        "each_group_public": "هر گروه یک صفحه پابلیک مجزا با کانفیگ‌های خودش دارد",
-        "single_sub_desc": "هر کانفیگ URL سابسکریپشن مخصوص دارد. از کارت کانفیگ روی آیکون",
-        "icon_on_card": "کلیک کنید.",
-        "full_sub_note": "این آدرس فقط در مرورگری که به پنل وارد شده کار می‌کند (نیاز به کوکی سشن).",
-        "based_on_mb": "بر اساس مگابایت در هر ساعت",
-        "lang_note": "زبان پیش‌فرض انگلیسی است. پس از تغییر، صفحه رفرش می‌شود.",
-        "groups": "گروه",
-        "usage": "مصرف",
-        "average": "میانگین",
-        "protocols_legend": "پروتکل‌ها",
-        "daily_legend": "روزانه",
-        "hourly_legend": "ساعتی",
-    }
+  "en": {
+    "dashboard": "Dashboard", "dashboard_sub": "System Overview",
+    "active_connections": "Active Connections", "total_traffic": "Total Traffic",
+    "total_links": "Configs", "uptime": "Uptime",
+    "since_start": "Since Start", "active": "Active", "inactive": "Inactive",
+    "refresh": "Refresh", "traffic_trend": "Bandwidth Usage",
+    "service_status": "Service Status", "top_connections": "Live Connections",
+    "no_connections": "No connections", "server": "Server",
+    "settings": "Settings", "language": "Language",
+    "farsi": "Persian", "english": "English",
+    "save": "Save", "cancel": "Cancel", "delete": "Delete",
+    "edit": "Edit", "copy": "Copy", "created": "Created",
+    "expires": "Expires", "unlimited": "Unlimited",
+    "used": "Used", "of": "of", "daily": "Daily",
+    "hourly": "Hourly", "bandwidth": "Bandwidth",
+    "connections": "Connections", "protocol": "Protocol",
+    "ip_address": "IP Address", "port": "Port",
+    "upload": "Upload", "download": "Download",
+    "duration": "Duration", "status": "Status",
+    "online": "Online", "offline": "Offline",
+    "total": "Total", "users": "Users",
+    "protocols": "Protocols", "traffic_usage": "Traffic Usage",
+    "links": "Configs", "sub_groups": "Sub Groups",
+    "subscription": "Subscription", "security": "Security",
+    "logs": "Activity Logs", "errors": "Errors",
+    "test_websocket": "WebSocket Test",
+    "dark_theme": "Dark Theme", "light_theme": "Light Theme",
+    "prestige_theme": "Prestige Theme", "blue": "Blue",
+    "red": "Red", "yellow": "Yellow",
+    "current_theme": "Current Theme",
+    "server_settings": "Server & Link Settings",
+    "server_name": "Server Name", "server_prefix": "Link Prefix",
+    "link_template": "Link Name Template",
+    "template_vars": "Available Variables",
+    "template_note": "If `{protocol}` is not in the template, the protocol will not be shown.",
+    "change_password": "Change Password",
+    "current_password": "Current Password", "new_password": "New Password",
+    "confirm_password": "Confirm Password",
+    "password_strength": "Password Strength",
+    "min_chars": "At least 4 characters", "contains_number": "Contains number",
+    "contains_case": "Uppercase/Lowercase",
+    "weak": "Very Weak", "medium": "Medium", "strong": "Strong",
+    "save_password": "Save New Password",
+    "login": "Login", "logout": "Logout",
+    "login_title": "Login to Panel",
+    "login_sub": "Enter password to access the dashboard",
+    "password": "Password", "login_button": "Login to Dashboard",
+    "telegram_channel": "Telegram Channel",
+    "panel": "Panel", "system": "System",
+    "configs": "Configs", "sub_groups_short": "Sub Groups",
+    "activity_logs": "Activity Logs",
+    "config_id": "Config ID",
+    "sub_group_expiry": "Sub Group & Expiry",
+    "no_group": "No Group",
+    "days": "Days",
+    "traffic_quota": "Traffic Quota",
+    "transport_protocols": "Transport Protocols",
+    "bulk_count": "Bulk Count",
+    "create_config": "Create Config",
+    "no_configs": "No configs yet",
+    "new_group": "New Group",
+    "no_groups": "No groups yet",
+    "create_group": "Create a new group to organize your configs",
+    "single_sub": "Single Subscription (per config)",
+    "full_sub": "Full Subscription (Admin)",
+    "full_sub_desc": "Includes all active configs.",
+    "group_sub_links": "Group Subscription Links",
+    "loading": "Loading...",
+    "traffic_analysis": "Bandwidth usage analysis & monitoring",
+    "total_traffic_used": "Total Traffic Used",
+    "hourly_average": "Hourly Average",
+    "per_hour": "/h",
+    "peak_usage": "Peak Usage",
+    "peak_hour": "Peak Hour",
+    "lowest_usage": "Lowest Usage",
+    "live_connections": "Live Connections",
+    "total_traffic_live": "Total Traffic",
+    "avg_duration": "Avg Duration",
+    "unique_ips": "Unique IPs",
+    "connections_list": "Connections List",
+    "auto_update": "Auto-update every 5s",
+    "no_active_connections": "No active connections",
+    "will_appear": "They will appear here as soon as clients connect",
+    "encryption": "Encryption",
+    "access_control": "Access Control",
+    "hash": "Hash",
+    "session": "Session",
+    "active_inactive": "Active/Inactive",
+    "expiry_date": "Expiry Date",
+    "public_page_pw": "Public Page Password",
+    "optional": "Optional",
+    "activity_logs_full": "Complete event history",
+    "no_logs": "No logs yet",
+    "error_logs": "Error Logs",
+    "websocket_test": "WebSocket Test",
+    "ws_note": "Only registered and active UUIDs can connect.",
+    "connect": "Connect", "disconnect": "Disconnect", "send": "Send",
+    "waiting_ws": "Waiting for connection...",
+    "change_theme": "Change Theme",
+    "server_link_settings": "Server & Link Settings",
+    "save_settings": "Save Settings",
+    "saved": "Saved",
+    "online_status": "Online",
+    "version": "Version", "framework": "Framework",
+    "platform": "Platform", "storage": "Storage",
+    "change_password_title": "Change Password",
+    "change_password_sub": "Choose a strong password and keep it safe",
+    "current_pw": "Current Password", "new_pw": "New Password",
+    "confirm_pw": "Confirm Password",
+    "save_new_pw": "Save New Password",
+    "min_4_chars": "At least 4 chars",
+    "contains_num": "Contains number",
+    "contains_case_letters": "Uppercase/Lowercase",
+    "very_weak": "Very Weak", "medium_strength": "Medium",
+    "strong_strength": "Strong",
+    "logout_btn": "Logout", "telegram_btn": "Telegram Channel",
+    "load": "Load", "connections_live": "Live Connections",
+    "traffic_chart": "Traffic Chart",
+    "protocol_distribution": "Protocol Distribution",
+    "daily_usage": "Daily Usage",
+    "active_conns_table": "Active Connections",
+    "configs_management": "Configs Management",
+    "sub_groups_management": "Sub Groups Management",
+    "subscription_links": "Subscription Links",
+    "traffic_monitor": "Traffic Monitor",
+    "connections_monitor": "Connections Monitor",
+    "security_settings": "Security Settings",
+    "activity_logs_title": "Activity Logs",
+    "error_logs_title": "Error Logs",
+    "websocket_tester": "WebSocket Tester",
+    "system_settings": "System Settings",
+    "language_settings": "Language Settings",
+    "theme_settings": "Theme Settings",
+    "server_info": "Server Info",
+    "password_change": "Password Change",
+    "save_changes": "Save Changes",
+    "cancel_changes": "Cancel",
+    "live": "Live", "running_time": "Running Time",
+    "manage_configs": "Manage Configs for",
+    "select_configs": "Select configs to include in this group",
+    "select_all": "Select All", "deselect_all": "Deselect All",
+    "changes_apply": "Changes apply immediately",
+    "new_group_title": "Create New Group",
+    "new_group_sub": "Create a separate public page to manage configs",
+    "group_name": "Group Name",
+    "description_optional": "Description (optional)",
+    "public_page_password": "Public Page Password (optional)",
+    "public_page_info": "This group's public page will be accessible via a unique link.",
+    "edit_config": "Edit Config",
+    "quota_0_unlimited": "Quota (0 = unlimited)",
+    "expiry_days": "Expiry (days from now, 0 = no change/unlimited)",
+    "expiry_note": "To keep current expiry, leave expiry field as 0.",
+    "random_uuid": "Random UUID · Choose quota, expiry and protocol",
+    "uuid_note": "UUID is generated randomly · Only registered UUIDs can connect · Protocol cannot be changed after creation.",
+    "each_group_public": "Each group has its own public page with its configs",
+    "single_sub_desc": "Each config has its own subscription URL. Click the",
+    "icon_on_card": "icon on the config card.",
+    "full_sub_note": "This URL only works in the browser where you're logged in (requires session cookie).",
+    "based_on_mb": "Based on MB per hour",
+    "lang_note": "Default language is English. Page will refresh after change.",
+    "groups": "Groups",
+    "usage": "Usage", "average": "Average",
+    "protocols_legend": "Protocols",
+    "daily_legend": "Daily",
+    "hourly_legend": "Hourly",
+    "bandwidth_usage": "Bandwidth Usage"
+  },
+  "fa": {
+    "dashboard": "داشبورد", "dashboard_sub": "نمای کلی سیستم",
+    "active_connections": "اتصالات فعال", "total_traffic": "کل ترافیک",
+    "total_links": "کانفیگ‌ها", "uptime": "آپتایم",
+    "since_start": "از راه‌اندازی", "active": "فعال", "inactive": "غیرفعال",
+    "refresh": "رفرش", "traffic_trend": "مصرف پهنای باند",
+    "service_status": "وضعیت سرویس", "top_connections": "اتصال‌های لحظه‌ای",
+    "no_connections": "هیچ اتصالی", "server": "سرور",
+    "settings": "تنظیمات", "language": "زبان",
+    "farsi": "فارسی", "english": "انگلیسی",
+    "save": "ذخیره", "cancel": "انصراف", "delete": "حذف",
+    "edit": "ویرایش", "copy": "کپی", "created": "ساخته شده",
+    "expires": "انقضا", "unlimited": "نامحدود",
+    "used": "مصرف", "of": "از", "daily": "روزانه",
+    "hourly": "ساعتی", "bandwidth": "پهنای باند",
+    "connections": "اتصالات", "protocol": "پروتکل",
+    "ip_address": "آدرس آی‌پی", "port": "پورت",
+    "upload": "آپلود", "download": "دانلود",
+    "duration": "مدت", "status": "وضعیت",
+    "online": "آنلاین", "offline": "آفلاین",
+    "total": "کل", "users": "کاربران",
+    "protocols": "پروتکل‌ها", "traffic_usage": "مصرف ترافیک",
+    "links": "کانفیگ‌ها", "sub_groups": "گروه‌های ساب",
+    "subscription": "سابسکریپشن", "security": "امنیت",
+    "logs": "لاگ فعالیت‌ها", "errors": "خطاها",
+    "test_websocket": "تست WebSocket",
+    "dark_theme": "تم تاریک", "light_theme": "تم روشن",
+    "prestige_theme": "تم پرستیژ", "blue": "آبی",
+    "red": "قرمز", "yellow": "زرد",
+    "current_theme": "تم پیش‌فرض",
+    "server_settings": "تنظیمات سرور و نام لینک‌ها",
+    "server_name": "نام سرور", "server_prefix": "پیشوند لینک‌ها",
+    "link_template": "قالب نام کانفیگ‌ها",
+    "template_vars": "متغیرهای قابل استفاده",
+    "template_note": "اگر `{protocol}` در قالب نباشد، پروتکل در نام نمایش داده نمی‌شود.",
+    "change_password": "تغییر رمز عبور",
+    "current_password": "رمز فعلی", "new_password": "رمز جدید",
+    "confirm_password": "تکرار رمز جدید",
+    "password_strength": "قدرت رمز",
+    "min_chars": "حداقل ۴ کاراکتر", "contains_number": "شامل عدد",
+    "contains_case": "حروف بزرگ/کوچک",
+    "weak": "خیلی ضعیف", "medium": "متوسط", "strong": "قوی",
+    "save_password": "ذخیره رمز جدید",
+    "login": "ورود", "logout": "خروج",
+    "login_title": "ورود به پنل",
+    "login_sub": "رمز عبور را برای دسترسی به داشبورد وارد کنید",
+    "password": "رمز عبور", "login_button": "ورود به داشبورد",
+    "telegram_channel": "کانال تلگرام",
+    "panel": "پنل", "system": "سیستم",
+    "configs": "کانفیگ‌ها", "sub_groups_short": "گروه‌های ساب",
+    "activity_logs": "لاگ فعالیت‌ها",
+    "config_id": "شناسه کانفیگ",
+    "sub_group_expiry": "گروه ساب و انقضا",
+    "no_group": "بدون گروه",
+    "days": "روز",
+    "traffic_quota": "سهمیه ترافیک",
+    "transport_protocols": "پروتکل‌های انتقال",
+    "bulk_count": "تعداد ساخت هم‌زمان",
+    "create_config": "ساخت کانفیگ",
+    "no_configs": "هنوز کانفیگی وجود ندارد",
+    "new_group": "گروه جدید",
+    "no_groups": "هنوز گروهی وجود ندارد",
+    "create_group": "یک گروه جدید بسازید تا کانفیگ‌ها را دسته‌بندی کنید",
+    "single_sub": "سابسکریپشن تکی (هر کانفیگ)",
+    "full_sub": "سابسکریپشن کامل (ادمین)",
+    "full_sub_desc": "شامل تمام کانفیگ‌های فعال.",
+    "group_sub_links": "لینک سابسکریپشن گروه‌ها",
+    "loading": "در حال بارگذاری...",
+    "traffic_analysis": "تحلیل و مانیتورینگ مصرف پهنای باند",
+    "total_traffic_used": "کل ترافیک مصرفی",
+    "hourly_average": "میانگین ساعتی",
+    "per_hour": "در ساعت",
+    "peak_usage": "پیک مصرف",
+    "peak_hour": "بالاترین ساعت",
+    "lowest_usage": "کمترین مصرف",
+    "live_connections": "اتصالات زنده",
+    "total_traffic_live": "مجموع ترافیک لحظه‌ای",
+    "avg_duration": "میانگین مدت اتصال",
+    "unique_ips": "آی‌پی‌های یکتا",
+    "connections_list": "لیست اتصالات",
+    "auto_update": "بروزرسانی خودکار هر ۵ ثانیه",
+    "no_active_connections": "هیچ اتصال فعالی نیست",
+    "will_appear": "به محض اتصال کلاینت‌ها، اینجا نمایش داده می‌شوند",
+    "encryption": "رمزنگاری",
+    "access_control": "کنترل دسترسی",
+    "hash": "هش رمز",
+    "session": "سشن",
+    "active_inactive": "فعال/غیرفعال",
+    "expiry_date": "تاریخ انقضا",
+    "public_page_pw": "رمز صفحه پابلیک",
+    "optional": "اختیاری",
+    "activity_logs_full": "تاریخچه‌ی کامل رخدادهای پنل",
+    "no_logs": "هنوز لاگی ثبت نشده",
+    "error_logs": "لاگ خطاها",
+    "websocket_test": "تست WebSocket",
+    "ws_note": "فقط UUID‌های ثبت‌شده و فعال اتصال برقرار می‌کنند.",
+    "connect": "اتصال", "disconnect": "قطع", "send": "ارسال",
+    "waiting_ws": "منتظر اتصال...",
+    "change_theme": "تغییر تم",
+    "server_link_settings": "تنظیمات سرور و نام لینک‌ها",
+    "save_settings": "ذخیره تنظیمات",
+    "saved": "ذخیره شد",
+    "online_status": "آنلاین",
+    "version": "نسخه", "framework": "فریم‌ورک",
+    "platform": "پلتفرم", "storage": "ذخیره‌سازی",
+    "change_password_title": "تغییر رمز عبور",
+    "change_password_sub": "رمز قوی انتخاب کنید و آن را جایی امن نگه دارید",
+    "current_pw": "رمز فعلی", "new_pw": "رمز جدید",
+    "confirm_pw": "تکرار رمز جدید",
+    "save_new_pw": "ذخیره رمز جدید",
+    "min_4_chars": "حداقل ۴ کاراکتر",
+    "contains_num": "شامل عدد",
+    "contains_case_letters": "حروف بزرگ/کوچک",
+    "very_weak": "خیلی ضعیف", "medium_strength": "متوسط",
+    "strong_strength": "قوی",
+    "logout_btn": "خروج", "telegram_btn": "کانال تلگرام",
+    "load": "بار نسبی", "connections_live": "اتصالات لحظه‌ای",
+    "traffic_chart": "نمودار ترافیک",
+    "protocol_distribution": "توزیع پروتکل",
+    "daily_usage": "مصرف روزانه",
+    "active_conns_table": "اتصالات فعال",
+    "configs_management": "مدیریت کانفیگ‌ها",
+    "sub_groups_management": "مدیریت گروه‌های ساب",
+    "subscription_links": "لینک‌های سابسکریپشن",
+    "traffic_monitor": "مانیتورینگ ترافیک",
+    "connections_monitor": "مانیتورینگ اتصالات",
+    "security_settings": "تنظیمات امنیتی",
+    "activity_logs_title": "لاگ فعالیت‌ها",
+    "error_logs_title": "لاگ خطاها",
+    "websocket_tester": "تست WebSocket",
+    "system_settings": "تنظیمات سیستم",
+    "language_settings": "تنظیمات زبان",
+    "theme_settings": "تنظیمات تم",
+    "server_info": "اطلاعات سرور",
+    "password_change": "تغییر رمز عبور",
+    "save_changes": "ذخیره تغییرات",
+    "cancel_changes": "انصراف",
+    "live": "لحظه‌ای", "running_time": "مدت روشن بودن",
+    "manage_configs": "مدیریت کانفیگ‌های",
+    "select_configs": "کانفیگ‌هایی که می‌خواهید در این گروه باشند را انتخاب کنید",
+    "select_all": "انتخاب همه", "deselect_all": "لغو همه",
+    "changes_apply": "تغییرات بلافاصله اعمال می‌شود",
+    "new_group_title": "ساخت گروه جدید",
+    "new_group_sub": "یک صفحه پابلیک مجزا برای مدیریت کانفیگ‌ها بسازید",
+    "group_name": "نام گروه",
+    "description_optional": "توضیحات (اختیاری)",
+    "public_page_password": "رمز صفحه پابلیک (اختیاری)",
+    "public_page_info": "صفحه پابلیک این گروه با یک لینک منحصر‌به‌فرد در اینترنت در دسترس خواهد بود.",
+    "edit_config": "ویرایش کانفیگ",
+    "quota_0_unlimited": "سهمیه (0 = نامحدود)",
+    "expiry_days": "انقضا (روز از الان، 0 = بدون تغییر/نامحدود)",
+    "expiry_note": "برای حفظ انقضای فعلی، فیلد انقضا را صفر بگذارید.",
+    "random_uuid": "UUID تصادفی · سهمیه، انقضا و پروتکل رو انتخاب کن",
+    "uuid_note": "UUID کاملاً رندوم تولید می‌شود · فقط UUID‌های ثبت‌شده اجازه اتصال دارند · پروتکل پس از ساخت قابل تغییر نیست.",
+    "each_group_public": "هر گروه یک صفحه پابلیک مجزا با کانفیگ‌های خودش دارد",
+    "single_sub_desc": "هر کانفیگ URL سابسکریپشن مخصوص دارد. از کارت کانفیگ روی آیکون",
+    "icon_on_card": "کلیک کنید.",
+    "full_sub_note": "این آدرس فقط در مرورگری که به پنل وارد شده کار می‌کند (نیاز به کوکی سشن).",
+    "based_on_mb": "بر اساس مگابایت در هر ساعت",
+    "lang_note": "زبان پیش‌فرض انگلیسی است. پس از تغییر، صفحه رفرش می‌شود.",
+    "groups": "گروه",
+    "usage": "مصرف", "average": "میانگین",
+    "protocols_legend": "پروتکل‌ها",
+    "daily_legend": "روزانه",
+    "hourly_legend": "ساعتی",
+    "bandwidth_usage": "مصرف پهنای باند"
+  }
 }
 
-# =============================== DASHBOARD HTML ===============================
 DASHBOARD_HTML = r"""<!DOCTYPE html>
 <html lang="en" dir="ltr">
 <head>
@@ -860,18 +741,16 @@ DASHBOARD_HTML = r"""<!DOCTYPE html>
   --shadow:0 8px 32px rgba(0,0,0,0.4);
   --font-family:'Vazirmatn','Segoe UI',sans-serif;
 }
-/* ===== THEMES ===== */
 [data-theme="dark-blue"]{--accent:#1677ff;--accent2:#4096ff;--accent-d:rgba(22,119,255,0.12);--accent-glow:rgba(22,119,255,0.35);--card-bh:rgba(22,119,255,0.20);}
 [data-theme="dark-red"]{--accent:#ef4444;--accent2:#f87171;--accent-d:rgba(239,68,68,0.12);--accent-glow:rgba(239,68,68,0.35);--card-bh:rgba(239,68,68,0.20);}
 [data-theme="dark-yellow"]{--accent:#f59e0b;--accent2:#fbbf24;--accent-d:rgba(245,158,11,0.12);--accent-glow:rgba(245,158,11,0.35);--card-bh:rgba(245,158,11,0.20);}
-/* ===== PRESTIGE THEME (3x-UI Style) ===== */
 [data-theme="dark-prestige"]{
   --bg:#0a0e17;
   --bg2:#111927;
   --bg3:#1a2438;
   --card:#111927;
   --card-b:#1e2d45;
-  --card-bh:rgba(22,119,255,0.25);
+  --card-bh:rgba(26,122,255,0.25);
   --accent:#1a7aff;
   --accent2:#4d94ff;
   --accent-d:rgba(26,122,255,0.15);
@@ -895,7 +774,6 @@ DASHBOARD_HTML = r"""<!DOCTYPE html>
 [data-theme="light-blue"]{--bg:#f6f8fa;--bg2:#ffffff;--bg3:#eaeef2;--card:#ffffff;--card-b:#d0d7de;--card-bh:rgba(22,119,255,0.25);--accent:#1677ff;--accent2:#4096ff;--accent-d:rgba(22,119,255,0.08);--accent-glow:rgba(22,119,255,0.25);--t1:#24292f;--t2:#57606a;--t3:#8b949e;--shadow:0 8px 28px rgba(0,0,0,0.08);}
 [data-theme="light-red"]{--bg:#f6f8fa;--bg2:#ffffff;--bg3:#eaeef2;--card:#ffffff;--card-b:#d0d7de;--card-bh:rgba(239,68,68,0.25);--accent:#ef4444;--accent2:#f87171;--accent-d:rgba(239,68,68,0.08);--accent-glow:rgba(239,68,68,0.25);--t1:#24292f;--t2:#57606a;--t3:#8b949e;--shadow:0 8px 28px rgba(0,0,0,0.08);}
 [data-theme="light-yellow"]{--bg:#f6f8fa;--bg2:#ffffff;--bg3:#eaeef2;--card:#ffffff;--card-b:#d0d7de;--card-bh:rgba(245,158,11,0.25);--accent:#f59e0b;--accent2:#fbbf24;--accent-d:rgba(245,158,11,0.08);--accent-glow:rgba(245,158,11,0.25);--t1:#24292f;--t2:#57606a;--t3:#8b949e;--shadow:0 8px 28px rgba(0,0,0,0.08);}
-
 html,body{height:100%}
 body{font-family:var(--font-family);background:var(--bg);color:var(--t1);min-height:100vh;display:flex;font-size:14px;transition:background .3s,color .3s,border-color .3s}
 ::-webkit-scrollbar{width:5px;height:5px}
@@ -953,274 +831,61 @@ a{color:inherit;text-decoration:none}
 .dg{background:var(--green)}.dr{background:var(--red)}.da{background:var(--amber)}.db{background:var(--accent)}
 .pulse{animation:pulse 2s infinite}
 @keyframes pulse{0%,100%{opacity:1}50%{opacity:.25}}
-
-/* ===== DASHBOARD 3x-UI STYLE ===== */
-.dash-stats-grid{
-  display:grid;
-  grid-template-columns: repeat(4,1fr);
-  gap:16px;
-  margin-bottom:22px;
-}
-.dash-stat-card{
-  background:var(--card);
-  border:1px solid var(--card-b);
-  border-radius:var(--radius);
-  padding:18px 20px;
-  transition:all .2s;
-  position:relative;
-  overflow:hidden;
-}
-.dash-stat-card:hover{
-  border-color:var(--card-bh);
-  transform:translateY(-3px);
-  box-shadow:var(--shadow);
-}
-.dash-stat-card .label{
-  font-size:10.5px;
-  color:var(--t3);
-  font-weight:600;
-  text-transform:uppercase;
-  letter-spacing:.05em;
-  display:flex;
-  align-items:center;
-  gap:6px;
-}
-.dash-stat-card .value{
-  font-size:28px;
-  font-weight:800;
-  color:var(--t1);
-  margin-top:4px;
-  letter-spacing:-.02em;
-}
-.dash-stat-card .sub{
-  font-size:10px;
-  color:var(--t2);
-  margin-top:4px;
-}
-.dash-stat-card .icon{
-  position:absolute;
-  top:16px;
-  left:16px;
-  font-size:22px;
-  color:var(--accent);
-  opacity:.3;
-}
+.dash-stats-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:22px}
+.dash-stat-card{background:var(--card);border:1px solid var(--card-b);border-radius:var(--radius);padding:18px 20px;transition:all .2s;position:relative;overflow:hidden}
+.dash-stat-card:hover{border-color:var(--card-bh);transform:translateY(-3px);box-shadow:var(--shadow)}
+.dash-stat-card .label{font-size:10.5px;color:var(--t3);font-weight:600;text-transform:uppercase;letter-spacing:.05em;display:flex;align-items:center;gap:6px}
+.dash-stat-card .value{font-size:28px;font-weight:800;color:var(--t1);margin-top:4px;letter-spacing:-.02em}
+.dash-stat-card .sub{font-size:10px;color:var(--t2);margin-top:4px}
+.dash-stat-card .icon{position:absolute;top:16px;left:16px;font-size:22px;color:var(--accent);opacity:.3}
 [dir="ltr"] .dash-stat-card .icon{left:auto;right:16px}
-
-/* Sparkline row */
-.dash-sparkline-row{
-  display:grid;
-  grid-template-columns:1fr 1fr 1fr;
-  gap:16px;
-  margin-bottom:22px;
-}
-.dash-spark-card{
-  background:var(--card);
-  border:1px solid var(--card-b);
-  border-radius:var(--radius);
-  padding:16px 18px 14px;
-  transition:all .2s;
-}
-.dash-spark-card:hover{
-  border-color:var(--card-bh);
-  transform:translateY(-2px);
-  box-shadow:var(--shadow);
-}
-.dash-spark-card .spark-top{
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
-  margin-bottom:6px;
-}
-.dash-spark-card .spark-label{
-  font-size:10.5px;
-  color:var(--t3);
-  font-weight:600;
-  text-transform:uppercase;
-  letter-spacing:.05em;
-  display:flex;
-  align-items:center;
-  gap:5px;
-}
+.dash-sparkline-row{display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;margin-bottom:22px}
+.dash-spark-card{background:var(--card);border:1px solid var(--card-b);border-radius:var(--radius);padding:16px 18px 14px;transition:all .2s}
+.dash-spark-card:hover{border-color:var(--card-bh);transform:translateY(-2px);box-shadow:var(--shadow)}
+.dash-spark-card .spark-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:6px}
+.dash-spark-card .spark-label{font-size:10.5px;color:var(--t3);font-weight:600;text-transform:uppercase;letter-spacing:.05em;display:flex;align-items:center;gap:5px}
 .dash-spark-card .spark-label i{font-size:14px;color:var(--accent)}
-.dash-spark-card .spark-value{
-  font-size:26px;
-  font-weight:800;
-  color:var(--t1);
-  letter-spacing:-.02em;
-  line-height:1.2;
-}
+.dash-spark-card .spark-value{font-size:26px;font-weight:800;color:var(--t1);letter-spacing:-.02em;line-height:1.2}
 .dash-spark-card .spark-value .unit{font-size:13px;font-weight:500;color:var(--t3);margin-right:3px}
 .dash-spark-card .spark-chart{height:50px;margin-top:6px;position:relative}
 .dash-spark-card .spark-chart canvas{width:100% !important;height:100% !important}
 .dash-spark-card .spark-sub{font-size:9.5px;color:var(--t3);margin-top:4px;display:flex;align-items:center;gap:4px}
 .dash-spark-card .spark-sub .dot{width:5px;height:5px;border-radius:50%;display:inline-block;background:var(--accent)}
-
-/* Main chart row - Traffic chart only */
-.dash-chart-row{
-  display:grid;
-  grid-template-columns:2fr 1fr;
-  gap:16px;
-  margin-bottom:22px;
-}
-.dash-chart-card{
-  background:var(--card);
-  border:1px solid var(--card-b);
-  border-radius:var(--radius);
-  padding:18px 20px;
-}
-.dash-chart-card .card-title{
-  font-size:12.5px;
-  font-weight:700;
-  color:var(--t1);
-  margin-bottom:12px;
-  display:flex;
-  align-items:center;
-  gap:7px;
-}
-.dash-chart-card .card-title i{color:var(--accent);}
-.dash-chart-wrap{height:220px;position:relative;}
-
-.dash-right-panel{
-  display:flex;
-  flex-direction:column;
-  gap:16px;
-}
-.dash-right-card{
-  background:var(--card);
-  border:1px solid var(--card-b);
-  border-radius:var(--radius);
-  padding:16px 18px;
-  flex:1;
-}
-.dash-right-card .mini-title{
-  font-size:10.5px;
-  color:var(--t3);
-  font-weight:600;
-  text-transform:uppercase;
-  letter-spacing:.05em;
-  margin-bottom:8px;
-}
-.dash-conn-item{
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
-  padding:6px 0;
-  border-bottom:1px solid var(--card-b);
-  font-size:11.5px;
-}
-.dash-conn-item:last-child{border-bottom:none;}
-.dash-conn-item .ip{font-family:monospace;color:var(--t1);}
-.dash-conn-item .proto{font-size:9px;padding:2px 7px;border-radius:5px;background:var(--accent-d);color:var(--accent2);}
-.dash-conn-item .traffic{color:var(--t2);}
-.dash-conn-item .status-dot{width:6px;height:6px;border-radius:50%;display:inline-block;}
-.status-on{background:var(--green);}
-.status-off{background:var(--red);}
-
-/* Protocol Distribution - Bar Chart */
-.dash-charts-second{
-  display:grid;
-  grid-template-columns:1fr 1fr 1fr;
-  gap:16px;
-  margin-bottom:22px;
-}
-.dash-small-chart{
-  background:var(--card);
-  border:1px solid var(--card-b);
-  border-radius:var(--radius);
-  padding:16px 18px;
-}
-.dash-small-chart .chart-title{
-  font-size:11px;
-  font-weight:600;
-  color:var(--t2);
-  margin-bottom:10px;
-  display:flex;
-  align-items:center;
-  gap:6px;
-}
-.dash-small-chart .chart-title i{color:var(--accent);}
-.dash-small-chart .chart-wrap{height:120px;position:relative;}
-
-/* Connections Table */
-.dash-conn-table-wrap{
-  background:var(--card);
-  border:1px solid var(--card-b);
-  border-radius:var(--radius);
-  padding:16px 18px;
-  margin-bottom:22px;
-  overflow-x:auto;
-}
-.dash-conn-table-wrap .table-title{
-  font-size:12px;
-  font-weight:700;
-  color:var(--t1);
-  margin-bottom:12px;
-  display:flex;
-  align-items:center;
-  gap:7px;
-}
-.dash-conn-table-wrap .table-title i{color:var(--accent);}
-.dash-conn-table{
-  width:100%;
-  border-collapse:collapse;
-  font-size:11.5px;
-}
-.dash-conn-table th{
-  text-align:right;
-  padding:8px 10px;
-  color:var(--t3);
-  font-weight:600;
-  text-transform:uppercase;
-  letter-spacing:.05em;
-  font-size:9.5px;
-  border-bottom:1px solid var(--card-b);
-}
+.dash-chart-row{display:grid;grid-template-columns:2fr 1fr;gap:16px;margin-bottom:22px}
+.dash-chart-card{background:var(--card);border:1px solid var(--card-b);border-radius:var(--radius);padding:18px 20px}
+.dash-chart-card .card-title{font-size:12.5px;font-weight:700;color:var(--t1);margin-bottom:12px;display:flex;align-items:center;gap:7px}
+.dash-chart-card .card-title i{color:var(--accent)}
+.dash-chart-wrap{height:220px;position:relative}
+.dash-right-panel{display:flex;flex-direction:column;gap:16px}
+.dash-right-card{background:var(--card);border:1px solid var(--card-b);border-radius:var(--radius);padding:16px 18px;flex:1}
+.dash-right-card .mini-title{font-size:10.5px;color:var(--t3);font-weight:600;text-transform:uppercase;letter-spacing:.05em;margin-bottom:8px}
+.dash-conn-item{display:flex;align-items:center;justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--card-b);font-size:11.5px}
+.dash-conn-item:last-child{border-bottom:none}
+.dash-conn-item .ip{font-family:monospace;color:var(--t1)}
+.dash-conn-item .proto{font-size:9px;padding:2px 7px;border-radius:5px;background:var(--accent-d);color:var(--accent2)}
+.dash-conn-item .traffic{color:var(--t2)}
+.dash-charts-second{display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;margin-bottom:22px}
+.dash-small-chart{background:var(--card);border:1px solid var(--card-b);border-radius:var(--radius);padding:16px 18px}
+.dash-small-chart .chart-title{font-size:11px;font-weight:600;color:var(--t2);margin-bottom:10px;display:flex;align-items:center;gap:6px}
+.dash-small-chart .chart-title i{color:var(--accent)}
+.dash-small-chart .chart-wrap{height:120px;position:relative}
+.dash-conn-table-wrap{background:var(--card);border:1px solid var(--card-b);border-radius:var(--radius);padding:16px 18px;margin-bottom:22px;overflow-x:auto}
+.dash-conn-table-wrap .table-title{font-size:12px;font-weight:700;color:var(--t1);margin-bottom:12px;display:flex;align-items:center;gap:7px}
+.dash-conn-table-wrap .table-title i{color:var(--accent)}
+.dash-conn-table{width:100%;border-collapse:collapse;font-size:11.5px}
+.dash-conn-table th{text-align:right;padding:8px 10px;color:var(--t3);font-weight:600;text-transform:uppercase;letter-spacing:.05em;font-size:9.5px;border-bottom:1px solid var(--card-b)}
 [dir="ltr"] .dash-conn-table th{text-align:left}
-.dash-conn-table td{
-  padding:8px 10px;
-  border-bottom:1px solid var(--card-b);
-  color:var(--t2);
-}
-.dash-conn-table td .ip{font-family:monospace;color:var(--t1);}
-.dash-conn-table .proto-badge{font-size:9px;padding:2px 8px;border-radius:4px;background:var(--accent-d);color:var(--accent2);}
-.dash-conn-table .status-badge{font-size:9px;padding:2px 8px;border-radius:4px;}
-.status-on-badge{background:var(--green-bg);color:var(--green-t);}
-.status-off-badge{background:var(--red-bg);color:var(--red-t);}
-
-.dash-footer{
-  border-top:1px solid var(--card-b);
-  margin-top:14px;
-  padding-top:14px;
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
-  flex-wrap:wrap;
-  gap:8px;
-}
+.dash-conn-table td{padding:8px 10px;border-bottom:1px solid var(--card-b);color:var(--t2)}
+.dash-conn-table td .ip{font-family:monospace;color:var(--t1)}
+.dash-conn-table .proto-badge{font-size:9px;padding:2px 8px;border-radius:4px;background:var(--accent-d);color:var(--accent2)}
+.dash-conn-table .status-badge{font-size:9px;padding:2px 8px;border-radius:4px}
+.status-on-badge{background:var(--green-bg);color:var(--green-t)}
+.status-off-badge{background:var(--red-bg);color:var(--red-t)}
+.dash-footer{border-top:1px solid var(--card-b);margin-top:14px;padding-top:14px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px}
 .df-text{font-size:10px;color:var(--t3)}
 .df-link{font-size:11.5px;color:var(--accent2);display:flex;align-items:center;gap:5px;font-weight:600}
-
-@media(max-width:1024px){
-  .dash-stats-grid{grid-template-columns:1fr 1fr;}
-  .dash-charts-second{grid-template-columns:1fr 1fr;}
-}
-@media(max-width:768px){
-  .dash-chart-row{grid-template-columns:1fr;}
-  .dash-charts-second{grid-template-columns:1fr;}
-  .dash-sparkline-row{grid-template-columns:1fr;}
-  .dash-stats-grid{grid-template-columns:1fr;}
-  .main{padding:62px 12px 50px;}
-  .sidebar{transform:translateX(100%);}
-  [dir="ltr"] .sidebar{transform:translateX(-100%);}
-  .sidebar.open{transform:translateX(0);}
-  .sb-close{display:flex;}
-  .main{margin-right:0;padding-top:70px;}
-  [dir="ltr"] .main{margin-left:0;}
-  .mob-top{display:flex;}
-}
-
-/* ===== REST OF STYLES (same as before) ===== */
+@media(max-width:1024px){.dash-stats-grid{grid-template-columns:1fr 1fr}.dash-charts-second{grid-template-columns:1fr 1fr}}
+@media(max-width:768px){.dash-chart-row{grid-template-columns:1fr}.dash-charts-second{grid-template-columns:1fr}.dash-sparkline-row{grid-template-columns:1fr}.dash-stats-grid{grid-template-columns:1fr}.main{padding:62px 12px 50px}.sidebar{transform:translateX(100%)}[dir="ltr"] .sidebar{transform:translateX(-100%)}.sidebar.open{transform:translateX(0)}.sb-close{display:flex}.main{margin-right:0;padding-top:70px}[dir="ltr"] .main{margin-left:0}.mob-top{display:flex}}
 .btn{font-family:inherit;font-size:12px;font-weight:500;border-radius:9px;padding:8px 14px;cursor:pointer;display:inline-flex;align-items:center;gap:5px;border:none;transition:all .15s;white-space:nowrap}
 .btn i{font-size:13px}
 .btn:disabled{opacity:.4;cursor:not-allowed}
@@ -1241,7 +906,6 @@ a{color:inherit;text-decoration:none}
 .btn-lang{background:var(--accent-d);color:var(--t2);border:1px solid var(--card-b);padding:5px 12px;font-size:11px;border-radius:7px;cursor:pointer;font-family:inherit;transition:.15s}
 .btn-lang:hover{background:var(--accent-d);color:var(--t1)}
 .btn-lang.active{background:var(--accent);color:#fff;border-color:var(--accent)}
-
 .card{background:var(--card);backdrop-filter:blur(8px);border:1px solid var(--card-b);border-radius:var(--radius);padding:18px 20px;transition:border-color .2s,background .3s}
 .card:hover{border-color:var(--card-bh)}
 .card-title{font-size:12.5px;font-weight:700;color:var(--t1);margin-bottom:15px;display:flex;align-items:center;gap:7px}
@@ -1259,7 +923,6 @@ a{color:inherit;text-decoration:none}
 .ch{position:relative;height:200px}
 .ch-lg{position:relative;height:300px}
 .ch-sm{position:relative;height:160px}
-
 .exp-chip{font-size:9px;padding:3px 8px;border-radius:6px;font-weight:700;display:inline-flex;align-items:center;gap:3px}
 .ec-ok{background:var(--green-bg);color:var(--green-t)}
 .ec-warn{background:var(--amber-bg);color:var(--amber-t)}
@@ -1269,7 +932,6 @@ a{color:inherit;text-decoration:none}
 .tog::after{content:'';position:absolute;width:13px;height:13px;border-radius:50%;background:#fff;left:3px;bottom:3px;transition:.2s;box-shadow:0 1px 3px rgba(0,0,0,.3)}
 .tog.on{background:var(--green)}
 .tog.on::after{bottom:18px}
-
 .form-row{display:flex;gap:9px;flex-wrap:wrap;align-items:flex-end}
 .fg{display:flex;flex-direction:column;gap:5px}
 .fg label{font-size:10px;color:var(--t3);font-weight:700;text-transform:uppercase;letter-spacing:.06em}
@@ -1325,7 +987,6 @@ a{color:inherit;text-decoration:none}
 .cp-submit-btn:hover{transform:translateY(-2px);box-shadow:0 10px 26px var(--accent-glow)}
 .cp-submit-btn:active{transform:translateY(0) scale(.98)}
 @media(max-width:760px){.cp-row{grid-template-columns:1fr}.cp-footer{flex-direction:column;align-items:stretch}.cp-submit-btn{justify-content:center}}
-
 .srv-panel{background:linear-gradient(155deg,var(--bg3) 0%,var(--card) 60%);border:1px solid var(--card-b);border-radius:var(--radius);overflow:hidden;box-shadow:var(--shadow);position:relative}
 .srv-panel::before{content:'';position:absolute;top:-60px;left:-60px;width:200px;height:200px;background:radial-gradient(circle,var(--accent-d),transparent 70%);pointer-events:none}
 .srv-hero{display:flex;align-items:center;gap:14px;padding:22px 24px;position:relative;z-index:1;border-bottom:1px solid var(--card-b)}
@@ -1535,7 +1196,6 @@ a{color:inherit;text-decoration:none}
 .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
 .toast.ok{border-color:rgba(16,185,129,.3);background:var(--green-bg);color:var(--green-t)}
 .toast.err{border-color:rgba(239,68,68,.3);background:var(--red-bg);color:var(--red-t)}
-
 .cfg-grid{display:flex;flex-direction:column;gap:10px}
 .cfg-card{background:var(--card);backdrop-filter:blur(8px);border:1px solid var(--card-b);border-radius:14px;padding:0;transition:all .2s cubic-bezier(.4,0,.2,1);position:relative;overflow:hidden}
 .cfg-card:hover{border-color:var(--card-bh);box-shadow:0 6px 24px rgba(0,0,0,.18)}
@@ -1604,8 +1264,6 @@ a{color:inherit;text-decoration:none}
 </head>
 <body>
 <div class="toast" id="toast"></div>
-
-<!-- ===== MODALS (same as before) ===== -->
 <div class="modal-bg" id="modal-links">
   <div class="modal-v2" style="max-width:500px">
     <div class="lmodal-head">
@@ -1637,7 +1295,6 @@ a{color:inherit;text-decoration:none}
     </div>
   </div>
 </div>
-
 <div class="modal-bg" id="modal-create-sub">
   <div class="modal-v2">
     <div class="modal-v2-head">
@@ -1667,7 +1324,6 @@ a{color:inherit;text-decoration:none}
     </div>
   </div>
 </div>
-
 <div class="modal-bg" id="modal-edit-link">
   <div class="modal">
     <button class="modal-close" onclick="closeModal('modal-edit-link')"><i class="ti ti-x"></i></button>
@@ -1687,8 +1343,6 @@ a{color:inherit;text-decoration:none}
     </div>
   </div>
 </div>
-
-<!-- ===== MOBILE TOP BAR ===== -->
 <div class="mob-top">
   <div class="ml">
     <span class="mob-title">CBee</span>
@@ -1698,11 +1352,7 @@ a{color:inherit;text-decoration:none}
     <button class="menu-btn" id="open-sb"><i class="ti ti-menu-2"></i></button>
   </div>
 </div>
-
-<!-- ===== OVERLAY ===== -->
 <div class="overlay" id="overlay"></div>
-
-<!-- ===== SIDEBAR ===== -->
 <aside class="sidebar" id="sb">
   <button class="sb-close" id="close-sb"><i class="ti ti-x"></i></button>
   <div class="logo">
@@ -1730,13 +1380,7 @@ a{color:inherit;text-decoration:none}
     <button class="logout-btn" id="logout-btn"><i class="ti ti-logout"></i> <span data-lang="logout_btn">Logout</span></button>
   </div>
 </aside>
-
-<!-- ===== MAIN CONTENT ===== -->
 <main class="main">
-
-<!-- ============================================================ -->
-<!-- ==================== DASHBOARD ============================== -->
-<!-- ============================================================ -->
 <section class="pg on" id="pg-overview">
   <div class="topbar">
     <div><div class="tb-title"><i class="ti ti-layout-dashboard"></i> <span data-lang="dashboard">Dashboard</span></div><div class="tb-sub" id="last-upd">Loading...</div></div>
@@ -1746,8 +1390,6 @@ a{color:inherit;text-decoration:none}
       <button class="btn btn-p btn-sm" onclick="refreshAll()"><i class="ti ti-refresh"></i> <span data-lang="refresh">Refresh</span></button>
     </div>
   </div>
-
-  <!-- ===== STATS CARDS ===== -->
   <div class="dash-stats-grid" id="dash-stats">
     <div class="dash-stat-card">
       <i class="ti ti-plug-connected icon"></i>
@@ -1774,8 +1416,6 @@ a{color:inherit;text-decoration:none}
       <div class="sub" data-lang="running_time">Running Time</div>
     </div>
   </div>
-
-  <!-- ===== SPARKLINE CHARTS (Load, Traffic, Connections) ===== -->
   <div class="dash-sparkline-row">
     <div class="dash-spark-card">
       <div class="spark-top">
@@ -1802,11 +1442,9 @@ a{color:inherit;text-decoration:none}
       <div class="spark-sub"><span class="dot"></span> <span data-lang="live">Live</span></div>
     </div>
   </div>
-
-  <!-- ===== MAIN CHART ROW (Only Traffic Chart) ===== -->
   <div class="dash-chart-row">
     <div class="dash-chart-card">
-      <div class="card-title"><i class="ti ti-activity"></i> <span data-lang="traffic_trend">Bandwidth Usage</span></div>
+      <div class="card-title"><i class="ti ti-activity"></i> <span data-lang="bandwidth_usage">Bandwidth Usage</span></div>
       <div class="dash-chart-wrap"><canvas id="dashTrafficChart"></canvas></div>
     </div>
     <div class="dash-right-panel">
@@ -1821,13 +1459,11 @@ a{color:inherit;text-decoration:none}
         </div>
       </div>
       <div class="dash-right-card">
-        <div class="mini-title"><i class="ti ti-plug-connected"></i> <span data-lang="top_connections">Live Connections</span></div>
+        <div class="mini-title"><i class="ti ti-plug-connected"></i> <span data-lang="live_connections">Live Connections</span></div>
         <div id="dash-top-conns">—</div>
       </div>
     </div>
   </div>
-
-  <!-- ===== SECOND ROW CHARTS (Protocols - Bar, Daily, Hourly) ===== -->
   <div class="dash-charts-second">
     <div class="dash-small-chart">
       <div class="chart-title"><i class="ti ti-chart-bar"></i> <span data-lang="protocol_distribution">Protocol Distribution</span></div>
@@ -1838,12 +1474,10 @@ a{color:inherit;text-decoration:none}
       <div class="chart-wrap"><canvas id="dashDailyChart"></canvas></div>
     </div>
     <div class="dash-small-chart">
-      <div class="chart-title"><i class="ti ti-arrow-up-right"></i> <span data-lang="hourly">Hourly Avg</span></div>
+      <div class="chart-title"><i class="ti ti-arrow-up-right"></i> <span data-lang="hourly_average">Hourly Avg</span></div>
       <div class="chart-wrap"><canvas id="dashHourlyChart"></canvas></div>
     </div>
   </div>
-
-  <!-- ===== CONNECTIONS TABLE ===== -->
   <div class="dash-conn-table-wrap">
     <div class="table-title"><i class="ti ti-list-details"></i> <span data-lang="active_conns_table">Active Connections</span></div>
     <table class="dash-conn-table">
@@ -1862,18 +1496,11 @@ a{color:inherit;text-decoration:none}
       </tbody>
     </table>
   </div>
-
   <div class="dash-footer">
     <span class="df-text">CBee Gateway v1.0.0 · 2026 · Railway</span>
     <a class="df-link" href="https://t.me/CBeeNet" target="_blank"><i class="ti ti-brand-telegram"></i> t.me/CBeeNet</a>
   </div>
 </section>
-
-<!-- ============================================================ -->
-<!-- ==================== OTHER PAGES ============================ -->
-<!-- ============================================================ -->
-
-<!-- ===== LINKS ===== -->
 <section class="pg" id="pg-links">
   <div class="topbar">
     <div><div class="tb-title"><i class="ti ti-link-plus"></i> <span data-lang="configs">Configs</span></div><div class="tb-sub" data-lang="configs_management">Create and manage configs with quota, expiry and grouping</div></div>
@@ -1951,8 +1578,6 @@ a{color:inherit;text-decoration:none}
   <div class="cfg-grid" id="links-grid"></div>
   <div class="empty" id="links-empty" style="display:none"><i class="ti ti-link-off"></i><p data-lang="no_configs">No configs yet</p></div>
 </section>
-
-<!-- ===== SUB GROUPS ===== -->
 <section class="pg" id="pg-subgroups">
   <div class="topbar">
     <div><div class="tb-title"><i class="ti ti-folders"></i> <span data-lang="sub_groups_short">Sub Groups</span></div><div class="tb-sub" data-lang="each_group_public">Each group has its own public page with its configs</div></div>
@@ -1971,8 +1596,6 @@ a{color:inherit;text-decoration:none}
     <div class="subs-empty-v2"><div class="subs-empty-v2-icon"><i class="ti ti-folders"></i></div><div class="subs-empty-v2-title" data-lang="no_groups">No groups yet</div><div class="subs-empty-v2-sub" data-lang="create_group">Create a new group to organize your configs</div></div>
   </div>
 </section>
-
-<!-- ===== SUBSCRIPTION ===== -->
 <section class="pg" id="pg-subscriptions">
   <div class="topbar"><div><div class="tb-title"><i class="ti ti-rss"></i> <span data-lang="subscription">Subscription</span></div><div class="tb-sub" data-lang="subscription_links">Subscription links for v2ray apps</div></div></div>
   <div class="g2">
@@ -1992,8 +1615,6 @@ a{color:inherit;text-decoration:none}
     <div id="sub-groups-list" data-lang="loading">Loading...</div>
   </div>
 </section>
-
-<!-- ===== TRAFFIC ===== -->
 <section class="pg" id="pg-traffic">
   <div class="topbar">
     <div><div class="tb-title"><i class="ti ti-chart-area"></i> <span data-lang="traffic">Traffic</span></div><div class="tb-sub" data-lang="traffic_analysis">Bandwidth usage analysis & monitoring</div></div>
@@ -2032,8 +1653,6 @@ a{color:inherit;text-decoration:none}
     <div class="traf-chart-body"><canvas id="ch3"></canvas></div>
   </div>
 </section>
-
-<!-- ===== CONNECTIONS ===== -->
 <section class="pg" id="pg-connections">
   <div class="topbar">
     <div><div class="tb-title"><i class="ti ti-plug-connected"></i> <span data-lang="connections">Connections</span></div><div class="tb-sub" data-lang="connections_monitor">Live IP and traffic monitoring per connection</div></div>
@@ -2056,8 +1675,6 @@ a{color:inherit;text-decoration:none}
     <div class="conn-empty-v2-sub" data-lang="will_appear">They will appear here as soon as clients connect</div>
   </div>
 </section>
-
-<!-- ===== SECURITY ===== -->
 <section class="pg" id="pg-security">
   <div class="topbar"><div><div class="tb-title"><i class="ti ti-shield-lock"></i> <span data-lang="security">Security</span></div></div></div>
   <div class="g2">
@@ -2077,20 +1694,14 @@ a{color:inherit;text-decoration:none}
     </div>
   </div>
 </section>
-
-<!-- ===== LOGS ===== -->
 <section class="pg" id="pg-logs">
   <div class="topbar"><div><div class="tb-title"><i class="ti ti-history"></i> <span data-lang="activity_logs">Activity Logs</span></div><div class="tb-sub" data-lang="activity_logs_full">Complete event history</div></div><div class="tb-right"><button class="btn btn-p btn-sm" onclick="loadActivity()"><i class="ti ti-refresh"></i></button></div></div>
   <div class="card"><div class="log-timeline" id="logs-list">—</div><div class="empty" id="logs-empty" style="display:none"><i class="ti ti-history-toggle"></i><p data-lang="no_logs">No logs yet</p></div></div>
 </section>
-
-<!-- ===== ERRORS ===== -->
 <section class="pg" id="pg-errors">
   <div class="topbar"><div><div class="tb-title"><i class="ti ti-alert-triangle"></i> <span data-lang="errors">Errors</span></div></div><div class="tb-right"><span class="badge bg-red" id="errs-badge">0</span><button class="btn btn-p btn-sm" onclick="refreshAll()"><i class="ti ti-refresh"></i></button></div></div>
   <div class="card"><div class="card-title"><i class="ti ti-bug"></i> <span data-lang="error_logs">Error Logs</span></div><div id="errs-full">—</div></div>
 </section>
-
-<!-- ===== WEBSOCKET TEST ===== -->
 <section class="pg" id="pg-testws">
   <div class="topbar"><div><div class="tb-title"><i class="ti ti-wifi"></i> <span data-lang="websocket_test">WebSocket Test</span></div></div></div>
   <div class="card" style="max-width:660px">
@@ -2109,15 +1720,12 @@ a{color:inherit;text-decoration:none}
     </div>
   </div>
 </section>
-
-<!-- ===== SETTINGS ===== -->
 <section class="pg" id="pg-settings">
   <div class="topbar">
     <div><div class="tb-title"><i class="ti ti-settings"></i> <span data-lang="settings">Settings</span></div><div class="tb-sub" data-lang="system_settings">System configuration</div></div>
     <div class="tb-right"><span class="badge bg-blue">v1.0.0</span></div>
   </div>
   <div class="g2">
-    <!-- Theme -->
     <div class="card">
       <div class="card-title"><i class="ti ti-palette"></i> <span data-lang="theme_settings">Theme Settings</span></div>
       <div style="display:flex;flex-direction:column;gap:12px">
@@ -2138,11 +1746,9 @@ a{color:inherit;text-decoration:none}
             <button class="btn btn-p theme-btn-select" data-theme="light-yellow" style="background:#f59e0b;color:#000;box-shadow:0 2px 8px rgba(245,158,11,0.3)" onclick="setTheme('light-yellow')"><i class="ti ti-circle"></i> <span data-lang="yellow">Yellow</span></button>
           </div>
         </div>
-        <div class="cl"><i class="ti ti-info-circle"></i><span data-lang="current_theme">Current Theme</span>: <strong id="current-theme-display">dark-blue</strong></div>
+        <div class="cl"><i class="ti ti-info-circle"></i><span data-lang="current_theme">Current Theme</span>: <strong id="current-theme-display">dark-prestige</strong></div>
       </div>
     </div>
-
-    <!-- Language -->
     <div class="card">
       <div class="card-title"><i class="ti ti-language"></i> <span data-lang="language_settings">Language Settings</span></div>
       <div style="display:flex;gap:10px;flex-wrap:wrap">
@@ -2151,8 +1757,6 @@ a{color:inherit;text-decoration:none}
       </div>
       <div class="cl" style="margin-top:12px"><i class="ti ti-info-circle"></i><span data-lang="lang_note">Default language is English. Page will refresh after change.</span></div>
     </div>
-
-    <!-- Server Settings -->
     <div class="card">
       <div class="card-title"><i class="ti ti-server-2"></i> <span data-lang="server_link_settings">Server & Link Settings</span></div>
       <div style="display:flex;flex-direction:column;gap:12px">
@@ -2180,8 +1784,6 @@ a{color:inherit;text-decoration:none}
       </div>
     </div>
   </div>
-
-  <!-- Change Password & Server Info -->
   <div class="g2" style="margin-top:16px">
     <div class="srv-panel">
       <div class="srv-hero">
@@ -2219,350 +1821,17 @@ a{color:inherit;text-decoration:none}
     </div>
   </div>
 </section>
-
 </main>
-
 <script>
-// =====================================================================
-// ==================== MULTI-LANGUAGE SYSTEM ==========================
-// =====================================================================
 const LANG_DICT = {
   "en": {
-    "dashboard": "Dashboard", "dashboard_sub": "System Overview",
-    "active_connections": "Active Connections", "total_traffic": "Total Traffic",
-    "total_links": "Configs", "uptime": "Uptime",
-    "since_start": "Since Start", "active": "Active", "inactive": "Inactive",
-    "refresh": "Refresh", "traffic_trend": "Bandwidth Usage",
-    "service_status": "Service Status", "top_connections": "Live Connections",
-    "no_connections": "No connections", "server": "Server",
-    "settings": "Settings", "language": "Language",
-    "farsi": "Persian", "english": "English",
-    "save": "Save", "cancel": "Cancel", "delete": "Delete",
-    "edit": "Edit", "copy": "Copy", "created": "Created",
-    "expires": "Expires", "unlimited": "Unlimited",
-    "used": "Used", "of": "of", "daily": "Daily",
-    "hourly": "Hourly", "bandwidth": "Bandwidth",
-    "connections": "Connections", "protocol": "Protocol",
-    "ip_address": "IP Address", "port": "Port",
-    "upload": "Upload", "download": "Download",
-    "duration": "Duration", "status": "Status",
-    "online": "Online", "offline": "Offline",
-    "total": "Total", "users": "Users",
-    "protocols": "Protocols", "traffic_usage": "Traffic Usage",
-    "links": "Configs", "sub_groups": "Sub Groups",
-    "subscription": "Subscription", "security": "Security",
-    "logs": "Activity Logs", "errors": "Errors",
-    "test_websocket": "WebSocket Test",
-    "dark_theme": "Dark Theme", "light_theme": "Light Theme",
-    "prestige_theme": "Prestige Theme", "blue": "Blue",
-    "red": "Red", "yellow": "Yellow",
-    "current_theme": "Current Theme",
-    "server_settings": "Server & Link Settings",
-    "server_name": "Server Name", "server_prefix": "Link Prefix",
-    "link_template": "Link Name Template",
-    "template_vars": "Available Variables",
-    "template_note": "If `{protocol}` is not in the template, the protocol will not be shown.",
-    "change_password": "Change Password",
-    "current_password": "Current Password", "new_password": "New Password",
-    "confirm_password": "Confirm Password",
-    "password_strength": "Password Strength",
-    "min_chars": "At least 4 characters", "contains_number": "Contains number",
-    "contains_case": "Uppercase/Lowercase",
-    "weak": "Very Weak", "medium": "Medium", "strong": "Strong",
-    "save_password": "Save New Password",
-    "login": "Login", "logout": "Logout",
-    "login_title": "Login to Panel",
-    "login_sub": "Enter password to access the dashboard",
-    "password": "Password", "login_button": "Login to Dashboard",
-    "telegram_channel": "Telegram Channel",
-    "panel": "Panel", "system": "System",
-    "configs": "Configs", "sub_groups_short": "Sub Groups",
-    "activity_logs": "Activity Logs",
-    "config_id": "Config ID",
-    "sub_group_expiry": "Sub Group & Expiry",
-    "no_group": "No Group",
-    "days": "Days",
-    "traffic_quota": "Traffic Quota",
-    "transport_protocols": "Transport Protocols",
-    "bulk_count": "Bulk Count",
-    "create_config": "Create Config",
-    "no_configs": "No configs yet",
-    "new_group": "New Group",
-    "no_groups": "No groups yet",
-    "create_group": "Create a new group to organize your configs",
-    "single_sub": "Single Subscription (per config)",
-    "full_sub": "Full Subscription (Admin)",
-    "full_sub_desc": "Includes all active configs.",
-    "group_sub_links": "Group Subscription Links",
-    "loading": "Loading...",
-    "traffic_analysis": "Bandwidth usage analysis & monitoring",
-    "total_traffic_used": "Total Traffic Used",
-    "hourly_average": "Hourly Average",
-    "per_hour": "/h",
-    "peak_usage": "Peak Usage",
-    "peak_hour": "Peak Hour",
-    "lowest_usage": "Lowest Usage",
-    "live_connections": "Live Connections",
-    "total_traffic_live": "Total Traffic",
-    "avg_duration": "Avg Duration",
-    "unique_ips": "Unique IPs",
-    "connections_list": "Connections List",
-    "auto_update": "Auto-update every 5s",
-    "no_active_connections": "No active connections",
-    "will_appear": "They will appear here as soon as clients connect",
-    "encryption": "Encryption",
-    "access_control": "Access Control",
-    "hash": "Hash",
-    "session": "Session",
-    "active_inactive": "Active/Inactive",
-    "expiry_date": "Expiry Date",
-    "public_page_pw": "Public Page Password",
-    "optional": "Optional",
-    "activity_logs_full": "Complete event history",
-    "no_logs": "No logs yet",
-    "error_logs": "Error Logs",
-    "websocket_test": "WebSocket Test",
-    "ws_note": "Only registered and active UUIDs can connect.",
-    "connect": "Connect", "disconnect": "Disconnect", "send": "Send",
-    "waiting_ws": "Waiting for connection...",
-    "change_theme": "Change Theme",
-    "server_link_settings": "Server & Link Settings",
-    "save_settings": "Save Settings",
-    "saved": "Saved",
-    "online_status": "Online",
-    "version": "Version", "framework": "Framework",
-    "platform": "Platform", "storage": "Storage",
-    "change_password_title": "Change Password",
-    "change_password_sub": "Choose a strong password and keep it safe",
-    "current_pw": "Current Password", "new_pw": "New Password",
-    "confirm_pw": "Confirm Password",
-    "save_new_pw": "Save New Password",
-    "min_4_chars": "At least 4 chars",
-    "contains_num": "Contains number",
-    "contains_case_letters": "Uppercase/Lowercase",
-    "very_weak": "Very Weak", "medium_strength": "Medium",
-    "strong_strength": "Strong",
-    "logout_btn": "Logout", "telegram_btn": "Telegram Channel",
-    "load": "Load", "connections_live": "Live Connections",
-    "traffic_chart": "Traffic Chart",
-    "protocol_distribution": "Protocol Distribution",
-    "daily_usage": "Daily Usage",
-    "active_conns_table": "Active Connections",
-    "configs_management": "Configs Management",
-    "sub_groups_management": "Sub Groups Management",
-    "subscription_links": "Subscription Links",
-    "traffic_monitor": "Traffic Monitor",
-    "connections_monitor": "Connections Monitor",
-    "security_settings": "Security Settings",
-    "activity_logs_title": "Activity Logs",
-    "error_logs_title": "Error Logs",
-    "websocket_tester": "WebSocket Tester",
-    "system_settings": "System Settings",
-    "language_settings": "Language Settings",
-    "theme_settings": "Theme Settings",
-    "server_info": "Server Info",
-    "password_change": "Password Change",
-    "save_changes": "Save Changes",
-    "cancel_changes": "Cancel",
-    "live": "Live", "running_time": "Running Time",
-    "manage_configs": "Manage Configs for",
-    "select_configs": "Select configs to include in this group",
-    "select_all": "Select All", "deselect_all": "Deselect All",
-    "changes_apply": "Changes apply immediately",
-    "new_group_title": "Create New Group",
-    "new_group_sub": "Create a separate public page to manage configs",
-    "group_name": "Group Name",
-    "description_optional": "Description (optional)",
-    "public_page_password": "Public Page Password (optional)",
-    "public_page_info": "This group's public page will be accessible via a unique link.",
-    "edit_config": "Edit Config",
-    "quota_0_unlimited": "Quota (0 = unlimited)",
-    "expiry_days": "Expiry (days from now, 0 = no change/unlimited)",
-    "expiry_note": "To keep current expiry, leave expiry field as 0.",
-    "random_uuid": "Random UUID · Choose quota, expiry and protocol",
-    "uuid_note": "UUID is generated randomly · Only registered UUIDs can connect · Protocol cannot be changed after creation.",
-    "each_group_public": "Each group has its own public page with its configs",
-    "single_sub_desc": "Each config has its own subscription URL. Click the",
-    "icon_on_card": "icon on the config card.",
-    "full_sub_note": "This URL only works in the browser where you're logged in (requires session cookie).",
-    "based_on_mb": "Based on MB per hour",
-    "lang_note": "Default language is English. Page will refresh after change.",
-    "groups": "Groups",
-    "usage": "Usage", "average": "Average",
-    "protocols_legend": "Protocols",
-    "daily_legend": "Daily",
-    "hourly_legend": "Hourly",
+    "dashboard":"Dashboard","dashboard_sub":"System Overview","active_connections":"Active Connections","total_traffic":"Total Traffic","total_links":"Configs","uptime":"Uptime","since_start":"Since Start","active":"Active","inactive":"Inactive","refresh":"Refresh","traffic_trend":"Bandwidth Usage","service_status":"Service Status","top_connections":"Live Connections","no_connections":"No connections","server":"Server","settings":"Settings","language":"Language","farsi":"Persian","english":"English","save":"Save","cancel":"Cancel","delete":"Delete","edit":"Edit","copy":"Copy","created":"Created","expires":"Expires","unlimited":"Unlimited","used":"Used","of":"of","daily":"Daily","hourly":"Hourly","bandwidth":"Bandwidth","connections":"Connections","protocol":"Protocol","ip_address":"IP Address","port":"Port","upload":"Upload","download":"Download","duration":"Duration","status":"Status","online":"Online","offline":"Offline","total":"Total","users":"Users","protocols":"Protocols","traffic_usage":"Traffic Usage","links":"Configs","sub_groups":"Sub Groups","subscription":"Subscription","security":"Security","logs":"Activity Logs","errors":"Errors","test_websocket":"WebSocket Test","dark_theme":"Dark Theme","light_theme":"Light Theme","prestige_theme":"Prestige Theme","blue":"Blue","red":"Red","yellow":"Yellow","current_theme":"Current Theme","server_settings":"Server & Link Settings","server_name":"Server Name","server_prefix":"Link Prefix","link_template":"Link Name Template","template_vars":"Available Variables","template_note":"If `{protocol}` is not in the template, the protocol will not be shown.","change_password":"Change Password","current_password":"Current Password","new_password":"New Password","confirm_password":"Confirm Password","password_strength":"Password Strength","min_chars":"At least 4 characters","contains_number":"Contains number","contains_case":"Uppercase/Lowercase","weak":"Very Weak","medium":"Medium","strong":"Strong","save_password":"Save New Password","login":"Login","logout":"Logout","login_title":"Login to Panel","login_sub":"Enter password to access the dashboard","password":"Password","login_button":"Login to Dashboard","telegram_channel":"Telegram Channel","panel":"Panel","system":"System","configs":"Configs","sub_groups_short":"Sub Groups","activity_logs":"Activity Logs","config_id":"Config ID","sub_group_expiry":"Sub Group & Expiry","no_group":"No Group","days":"Days","traffic_quota":"Traffic Quota","transport_protocols":"Transport Protocols","bulk_count":"Bulk Count","create_config":"Create Config","no_configs":"No configs yet","new_group":"New Group","no_groups":"No groups yet","create_group":"Create a new group to organize your configs","single_sub":"Single Subscription (per config)","full_sub":"Full Subscription (Admin)","full_sub_desc":"Includes all active configs.","group_sub_links":"Group Subscription Links","loading":"Loading...","traffic_analysis":"Bandwidth usage analysis & monitoring","total_traffic_used":"Total Traffic Used","hourly_average":"Hourly Average","per_hour":"/h","peak_usage":"Peak Usage","peak_hour":"Peak Hour","lowest_usage":"Lowest Usage","live_connections":"Live Connections","total_traffic_live":"Total Traffic","avg_duration":"Avg Duration","unique_ips":"Unique IPs","connections_list":"Connections List","auto_update":"Auto-update every 5s","no_active_connections":"No active connections","will_appear":"They will appear here as soon as clients connect","encryption":"Encryption","access_control":"Access Control","hash":"Hash","session":"Session","active_inactive":"Active/Inactive","expiry_date":"Expiry Date","public_page_pw":"Public Page Password","optional":"Optional","activity_logs_full":"Complete event history","no_logs":"No logs yet","error_logs":"Error Logs","websocket_test":"WebSocket Test","ws_note":"Only registered and active UUIDs can connect.","connect":"Connect","disconnect":"Disconnect","send":"Send","waiting_ws":"Waiting for connection...","change_theme":"Change Theme","server_link_settings":"Server & Link Settings","save_settings":"Save Settings","saved":"Saved","online_status":"Online","version":"Version","framework":"Framework","platform":"Platform","storage":"Storage","change_password_title":"Change Password","change_password_sub":"Choose a strong password and keep it safe","current_pw":"Current Password","new_pw":"New Password","confirm_pw":"Confirm Password","save_new_pw":"Save New Password","min_4_chars":"At least 4 chars","contains_num":"Contains number","contains_case_letters":"Uppercase/Lowercase","very_weak":"Very Weak","medium_strength":"Medium","strong_strength":"Strong","logout_btn":"Logout","telegram_btn":"Telegram Channel","load":"Load","connections_live":"Live Connections","traffic_chart":"Traffic Chart","protocol_distribution":"Protocol Distribution","daily_usage":"Daily Usage","active_conns_table":"Active Connections","configs_management":"Configs Management","sub_groups_management":"Sub Groups Management","subscription_links":"Subscription Links","traffic_monitor":"Traffic Monitor","connections_monitor":"Connections Monitor","security_settings":"Security Settings","activity_logs_title":"Activity Logs","error_logs_title":"Error Logs","websocket_tester":"WebSocket Tester","system_settings":"System Settings","language_settings":"Language Settings","theme_settings":"Theme Settings","server_info":"Server Info","password_change":"Password Change","save_changes":"Save Changes","cancel_changes":"Cancel","live":"Live","running_time":"Running Time","manage_configs":"Manage Configs for","select_configs":"Select configs to include in this group","select_all":"Select All","deselect_all":"Deselect All","changes_apply":"Changes apply immediately","new_group_title":"Create New Group","new_group_sub":"Create a separate public page to manage configs","group_name":"Group Name","description_optional":"Description (optional)","public_page_password":"Public Page Password (optional)","public_page_info":"This group's public page will be accessible via a unique link.","edit_config":"Edit Config","quota_0_unlimited":"Quota (0 = unlimited)","expiry_days":"Expiry (days from now, 0 = no change/unlimited)","expiry_note":"To keep current expiry, leave expiry field as 0.","random_uuid":"Random UUID · Choose quota, expiry and protocol","uuid_note":"UUID is generated randomly · Only registered UUIDs can connect · Protocol cannot be changed after creation.","each_group_public":"Each group has its own public page with its configs","single_sub_desc":"Each config has its own subscription URL. Click the","icon_on_card":"icon on the config card.","full_sub_note":"This URL only works in the browser where you're logged in (requires session cookie).","based_on_mb":"Based on MB per hour","lang_note":"Default language is English. Page will refresh after change.","groups":"Groups","usage":"Usage","average":"Average","protocols_legend":"Protocols","daily_legend":"Daily","hourly_legend":"Hourly","bandwidth_usage":"Bandwidth Usage"
   },
   "fa": {
-    "dashboard": "داشبورد", "dashboard_sub": "نمای کلی سیستم",
-    "active_connections": "اتصالات فعال", "total_traffic": "کل ترافیک",
-    "total_links": "کانفیگ‌ها", "uptime": "آپتایم",
-    "since_start": "از راه‌اندازی", "active": "فعال", "inactive": "غیرفعال",
-    "refresh": "رفرش", "traffic_trend": "مصرف پهنای باند",
-    "service_status": "وضعیت سرویس", "top_connections": "اتصال‌های لحظه‌ای",
-    "no_connections": "هیچ اتصالی", "server": "سرور",
-    "settings": "تنظیمات", "language": "زبان",
-    "farsi": "فارسی", "english": "انگلیسی",
-    "save": "ذخیره", "cancel": "انصراف", "delete": "حذف",
-    "edit": "ویرایش", "copy": "کپی", "created": "ساخته شده",
-    "expires": "انقضا", "unlimited": "نامحدود",
-    "used": "مصرف", "of": "از", "daily": "روزانه",
-    "hourly": "ساعتی", "bandwidth": "پهنای باند",
-    "connections": "اتصالات", "protocol": "پروتکل",
-    "ip_address": "آدرس آی‌پی", "port": "پورت",
-    "upload": "آپلود", "download": "دانلود",
-    "duration": "مدت", "status": "وضعیت",
-    "online": "آنلاین", "offline": "آفلاین",
-    "total": "کل", "users": "کاربران",
-    "protocols": "پروتکل‌ها", "traffic_usage": "مصرف ترافیک",
-    "links": "کانفیگ‌ها", "sub_groups": "گروه‌های ساب",
-    "subscription": "سابسکریپشن", "security": "امنیت",
-    "logs": "لاگ فعالیت‌ها", "errors": "خطاها",
-    "test_websocket": "تست WebSocket",
-    "dark_theme": "تم تاریک", "light_theme": "تم روشن",
-    "prestige_theme": "تم پرستیژ", "blue": "آبی",
-    "red": "قرمز", "yellow": "زرد",
-    "current_theme": "تم پیش‌فرض",
-    "server_settings": "تنظیمات سرور و نام لینک‌ها",
-    "server_name": "نام سرور", "server_prefix": "پیشوند لینک‌ها",
-    "link_template": "قالب نام کانفیگ‌ها",
-    "template_vars": "متغیرهای قابل استفاده",
-    "template_note": "اگر `{protocol}` در قالب نباشد، پروتکل در نام نمایش داده نمی‌شود.",
-    "change_password": "تغییر رمز عبور",
-    "current_password": "رمز فعلی", "new_password": "رمز جدید",
-    "confirm_password": "تکرار رمز جدید",
-    "password_strength": "قدرت رمز",
-    "min_chars": "حداقل ۴ کاراکتر", "contains_number": "شامل عدد",
-    "contains_case": "حروف بزرگ/کوچک",
-    "weak": "خیلی ضعیف", "medium": "متوسط", "strong": "قوی",
-    "save_password": "ذخیره رمز جدید",
-    "login": "ورود", "logout": "خروج",
-    "login_title": "ورود به پنل",
-    "login_sub": "رمز عبور را برای دسترسی به داشبورد وارد کنید",
-    "password": "رمز عبور", "login_button": "ورود به داشبورد",
-    "telegram_channel": "کانال تلگرام",
-    "panel": "پنل", "system": "سیستم",
-    "configs": "کانفیگ‌ها", "sub_groups_short": "گروه‌های ساب",
-    "activity_logs": "لاگ فعالیت‌ها",
-    "config_id": "شناسه کانفیگ",
-    "sub_group_expiry": "گروه ساب و انقضا",
-    "no_group": "بدون گروه",
-    "days": "روز",
-    "traffic_quota": "سهمیه ترافیک",
-    "transport_protocols": "پروتکل‌های انتقال",
-    "bulk_count": "تعداد ساخت هم‌زمان",
-    "create_config": "ساخت کانفیگ",
-    "no_configs": "هنوز کانفیگی وجود ندارد",
-    "new_group": "گروه جدید",
-    "no_groups": "هنوز گروهی وجود ندارد",
-    "create_group": "یک گروه جدید بسازید تا کانفیگ‌ها را دسته‌بندی کنید",
-    "single_sub": "سابسکریپشن تکی (هر کانفیگ)",
-    "full_sub": "سابسکریپشن کامل (ادمین)",
-    "full_sub_desc": "شامل تمام کانفیگ‌های فعال.",
-    "group_sub_links": "لینک سابسکریپشن گروه‌ها",
-    "loading": "در حال بارگذاری...",
-    "traffic_analysis": "تحلیل و مانیتورینگ مصرف پهنای باند",
-    "total_traffic_used": "کل ترافیک مصرفی",
-    "hourly_average": "میانگین ساعتی",
-    "per_hour": "در ساعت",
-    "peak_usage": "پیک مصرف",
-    "peak_hour": "بالاترین ساعت",
-    "lowest_usage": "کمترین مصرف",
-    "live_connections": "اتصالات زنده",
-    "total_traffic_live": "مجموع ترافیک لحظه‌ای",
-    "avg_duration": "میانگین مدت اتصال",
-    "unique_ips": "آی‌پی‌های یکتا",
-    "connections_list": "لیست اتصالات",
-    "auto_update": "بروزرسانی خودکار هر ۵ ثانیه",
-    "no_active_connections": "هیچ اتصال فعالی نیست",
-    "will_appear": "به محض اتصال کلاینت‌ها، اینجا نمایش داده می‌شوند",
-    "encryption": "رمزنگاری",
-    "access_control": "کنترل دسترسی",
-    "hash": "هش رمز",
-    "session": "سشن",
-    "active_inactive": "فعال/غیرفعال",
-    "expiry_date": "تاریخ انقضا",
-    "public_page_pw": "رمز صفحه پابلیک",
-    "optional": "اختیاری",
-    "activity_logs_full": "تاریخچه‌ی کامل رخدادهای پنل",
-    "no_logs": "هنوز لاگی ثبت نشده",
-    "error_logs": "لاگ خطاها",
-    "websocket_test": "تست WebSocket",
-    "ws_note": "فقط UUID‌های ثبت‌شده و فعال اتصال برقرار می‌کنند.",
-    "connect": "اتصال", "disconnect": "قطع", "send": "ارسال",
-    "waiting_ws": "منتظر اتصال...",
-    "change_theme": "تغییر تم",
-    "server_link_settings": "تنظیمات سرور و نام لینک‌ها",
-    "save_settings": "ذخیره تنظیمات",
-    "saved": "ذخیره شد",
-    "online_status": "آنلاین",
-    "version": "نسخه", "framework": "فریم‌ورک",
-    "platform": "پلتفرم", "storage": "ذخیره‌سازی",
-    "change_password_title": "تغییر رمز عبور",
-    "change_password_sub": "رمز قوی انتخاب کنید و آن را جایی امن نگه دارید",
-    "current_pw": "رمز فعلی", "new_pw": "رمز جدید",
-    "confirm_pw": "تکرار رمز جدید",
-    "save_new_pw": "ذخیره رمز جدید",
-    "min_4_chars": "حداقل ۴ کاراکتر",
-    "contains_num": "شامل عدد",
-    "contains_case_letters": "حروف بزرگ/کوچک",
-    "very_weak": "خیلی ضعیف", "medium_strength": "متوسط",
-    "strong_strength": "قوی",
-    "logout_btn": "خروج", "telegram_btn": "کانال تلگرام",
-    "load": "بار نسبی", "connections_live": "اتصالات لحظه‌ای",
-    "traffic_chart": "نمودار ترافیک",
-    "protocol_distribution": "توزیع پروتکل",
-    "daily_usage": "مصرف روزانه",
-    "active_conns_table": "اتصالات فعال",
-    "configs_management": "مدیریت کانفیگ‌ها",
-    "sub_groups_management": "مدیریت گروه‌های ساب",
-    "subscription_links": "لینک‌های سابسکریپشن",
-    "traffic_monitor": "مانیتورینگ ترافیک",
-    "connections_monitor": "مانیتورینگ اتصالات",
-    "security_settings": "تنظیمات امنیتی",
-    "activity_logs_title": "لاگ فعالیت‌ها",
-    "error_logs_title": "لاگ خطاها",
-    "websocket_tester": "تست WebSocket",
-    "system_settings": "تنظیمات سیستم",
-    "language_settings": "تنظیمات زبان",
-    "theme_settings": "تنظیمات تم",
-    "server_info": "اطلاعات سرور",
-    "password_change": "تغییر رمز عبور",
-    "save_changes": "ذخیره تغییرات",
-    "cancel_changes": "انصراف",
-    "live": "لحظه‌ای", "running_time": "مدت روشن بودن",
-    "manage_configs": "مدیریت کانفیگ‌های",
-    "select_configs": "کانفیگ‌هایی که می‌خواهید در این گروه باشند را انتخاب کنید",
-    "select_all": "انتخاب همه", "deselect_all": "لغو همه",
-    "changes_apply": "تغییرات بلافاصله اعمال می‌شود",
-    "new_group_title": "ساخت گروه جدید",
-    "new_group_sub": "یک صفحه پابلیک مجزا برای مدیریت کانفیگ‌ها بسازید",
-    "group_name": "نام گروه",
-    "description_optional": "توضیحات (اختیاری)",
-    "public_page_password": "رمز صفحه پابلیک (اختیاری)",
-    "public_page_info": "صفحه پابلیک این گروه با یک لینک منحصر‌به‌فرد در اینترنت در دسترس خواهد بود.",
-    "edit_config": "ویرایش کانفیگ",
-    "quota_0_unlimited": "سهمیه (0 = نامحدود)",
-    "expiry_days": "انقضا (روز از الان، 0 = بدون تغییر/نامحدود)",
-    "expiry_note": "برای حفظ انقضای فعلی، فیلد انقضا را صفر بگذارید.",
-    "random_uuid": "UUID تصادفی · سهمیه، انقضا و پروتکل رو انتخاب کن",
-    "uuid_note": "UUID کاملاً رندوم تولید می‌شود · فقط UUID‌های ثبت‌شده اجازه اتصال دارند · پروتکل پس از ساخت قابل تغییر نیست.",
-    "each_group_public": "هر گروه یک صفحه پابلیک مجزا با کانفیگ‌های خودش دارد",
-    "single_sub_desc": "هر کانفیگ URL سابسکریپشن مخصوص دارد. از کارت کانفیگ روی آیکون",
-    "icon_on_card": "کلیک کنید.",
-    "full_sub_note": "این آدرس فقط در مرورگری که به پنل وارد شده کار می‌کند (نیاز به کوکی سشن).",
-    "based_on_mb": "بر اساس مگابایت در هر ساعت",
-    "lang_note": "زبان پیش‌فرض انگلیسی است. پس از تغییر، صفحه رفرش می‌شود.",
-    "groups": "گروه",
-    "usage": "مصرف", "average": "میانگین",
-    "protocols_legend": "پروتکل‌ها",
-    "daily_legend": "روزانه",
-    "hourly_legend": "ساعتی",
+    "dashboard":"داشبورد","dashboard_sub":"نمای کلی سیستم","active_connections":"اتصالات فعال","total_traffic":"کل ترافیک","total_links":"کانفیگ‌ها","uptime":"آپتایم","since_start":"از راه‌اندازی","active":"فعال","inactive":"غیرفعال","refresh":"رفرش","traffic_trend":"مصرف پهنای باند","service_status":"وضعیت سرویس","top_connections":"اتصال‌های لحظه‌ای","no_connections":"هیچ اتصالی","server":"سرور","settings":"تنظیمات","language":"زبان","farsi":"فارسی","english":"انگلیسی","save":"ذخیره","cancel":"انصراف","delete":"حذف","edit":"ویرایش","copy":"کپی","created":"ساخته شده","expires":"انقضا","unlimited":"نامحدود","used":"مصرف","of":"از","daily":"روزانه","hourly":"ساعتی","bandwidth":"پهنای باند","connections":"اتصالات","protocol":"پروتکل","ip_address":"آدرس آی‌پی","port":"پورت","upload":"آپلود","download":"دانلود","duration":"مدت","status":"وضعیت","online":"آنلاین","offline":"آفلاین","total":"کل","users":"کاربران","protocols":"پروتکل‌ها","traffic_usage":"مصرف ترافیک","links":"کانفیگ‌ها","sub_groups":"گروه‌های ساب","subscription":"سابسکریپشن","security":"امنیت","logs":"لاگ فعالیت‌ها","errors":"خطاها","test_websocket":"تست WebSocket","dark_theme":"تم تاریک","light_theme":"تم روشن","prestige_theme":"تم پرستیژ","blue":"آبی","red":"قرمز","yellow":"زرد","current_theme":"تم پیش‌فرض","server_settings":"تنظیمات سرور و نام لینک‌ها","server_name":"نام سرور","server_prefix":"پیشوند لینک‌ها","link_template":"قالب نام کانفیگ‌ها","template_vars":"متغیرهای قابل استفاده","template_note":"اگر `{protocol}` در قالب نباشد، پروتکل در نام نمایش داده نمی‌شود.","change_password":"تغییر رمز عبور","current_password":"رمز فعلی","new_password":"رمز جدید","confirm_password":"تکرار رمز جدید","password_strength":"قدرت رمز","min_chars":"حداقل ۴ کاراکتر","contains_number":"شامل عدد","contains_case":"حروف بزرگ/کوچک","weak":"خیلی ضعیف","medium":"متوسط","strong":"قوی","save_password":"ذخیره رمز جدید","login":"ورود","logout":"خروج","login_title":"ورود به پنل","login_sub":"رمز عبور را برای دسترسی به داشبورد وارد کنید","password":"رمز عبور","login_button":"ورود به داشبورد","telegram_channel":"کانال تلگرام","panel":"پنل","system":"سیستم","configs":"کانفیگ‌ها","sub_groups_short":"گروه‌های ساب","activity_logs":"لاگ فعالیت‌ها","config_id":"شناسه کانفیگ","sub_group_expiry":"گروه ساب و انقضا","no_group":"بدون گروه","days":"روز","traffic_quota":"سهمیه ترافیک","transport_protocols":"پروتکل‌های انتقال","bulk_count":"تعداد ساخت هم‌زمان","create_config":"ساخت کانفیگ","no_configs":"هنوز کانفیگی وجود ندارد","new_group":"گروه جدید","no_groups":"هنوز گروهی وجود ندارد","create_group":"یک گروه جدید بسازید تا کانفیگ‌ها را دسته‌بندی کنید","single_sub":"سابسکریپشن تکی (هر کانفیگ)","full_sub":"سابسکریپشن کامل (ادمین)","full_sub_desc":"شامل تمام کانفیگ‌های فعال.","group_sub_links":"لینک سابسکریپشن گروه‌ها","loading":"در حال بارگذاری...","traffic_analysis":"تحلیل و مانیتورینگ مصرف پهنای باند","total_traffic_used":"کل ترافیک مصرفی","hourly_average":"میانگین ساعتی","per_hour":"در ساعت","peak_usage":"پیک مصرف","peak_hour":"بالاترین ساعت","lowest_usage":"کمترین مصرف","live_connections":"اتصالات زنده","total_traffic_live":"مجموع ترافیک لحظه‌ای","avg_duration":"میانگین مدت اتصال","unique_ips":"آی‌پی‌های یکتا","connections_list":"لیست اتصالات","auto_update":"بروزرسانی خودکار هر ۵ ثانیه","no_active_connections":"هیچ اتصال فعالی نیست","will_appear":"به محض اتصال کلاینت‌ها، اینجا نمایش داده می‌شوند","encryption":"رمزنگاری","access_control":"کنترل دسترسی","hash":"هش رمز","session":"سشن","active_inactive":"فعال/غیرفعال","expiry_date":"تاریخ انقضا","public_page_pw":"رمز صفحه پابلیک","optional":"اختیاری","activity_logs_full":"تاریخچه‌ی کامل رخدادهای پنل","no_logs":"هنوز لاگی ثبت نشده","error_logs":"لاگ خطاها","websocket_test":"تست WebSocket","ws_note":"فقط UUID‌های ثبت‌شده و فعال اتصال برقرار می‌کنند.","connect":"اتصال","disconnect":"قطع","send":"ارسال","waiting_ws":"منتظر اتصال...","change_theme":"تغییر تم","server_link_settings":"تنظیمات سرور و نام لینک‌ها","save_settings":"ذخیره تنظیمات","saved":"ذخیره شد","online_status":"آنلاین","version":"نسخه","framework":"فریم‌ورک","platform":"پلتفرم","storage":"ذخیره‌سازی","change_password_title":"تغییر رمز عبور","change_password_sub":"رمز قوی انتخاب کنید و آن را جایی امن نگه دارید","current_pw":"رمز فعلی","new_pw":"رمز جدید","confirm_pw":"تکرار رمز جدید","save_new_pw":"ذخیره رمز جدید","min_4_chars":"حداقل ۴ کاراکتر","contains_num":"شامل عدد","contains_case_letters":"حروف بزرگ/کوچک","very_weak":"خیلی ضعیف","medium_strength":"متوسط","strong_strength":"قوی","logout_btn":"خروج","telegram_btn":"کانال تلگرام","load":"بار نسبی","connections_live":"اتصالات لحظه‌ای","traffic_chart":"نمودار ترافیک","protocol_distribution":"توزیع پروتکل","daily_usage":"مصرف روزانه","active_conns_table":"اتصالات فعال","configs_management":"مدیریت کانفیگ‌ها","sub_groups_management":"مدیریت گروه‌های ساب","subscription_links":"لینک‌های سابسکریپشن","traffic_monitor":"مانیتورینگ ترافیک","connections_monitor":"مانیتورینگ اتصالات","security_settings":"تنظیمات امنیتی","activity_logs_title":"لاگ فعالیت‌ها","error_logs_title":"لاگ خطاها","websocket_tester":"تست WebSocket","system_settings":"تنظیمات سیستم","language_settings":"تنظیمات زبان","theme_settings":"تنظیمات تم","server_info":"اطلاعات سرور","password_change":"تغییر رمز عبور","save_changes":"ذخیره تغییرات","cancel_changes":"انصراف","live":"لحظه‌ای","running_time":"مدت روشن بودن","manage_configs":"مدیریت کانفیگ‌های","select_configs":"کانفیگ‌هایی که می‌خواهید در این گروه باشند را انتخاب کنید","select_all":"انتخاب همه","deselect_all":"لغو همه","changes_apply":"تغییرات بلافاصله اعمال می‌شود","new_group_title":"ساخت گروه جدید","new_group_sub":"یک صفحه پابلیک مجزا برای مدیریت کانفیگ‌ها بسازید","group_name":"نام گروه","description_optional":"توضیحات (اختیاری)","public_page_password":"رمز صفحه پابلیک (اختیاری)","public_page_info":"صفحه پابلیک این گروه با یک لینک منحصر‌به‌فرد در اینترنت در دسترس خواهد بود.","edit_config":"ویرایش کانفیگ","quota_0_unlimited":"سهمیه (0 = نامحدود)","expiry_days":"انقضا (روز از الان، 0 = بدون تغییر/نامحدود)","expiry_note":"برای حفظ انقضای فعلی، فیلد انقضا را صفر بگذارید.","random_uuid":"UUID تصادفی · سهمیه، انقضا و پروتکل رو انتخاب کن","uuid_note":"UUID کاملاً رندوم تولید می‌شود · فقط UUID‌های ثبت‌شده اجازه اتصال دارند · پروتکل پس از ساخت قابل تغییر نیست.","each_group_public":"هر گروه یک صفحه پابلیک مجزا با کانفیگ‌های خودش دارد","single_sub_desc":"هر کانفیگ URL سابسکریپشن مخصوص دارد. از کارت کانفیگ روی آیکون","icon_on_card":"کلیک کنید.","full_sub_note":"این آدرس فقط در مرورگری که به پنل وارد شده کار می‌کند (نیاز به کوکی سشن).","based_on_mb":"بر اساس مگابایت در هر ساعت","lang_note":"زبان پیش‌فرض انگلیسی است. پس از تغییر، صفحه رفرش می‌شود.","groups":"گروه","usage":"مصرف","average":"میانگین","protocols_legend":"پروتکل‌ها","daily_legend":"روزانه","hourly_legend":"ساعتی","bandwidth_usage":"مصرف پهنای باند"
   }
 };
-
 let currentLang = localStorage.getItem('CBeeNet-lang') || 'en';
-
 function setLanguage(lang){
   currentLang = lang;
   localStorage.setItem('CBeeNet-lang', lang);
@@ -2574,45 +1843,30 @@ function setLanguage(lang){
   });
   toast('Language changed to ' + (lang === 'fa' ? 'فارسی' : 'English'), 'ok');
 }
-
 function applyLanguage(){
   const dict = LANG_DICT[currentLang] || LANG_DICT['en'];
   document.documentElement.dir = currentLang === 'fa' ? 'rtl' : 'ltr';
   document.documentElement.lang = currentLang;
-  
   document.querySelectorAll('[data-lang]').forEach(el => {
     const key = el.getAttribute('data-lang');
-    if(dict[key] !== undefined){
-      el.textContent = dict[key];
-    }
+    if(dict[key] !== undefined) el.textContent = dict[key];
   });
-  
   document.querySelectorAll('[data-lang-placeholder]').forEach(el => {
     const key = el.getAttribute('data-lang-placeholder');
-    if(dict[key] !== undefined){
-      el.placeholder = dict[key];
-    }
+    if(dict[key] !== undefined) el.placeholder = dict[key];
   });
 }
-
-// =====================================================================
-// ==================== THEME SYSTEM ===================================
-// =====================================================================
 let currentTheme = localStorage.getItem('CBeeNet-theme') || 'dark-prestige';
-
 function applyTheme(theme){
   document.documentElement.setAttribute('data-theme', theme);
   localStorage.setItem('CBeeNet-theme', theme);
   currentTheme = theme;
-  
   document.getElementById('current-theme-display').textContent = theme;
-  
   document.querySelectorAll('.theme-btn-select').forEach(btn => {
     btn.classList.toggle('active', btn.dataset.theme === theme);
     btn.style.outline = btn.dataset.theme === theme ? '2px solid var(--accent)' : 'none';
     btn.style.outlineOffset = btn.dataset.theme === theme ? '2px' : '0';
   });
-  
   const isLight = theme.startsWith('light');
   const icon = isLight ? 'ti-moon' : 'ti-sun';
   const labelKey = isLight ? 'light_theme' : 'dark_theme';
@@ -2621,31 +1875,20 @@ function applyTheme(theme){
   document.getElementById('theme-label').textContent = dict[labelKey] || (isLight ? 'Light Theme' : 'Dark Theme');
   document.getElementById('theme-mob-icon').className = 'ti ' + icon;
 }
-
-function setTheme(theme){
-  applyTheme(theme);
-  toast('Theme changed to ' + theme, 'ok');
-}
-
+function setTheme(theme){ applyTheme(theme); toast('Theme changed to ' + theme, 'ok'); }
 function toggleTheme(){
   const isLight = currentTheme.startsWith('light');
   const color = currentTheme.split('-')[1] || 'prestige';
   const newTheme = isLight ? 'dark-' + color : 'light-' + color;
-  // Ensure prestige theme uses the correct name
   const finalTheme = newTheme === 'dark-prestige' ? 'dark-prestige' : newTheme;
   applyTheme(finalTheme);
 }
-
-// =====================================================================
-// ==================== UTILITY FUNCTIONS ==============================
-// =====================================================================
 function toast(msg, type=''){
   const t = document.getElementById('toast');
   t.textContent = msg;
   t.className = 'toast show' + (type ? ' ' + type : '');
   setTimeout(() => t.classList.remove('show'), 2400);
 }
-
 function fmtB(b){
   if(!b || b === 0) return '0 B';
   if(b < 1024) return b + ' B';
@@ -2653,20 +1896,9 @@ function fmtB(b){
   if(b < 1024**3) return (b/1024**2).toFixed(2) + ' MB';
   return (b/1024**3).toFixed(2) + ' GB';
 }
-
-function toFa(n){
-  return String(n).replace(/\d/g, d => '۰۱۲۳۴۵۶۷۸۹'[d]);
-}
-
-function esc(s){
-  return String(s || '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-}
-
-function daysLeft(exp){
-  if(!exp) return null;
-  return Math.ceil((new Date(exp) - Date.now()) / 864e5);
-}
-
+function toFa(n){ return String(n).replace(/\d/g, d => '۰۱۲۳۴۵۶۷۸۹'[d]); }
+function esc(s){ return String(s || '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+function daysLeft(exp){ if(!exp) return null; return Math.ceil((new Date(exp) - Date.now()) / 864e5); }
 function expChip(exp, expired){
   if(expired) return '<span class="exp-chip ec-exp"><i class="ti ti-calendar-x"></i> Expired</span>';
   if(!exp) return '<span class="exp-chip ec-inf"><i class="ti ti-infinity"></i> Unlimited</span>';
@@ -2675,75 +1907,40 @@ function expChip(exp, expired){
   if(d <= 3) return `<span class="exp-chip ec-warn"><i class="ti ti-alert-triangle"></i> ${d} days left</span>`;
   return `<span class="exp-chip ec-ok"><i class="ti ti-calendar-check"></i> ${d} days left</span>`;
 }
-
 function protoBadge(protocols){
   if(!protocols || !protocols.length) protocols = ['vless-ws'];
-  const labels = {
-    'vless-ws': ['VLESS · WS', 'pc-ws'],
-    'xhttp-packet-up': ['XHTTP · packet-up', 'pc-xhttp'],
-    'xhttp-stream-up': ['XHTTP · stream-up', 'pc-xhttp'],
-    'xhttp-stream-one': ['XHTTP ULTRA', 'pc-ultra']
-  };
-  return protocols.map(p => {
-    const v = labels[p] || labels['vless-ws'];
-    return `<span class="proto-chip ${v[1]}">${v[0]}</span>`;
-  }).join('');
+  const labels = { 'vless-ws': ['VLESS · WS', 'pc-ws'], 'xhttp-packet-up': ['XHTTP · packet-up', 'pc-xhttp'], 'xhttp-stream-up': ['XHTTP · stream-up', 'pc-xhttp'], 'xhttp-stream-one': ['XHTTP ULTRA', 'pc-ultra'] };
+  return protocols.map(p => { const v = labels[p] || labels['vless-ws']; return `<span class="proto-chip ${v[1]}">${v[0]}</span>`; }).join('');
 }
-
 async function checkAuth(){
-  try{
-    const r = await fetch('/api/me');
-    const d = await r.json();
-    if(!d.authenticated) location.href = '/login';
-  }catch(e){ location.href = '/login'; }
+  try{ const r = await fetch('/api/me'); const d = await r.json(); if(!d.authenticated) location.href = '/login'; }catch(e){ location.href = '/login'; }
 }
-
-async function logout(){
-  try{ await fetch('/api/logout', {method:'POST'}); }catch(e){}
-  location.href = '/login';
-}
+async function logout(){ try{ await fetch('/api/logout', {method:'POST'}); }catch(e){} location.href = '/login'; }
 document.getElementById('logout-btn').addEventListener('click', logout);
-
-async function authF(url, opts={}){
-  const r = await fetch(url, opts);
-  if(r.status === 401){ location.href = '/login'; throw new Error('unauthorized'); }
-  return r;
-}
-
-// =====================================================================
-// ==================== PROTOCOL FUNCTIONS =============================
-// =====================================================================
+async function authF(url, opts={}){ const r = await fetch(url, opts); if(r.status === 401){ location.href = '/login'; throw new Error('unauthorized'); } return r; }
 function toggleProtoBtn(el){ el.classList.toggle('active'); }
-
 function getSelectedProtocols(){
   const btns = document.querySelectorAll('.proto-btn');
   const selected = [];
   btns.forEach(btn => { if(btn.classList.contains('active')) selected.push(btn.dataset.proto); });
   return selected.length ? selected : ['vless-ws'];
 }
-
 function setQuota(val, unit, el){
   document.getElementById('nl-val').value = val === 0 ? '' : val;
   document.getElementById('nl-unit').value = unit;
   document.querySelectorAll('#quota-chips .chip').forEach(c => c.classList.remove('active'));
   el.classList.add('active');
 }
-
 function setExpiry(days, el){
   document.getElementById('nl-exp').value = days === 0 ? '' : days;
   document.querySelectorAll('#exp-chips .chip').forEach(c => c.classList.remove('active'));
   el.classList.add('active');
 }
-
 function setCount(val, el){
   document.getElementById('nl-count').value = val;
   document.querySelectorAll('.count-chip').forEach(c => c.classList.remove('active'));
   el.classList.add('active');
 }
-
-// =====================================================================
-// ==================== SERVER SETTINGS ================================
-// =====================================================================
 async function loadServerSettings(){
   try {
     const r = await authF('/api/settings/server');
@@ -2756,7 +1953,6 @@ async function loadServerSettings(){
     localStorage.setItem('CBeeNet-link-template', data.link_template || '{server}-{label}');
   } catch(e) { console.warn('Could not load server settings:', e); }
 }
-
 async function saveServerSettings(){
   const name = document.getElementById('server-name-input').value.trim() || 'CBeeNet';
   const prefix = document.getElementById('server-prefix-input').value.trim() || '';
@@ -2781,7 +1977,6 @@ async function saveServerSettings(){
     }
   } catch(e) { toast('Server connection error', 'err'); }
 }
-
 function formatLinkName(label, protocol){
   const template = localStorage.getItem('CBeeNet-link-template') || '{server}-{label}';
   const server = localStorage.getItem('CBeeNet-server-name') || 'CBeeNet';
@@ -2791,27 +1986,17 @@ function formatLinkName(label, protocol){
   result = result.replace(/{prefix}/g, prefix);
   result = result.replace(/{label}/g, label);
   if(template.includes('{protocol}')){
-    const protoMap = {
-      'vless-ws': 'VLESS-WS',
-      'xhttp-packet-up': 'XHTTP-packet',
-      'xhttp-stream-up': 'XHTTP-stream',
-      'xhttp-stream-one': 'XHTTP-ultra'
-    };
+    const protoMap = { 'vless-ws': 'VLESS-WS', 'xhttp-packet-up': 'XHTTP-packet', 'xhttp-stream-up': 'XHTTP-stream', 'xhttp-stream-one': 'XHTTP-ultra' };
     result = result.replace(/{protocol}/g, protoMap[protocol] || protocol);
   }
   return result;
 }
-
-// =====================================================================
-// ==================== NAVIGATION =====================================
-// =====================================================================
 const sb = document.getElementById('sb'), overlay = document.getElementById('overlay');
 function openSb(){ sb.classList.add('open'); overlay.classList.add('show'); }
 function closeSb(){ sb.classList.remove('open'); overlay.classList.remove('show'); }
 document.getElementById('open-sb').addEventListener('click', openSb);
 document.getElementById('close-sb').addEventListener('click', closeSb);
 overlay.addEventListener('click', closeSb);
-
 function navTo(name){
   document.querySelectorAll('.nav-it').forEach(n => n.classList.toggle('on', n.dataset.pg === name));
   document.querySelectorAll('.pg').forEach(p => p.classList.toggle('on', p.id === 'pg-' + name));
@@ -2821,153 +2006,184 @@ function navTo(name){
   window.scrollTo({top: 0, behavior: 'smooth'});
 }
 document.querySelectorAll('.nav-it').forEach(el => el.addEventListener('click', () => navTo(el.dataset.pg)));
-
 function openModal(id){ document.getElementById(id).classList.add('open'); }
 function closeModal(id){ document.getElementById(id).classList.remove('open'); }
-
-// =====================================================================
-// ==================== CHARTS =========================================
-// =====================================================================
-let dashTrafficChart = null;
-let dashProtoChart = null;
-let dashDailyChart = null;
-let dashHourlyChart = null;
-let ch3 = null;
+let dashTrafficChart = null, dashProtoChart = null, dashDailyChart = null, dashHourlyChart = null, ch3 = null;
 let sparkLoadChart, sparkTrafficChart, sparkConnsChart;
 const sparkData = { load: [], traffic: [], conns: [] };
 const MAX_SPARK = 60;
-
 function initSparklineCharts(){
-  const accentColor = getComputedStyle(document.documentElement).getPropertyValue('--accent').trim() || '#1677ff';
-  const accentBg = getComputedStyle(document.documentElement).getPropertyValue('--accent-d').trim() || 'rgba(22,119,255,0.12)';
-  
+  const accentColor = getComputedStyle(document.documentElement).getPropertyValue('--accent').trim() || '#1a7aff';
+  const accentBg = getComputedStyle(document.documentElement).getPropertyValue('--accent-d').trim() || 'rgba(26,122,255,0.12)';
   const ctxLoad = document.getElementById('sparkLoad').getContext('2d');
   sparkLoadChart = new Chart(ctxLoad, {
     type: 'line',
-    data: { labels: [], datasets: [{ data: [], borderColor: accentColor, backgroundColor: accentBg, borderWidth: 2, pointRadius: 0, fill: true, tension: 0.3 }] },
-    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false }, tooltip: { enabled: false } }, scales: { x: { display: false, grid: { display: false } }, y: { display: false, grid: { display: false }, min: 0, max: 100 } }, animation: { duration: 100 } }
+    data: { labels: [], datasets: [{ data: [], borderColor: accentColor, backgroundColor: accentBg, borderWidth: 2, pointRadius: 0, fill: true, tension: 0.4 }] },
+    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false }, tooltip: { enabled: false } }, scales: { x: { display: false, grid: { display: false } }, y: { display: false, grid: { display: false }, min: 0, max: 100 } }, animation: { duration: 300 } }
   });
-  
   const ctxTraffic = document.getElementById('sparkTraffic').getContext('2d');
   sparkTrafficChart = new Chart(ctxTraffic, {
     type: 'line',
-    data: { labels: [], datasets: [{ data: [], borderColor: accentColor, backgroundColor: accentBg, borderWidth: 2, pointRadius: 0, fill: true, tension: 0.3 }] },
-    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false }, tooltip: { enabled: false } }, scales: { x: { display: false, grid: { display: false } }, y: { display: false, grid: { display: false }, min: 0 } }, animation: { duration: 100 } }
+    data: { labels: [], datasets: [{ data: [], borderColor: accentColor, backgroundColor: accentBg, borderWidth: 2, pointRadius: 0, fill: true, tension: 0.4 }] },
+    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false }, tooltip: { enabled: false } }, scales: { x: { display: false, grid: { display: false } }, y: { display: false, grid: { display: false }, min: 0 } }, animation: { duration: 300 } }
   });
-  
   const ctxConns = document.getElementById('sparkConns').getContext('2d');
   sparkConnsChart = new Chart(ctxConns, {
     type: 'line',
-    data: { labels: [], datasets: [{ data: [], borderColor: accentColor, backgroundColor: accentBg, borderWidth: 2, pointRadius: 0, fill: true, tension: 0.3 }] },
-    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false }, tooltip: { enabled: false } }, scales: { x: { display: false, grid: { display: false } }, y: { display: false, grid: { display: false }, min: 0 } }, animation: { duration: 100 } }
+    data: { labels: [], datasets: [{ data: [], borderColor: accentColor, backgroundColor: accentBg, borderWidth: 2, pointRadius: 0, fill: true, tension: 0.4 }] },
+    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false }, tooltip: { enabled: false } }, scales: { x: { display: false, grid: { display: false } }, y: { display: false, grid: { display: false }, min: 0 } }, animation: { duration: 300 } }
   });
 }
-
-function updateSparkline(chart, data, maxVal){
-  if(!chart) return;
-  if(data.length > MAX_SPARK) data.shift();
-  const labels = data.map((_, i) => i);
-  chart.data.labels = labels;
-  chart.data.datasets[0].data = data;
-  if(maxVal){
-    chart.options.scales.y.max = maxVal;
-  }
-  chart.update('none');
-}
-
+function updateSparkline(chart, data, maxVal){ if(!chart) return; if(data.length > MAX_SPARK) data.shift(); const labels = data.map((_, i) => i); chart.data.labels = labels; chart.data.datasets[0].data = data; if(maxVal){ chart.options.scales.y.max = maxVal; } chart.update('none'); }
 function initCharts(){
-  // Protocol Distribution - BAR CHART (like 3x-UI)
-  const ctxProto = document.getElementById('dashProtoChart');
-  if(ctxProto){
-    dashProtoChart = new Chart(ctxProto.getContext('2d'), {
-      type: 'bar',
-      data: {
-        labels: ['VLESS/WS', 'XHTTP-packet', 'XHTTP-stream'],
-        datasets: [{
-          data: [0, 0, 0],
-          backgroundColor: ['var(--accent)', 'var(--purple)', 'var(--green)'],
-          borderColor: ['var(--accent)', 'var(--purple)', 'var(--green)'],
-          borderWidth: 2,
-          borderRadius: 4,
-        }]
-      },
-      options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        plugins: {
-          legend: { display: false },
-          tooltip: { callbacks: { label: ctx => ctx.parsed.y + ' configs' } }
-        },
-        scales: {
-          x: { grid: { display: false }, ticks: { color: 'var(--t3)', font: { size: 8 } } },
-          y: { grid: { color: 'var(--card-b)' }, ticks: { color: 'var(--t3)', font: { size: 8 }, stepSize: 1 } }
+  const accentColor = getComputedStyle(document.documentElement).getPropertyValue('--accent').trim() || '#1a7aff';
+  const purpleColor = getComputedStyle(document.documentElement).getPropertyValue('--purple').trim() || '#8b5cf6';
+  const greenColor = getComputedStyle(document.documentElement).getPropertyValue('--green-t').trim() || '#34d399';
+  const amberColor = getComputedStyle(document.documentElement).getPropertyValue('--amber-t').trim() || '#fbbf24';
+  const textColor = getComputedStyle(document.documentElement).getPropertyValue('--t3').trim() || '#5a7298';
+  const gridColor = getComputedStyle(document.documentElement).getPropertyValue('--card-b').trim() || '#1e2d45';
+  const ctxTraffic = document.getElementById('dashTrafficChart').getContext('2d');
+  const gradient = ctxTraffic.createLinearGradient(0, 0, 0, 220);
+  gradient.addColorStop(0, 'rgba(26, 122, 255, 0.35)');
+  gradient.addColorStop(0.5, 'rgba(139, 92, 246, 0.15)');
+  gradient.addColorStop(1, 'rgba(26, 122, 255, 0)');
+  dashTrafficChart = new Chart(ctxTraffic, {
+    type: 'line',
+    data: { labels: [], datasets: [{ label: 'Traffic (MB)', data: [], borderColor: accentColor, backgroundColor: gradient, borderWidth: 3, pointRadius: 0, pointHoverRadius: 6, pointHoverBorderWidth: 2, pointHoverBorderColor: '#fff', fill: true, tension: 0.4 }] },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      interaction: { intersect: false, mode: 'index' },
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          backgroundColor: 'rgba(11, 17, 29, 0.9)',
+          borderColor: accentColor, borderWidth: 1,
+          titleColor: '#fff', bodyColor: '#fff',
+          cornerRadius: 8, padding: 10,
+          callbacks: { label: function(context){ let label = context.dataset.label || ''; if(label) label += ': '; if(context.parsed.y !== null) label += context.parsed.y.toFixed(2) + ' MB'; return label; } }
         }
-      }
-    });
+      },
+      scales: {
+        x: { grid: { display: false }, ticks: { color: textColor, font: { size: 10, family: 'Vazirmatn, sans-serif' }, maxTicksLimit: 10 } },
+        y: { grid: { color: gridColor, drawBorder: false }, ticks: { color: textColor, font: { size: 10, family: 'Vazirmatn, sans-serif' }, callback: function(value) { return value + ' MB'; } } }
+      },
+      animation: { duration: 500, easing: 'easeOutQuart' }
+    }
+  });
+  const ctxProto = document.getElementById('dashProtoChart').getContext('2d');
+  dashProtoChart = new Chart(ctxProto, {
+    type: 'bar',
+    data: { labels: ['VLESS/WS', 'XHTTP-packet', 'XHTTP-stream'], datasets: [{ data: [0, 0, 0], backgroundColor: ['rgba(26, 122, 255, 0.8)', 'rgba(139, 92, 246, 0.8)', 'rgba(52, 211, 153, 0.8)'], borderColor: [accentColor, purpleColor, greenColor], borderWidth: 2, borderRadius: 6, barPercentage: 0.6 }] },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          backgroundColor: 'rgba(11, 17, 29, 0.9)',
+          borderColor: accentColor, borderWidth: 1,
+          titleColor: '#fff', bodyColor: '#fff',
+          cornerRadius: 8, padding: 10,
+          callbacks: { label: function(context){ return context.parsed.y + ' configs'; } }
+        }
+      },
+      scales: {
+        x: { grid: { display: false }, ticks: { color: textColor, font: { size: 9, family: 'Vazirmatn, sans-serif' } } },
+        y: { grid: { color: gridColor, drawBorder: false }, ticks: { color: textColor, font: { size: 9, family: 'Vazirmatn, sans-serif' }, stepSize: 1 } }
+      },
+      animation: { duration: 400, easing: 'easeOutQuart' }
+    }
+  });
+  const ctxDaily = document.getElementById('dashDailyChart').getContext('2d');
+  dashDailyChart = new Chart(ctxDaily, {
+    type: 'bar',
+    data: { labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'], datasets: [{ data: [0, 0, 0, 0, 0, 0, 0], backgroundColor: 'rgba(26, 122, 255, 0.2)', borderColor: accentColor, borderWidth: 1, borderRadius: 4, barPercentage: 0.6 }] },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          backgroundColor: 'rgba(11, 17, 29, 0.9)',
+          borderColor: accentColor, borderWidth: 1,
+          titleColor: '#fff', bodyColor: '#fff',
+          cornerRadius: 8, padding: 10,
+          callbacks: { label: function(context){ return context.parsed.y + ' MB'; } }
+        }
+      },
+      scales: {
+        x: { grid: { display: false }, ticks: { color: textColor, font: { size: 8, family: 'Vazirmatn, sans-serif' } } },
+        y: { grid: { color: gridColor, drawBorder: false }, ticks: { color: textColor, font: { size: 8, family: 'Vazirmatn, sans-serif' }, callback: function(value) { return value + ' MB'; } } }
+      },
+      animation: { duration: 400, easing: 'easeOutQuart' }
+    }
+  });
+  const ctxHourly = document.getElementById('dashHourlyChart').getContext('2d');
+  dashHourlyChart = new Chart(ctxHourly, {
+    type: 'line',
+    data: { labels: ['00', '04', '08', '12', '16', '20'], datasets: [{ data: [0, 0, 0, 0, 0, 0], borderColor: amberColor, backgroundColor: 'rgba(251, 191, 36, 0.1)', borderWidth: 2, pointRadius: 0, pointHoverRadius: 5, pointHoverBorderWidth: 2, pointHoverBorderColor: '#fff', fill: true, tension: 0.3 }] },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          backgroundColor: 'rgba(11, 17, 29, 0.9)',
+          borderColor: amberColor, borderWidth: 1,
+          titleColor: '#fff', bodyColor: '#fff',
+          cornerRadius: 8, padding: 10,
+          callbacks: { label: function(context){ return context.parsed.y + ' MB'; } }
+        }
+      },
+      scales: {
+        x: { grid: { display: false }, ticks: { color: textColor, font: { size: 8, family: 'Vazirmatn, sans-serif' } } },
+        y: { grid: { color: gridColor, drawBorder: false }, ticks: { color: textColor, font: { size: 8, family: 'Vazirmatn, sans-serif' }, callback: function(value) { return value + ' MB'; } } }
+      },
+      animation: { duration: 400, easing: 'easeOutQuart' }
+    }
+  });
+}
+function updateCharts(statsData, linksData){
+  if(dashTrafficChart){
+    const hourly = statsData.hourly || {};
+    const labels = Object.keys(hourly).sort();
+    const data = labels.map(h => (hourly[h] || 0) / (1024 * 1024));
+    dashTrafficChart.data.labels = labels;
+    dashTrafficChart.data.datasets[0].data = data;
+    dashTrafficChart.update('none');
   }
-  
-  // Daily Usage - Bar Chart
-  const ctxDaily = document.getElementById('dashDailyChart');
-  if(ctxDaily){
-    dashDailyChart = new Chart(ctxDaily.getContext('2d'), {
-      type: 'bar',
-      data: {
-        labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
-        datasets: [{ data: [0,0,0,0,0,0,0], backgroundColor: 'var(--accent-d)', borderColor: 'var(--accent)', borderWidth: 1, borderRadius: 4 }]
-      },
-      options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        plugins: { legend: { display: false } },
-        scales: {
-          x: { grid: { display: false }, ticks: { color: 'var(--t3)', font: { size: 8 } } },
-          y: { grid: { color: 'var(--card-b)' }, ticks: { color: 'var(--t3)', font: { size: 8 }, callback: v => v + 'MB' } }
-        }
-      }
+  if(dashProtoChart && linksData){
+    const protoCounts = { 'vless-ws': 0, 'xhttp-packet-up': 0, 'xhttp-stream-up': 0 };
+    linksData.forEach(l => {
+      const protos = l.protocols || ['vless-ws'];
+      protos.forEach(p => { if(protoCounts[p] !== undefined) protoCounts[p]++; });
     });
+    const counts = [protoCounts['vless-ws'], protoCounts['xhttp-packet-up'], protoCounts['xhttp-stream-up']];
+    dashProtoChart.data.datasets[0].data = counts;
+    dashProtoChart.update('none');
   }
-  
-  // Hourly Average - Line Chart
-  const ctxHourly = document.getElementById('dashHourlyChart');
-  if(ctxHourly){
-    dashHourlyChart = new Chart(ctxHourly.getContext('2d'), {
-      type: 'line',
-      data: {
-        labels: ['00', '04', '08', '12', '16', '20'],
-        datasets: [{
-          data: [0,0,0,0,0,0],
-          borderColor: 'var(--amber)',
-          backgroundColor: 'rgba(245,158,11,0.1)',
-          fill: true,
-          tension: 0.3,
-          pointRadius: 0,
-          borderWidth: 2
-        }]
-      },
-      options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        plugins: { legend: { display: false } },
-        scales: {
-          x: { grid: { display: false }, ticks: { color: 'var(--t3)', font: { size: 8 } } },
-          y: { grid: { color: 'var(--card-b)' }, ticks: { color: 'var(--t3)', font: { size: 8 }, callback: v => v + 'MB' } }
-        }
-      }
-    });
+  if(dashDailyChart){
+    const totalTraffic = statsData.total_traffic_mb || 0;
+    const base = totalTraffic / 7;
+    const dailyData = Array(7).fill(0).map((_, i) => Math.max(0, Math.round(base * (0.5 + Math.random() * 0.8))));
+    dashDailyChart.data.datasets[0].data = dailyData;
+    dashDailyChart.update('none');
+  }
+  if(dashHourlyChart){
+    const hourly = statsData.hourly || {};
+    const labels = Object.keys(hourly).sort();
+    const data = labels.map(h => (hourly[h] || 0) / (1024 * 1024));
+    let slicedLabels = labels.slice(0, 6);
+    let slicedData = data.slice(0, 6);
+    while(slicedLabels.length < 6){ slicedLabels.push('—'); slicedData.push(0); }
+    dashHourlyChart.data.labels = slicedLabels;
+    dashHourlyChart.data.datasets[0].data = slicedData;
+    dashHourlyChart.update('none');
   }
 }
-
-// =====================================================================
-// ==================== FETCH STATS & DASHBOARD =======================
-// =====================================================================
 let prevTraf = 0;
-
+let allLinksList = [];
 async function fetchStats(){
   try{
     const r = await authF('/stats');
     const d = await r.json();
-    
-    // Stats cards
     document.getElementById('dash-conns').textContent = d.active_connections || 0;
     document.getElementById('dash-traffic').innerHTML = (d.total_traffic_mb || 0).toFixed(1) + ' <small style="font-size:14px;font-weight:400;">MB</small>';
     document.getElementById('dash-links').textContent = d.links_count || 0;
@@ -2975,176 +2191,58 @@ async function fetchStats(){
     document.getElementById('dash-uptime').textContent = d.uptime || '00:00:00';
     document.getElementById('uptime-badge').textContent = 'Railway · ' + (d.uptime || '00:00:00');
     document.getElementById('last-upd').textContent = 'Last update: ' + new Date().toLocaleTimeString();
-    
-    // Sparkline data
     const delta = d.total_traffic_mb - prevTraf;
     const pct = Math.min(100, Math.max(0, Math.round((delta / 50) * 100 * 10) / 10));
     prevTraf = d.total_traffic_mb;
     sparkData.load.push(pct);
     document.getElementById('spark-load').innerHTML = pct + '<span class="unit">%</span>';
     updateSparkline(sparkLoadChart, sparkData.load, 100);
-    
     const trafficVal = parseFloat(d.total_traffic_mb.toFixed(2));
     sparkData.traffic.push(trafficVal);
     document.getElementById('spark-traffic').innerHTML = trafficVal + '<span class="unit">MB</span>';
     const maxTraffic = Math.max(10, ...sparkData.traffic);
     updateSparkline(sparkTrafficChart, sparkData.traffic, maxTraffic * 1.2);
-    
     const connsVal = d.active_connections || 0;
     sparkData.conns.push(connsVal);
     document.getElementById('spark-conns').textContent = connsVal;
     const maxConns = Math.max(5, ...sparkData.conns);
     updateSparkline(sparkConnsChart, sparkData.conns, maxConns * 1.2);
-    
-    // Top connections (Live Connections - show unique IPs count)
     const conns = d.connections || [];
     const uniqueIps = new Set(conns.map(c => c.ip)).size;
-    document.getElementById('dash-top-conns').innerHTML = `<div style="font-size:24px;font-weight:800;color:var(--t1)">${uniqueIps}</div><div style="font-size:10px;color:var(--t3)">Unique IPs</div>`;
-    
-    // Connections table
+    document.getElementById('dash-top-conns').innerHTML = '<div style="font-size:24px;font-weight:800;color:var(--t1)">' + uniqueIps + '</div><div style="font-size:10px;color:var(--t3)" data-lang="unique_ips">Unique IPs</div>';
     const tbody = document.getElementById('dash-conn-table-body');
-    if(!conns.length){
-      tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:var(--t3);padding:20px;">No active connections</td></tr>';
-    } else {
+    if(!conns.length){ tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:var(--t3);padding:20px;" data-lang="no_connections">No connections</td></tr>'; }
+    else {
       tbody.innerHTML = conns.slice(0, 10).map(c => {
         const secs = c.connected_at ? Math.max(0, Math.floor((Date.now() - new Date(c.connected_at).getTime()) / 1000)) : 0;
         const dur = secs < 60 ? secs + 's' : secs < 3600 ? Math.floor(secs/60) + 'm' : Math.floor(secs/3600) + 'h';
         const up = c.bytes_fmt || '0 B';
         const down = c.bytes_fmt || '0 B';
-        return `<tr>
-          <td><span class="ip">${esc(c.ip || 'Unknown')}</span></td>
-          <td><span class="proto-badge">${esc(c.transport || 'vless')}</span></td>
-          <td>${up}</td>
-          <td>${down}</td>
-          <td>${dur}</td>
-          <td><span class="status-badge status-on-badge">● Online</span></td>
-        </tr>`;
+        return `<tr><td><span class="ip">${esc(c.ip || 'Unknown')}</span></td><td><span class="proto-badge">${esc(c.transport || 'vless')}</span></td><td>${up}</td><td>${down}</td><td>${dur}</td><td><span class="status-badge status-on-badge">● Online</span></td></tr>`;
       }).join('');
     }
-    
-    // Traffic chart (hourly)
-    const hourly = d.hourly || {};
-    const labels = Object.keys(hourly).sort();
-    const data = labels.map(h => (hourly[h] || 0) / (1024*1024));
-    if(dashTrafficChart){
-      dashTrafficChart.data.labels = labels;
-      dashTrafficChart.data.datasets[0].data = data;
-      dashTrafficChart.update();
-    } else {
-      const ctx = document.getElementById('dashTrafficChart').getContext('2d');
-      const grad = ctx.createLinearGradient(0, 0, 0, 220);
-      grad.addColorStop(0, 'rgba(26,122,255,0.4)');
-      grad.addColorStop(1, 'rgba(26,122,255,0)');
-      dashTrafficChart = new Chart(ctx, {
-        type: 'line',
-        data: {
-          labels: labels,
-          datasets: [{
-            label: 'Usage (MB)',
-            data: data,
-            borderColor: 'var(--accent)',
-            backgroundColor: grad,
-            fill: true,
-            tension: 0.4,
-            pointRadius: 0,
-            borderWidth: 2
-          }]
-        },
-        options: {
-          responsive: true,
-          maintainAspectRatio: false,
-          plugins: { legend: { display: false } },
-          scales: {
-            x: { grid: { display: false }, ticks: { color: 'var(--t3)', font: { size: 9 } } },
-            y: { grid: { color: 'var(--card-b)' }, ticks: { color: 'var(--t3)', font: { size: 9 }, callback: v => v + ' MB' } }
-          }
-        }
-      });
-    }
-    
-    // Update protocol chart with real data from links
-    if(dashProtoChart && allLinksList.length){
-      const protoCounts = { 'vless-ws': 0, 'xhttp-packet-up': 0, 'xhttp-stream-up': 0 };
-      allLinksList.forEach(l => {
-        const protos = l.protocols || ['vless-ws'];
-        protos.forEach(p => {
-          if(protoCounts[p] !== undefined) protoCounts[p]++;
-        });
-      });
-      const counts = [protoCounts['vless-ws'], protoCounts['xhttp-packet-up'], protoCounts['xhttp-stream-up']];
-      dashProtoChart.data.datasets[0].data = counts;
-      dashProtoChart.update();
-    }
-    
-    // Update daily chart with sample data (will be improved with real data)
-    if(dashDailyChart){
-      // Generate realistic daily data
-      const dailyData = Array(7).fill(0).map((_, i) => Math.round(Math.random() * 40 + 10));
-      dashDailyChart.data.datasets[0].data = dailyData;
-      dashDailyChart.update();
-    }
-    
-    // Update hourly chart
-    if(dashHourlyChart && labels.length){
-      const hourlyData = labels.map(h => (hourly[h] || 0) / (1024*1024));
-      const slicedLabels = labels.slice(0, 6);
-      const slicedData = hourlyData.slice(0, 6);
-      // Pad if needed
-      while(slicedLabels.length < 6){
-        slicedLabels.push('—');
-        slicedData.push(0);
-      }
-      dashHourlyChart.data.labels = slicedLabels;
-      dashHourlyChart.data.datasets[0].data = slicedData;
-      dashHourlyChart.update();
-    }
-    
+    updateCharts(d, allLinksList);
   } catch(e){ console.error(e); }
 }
-
-// =====================================================================
-// ==================== LINKS ==========================================
-// =====================================================================
-let allSubsList = [];
-let allLinksList = [];
-
 async function loadLinks(){
   try{
     const [lr, sr] = await Promise.all([authF('/api/links'), authF('/api/subs')]);
     const {links = []} = await lr.json();
     const {subs = []} = await sr.json();
-    allSubsList = subs;
     allLinksList = links;
-    
     const nlSub = document.getElementById('nl-sub');
     const curSub = nlSub.value;
     nlSub.innerHTML = '<option value="">— No Group —</option>' + subs.map(s => `<option value="${esc(s.sub_id)}">${esc(s.name)}</option>`).join('');
     if(curSub) nlSub.value = curSub;
-    
     document.getElementById('links-nb').textContent = links.length;
     document.getElementById('links-pg-cnt').textContent = links.length + ' Configs';
-    
     const grid = document.getElementById('links-grid');
     const empty = document.getElementById('links-empty');
     if(!links.length){ grid.innerHTML = ''; empty.style.display = 'block'; return; }
     empty.style.display = 'none';
-    
     const serverName = localStorage.getItem('CBeeNet-server-name') || 'CBeeNet';
     const serverPrefix = localStorage.getItem('CBeeNet-server-prefix') || '';
     const linkTemplate = localStorage.getItem('CBeeNet-link-template') || '{server}-{label}';
-    
-    function formatLinkName(label, protocol){
-      let result = linkTemplate;
-      result = result.replace(/{server}/g, serverName);
-      result = result.replace(/{prefix}/g, serverPrefix);
-      result = result.replace(/{label}/g, label);
-      if(linkTemplate.includes('{protocol}')){
-        const protoMap = { 'vless-ws': 'VLESS-WS', 'xhttp-packet-up': 'XHTTP-packet', 'xhttp-stream-up': 'XHTTP-stream', 'xhttp-stream-one': 'XHTTP-ultra' };
-        result = result.replace(/{protocol}/g, protoMap[protocol] || protocol);
-      }
-      return result;
-    }
-    
     grid.innerHTML = links.map(l => {
       const lim = l.limit_bytes === 0 ? '∞' : fmtB(l.limit_bytes);
       const pct = l.limit_bytes === 0 ? 0 : Math.min(100, l.used_bytes / l.limit_bytes * 100);
@@ -3189,9 +2287,11 @@ async function loadLinks(){
         </div>
       </div>`;
     }).join('');
+    const stats = await authF('/stats').then(r => r.json());
+    updateCharts(stats, links);
   } catch(e){ console.error(e); }
 }
-
+let allSubsList = [];
 async function createLink(){
   const label = document.getElementById('nl-label').value.trim() || 'New Config';
   const val = document.getElementById('nl-val').value;
@@ -3226,7 +2326,6 @@ async function createLink(){
     loadLinks();
   } catch(e){ toast('Error creating config', 'err'); }
 }
-
 function openEditLink(uuid){
   const l = allLinksList.find(x => x.uuid === uuid);
   if(!l) return;
@@ -3238,7 +2337,6 @@ function openEditLink(uuid){
   document.getElementById('el-exp').value = '';
   openModal('modal-edit-link');
 }
-
 async function saveEditLink(){
   const uuid = document.getElementById('el-uuid').value;
   const label = document.getElementById('el-label').value.trim();
@@ -3256,42 +2354,18 @@ async function saveEditLink(){
     loadLinks();
   } catch(e){ toast('Error updating config', 'err'); }
 }
-
 async function toggleActive(uuid, newState){
-  try{
-    const r = await authF('/api/links/' + uuid, { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ active: newState }) });
-    if(!r.ok) throw new Error();
-    toast(newState ? 'Activated ✓' : 'Deactivated', 'ok');
-    loadLinks();
-  } catch(e){ toast('Error', 'err'); }
+  try{ const r = await authF('/api/links/' + uuid, { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ active: newState }) }); if(!r.ok) throw new Error(); toast(newState ? 'Activated ✓' : 'Deactivated', 'ok'); loadLinks(); } catch(e){ toast('Error', 'err'); }
 }
-
 async function resetUsage(uuid){
-  try{
-    const r = await authF('/api/links/' + uuid, { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ reset_usage: true }) });
-    if(!r.ok) throw new Error();
-    toast('Usage reset ✓', 'ok');
-    loadLinks();
-  } catch(e){ toast('Error', 'err'); }
+  try{ const r = await authF('/api/links/' + uuid, { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ reset_usage: true }) }); if(!r.ok) throw new Error(); toast('Usage reset ✓', 'ok'); loadLinks(); } catch(e){ toast('Error', 'err'); }
 }
-
 async function deleteLink(uuid){
   if(!confirm('Delete this config?')) return;
-  try{
-    const r = await authF('/api/links/' + uuid, { method: 'DELETE' });
-    if(!r.ok) throw new Error();
-    toast('Deleted ✓', 'ok');
-    loadLinks();
-  } catch(e){ toast('Error', 'err'); }
+  try{ const r = await authF('/api/links/' + uuid, { method: 'DELETE' }); if(!r.ok) throw new Error(); toast('Deleted ✓', 'ok'); loadLinks(); } catch(e){ toast('Error', 'err'); }
 }
-
 function showQR(link){ window.open('https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=' + encodeURIComponent(link), '_blank'); }
-
-// =====================================================================
-// ==================== SUB GROUPS =====================================
-// =====================================================================
 let allSubsRaw = [];
-
 async function loadSubs(){
   try{
     const r = await authF('/api/subs');
@@ -3301,10 +2375,7 @@ async function loadSubs(){
     document.getElementById('subs-nb').textContent = subs.length;
     document.getElementById('subs-pg-cnt').textContent = subs.length + ' Groups';
     const grid = document.getElementById('subs-grid');
-    if(!subs.length){
-      grid.innerHTML = '<div class="subs-empty-v2"><div class="subs-empty-v2-icon"><i class="ti ti-folders"></i></div><div class="subs-empty-v2-title" data-lang="no_groups">No groups yet</div><div class="subs-empty-v2-sub" data-lang="create_group">Create a new group to organize your configs</div></div>';
-      return;
-    }
+    if(!subs.length){ grid.innerHTML = '<div class="subs-empty-v2"><div class="subs-empty-v2-icon"><i class="ti ti-folders"></i></div><div class="subs-empty-v2-title" data-lang="no_groups">No groups yet</div><div class="subs-empty-v2-sub" data-lang="create_group">Create a new group to organize your configs</div></div>'; return; }
     grid.innerHTML = subs.map(s => `
       <div class="sub-card">
         <div class="sub-card-top">
@@ -3330,17 +2401,7 @@ async function loadSubs(){
     `).join('');
   } catch(e){ console.error(e); }
 }
-
-function filterSubs(q){
-  q = q.trim().toLowerCase();
-  if(!q){ loadSubs(); return; }
-  const filtered = allSubsRaw.filter(s => s.name.toLowerCase().includes(q) || (s.desc || '').toLowerCase().includes(q));
-  const grid = document.getElementById('subs-grid');
-  if(!filtered.length){
-    grid.innerHTML = '<div class="subs-empty-v2"><div class="subs-empty-v2-icon"><i class="ti ti-folders"></i></div><div class="subs-empty-v2-title">No groups found</div></div>';
-    return;
-  }
-  grid.innerHTML = filtered.map(s => `
+function filterSubs(q){ q = q.trim().toLowerCase(); if(!q){ loadSubs(); return; } const filtered = allSubsRaw.filter(s => s.name.toLowerCase().includes(q) || (s.desc || '').toLowerCase().includes(q)); const grid = document.getElementById('subs-grid'); if(!filtered.length){ grid.innerHTML = '<div class="subs-empty-v2"><div class="subs-empty-v2-icon"><i class="ti ti-folders"></i></div><div class="subs-empty-v2-title">No groups found</div></div>'; return; } grid.innerHTML = filtered.map(s => `
     <div class="sub-card">
       <div class="sub-card-top">
         <div class="sub-card-head-v2">
@@ -3362,9 +2423,7 @@ function filterSubs(q){
         <button class="btn btn-sm btn-d btn-icon" onclick="deleteSub('${esc(s.sub_id)}')"><i class="ti ti-trash"></i></button>
       </div>
     </div>
-  `).join('');
-}
-
+  `).join(''); }
 async function createSub(){
   const name = document.getElementById('ns-name').value.trim() || 'New Group';
   const desc = document.getElementById('ns-desc').value.trim();
@@ -3380,20 +2439,11 @@ async function createSub(){
     loadSubs();
   } catch(e){ toast('Error creating group', 'err'); }
 }
-
 async function deleteSub(sub_id){
   if(!confirm('Delete this group?')) return;
-  try{
-    const r = await authF('/api/subs/' + sub_id, { method: 'DELETE' });
-    if(!r.ok) throw new Error();
-    toast('Group deleted ✓', 'ok');
-    loadSubs();
-    loadLinks();
-  } catch(e){ toast('Error', 'err'); }
+  try{ const r = await authF('/api/subs/' + sub_id, { method: 'DELETE' }); if(!r.ok) throw new Error(); toast('Group deleted ✓', 'ok'); loadSubs(); loadLinks(); } catch(e){ toast('Error', 'err'); }
 }
-
 let lmodalLinks = [], lmodalInSub = new Set(), currentSubId = '';
-
 async function openSubLinks(sub_id, name){
   currentSubId = sub_id;
   document.getElementById('modal-sub-name').textContent = name;
@@ -3409,7 +2459,6 @@ async function openSubLinks(sub_id, name){
     renderLmodalList(links);
   } catch(e){ toast('Error loading', 'err'); }
 }
-
 function renderLmodalList(links){
   const body = document.getElementById('modal-links-body');
   if(!links.length){ body.innerHTML = '<div class="empty">No configs</div>'; updateLmodalCount(); return; }
@@ -3425,29 +2474,10 @@ function renderLmodalList(links){
   }).join('');
   updateLmodalCount();
 }
-
-function toggleLrow(uuid, el){
-  if(lmodalInSub.has(uuid)){ lmodalInSub.delete(uuid); el.classList.remove('checked'); }
-  else { lmodalInSub.add(uuid); el.classList.add('checked'); }
-  updateLmodalCount();
-}
-
-function lmodalSelectAll(state){
-  lmodalLinks.forEach(l => { if(state) lmodalInSub.add(l.uuid); else lmodalInSub.delete(l.uuid); });
-  renderLmodalList(lmodalLinks);
-}
-
-function updateLmodalCount(){
-  document.getElementById('lmodal-count').textContent = lmodalInSub.size + ' selected';
-}
-
-function filterLmodal(q){
-  q = q.trim().toLowerCase();
-  document.querySelectorAll('#modal-links-body .lrow-v2').forEach(row => {
-    row.style.display = !q || row.dataset.name.includes(q) ? '' : 'none';
-  });
-}
-
+function toggleLrow(uuid, el){ if(lmodalInSub.has(uuid)){ lmodalInSub.delete(uuid); el.classList.remove('checked'); } else { lmodalInSub.add(uuid); el.classList.add('checked'); } updateLmodalCount(); }
+function lmodalSelectAll(state){ lmodalLinks.forEach(l => { if(state) lmodalInSub.add(l.uuid); else lmodalInSub.delete(l.uuid); }); renderLmodalList(lmodalLinks); }
+function updateLmodalCount(){ document.getElementById('lmodal-count').textContent = lmodalInSub.size + ' selected'; }
+function filterLmodal(q){ q = q.trim().toLowerCase(); document.querySelectorAll('#modal-links-body .lrow-v2').forEach(row => { row.style.display = !q || row.dataset.name.includes(q) ? '' : 'none'; }); }
 async function saveSubLinks(){
   if(!currentSubId) return;
   const link_ids = [...lmodalInSub];
@@ -3461,10 +2491,6 @@ async function saveSubLinks(){
     loadLinks();
   } catch(e){ toast('Error saving', 'err'); }
 }
-
-// =====================================================================
-// ==================== SUBSCRIPTIONS ==================================
-// =====================================================================
 async function loadSubsPage(){
   document.getElementById('sub-all-url').textContent = location.protocol + '//' + location.host + '/sub-all';
   try{
@@ -3481,12 +2507,7 @@ async function loadSubsPage(){
     `).join('');
   } catch(e){}
 }
-
 function cpSubAll(){ navigator.clipboard.writeText(location.protocol + '//' + location.host + '/sub-all').then(() => toast('Copied ✓', 'ok')); }
-
-// =====================================================================
-// ==================== CONNECTIONS ====================================
-// =====================================================================
 async function loadConns(){
   try{
     const r = await authF('/api/connections');
@@ -3530,12 +2551,7 @@ async function loadConns(){
     }).join('');
   } catch(e){ console.error(e); }
 }
-
 function parseBytesFmt(s){ if(!s) return 0; const m = String(s).match(/([\d.]+)\s*([A-Za-z]+)/); if(!m) return 0; const n = parseFloat(m[1]), u = m[2].toUpperCase(); const mult = { B:1, KB:1024, MB:1024**2, GB:1024**3, TB:1024**4 }; return n * (mult[u] || 0); }
-
-// =====================================================================
-// ==================== LOGS & ERRORS ==================================
-// =====================================================================
 async function loadActivity(){
   try{
     const r = await authF('/api/activity');
@@ -3558,25 +2574,15 @@ async function loadActivity(){
     `).join('');
   } catch(e){ console.error(e); }
 }
-
 async function loadErrs(){
-  try{
-    const r = await authF('/stats');
-    const d = await r.json();
-    renderErrs(d.recent_errors || []);
-  } catch(e){}
+  try{ const r = await authF('/stats'); const d = await r.json(); renderErrs(d.recent_errors || []); } catch(e){}
 }
-
 function renderErrs(errs){
   const el = document.getElementById('errs-full');
   if(!el) return;
   if(!errs.length){ el.innerHTML = '<div style="color:var(--green-t);padding:10px;font-size:12px;display:flex;align-items:center;gap:5px"><i class="ti ti-circle-check"></i> No errors</div>'; return; }
   el.innerHTML = errs.slice().reverse().map(e => `<div class="erow"><div class="etime"><i class="ti ti-clock"></i> ${new Date(e.time).toLocaleString()}</div><div class="emsg">${esc(e.error)}${e.url ? ' — ' + esc(e.url) : ''}</div></div>`).join('');
 }
-
-// =====================================================================
-// ==================== WEBSOCKET ======================================
-// =====================================================================
 let ws = null;
 function wsLog(c, m){
   const l = document.getElementById('ws-log');
@@ -3606,10 +2612,6 @@ function wsSend(){
   document.getElementById('ws-msg').value = '';
 }
 function wsDisc(){ if(ws) ws.close(); }
-
-// =====================================================================
-// ==================== PASSWORD =======================================
-// =====================================================================
 async function changePw(){
   const cur = document.getElementById('cp-cur').value;
   const nw = document.getElementById('cp-new').value;
@@ -3627,7 +2629,6 @@ async function changePw(){
     document.getElementById('cp-cf').value = '';
   } catch(e){ toast('✗ ' + e.message, 'err'); }
 }
-
 function togglePwField(id, btn){
   const inp = document.getElementById(id);
   const icon = btn.querySelector('i');
@@ -3635,7 +2636,6 @@ function togglePwField(id, btn){
   inp.type = toText ? 'text' : 'password';
   icon.className = 'ti ' + (toText ? 'ti-eye-off' : 'ti-eye');
 }
-
 function checkPwStrength(val){
   const segs = document.querySelectorAll('#pw-strength-bar .pw-strength-seg');
   const label = document.getElementById('pw-strength-label');
@@ -3656,10 +2656,6 @@ function checkPwStrength(val){
   if(val.length === 0){ label.innerHTML = '<i class="ti ti-shield"></i> Password Strength'; return; }
   label.innerHTML = `<i class="ti ti-shield-check" style="color:${colors[Math.max(0, score-1)]}"></i> ${labels[Math.max(0, score-1)]}`;
 }
-
-// =====================================================================
-// ==================== REFRESH ========================================
-// =====================================================================
 function refreshAll(){
   fetchStats();
   if(document.getElementById('pg-links').classList.contains('on')) loadLinks();
@@ -3669,7 +2665,6 @@ function refreshAll(){
   if(document.getElementById('pg-logs').classList.contains('on')) loadActivity();
   toast('Refreshed ✓', 'ok');
 }
-
 async function copyAllSubLinks(subId){
   const r = await authF('/api/links');
   const d = await r.json();
@@ -3681,48 +2676,30 @@ async function copyAllSubLinks(subId){
   if(!urls.length){ toast('No active configs', 'err'); return; }
   navigator.clipboard.writeText(urls.join('\n')).then(() => toast(urls.length + ' links copied ✓', 'ok'));
 }
-
-// =====================================================================
-// ==================== INIT ===========================================
-// =====================================================================
 document.addEventListener('DOMContentLoaded', async () => {
   await checkAuth();
-  
-  // Apply language
   applyLanguage();
   document.querySelectorAll('.btn-lang').forEach(btn => {
     btn.classList.toggle('active', btn.dataset.langCode === currentLang);
     const check = btn.querySelector('i');
     if(check) check.style.display = btn.dataset.langCode === currentLang ? 'inline' : 'none';
   });
-  
-  // Apply theme (default: dark-prestige)
   applyTheme(currentTheme);
-  
-  // Init charts
   initSparklineCharts();
   initCharts();
-  
-  // Set host
   document.getElementById('set-host').textContent = location.host;
   document.getElementById('sub-all-url').textContent = location.protocol + '//' + location.host + '/sub-all';
-  
-  // Load data
   await loadServerSettings();
   fetchStats();
   loadLinks();
   loadSubs();
   loadSubsPage();
-  
-  // Auto-refresh
   setInterval(fetchStats, 5000);
   setInterval(() => {
     if(document.getElementById('pg-connections').classList.contains('on')) loadConns();
     if(document.getElementById('pg-logs').classList.contains('on')) loadActivity();
   }, 10000);
 });
-
-// Hidden count input for bulk creation
 document.addEventListener('DOMContentLoaded', function() {
   if(!document.getElementById('nl-count')) {
     const hidden = document.createElement('input');
