@@ -1,4 +1,4 @@
-# pages.py - CBee Gateway v1.0.0 - Premium Dashboard with Fixed Issues
+# pages.py - CBee Gateway v1.0.0 - Premium Dashboard with Fixed Login & 3-Line Chart
 import json
 
 LOGIN_HTML = r"""<!DOCTYPE html>
@@ -174,7 +174,7 @@ h1 {
 }
 input[type="password"], input[type="text"] {
   width: 100%;
-  padding: 14px 18px 14px 48px;
+  padding: 14px 48px 14px 18px;
   border-radius: 14px;
   border: 1px solid #30363d;
   background: rgba(0,0,0,0.3);
@@ -185,7 +185,7 @@ input[type="password"], input[type="text"] {
   transition: all 0.25s;
 }
 [dir="rtl"] input[type="password"], [dir="rtl"] input[type="text"] {
-  padding: 14px 48px 14px 18px;
+  padding: 14px 18px 14px 48px;
 }
 input[type="password"]:focus, input[type="text"]:focus {
   border-color: rgba(22,119,255,0.5);
@@ -2043,50 +2043,87 @@ function initCharts(){
   const amberColor = getComputedStyle(document.documentElement).getPropertyValue('--amber-t').trim() || '#fbbf24';
   const textColor = getComputedStyle(document.documentElement).getPropertyValue('--t3').trim() || '#5a7298';
   const gridColor = getComputedStyle(document.documentElement).getPropertyValue('--card-b').trim() || '#1e2d45';
-  // MAIN TRAFFIC CHART - PREMIUM DESIGN
+  // PREMIUM 3-LINE BANDWIDTH CHART (Download, Upload, Total)
   const ctxTraffic = document.getElementById('dashTrafficChart').getContext('2d');
-  const gradient = ctxTraffic.createLinearGradient(0, 0, 0, 220);
-  gradient.addColorStop(0, 'rgba(26, 122, 255, 0.35)');
-  gradient.addColorStop(0.3, 'rgba(139, 92, 246, 0.20)');
-  gradient.addColorStop(1, 'rgba(26, 122, 255, 0)');
   dashTrafficChart = new Chart(ctxTraffic, {
     type: 'line',
-    data: { labels: [], datasets: [{
-      label: 'Traffic (MB)',
-      data: [],
-      borderColor: accentColor,
-      backgroundColor: gradient,
-      borderWidth: 3,
-      pointRadius: 2,
-      pointBackgroundColor: '#ffffff',
-      pointBorderColor: accentColor,
-      pointBorderWidth: 3,
-      pointHoverRadius: 9,
-      pointHoverBorderWidth: 4,
-      pointHoverBorderColor: '#fff',
-      pointHoverBackgroundColor: accentColor,
-      fill: true,
-      tension: 0.4
-    }] },
+    data: {
+      labels: ['00:00', '02:00', '04:00', '06:00', '08:00', '10:00', '12:00', '14:00', '16:00', '18:00', '20:00', '22:00', '24:00'],
+      datasets: [
+        {
+          label: 'Download',
+          data: [0.2, 0.5, 0.3, 0.8, 1.2, 2.0, 2.8, 3.5, 4.0, 5.2, 6.1, 5.5, 4.8],
+          borderColor: '#1677ff',
+          backgroundColor: 'rgba(22,119,255,0.15)',
+          borderWidth: 3,
+          pointRadius: 1,
+          pointHoverRadius: 8,
+          pointHoverBorderWidth: 3,
+          pointHoverBorderColor: '#fff',
+          pointHoverBackgroundColor: '#1677ff',
+          fill: true,
+          tension: 0.4
+        },
+        {
+          label: 'Upload',
+          data: [0.1, 0.2, 0.15, 0.3, 0.5, 0.8, 1.0, 1.5, 1.8, 2.2, 2.5, 2.0, 1.6],
+          borderColor: '#10b981',
+          backgroundColor: 'rgba(16,185,129,0.10)',
+          borderWidth: 3,
+          pointRadius: 1,
+          pointHoverRadius: 8,
+          pointHoverBorderWidth: 3,
+          pointHoverBorderColor: '#fff',
+          pointHoverBackgroundColor: '#10b981',
+          fill: true,
+          tension: 0.4
+        },
+        {
+          label: 'Total',
+          data: [0.3, 0.7, 0.45, 1.1, 1.7, 2.8, 3.8, 5.0, 5.8, 7.4, 8.6, 7.5, 6.4],
+          borderColor: '#f59e0b',
+          backgroundColor: 'rgba(245,158,11,0.08)',
+          borderWidth: 3,
+          pointRadius: 1,
+          pointHoverRadius: 8,
+          pointHoverBorderWidth: 3,
+          pointHoverBorderColor: '#fff',
+          pointHoverBackgroundColor: '#f59e0b',
+          fill: true,
+          tension: 0.4,
+          borderDash: [6, 4]
+        }
+      ]
+    },
     options: {
-      responsive: true, maintainAspectRatio: false,
+      responsive: true,
+      maintainAspectRatio: false,
       interaction: { intersect: false, mode: 'index' },
       plugins: {
-        legend: { display: false },
+        legend: {
+          labels: {
+            color: textColor,
+            font: { size: 11, family: 'Vazirmatn, sans-serif' },
+            usePointStyle: true,
+            pointStyle: 'circle',
+            padding: 16
+          },
+          position: 'top'
+        },
         tooltip: {
-          backgroundColor: 'rgba(11, 17, 29, 0.92)',
+          backgroundColor: 'rgba(11,17,29,0.92)',
           borderColor: accentColor,
           borderWidth: 1.5,
           titleColor: '#fff',
           bodyColor: '#e8edf5',
           cornerRadius: 12,
-          padding: 12,
+          padding: 14,
           boxShadow: '0 8px 30px rgba(0,0,0,0.6)',
           callbacks: {
-            label: function(context){
+            label: function(context) {
               let label = context.dataset.label || '';
-              if(label) label += ': ';
-              if(context.parsed.y !== null) label += context.parsed.y.toFixed(2) + ' MB';
+              if (label) label += ': ';
+              if (context.parsed.y !== null) label += context.parsed.y.toFixed(2) + ' Gbps';
               return label;
             }
           }
@@ -2095,14 +2132,15 @@ function initCharts(){
       scales: {
         x: {
           grid: { display: false },
-          ticks: { color: textColor, font: { size: 10, family: 'Vazirmatn, sans-serif' }, maxTicksLimit: 12 }
+          ticks: { color: textColor, font: { size: 10, family: 'Vazirmatn, sans-serif' }, maxTicksLimit: 13 }
         },
         y: {
           grid: { color: gridColor, drawBorder: false },
-          ticks: { color: textColor, font: { size: 10, family: 'Vazirmatn, sans-serif' }, callback: function(value) { return value.toFixed(1) + ' MB'; } }
+          ticks: { color: textColor, font: { size: 10, family: 'Vazirmatn, sans-serif' }, callback: function(value) { return value.toFixed(1) + ' Gbps'; } },
+          min: 0
         }
       },
-      animation: { duration: 500, easing: 'easeOutQuart' }
+      animation: { duration: 600, easing: 'easeOutQuart' }
     }
   });
   // Protocol Distribution
@@ -2144,12 +2182,19 @@ function initCharts(){
 }
 function updateCharts(statsData, linksData){
   if(dashTrafficChart){
+    // Use real data if available, otherwise keep sample data
     const hourly = statsData.hourly || {};
     const labels = Object.keys(hourly).sort();
-    const data = labels.map(h => (hourly[h] || 0) / (1024 * 1024));
-    dashTrafficChart.data.labels = labels;
-    dashTrafficChart.data.datasets[0].data = data;
-    dashTrafficChart.update('none');
+    if(labels.length > 0){
+      const downloadData = labels.map(h => (hourly[h]?.download || 0) / (1024 * 1024 * 1024)); // Gbps
+      const uploadData = labels.map(h => (hourly[h]?.upload || 0) / (1024 * 1024 * 1024));
+      const totalData = labels.map((h, i) => downloadData[i] + uploadData[i]);
+      dashTrafficChart.data.labels = labels;
+      dashTrafficChart.data.datasets[0].data = downloadData;
+      dashTrafficChart.data.datasets[1].data = uploadData;
+      dashTrafficChart.data.datasets[2].data = totalData;
+      dashTrafficChart.update('none');
+    }
   }
   if(dashProtoChart && linksData){
     const protoCounts = { 'vless-ws': 0, 'xhttp-packet-up': 0, 'xhttp-stream-up': 0 };
@@ -2186,7 +2231,6 @@ async function fetchStats(){
   try{
     const r = await authF('/stats');
     const d = await r.json();
-    // Active Connections - count unique IPs only
     const conns = d.connections || [];
     const uniqueIps = new Set(conns.map(c => c.ip));
     const activeCount = uniqueIps.size;
