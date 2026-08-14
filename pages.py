@@ -325,6 +325,7 @@ function applyLoginLang(lang){
   document.getElementById('login-btn-text').textContent = dict.btn_text;
   document.getElementById('login-telegram').textContent = dict.telegram;
   document.documentElement.lang = lang;
+  document.documentElement.dir = lang === 'fa' ? 'rtl' : 'ltr';
   document.getElementById('pw').dir = 'ltr';
   document.querySelectorAll('.lang-btn').forEach(b => b.classList.toggle('active', b.dataset.lang === lang));
   localStorage.setItem('CBeeNet-login-lang', lang);
@@ -1751,9 +1752,9 @@ a{color:inherit;text-decoration:none}
     </div>
     <div class="card">
       <div class="card-title"><i class="ti ti-language"></i> <span data-lang="language_settings">Language Settings</span></div>
-      <div style="display:flex;gap:10px;flex-wrap:wrap">
-        <button class="btn-lang active" data-lang-code="en" onclick="setLanguage('en')"><i class="ti ti-check" style="display:none"></i> English</button>
-        <button class="btn-lang" data-lang-code="fa" onclick="setLanguage('fa')"><i class="ti ti-check" style="display:none"></i> فارسی</button>
+      <div style="display:flex;gap:10px;flex-wrap:wrap" id="lang-buttons">
+        <button class="btn-lang" data-lang-code="en" onclick="setLanguage('en')">English</button>
+        <button class="btn-lang" data-lang-code="fa" onclick="setLanguage('fa')">فارسی</button>
       </div>
       <div class="cl" style="margin-top:12px"><i class="ti ti-info-circle"></i><span data-lang="lang_note">Default language is English. Page will refresh after change.</span></div>
     </div>
@@ -1832,14 +1833,14 @@ const LANG_DICT = {
   }
 };
 let currentLang = localStorage.getItem('CBeeNet-lang') || 'en';
+let currentTheme = localStorage.getItem('CBeeNet-theme') || 'dark-prestige';
+
 function setLanguage(lang){
   currentLang = lang;
   localStorage.setItem('CBeeNet-lang', lang);
   applyLanguage();
   document.querySelectorAll('.btn-lang').forEach(btn => {
     btn.classList.toggle('active', btn.dataset.langCode === lang);
-    const check = btn.querySelector('i');
-    if(check) check.style.display = btn.dataset.langCode === lang ? 'inline' : 'none';
   });
   toast('Language changed to ' + (lang === 'fa' ? 'فارسی' : 'English'), 'ok');
 }
@@ -1856,7 +1857,6 @@ function applyLanguage(){
     if(dict[key] !== undefined) el.placeholder = dict[key];
   });
 }
-let currentTheme = localStorage.getItem('CBeeNet-theme') || 'dark-prestige';
 function applyTheme(theme){
   document.documentElement.setAttribute('data-theme', theme);
   localStorage.setItem('CBeeNet-theme', theme);
@@ -1889,13 +1889,7 @@ function toast(msg, type=''){
   t.className = 'toast show' + (type ? ' ' + type : '');
   setTimeout(() => t.classList.remove('show'), 2400);
 }
-function fmtB(b){
-  if(!b || b === 0) return '0 B';
-  if(b < 1024) return b + ' B';
-  if(b < 1024**2) return (b/1024).toFixed(1) + ' KB';
-  if(b < 1024**3) return (b/1024**2).toFixed(2) + ' MB';
-  return (b/1024**3).toFixed(2) + ' GB';
-}
+function fmtB(b){ if(!b || b === 0) return '0 B'; if(b < 1024) return b + ' B'; if(b < 1024**2) return (b/1024).toFixed(1) + ' KB'; if(b < 1024**3) return (b/1024**2).toFixed(2) + ' MB'; return (b/1024**3).toFixed(2) + ' GB'; }
 function toFa(n){ return String(n).replace(/\d/g, d => '۰۱۲۳۴۵۶۷۸۹'[d]); }
 function esc(s){ return String(s || '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
 function daysLeft(exp){ if(!exp) return null; return Math.ceil((new Date(exp) - Date.now()) / 864e5); }
@@ -2042,14 +2036,15 @@ function initCharts(){
   const amberColor = getComputedStyle(document.documentElement).getPropertyValue('--amber-t').trim() || '#fbbf24';
   const textColor = getComputedStyle(document.documentElement).getPropertyValue('--t3').trim() || '#5a7298';
   const gridColor = getComputedStyle(document.documentElement).getPropertyValue('--card-b').trim() || '#1e2d45';
+  // Main Traffic Chart - Premium Design
   const ctxTraffic = document.getElementById('dashTrafficChart').getContext('2d');
   const gradient = ctxTraffic.createLinearGradient(0, 0, 0, 220);
   gradient.addColorStop(0, 'rgba(26, 122, 255, 0.35)');
-  gradient.addColorStop(0.5, 'rgba(139, 92, 246, 0.15)');
+  gradient.addColorStop(0.4, 'rgba(139, 92, 246, 0.15)');
   gradient.addColorStop(1, 'rgba(26, 122, 255, 0)');
   dashTrafficChart = new Chart(ctxTraffic, {
     type: 'line',
-    data: { labels: [], datasets: [{ label: 'Traffic (MB)', data: [], borderColor: accentColor, backgroundColor: gradient, borderWidth: 3, pointRadius: 0, pointHoverRadius: 6, pointHoverBorderWidth: 2, pointHoverBorderColor: '#fff', fill: true, tension: 0.4 }] },
+    data: { labels: [], datasets: [{ label: 'Traffic (MB)', data: [], borderColor: accentColor, backgroundColor: gradient, borderWidth: 3, pointRadius: 0, pointHoverRadius: 8, pointHoverBorderWidth: 3, pointHoverBorderColor: '#fff', fill: true, tension: 0.4 }] },
     options: {
       responsive: true, maintainAspectRatio: false,
       interaction: { intersect: false, mode: 'index' },
@@ -2070,6 +2065,7 @@ function initCharts(){
       animation: { duration: 500, easing: 'easeOutQuart' }
     }
   });
+  // Protocol Distribution
   const ctxProto = document.getElementById('dashProtoChart').getContext('2d');
   dashProtoChart = new Chart(ctxProto, {
     type: 'bar',
@@ -2093,6 +2089,7 @@ function initCharts(){
       animation: { duration: 400, easing: 'easeOutQuart' }
     }
   });
+  // Daily Usage
   const ctxDaily = document.getElementById('dashDailyChart').getContext('2d');
   dashDailyChart = new Chart(ctxDaily, {
     type: 'bar',
@@ -2116,6 +2113,7 @@ function initCharts(){
       animation: { duration: 400, easing: 'easeOutQuart' }
     }
   });
+  // Hourly Average
   const ctxHourly = document.getElementById('dashHourlyChart').getContext('2d');
   dashHourlyChart = new Chart(ctxHourly, {
     type: 'line',
@@ -2678,11 +2676,11 @@ async function copyAllSubLinks(subId){
 }
 document.addEventListener('DOMContentLoaded', async () => {
   await checkAuth();
+  // Apply language first
   applyLanguage();
+  // Set active language buttons (no check icon)
   document.querySelectorAll('.btn-lang').forEach(btn => {
     btn.classList.toggle('active', btn.dataset.langCode === currentLang);
-    const check = btn.querySelector('i');
-    if(check) check.style.display = btn.dataset.langCode === currentLang ? 'inline' : 'none';
   });
   applyTheme(currentTheme);
   initSparklineCharts();
