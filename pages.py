@@ -1,11 +1,12 @@
-# pages.py - CBee Gateway v1.0.0 (3x-UI Style Dashboard + Multi-Language)
+# pages.py - CBee Gateway v1.0.0 (3x-UI Dashboard + Multi-Language + Imperial Theme)
 import json
 
+# =============================== LOGIN PAGE ===============================
 LOGIN_HTML = r"""<!DOCTYPE html>
-<html lang="fa" dir="rtl">
+<html lang="en" dir="ltr">
 <head>
 <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>ورود · CBee</title>
+<title>Login · CBee</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.19.0/dist/tabler-icons.min.css">
@@ -13,7 +14,7 @@ LOGIN_HTML = r"""<!DOCTYPE html>
 * { margin:0; padding:0; box-sizing:border-box; }
 html, body { height:100%; overflow:hidden; }
 body {
-  font-family: 'Vazirmatn', sans-serif;
+  font-family: 'Vazirmatn', 'Segoe UI', sans-serif;
   background: #0d1117;
   display: flex;
   align-items: center;
@@ -109,6 +110,26 @@ body {
   font-weight: 600;
   margin-top: 4px;
 }
+.lang-row {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  margin-bottom: 20px;
+}
+.lang-btn {
+  background: transparent;
+  border: 1px solid #30363d;
+  color: #8b949e;
+  padding: 4px 14px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: inherit;
+  transition: 0.2s;
+}
+.lang-btn:hover { border-color: #1677ff; color: #f0f6fc; }
+.lang-btn.active { background: #1677ff; border-color: #1677ff; color: #fff; }
 h1 {
   font-size: 20px;
   font-weight: 800;
@@ -152,7 +173,7 @@ h1 {
 .inp-wrap {
   position: relative;
 }
-input[type="password"] {
+input[type="password"], input[type="text"] {
   width: 100%;
   padding: 14px 48px 14px 18px;
   border-radius: 14px;
@@ -164,7 +185,7 @@ input[type="password"] {
   outline: none;
   transition: all 0.25s;
 }
-input[type="password"]:focus {
+input[type="password"]:focus, input[type="text"]:focus {
   border-color: rgba(22,119,255,0.5);
   background: rgba(0,0,0,0.4);
   box-shadow: 0 0 0 4px rgba(22,119,255,0.08);
@@ -250,27 +271,83 @@ input:focus + .ic { color: #1677ff; }
       <div class="brand-name">CBee</div>
       <div class="brand-sub">Gateway · v1.0.0</div>
     </div>
-    <h1>ورود به پنل</h1>
-    <p class="sub">رمز عبور را برای دسترسی به داشبورد وارد کنید</p>
+    <div class="lang-row">
+      <button class="lang-btn active" data-lang="en" onclick="setLoginLang('en')">English</button>
+      <button class="lang-btn" data-lang="fa" onclick="setLoginLang('fa')">فارسی</button>
+    </div>
+    <h1 id="login-title">Login to Panel</h1>
+    <p class="sub" id="login-sub">Enter password to access the dashboard</p>
     <div class="err" id="err"><i class="ti ti-alert-circle"></i><span id="err-text"></span></div>
     <form id="form">
       <div class="field">
-        <label>رمز عبور</label>
+        <label id="login-pw-label">Password</label>
         <div class="inp-wrap">
           <input type="password" id="pw" placeholder="••••••••" autofocus required>
           <i class="ti ti-key ic"></i>
         </div>
       </div>
       <button class="btn" type="submit" id="btn">
-        <span><i class="ti ti-login-2"></i> ورود به داشبورد</span>
+        <span><i class="ti ti-login-2"></i> <span id="login-btn-text">Login to Dashboard</span></span>
       </button>
     </form>
     <div class="footer">
-      <a href="https://t.me/CBeeNet" target="_blank"><i class="ti ti-brand-telegram"></i> @CBeeNet</a>
+      <a href="https://t.me/CBeeNet" target="_blank"><i class="ti ti-brand-telegram"></i> <span id="login-telegram">@CBeeNet</span></a>
     </div>
   </div>
 </div>
 <script>
+// ===== Login Language =====
+const loginLang = {
+  en: {
+    title: 'Login to Panel',
+    sub: 'Enter password to access the dashboard',
+    pw_label: 'Password',
+    pw_placeholder: '••••••••',
+    btn_text: 'Login to Dashboard',
+    telegram: '@CBeeNet',
+    error_default: 'Wrong password'
+  },
+  fa: {
+    title: 'ورود به پنل',
+    sub: 'رمز عبور را برای دسترسی به داشبورد وارد کنید',
+    pw_label: 'رمز عبور',
+    pw_placeholder: '••••••••',
+    btn_text: 'ورود به داشبورد',
+    telegram: '@CBeeNet',
+    error_default: 'رمز عبور اشتباه است'
+  }
+};
+
+let currentLoginLang = localStorage.getItem('CBeeNet-login-lang') || 'en';
+
+function applyLoginLang(lang){
+  const dict = loginLang[lang] || loginLang.en;
+  document.getElementById('login-title').textContent = dict.title;
+  document.getElementById('login-sub').textContent = dict.sub;
+  document.getElementById('login-pw-label').textContent = dict.pw_label;
+  document.getElementById('pw').placeholder = dict.pw_placeholder;
+  document.getElementById('login-btn-text').textContent = dict.btn_text;
+  document.getElementById('login-telegram').textContent = dict.telegram;
+  
+  // Set dir and language
+  document.documentElement.lang = lang;
+  document.documentElement.dir = lang === 'fa' ? 'rtl' : 'ltr';
+  
+  // Update active button
+  document.querySelectorAll('.lang-btn').forEach(b => b.classList.toggle('active', b.dataset.lang === lang));
+  
+  localStorage.setItem('CBeeNet-login-lang', lang);
+  currentLoginLang = lang;
+}
+
+function setLoginLang(lang){
+  applyLoginLang(lang);
+}
+
+// Apply saved language on load
+applyLoginLang(localStorage.getItem('CBeeNet-login-lang') || 'en');
+
+// ===== Login Form =====
 document.getElementById('form').addEventListener('submit', async e => {
   e.preventDefault();
   const btn = document.getElementById('btn');
@@ -278,7 +355,7 @@ document.getElementById('form').addEventListener('submit', async e => {
   const et = document.getElementById('err-text');
   err.classList.remove('show');
   btn.disabled = true;
-  btn.querySelector('span').innerHTML = '<i class="ti ti-loader-2" style="animation:spin 1s linear infinite"></i> در حال ورود...';
+  btn.querySelector('span').innerHTML = '<i class="ti ti-loader-2" style="animation:spin 1s linear infinite"></i> ' + (currentLoginLang === 'fa' ? 'در حال ورود...' : 'Logging in...');
   try {
     const r = await fetch('/api/login', {
       method: 'POST',
@@ -287,108 +364,23 @@ document.getElementById('form').addEventListener('submit', async e => {
     });
     if (!r.ok) {
       const d = await r.json().catch(() => ({}));
-      throw new Error(d.detail || 'رمز عبور اشتباه است');
+      const dict = loginLang[currentLoginLang] || loginLang.en;
+      throw new Error(d.detail || dict.error_default);
     }
     location.href = '/CFOX';
   } catch (e) {
     et.textContent = e.message;
     err.classList.add('show');
     btn.disabled = false;
-    btn.querySelector('span').innerHTML = '<i class="ti ti-login-2"></i> ورود به داشبورد';
+    const dict = loginLang[currentLoginLang] || loginLang.en;
+    btn.querySelector('span').innerHTML = '<i class="ti ti-login-2"></i> ' + dict.btn_text;
   }
 });
 </script>
 </body></html>"""
 
-# ===== دیکشنری ترجمه =====
+# =============================== LANGUAGE DICTIONARY ===============================
 LANG = {
-    "fa": {
-        "dashboard": "داشبورد",
-        "dashboard_sub": "نمای کلی سیستم",
-        "active_connections": "اتصالات فعال",
-        "total_traffic": "کل ترافیک",
-        "total_links": "کانفیگ‌ها",
-        "uptime": "آپتایم",
-        "since_start": "از راه‌اندازی",
-        "active": "فعال",
-        "inactive": "غیرفعال",
-        "refresh": "رفرش",
-        "traffic_trend": "روند مصرف ترافیک",
-        "service_status": "وضعیت سرویس",
-        "top_connections": "اتصال‌های لحظه‌ای",
-        "no_connections": "هیچ اتصالی",
-        "server": "سرور",
-        "settings": "تنظیمات",
-        "language": "زبان",
-        "farsi": "فارسی",
-        "english": "انگلیسی",
-        "save": "ذخیره",
-        "cancel": "انصراف",
-        "delete": "حذف",
-        "edit": "ویرایش",
-        "copy": "کپی",
-        "created": "ساخته شده",
-        "expires": "انقضا",
-        "unlimited": "نامحدود",
-        "used": "مصرف",
-        "of": "از",
-        "daily": "روزانه",
-        "hourly": "ساعتی",
-        "bandwidth": "پهنای باند",
-        "connections": "اتصالات",
-        "protocol": "پروتکل",
-        "ip_address": "آدرس آی‌پی",
-        "port": "پورت",
-        "upload": "آپلود",
-        "download": "دانلود",
-        "duration": "مدت",
-        "status": "وضعیت",
-        "online": "آنلاین",
-        "offline": "آفلاین",
-        "total": "کل",
-        "users": "کاربران",
-        "protocols": "پروتکل‌ها",
-        "traffic_usage": "مصرف ترافیک",
-        "links": "کانفیگ‌ها",
-        "sub_groups": "گروه‌های ساب",
-        "subscription": "سابسکریپشن",
-        "security": "امنیت",
-        "logs": "لاگ فعالیت‌ها",
-        "errors": "خطاها",
-        "test_websocket": "تست WebSocket",
-        "dark_theme": "تم تاریک",
-        "light_theme": "تم روشن",
-        "royal_theme": "تم شاهی",
-        "blue": "آبی",
-        "red": "قرمز",
-        "yellow": "زرد",
-        "current_theme": "تم پیش‌فرض",
-        "server_settings": "تنظیمات سرور و نام لینک‌ها",
-        "server_name": "نام سرور",
-        "server_prefix": "پیشوند لینک‌ها",
-        "link_template": "قالب نام کانفیگ‌ها",
-        "template_vars": "متغیرهای قابل استفاده",
-        "template_note": "اگر `{protocol}` در قالب نباشد، پروتکل در نام نمایش داده نمی‌شود.",
-        "change_password": "تغییر رمز عبور",
-        "current_password": "رمز فعلی",
-        "new_password": "رمز جدید",
-        "confirm_password": "تکرار رمز جدید",
-        "password_strength": "قدرت رمز",
-        "min_chars": "حداقل ۴ کاراکتر",
-        "contains_number": "شامل عدد",
-        "contains_case": "حروف بزرگ/کوچک",
-        "weak": "خیلی ضعیف",
-        "medium": "متوسط",
-        "strong": "قوی",
-        "save_password": "ذخیره رمز جدید",
-        "login": "ورود",
-        "logout": "خروج",
-        "login_title": "ورود به پنل",
-        "login_sub": "رمز عبور را برای دسترسی به داشبورد وارد کنید",
-        "password": "رمز عبور",
-        "login_button": "ورود به داشبورد",
-        "telegram_channel": "کانال تلگرام",
-    },
     "en": {
         "dashboard": "Dashboard",
         "dashboard_sub": "System Overview",
@@ -445,7 +437,7 @@ LANG = {
         "test_websocket": "WebSocket Test",
         "dark_theme": "Dark Theme",
         "light_theme": "Light Theme",
-        "royal_theme": "Royal Theme",
+        "imperial_theme": "Imperial Theme",
         "blue": "Blue",
         "red": "Red",
         "yellow": "Yellow",
@@ -475,11 +467,297 @@ LANG = {
         "password": "Password",
         "login_button": "Login to Dashboard",
         "telegram_channel": "Telegram Channel",
+        "panel": "Panel",
+        "system": "System",
+        "configs": "Configs",
+        "sub_groups_short": "Sub Groups",
+        "activity_logs": "Activity Logs",
+        "config_id": "Config ID",
+        "sub_group_expiry": "Sub Group & Expiry",
+        "no_group": "No Group",
+        "days": "Days",
+        "traffic_quota": "Traffic Quota",
+        "transport_protocols": "Transport Protocols",
+        "bulk_count": "Bulk Count",
+        "create_config": "Create Config",
+        "no_configs": "No configs yet",
+        "new_group": "New Group",
+        "no_groups": "No groups yet",
+        "create_group": "Create a new group to organize your configs",
+        "single_sub": "Single Subscription (per config)",
+        "full_sub": "Full Subscription (Admin)",
+        "full_sub_desc": "Includes all active configs.",
+        "group_sub_links": "Group Subscription Links",
+        "loading": "Loading...",
+        "traffic_analysis": "Bandwidth usage analysis & monitoring",
+        "total_traffic_used": "Total Traffic Used",
+        "hourly_average": "Hourly Average",
+        "per_hour": "/h",
+        "peak_usage": "Peak Usage",
+        "peak_hour": "Peak Hour",
+        "lowest_usage": "Lowest Usage",
+        "live_connections": "Live Connections",
+        "total_traffic_live": "Total Traffic",
+        "avg_duration": "Avg Duration",
+        "unique_ips": "Unique IPs",
+        "connections_list": "Connections List",
+        "auto_update": "Auto-update every 5s",
+        "no_active_connections": "No active connections",
+        "will_appear": "They will appear here as soon as clients connect",
+        "encryption": "Encryption",
+        "access_control": "Access Control",
+        "hash": "Hash",
+        "session": "Session",
+        "active_inactive": "Active/Inactive",
+        "expiry_date": "Expiry Date",
+        "public_page_pw": "Public Page Password",
+        "optional": "Optional",
+        "activity_logs_full": "Complete event history",
+        "no_logs": "No logs yet",
+        "error_logs": "Error Logs",
+        "websocket_test": "WebSocket Test",
+        "ws_note": "Only registered and active UUIDs can connect.",
+        "connect": "Connect",
+        "disconnect": "Disconnect",
+        "send": "Send",
+        "waiting_ws": "Waiting for connection...",
+        "change_theme": "Change Theme",
+        "server_link_settings": "Server & Link Settings",
+        "save_settings": "Save Settings",
+        "saved": "Saved",
+        "online_status": "Online",
+        "version": "Version",
+        "framework": "Framework",
+        "platform": "Platform",
+        "storage": "Storage",
+        "change_password_title": "Change Password",
+        "change_password_sub": "Choose a strong password and keep it safe",
+        "current_pw": "Current Password",
+        "new_pw": "New Password",
+        "confirm_pw": "Confirm Password",
+        "save_new_pw": "Save New Password",
+        "min_4_chars": "At least 4 chars",
+        "contains_num": "Contains number",
+        "contains_case_letters": "Uppercase/Lowercase",
+        "very_weak": "Very Weak",
+        "medium_strength": "Medium",
+        "strong_strength": "Strong",
+        "logout_btn": "Logout",
+        "telegram_btn": "Telegram Channel",
+        "load": "Load",
+        "connections_live": "Live Connections",
+        "traffic_chart": "Traffic Chart",
+        "protocol_distribution": "Protocol Distribution",
+        "daily_usage": "Daily Usage",
+        "active_conns_table": "Active Connections",
+        "configs_management": "Configs Management",
+        "sub_groups_management": "Sub Groups Management",
+        "subscription_links": "Subscription Links",
+        "traffic_monitor": "Traffic Monitor",
+        "connections_monitor": "Connections Monitor",
+        "security_settings": "Security Settings",
+        "activity_logs_title": "Activity Logs",
+        "error_logs_title": "Error Logs",
+        "websocket_tester": "WebSocket Tester",
+        "system_settings": "System Settings",
+        "language_settings": "Language Settings",
+        "theme_settings": "Theme Settings",
+        "server_info": "Server Info",
+        "password_change": "Password Change",
+        "save_changes": "Save Changes",
+        "cancel_changes": "Cancel",
+    },
+    "fa": {
+        "dashboard": "داشبورد",
+        "dashboard_sub": "نمای کلی سیستم",
+        "active_connections": "اتصالات فعال",
+        "total_traffic": "کل ترافیک",
+        "total_links": "کانفیگ‌ها",
+        "uptime": "آپتایم",
+        "since_start": "از راه‌اندازی",
+        "active": "فعال",
+        "inactive": "غیرفعال",
+        "refresh": "رفرش",
+        "traffic_trend": "روند مصرف ترافیک",
+        "service_status": "وضعیت سرویس",
+        "top_connections": "اتصال‌های لحظه‌ای",
+        "no_connections": "هیچ اتصالی",
+        "server": "سرور",
+        "settings": "تنظیمات",
+        "language": "زبان",
+        "farsi": "فارسی",
+        "english": "انگلیسی",
+        "save": "ذخیره",
+        "cancel": "انصراف",
+        "delete": "حذف",
+        "edit": "ویرایش",
+        "copy": "کپی",
+        "created": "ساخته شده",
+        "expires": "انقضا",
+        "unlimited": "نامحدود",
+        "used": "مصرف",
+        "of": "از",
+        "daily": "روزانه",
+        "hourly": "ساعتی",
+        "bandwidth": "پهنای باند",
+        "connections": "اتصالات",
+        "protocol": "پروتکل",
+        "ip_address": "آدرس آی‌پی",
+        "port": "پورت",
+        "upload": "آپلود",
+        "download": "دانلود",
+        "duration": "مدت",
+        "status": "وضعیت",
+        "online": "آنلاین",
+        "offline": "آفلاین",
+        "total": "کل",
+        "users": "کاربران",
+        "protocols": "پروتکل‌ها",
+        "traffic_usage": "مصرف ترافیک",
+        "links": "کانفیگ‌ها",
+        "sub_groups": "گروه‌های ساب",
+        "subscription": "سابسکریپشن",
+        "security": "امنیت",
+        "logs": "لاگ فعالیت‌ها",
+        "errors": "خطاها",
+        "test_websocket": "تست WebSocket",
+        "dark_theme": "تم تاریک",
+        "light_theme": "تم روشن",
+        "imperial_theme": "تم امپراتوری",
+        "blue": "آبی",
+        "red": "قرمز",
+        "yellow": "زرد",
+        "current_theme": "تم پیش‌فرض",
+        "server_settings": "تنظیمات سرور و نام لینک‌ها",
+        "server_name": "نام سرور",
+        "server_prefix": "پیشوند لینک‌ها",
+        "link_template": "قالب نام کانفیگ‌ها",
+        "template_vars": "متغیرهای قابل استفاده",
+        "template_note": "اگر `{protocol}` در قالب نباشد، پروتکل در نام نمایش داده نمی‌شود.",
+        "change_password": "تغییر رمز عبور",
+        "current_password": "رمز فعلی",
+        "new_password": "رمز جدید",
+        "confirm_password": "تکرار رمز جدید",
+        "password_strength": "قدرت رمز",
+        "min_chars": "حداقل ۴ کاراکتر",
+        "contains_number": "شامل عدد",
+        "contains_case": "حروف بزرگ/کوچک",
+        "weak": "خیلی ضعیف",
+        "medium": "متوسط",
+        "strong": "قوی",
+        "save_password": "ذخیره رمز جدید",
+        "login": "ورود",
+        "logout": "خروج",
+        "login_title": "ورود به پنل",
+        "login_sub": "رمز عبور را برای دسترسی به داشبورد وارد کنید",
+        "password": "رمز عبور",
+        "login_button": "ورود به داشبورد",
+        "telegram_channel": "کانال تلگرام",
+        "panel": "پنل",
+        "system": "سیستم",
+        "configs": "کانفیگ‌ها",
+        "sub_groups_short": "گروه‌های ساب",
+        "activity_logs": "لاگ فعالیت‌ها",
+        "config_id": "شناسه کانفیگ",
+        "sub_group_expiry": "گروه ساب و انقضا",
+        "no_group": "بدون گروه",
+        "days": "روز",
+        "traffic_quota": "سهمیه ترافیک",
+        "transport_protocols": "پروتکل‌های انتقال",
+        "bulk_count": "تعداد ساخت هم‌زمان",
+        "create_config": "ساخت کانفیگ",
+        "no_configs": "هنوز کانفیگی وجود ندارد",
+        "new_group": "گروه جدید",
+        "no_groups": "هنوز گروهی وجود ندارد",
+        "create_group": "یک گروه جدید بسازید تا کانفیگ‌ها را دسته‌بندی کنید",
+        "single_sub": "سابسکریپشن تکی (هر کانفیگ)",
+        "full_sub": "سابسکریپشن کامل (ادمین)",
+        "full_sub_desc": "شامل تمام کانفیگ‌های فعال.",
+        "group_sub_links": "لینک سابسکریپشن گروه‌ها",
+        "loading": "در حال بارگذاری...",
+        "traffic_analysis": "تحلیل و مانیتورینگ مصرف پهنای باند",
+        "total_traffic_used": "کل ترافیک مصرفی",
+        "hourly_average": "میانگین ساعتی",
+        "per_hour": "در ساعت",
+        "peak_usage": "پیک مصرف",
+        "peak_hour": "بالاترین ساعت",
+        "lowest_usage": "کمترین مصرف",
+        "live_connections": "اتصالات زنده",
+        "total_traffic_live": "مجموع ترافیک لحظه‌ای",
+        "avg_duration": "میانگین مدت اتصال",
+        "unique_ips": "آی‌پی‌های یکتا",
+        "connections_list": "لیست اتصالات",
+        "auto_update": "بروزرسانی خودکار هر ۵ ثانیه",
+        "no_active_connections": "هیچ اتصال فعالی نیست",
+        "will_appear": "به محض اتصال کلاینت‌ها، اینجا نمایش داده می‌شوند",
+        "encryption": "رمزنگاری",
+        "access_control": "کنترل دسترسی",
+        "hash": "هش رمز",
+        "session": "سشن",
+        "active_inactive": "فعال/غیرفعال",
+        "expiry_date": "تاریخ انقضا",
+        "public_page_pw": "رمز صفحه پابلیک",
+        "optional": "اختیاری",
+        "activity_logs_full": "تاریخچه‌ی کامل رخدادهای پنل",
+        "no_logs": "هنوز لاگی ثبت نشده",
+        "error_logs": "لاگ خطاها",
+        "websocket_test": "تست WebSocket",
+        "ws_note": "فقط UUID‌های ثبت‌شده و فعال اتصال برقرار می‌کنند.",
+        "connect": "اتصال",
+        "disconnect": "قطع",
+        "send": "ارسال",
+        "waiting_ws": "منتظر اتصال...",
+        "change_theme": "تغییر تم",
+        "server_link_settings": "تنظیمات سرور و نام لینک‌ها",
+        "save_settings": "ذخیره تنظیمات",
+        "saved": "ذخیره شد",
+        "online_status": "آنلاین",
+        "version": "نسخه",
+        "framework": "فریم‌ورک",
+        "platform": "پلتفرم",
+        "storage": "ذخیره‌سازی",
+        "change_password_title": "تغییر رمز عبور",
+        "change_password_sub": "رمز قوی انتخاب کنید و آن را جایی امن نگه دارید",
+        "current_pw": "رمز فعلی",
+        "new_pw": "رمز جدید",
+        "confirm_pw": "تکرار رمز جدید",
+        "save_new_pw": "ذخیره رمز جدید",
+        "min_4_chars": "حداقل ۴ کاراکتر",
+        "contains_num": "شامل عدد",
+        "contains_case_letters": "حروف بزرگ/کوچک",
+        "very_weak": "خیلی ضعیف",
+        "medium_strength": "متوسط",
+        "strong_strength": "قوی",
+        "logout_btn": "خروج",
+        "telegram_btn": "کانال تلگرام",
+        "load": "بار نسبی",
+        "connections_live": "اتصالات لحظه‌ای",
+        "traffic_chart": "نمودار ترافیک",
+        "protocol_distribution": "توزیع پروتکل",
+        "daily_usage": "مصرف روزانه",
+        "active_conns_table": "اتصالات فعال",
+        "configs_management": "مدیریت کانفیگ‌ها",
+        "sub_groups_management": "مدیریت گروه‌های ساب",
+        "subscription_links": "لینک‌های سابسکریپشن",
+        "traffic_monitor": "مانیتورینگ ترافیک",
+        "connections_monitor": "مانیتورینگ اتصالات",
+        "security_settings": "تنظیمات امنیتی",
+        "activity_logs_title": "لاگ فعالیت‌ها",
+        "error_logs_title": "لاگ خطاها",
+        "websocket_tester": "تست WebSocket",
+        "system_settings": "تنظیمات سیستم",
+        "language_settings": "تنظیمات زبان",
+        "theme_settings": "تنظیمات تم",
+        "server_info": "اطلاعات سرور",
+        "password_change": "تغییر رمز عبور",
+        "save_changes": "ذخیره تغییرات",
+        "cancel_changes": "انصراف",
     }
 }
 
+# =============================== DASHBOARD HTML ===============================
 DASHBOARD_HTML = r"""<!DOCTYPE html>
-<html lang="fa" dir="rtl">
+<html lang="en" dir="ltr">
 <head>
 <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>CBee · Gateway</title>
@@ -517,19 +795,45 @@ DASHBOARD_HTML = r"""<!DOCTYPE html>
   --sidebar-w:248px;
   --radius:16px;
   --shadow:0 8px 32px rgba(0,0,0,0.4);
-  --font-family:'Vazirmatn',sans-serif;
+  --font-family:'Vazirmatn','Segoe UI',sans-serif;
 }
+/* ===== THEMES ===== */
 [data-theme="dark-blue"]{--accent:#1677ff;--accent2:#4096ff;--accent-d:rgba(22,119,255,0.12);--accent-glow:rgba(22,119,255,0.35);--card-bh:rgba(22,119,255,0.20);}
 [data-theme="dark-red"]{--accent:#ef4444;--accent2:#f87171;--accent-d:rgba(239,68,68,0.12);--accent-glow:rgba(239,68,68,0.35);--card-bh:rgba(239,68,68,0.20);}
 [data-theme="dark-yellow"]{--accent:#f59e0b;--accent2:#fbbf24;--accent-d:rgba(245,158,11,0.12);--accent-glow:rgba(245,158,11,0.35);--card-bh:rgba(245,158,11,0.20);}
-[data-theme="dark-royal"]{--bg:#0a0618;--bg2:#140f26;--bg3:#1e1638;--card:#140f26;--card-b:#2d1f5a;--card-bh:rgba(139,92,246,0.30);--accent:#8b5cf6;--accent2:#a78bfa;--accent-d:rgba(139,92,246,0.15);--accent-glow:rgba(139,92,246,0.45);--green:#34d399;--green-bg:rgba(52,211,153,0.10);--green-t:#6ee7b7;--red:#f87171;--red-bg:rgba(248,113,113,0.10);--red-t:#fca5a5;--amber:#fbbf24;--amber-bg:rgba(251,191,36,0.10);--amber-t:#fcd34d;--purple:#8b5cf6;--purple-bg:rgba(139,92,246,0.15);--t1:#f0f0ff;--t2:#b4b0d1;--t3:#8985a6;--shadow:0 8px 32px rgba(0,0,0,0.6);}
+[data-theme="dark-imperial"]{
+  --bg:#0a0815;
+  --bg2:#120f24;
+  --bg3:#1a1635;
+  --card:#120f24;
+  --card-b:#2a2448;
+  --card-bh:rgba(212,175,55,0.25);
+  --accent:#d4af37;
+  --accent2:#e8c84a;
+  --accent-d:rgba(212,175,55,0.12);
+  --accent-glow:rgba(212,175,55,0.35);
+  --green:#34d399;
+  --green-bg:rgba(52,211,153,0.10);
+  --green-t:#6ee7b7;
+  --red:#f87171;
+  --red-bg:rgba(248,113,113,0.10);
+  --red-t:#fca5a5;
+  --amber:#fbbf24;
+  --amber-bg:rgba(251,191,36,0.10);
+  --amber-t:#fcd34d;
+  --purple:#8b5cf6;
+  --purple-bg:rgba(139,92,246,0.15);
+  --t1:#f0ece4;
+  --t2:#b8b0a0;
+  --t3:#8a8270;
+  --shadow:0 8px 32px rgba(0,0,0,0.7);
+}
 [data-theme="light-blue"]{--bg:#f6f8fa;--bg2:#ffffff;--bg3:#eaeef2;--card:#ffffff;--card-b:#d0d7de;--card-bh:rgba(22,119,255,0.25);--accent:#1677ff;--accent2:#4096ff;--accent-d:rgba(22,119,255,0.08);--accent-glow:rgba(22,119,255,0.25);--t1:#24292f;--t2:#57606a;--t3:#8b949e;--shadow:0 8px 28px rgba(0,0,0,0.08);}
 [data-theme="light-red"]{--bg:#f6f8fa;--bg2:#ffffff;--bg3:#eaeef2;--card:#ffffff;--card-b:#d0d7de;--card-bh:rgba(239,68,68,0.25);--accent:#ef4444;--accent2:#f87171;--accent-d:rgba(239,68,68,0.08);--accent-glow:rgba(239,68,68,0.25);--t1:#24292f;--t2:#57606a;--t3:#8b949e;--shadow:0 8px 28px rgba(0,0,0,0.08);}
 [data-theme="light-yellow"]{--bg:#f6f8fa;--bg2:#ffffff;--bg3:#eaeef2;--card:#ffffff;--card-b:#d0d7de;--card-bh:rgba(245,158,11,0.25);--accent:#f59e0b;--accent2:#fbbf24;--accent-d:rgba(245,158,11,0.08);--accent-glow:rgba(245,158,11,0.25);--t1:#24292f;--t2:#57606a;--t3:#8b949e;--shadow:0 8px 28px rgba(0,0,0,0.08);}
 
 html,body{height:100%}
 body{font-family:var(--font-family);background:var(--bg);color:var(--t1);min-height:100vh;display:flex;font-size:14px;transition:background .3s,color .3s,border-color .3s}
-[dir="ltr"] body{font-family:'Segoe UI','Vazirmatn',sans-serif}
 ::-webkit-scrollbar{width:5px;height:5px}
 ::-webkit-scrollbar-track{background:var(--bg)}
 ::-webkit-scrollbar-thumb{background:var(--bg3);border-radius:3px}
@@ -638,6 +942,57 @@ a{color:inherit;text-decoration:none}
   opacity:.3;
 }
 [dir="ltr"] .dash-stat-card .icon{left:auto;right:16px}
+
+/* Sparkline row - first row of charts */
+.dash-sparkline-row{
+  display:grid;
+  grid-template-columns:1fr 1fr 1fr;
+  gap:16px;
+  margin-bottom:22px;
+}
+.dash-spark-card{
+  background:var(--card);
+  border:1px solid var(--card-b);
+  border-radius:var(--radius);
+  padding:16px 18px 14px;
+  transition:all .2s;
+}
+.dash-spark-card:hover{
+  border-color:var(--card-bh);
+  transform:translateY(-2px);
+  box-shadow:var(--shadow);
+}
+.dash-spark-card .spark-top{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  margin-bottom:6px;
+}
+.dash-spark-card .spark-label{
+  font-size:10.5px;
+  color:var(--t3);
+  font-weight:600;
+  text-transform:uppercase;
+  letter-spacing:.05em;
+  display:flex;
+  align-items:center;
+  gap:5px;
+}
+.dash-spark-card .spark-label i{font-size:14px;color:var(--accent)}
+.dash-spark-card .spark-value{
+  font-size:26px;
+  font-weight:800;
+  color:var(--t1);
+  letter-spacing:-.02em;
+  line-height:1.2;
+}
+.dash-spark-card .spark-value .unit{font-size:13px;font-weight:500;color:var(--t3);margin-right:3px}
+.dash-spark-card .spark-chart{height:50px;margin-top:6px;position:relative}
+.dash-spark-card .spark-chart canvas{width:100% !important;height:100% !important}
+.dash-spark-card .spark-sub{font-size:9.5px;color:var(--t3);margin-top:4px;display:flex;align-items:center;gap:4px}
+.dash-spark-card .spark-sub .dot{width:5px;height:5px;border-radius:50%;display:inline-block;background:var(--accent)}
+
+/* Main chart row */
 .dash-chart-row{
   display:grid;
   grid-template-columns:2fr 1fr;
@@ -661,6 +1016,7 @@ a{color:inherit;text-decoration:none}
 }
 .dash-chart-card .card-title i{color:var(--accent);}
 .dash-chart-wrap{height:220px;position:relative;}
+
 .dash-right-panel{
   display:flex;
   flex-direction:column;
@@ -693,14 +1049,11 @@ a{color:inherit;text-decoration:none}
 .dash-conn-item .ip{font-family:monospace;color:var(--t1);}
 .dash-conn-item .proto{font-size:9px;padding:2px 7px;border-radius:5px;background:var(--accent-d);color:var(--accent2);}
 .dash-conn-item .traffic{color:var(--t2);}
-.dash-conn-item .status-dot{width:6px;height:6px;border-radius:50%;display:inline-block;}
-.status-on{background:var(--green);}
-.status-off{background:var(--red);}
 
-/* ===== SECOND ROW CHARTS ===== */
+/* Second row charts */
 .dash-charts-second{
   display:grid;
-  grid-template-columns:1fr 1fr;
+  grid-template-columns:1fr 1fr 1fr;
   gap:16px;
   margin-bottom:22px;
 }
@@ -722,7 +1075,7 @@ a{color:inherit;text-decoration:none}
 .dash-small-chart .chart-title i{color:var(--accent);}
 .dash-small-chart .chart-wrap{height:120px;position:relative;}
 
-/* ===== CONNECTIONS TABLE ===== */
+/* Connections Table */
 .dash-conn-table-wrap{
   background:var(--card);
   border:1px solid var(--card-b);
@@ -781,10 +1134,14 @@ a{color:inherit;text-decoration:none}
 .df-text{font-size:10px;color:var(--t3)}
 .df-link{font-size:11.5px;color:var(--accent2);display:flex;align-items:center;gap:5px;font-weight:600}
 
-@media(max-width:1024px){.dash-stats-grid{grid-template-columns:1fr 1fr;}}
+@media(max-width:1024px){
+  .dash-stats-grid{grid-template-columns:1fr 1fr;}
+  .dash-charts-second{grid-template-columns:1fr 1fr;}
+}
 @media(max-width:768px){
   .dash-chart-row{grid-template-columns:1fr;}
   .dash-charts-second{grid-template-columns:1fr;}
+  .dash-sparkline-row{grid-template-columns:1fr;}
   .dash-stats-grid{grid-template-columns:1fr;}
   .main{padding:62px 12px 50px;}
   .sidebar{transform:translateX(100%);}
@@ -796,21 +1153,7 @@ a{color:inherit;text-decoration:none}
   .mob-top{display:flex;}
 }
 
-/* ===== بقیه استایل‌های قبلی ===== */
-.sparkline-row{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-bottom:22px}
-.sparkline-card{background:var(--card);border:1px solid var(--card-b);border-radius:var(--radius);padding:16px 18px 14px;transition:all .2s;position:relative;overflow:hidden}
-.sparkline-card:hover{border-color:var(--card-bh);transform:translateY(-2px);box-shadow:var(--shadow)}
-.sparkline-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:6px}
-.sparkline-label{font-size:10.5px;color:var(--t3);font-weight:600;text-transform:uppercase;letter-spacing:.05em;display:flex;align-items:center;gap:5px}
-.sparkline-label i{font-size:14px;color:var(--accent)}
-.sparkline-value{font-size:26px;font-weight:800;color:var(--t1);letter-spacing:-.02em;line-height:1.2}
-.sparkline-value .unit{font-size:13px;font-weight:500;color:var(--t3);margin-right:3px}
-.sparkline-chart{height:50px;margin-top:6px;position:relative}
-.sparkline-chart canvas{width:100% !important;height:100% !important}
-.sparkline-sub{font-size:9.5px;color:var(--t3);margin-top:4px;display:flex;align-items:center;gap:4px}
-.sparkline-sub .dot{width:5px;height:5px;border-radius:50%;display:inline-block;background:var(--accent)}
-@media(max-width:768px){.sparkline-row{grid-template-columns:1fr;gap:12px}}
-
+/* ===== REST OF STYLES (same as before) ===== */
 .btn{font-family:inherit;font-size:12px;font-weight:500;border-radius:9px;padding:8px 14px;cursor:pointer;display:inline-flex;align-items:center;gap:5px;border:none;transition:all .15s;white-space:nowrap}
 .btn i{font-size:13px}
 .btn:disabled{opacity:.4;cursor:not-allowed}
@@ -1195,7 +1538,7 @@ a{color:inherit;text-decoration:none}
 <body>
 <div class="toast" id="toast"></div>
 
-<!-- ===== Modals ===== -->
+<!-- ===== Modals (same as before) ===== -->
 <div class="modal-bg" id="modal-links">
   <div class="modal-v2" style="max-width:500px">
     <div class="lmodal-head">
@@ -1203,75 +1546,77 @@ a{color:inherit;text-decoration:none}
       <div class="lmodal-icon-row">
         <div class="lmodal-icon"><i class="ti ti-link-plus"></i></div>
         <div>
-          <div class="lmodal-title-v2">مدیریت کانفیگ‌های <span id="modal-sub-name" style="color:var(--accent2)">—</span></div>
-          <div class="lmodal-sub-v2">کانفیگ‌هایی که می‌خواهید در این گروه باشند را انتخاب کنید</div>
+          <div class="lmodal-title-v2" data-lang="manage_configs">Manage Configs for <span id="modal-sub-name" style="color:var(--accent2)">—</span></div>
+          <div class="lmodal-sub-v2" data-lang="select_configs">Select configs to include in this group</div>
         </div>
       </div>
       <div class="lmodal-search">
         <i class="ti ti-search"></i>
-        <input type="text" id="lmodal-search-inp" placeholder="جستجوی کانفیگ..." oninput="filterLmodal(this.value)">
+        <input type="text" id="lmodal-search-inp" placeholder="Search configs..." oninput="filterLmodal(this.value)">
       </div>
       <div class="lmodal-quickbar">
-        <button class="lmodal-qbtn" onclick="lmodalSelectAll(true)"><i class="ti ti-checks"></i> انتخاب همه</button>
-        <button class="lmodal-qbtn" onclick="lmodalSelectAll(false)"><i class="ti ti-x"></i> لغو همه</button>
-        <span class="lmodal-count" id="lmodal-count">۰ انتخاب شده</span>
+        <button class="lmodal-qbtn" onclick="lmodalSelectAll(true)"><i class="ti ti-checks"></i> <span data-lang="select_all">Select All</span></button>
+        <button class="lmodal-qbtn" onclick="lmodalSelectAll(false)"><i class="ti ti-x"></i> <span data-lang="deselect_all">Deselect All</span></button>
+        <span class="lmodal-count" id="lmodal-count">0 selected</span>
       </div>
     </div>
-    <div class="lmodal-list" id="modal-links-body">در حال بارگذاری...</div>
+    <div class="lmodal-list" id="modal-links-body">Loading...</div>
     <div class="lmodal-footer">
-      <div class="lmodal-footer-info"><i class="ti ti-info-circle"></i> تغییرات بلافاصله اعمال می‌شود</div>
+      <div class="lmodal-footer-info"><i class="ti ti-info-circle"></i> <span data-lang="changes_apply">Changes apply immediately</span></div>
       <div class="lmodal-footer-btns">
-        <button class="btn btn-o" onclick="closeModal('modal-links')">بستن</button>
-        <button class="btn btn-p" id="modal-save-btn" onclick="saveSubLinks()"><i class="ti ti-check"></i> ذخیره</button>
+        <button class="btn btn-o" onclick="closeModal('modal-links')"><span data-lang="close">Close</span></button>
+        <button class="btn btn-p" id="modal-save-btn" onclick="saveSubLinks()"><i class="ti ti-check"></i> <span data-lang="save">Save</span></button>
       </div>
     </div>
   </div>
 </div>
+
 <div class="modal-bg" id="modal-create-sub">
   <div class="modal-v2">
     <div class="modal-v2-head">
       <button class="modal-v2-close" onclick="closeModal('modal-create-sub')"><i class="ti ti-x"></i></button>
       <div class="modal-v2-icon"><i class="ti ti-folder-plus"></i></div>
-      <div class="modal-v2-title">ساخت گروه جدید</div>
-      <div class="modal-v2-sub">یک صفحه پابلیک مجزا برای مدیریت کانفیگ‌ها بسازید</div>
+      <div class="modal-v2-title" data-lang="new_group_title">Create New Group</div>
+      <div class="modal-v2-sub" data-lang="new_group_sub">Create a separate public page to manage configs</div>
     </div>
     <div class="modal-v2-body">
       <div class="modal-v2-field">
-        <label><i class="ti ti-tag"></i> نام گروه</label>
-        <input class="modal-v2-input" id="ns-name" placeholder="مثلاً: کانال تلگرام">
+        <label><i class="ti ti-tag"></i> <span data-lang="group_name">Group Name</span></label>
+        <input class="modal-v2-input" id="ns-name" placeholder="e.g. Telegram Channel">
       </div>
       <div class="modal-v2-field">
-        <label><i class="ti ti-align-left"></i> توضیحات (اختیاری)</label>
-        <input class="modal-v2-input" id="ns-desc" placeholder="توضیح کوتاه درباره این گروه">
+        <label><i class="ti ti-align-left"></i> <span data-lang="description_optional">Description (optional)</span></label>
+        <input class="modal-v2-input" id="ns-desc" placeholder="Short description of this group">
       </div>
       <div class="modal-v2-field" style="margin-bottom:0">
-        <label><i class="ti ti-lock"></i> رمز صفحه پابلیک (اختیاری)</label>
-        <input class="modal-v2-input" id="ns-pw" type="password" placeholder="خالی بگذارید = بدون رمز">
+        <label><i class="ti ti-lock"></i> <span data-lang="public_page_password">Public Page Password (optional)</span></label>
+        <input class="modal-v2-input" id="ns-pw" type="password" placeholder="Leave empty = no password">
       </div>
-      <div class="cl" style="margin-top:14px"><i class="ti ti-info-circle"></i><span>صفحه پابلیک این گروه با یک لینک منحصر‌به‌فرد در اینترنت در دسترس خواهد بود.</span></div>
+      <div class="cl" style="margin-top:14px"><i class="ti ti-info-circle"></i><span data-lang="public_page_info">This group's public page will be accessible via a unique link.</span></div>
       <div class="modal-v2-footer">
-        <button class="btn btn-o" onclick="closeModal('modal-create-sub')" style="flex:.6">انصراف</button>
-        <button class="btn btn-pur" onclick="createSub()"><i class="ti ti-folder-plus"></i> ساخت گروه</button>
+        <button class="btn btn-o" onclick="closeModal('modal-create-sub')" style="flex:.6"><span data-lang="cancel">Cancel</span></button>
+        <button class="btn btn-pur" onclick="createSub()"><i class="ti ti-folder-plus"></i> <span data-lang="create_group">Create Group</span></button>
       </div>
     </div>
   </div>
 </div>
+
 <div class="modal-bg" id="modal-edit-link">
   <div class="modal">
     <button class="modal-close" onclick="closeModal('modal-edit-link')"><i class="ti ti-x"></i></button>
-    <div class="modal-title"><i class="ti ti-edit"></i> ویرایش کانفیگ</div>
+    <div class="modal-title"><i class="ti ti-edit"></i> <span data-lang="edit_config">Edit Config</span></div>
     <input type="hidden" id="el-uuid">
-    <div class="fg" style="margin-bottom:13px"><label>عنوان</label><input class="fi" id="el-label" style="width:100%"></div>
+    <div class="fg" style="margin-bottom:13px"><label data-lang="title">Title</label><input class="fi" id="el-label" style="width:100%"></div>
     <div class="form-row" style="margin-bottom:13px">
-      <div class="fg" style="flex:1"><label>سهمیه (0 = نامحدود)</label><input class="fi" id="el-val" type="number" min="0" step="0.1" style="width:100%"></div>
-      <div class="fg"><label>واحد</label><select class="fs" id="el-unit"><option value="GB">GB</option><option value="MB">MB</option></select></div>
+      <div class="fg" style="flex:1"><label data-lang="quota_0_unlimited">Quota (0 = unlimited)</label><input class="fi" id="el-val" type="number" min="0" step="0.1" style="width:100%"></div>
+      <div class="fg"><label>Unit</label><select class="fs" id="el-unit"><option value="GB">GB</option><option value="MB">MB</option></select></div>
     </div>
-    <div class="fg" style="margin-bottom:13px"><label>انقضا (روز از الان، 0 = بدون تغییر/نامحدود)</label><input class="fi" id="el-exp" type="number" min="0" step="1" style="width:100%"></div>
-    <div class="fg" style="margin-bottom:16px"><label>یادداشت</label><input class="fi" id="el-note" style="width:100%"></div>
-    <div class="cl"><i class="ti ti-info-circle"></i><span>برای حفظ انقضای فعلی، فیلد انقضا را صفر بگذارید.</span></div>
+    <div class="fg" style="margin-bottom:13px"><label data-lang="expiry_days">Expiry (days from now, 0 = no change/unlimited)</label><input class="fi" id="el-exp" type="number" min="0" step="1" style="width:100%"></div>
+    <div class="fg" style="margin-bottom:16px"><label data-lang="note">Note</label><input class="fi" id="el-note" style="width:100%"></div>
+    <div class="cl"><i class="ti ti-info-circle"></i><span data-lang="expiry_note">To keep current expiry, leave expiry field as 0.</span></div>
     <div style="margin-top:16px;display:flex;gap:8px;justify-content:flex-end">
-      <button class="btn btn-o" onclick="closeModal('modal-edit-link')">انصراف</button>
-      <button class="btn btn-p" onclick="saveEditLink()"><i class="ti ti-check"></i> ذخیره تغییرات</button>
+      <button class="btn btn-o" onclick="closeModal('modal-edit-link')"><span data-lang="cancel">Cancel</span></button>
+      <button class="btn btn-p" onclick="saveEditLink()"><i class="ti ti-check"></i> <span data-lang="save_changes">Save Changes</span></button>
     </div>
   </div>
 </div>
@@ -1298,121 +1643,155 @@ a{color:inherit;text-decoration:none}
     <div style="font-size:10px;color:var(--t3);margin-top:1px">Gateway · v1.0.0</div>
   </div>
   <div class="nav-wrap">
-    <div class="nav-sec" data-lang="پنل">Panel</div>
-    <div class="nav-it on" data-pg="overview"><i class="ti ti-layout-dashboard"></i> <span data-lang="داشبورد">Dashboard</span></div>
-    <div class="nav-it" data-pg="links"><i class="ti ti-link-plus"></i> <span data-lang="کانفیگ‌ها">Configs</span> <span class="nav-badge" id="links-nb">0</span></div>
-    <div class="nav-it" data-pg="subgroups"><i class="ti ti-folders"></i> <span data-lang="گروه‌های ساب">Sub Groups</span> <span class="nav-badge" id="subs-nb">0</span></div>
-    <div class="nav-it" data-pg="subscriptions"><i class="ti ti-rss"></i> <span data-lang="سابسکریپشن">Subscription</span></div>
-    <div class="nav-it" data-pg="traffic"><i class="ti ti-chart-area"></i> <span data-lang="ترافیک">Traffic</span></div>
-    <div class="nav-it" data-pg="connections"><i class="ti ti-plug-connected"></i> <span data-lang="اتصالات">Connections</span> <span class="nav-badge" id="conns-nb">0</span></div>
-    <div class="nav-sec" data-lang="سیستم">System</div>
-    <div class="nav-it" data-pg="security"><i class="ti ti-shield-lock"></i> <span data-lang="امنیت">Security</span></div>
-    <div class="nav-it" data-pg="logs"><i class="ti ti-history"></i> <span data-lang="لاگ فعالیت‌ها">Activity Logs</span></div>
-    <div class="nav-it" data-pg="errors"><i class="ti ti-alert-triangle"></i> <span data-lang="خطاها">Errors</span></div>
-    <div class="nav-it" data-pg="testws"><i class="ti ti-wifi"></i> <span data-lang="تست WebSocket">WebSocket Test</span></div>
-    <div class="nav-it" data-pg="settings"><i class="ti ti-settings"></i> <span data-lang="تنظیمات">Settings</span></div>
+    <div class="nav-sec" data-lang="panel">Panel</div>
+    <div class="nav-it on" data-pg="overview"><i class="ti ti-layout-dashboard"></i> <span data-lang="dashboard">Dashboard</span></div>
+    <div class="nav-it" data-pg="links"><i class="ti ti-link-plus"></i> <span data-lang="configs">Configs</span> <span class="nav-badge" id="links-nb">0</span></div>
+    <div class="nav-it" data-pg="subgroups"><i class="ti ti-folders"></i> <span data-lang="sub_groups_short">Sub Groups</span> <span class="nav-badge" id="subs-nb">0</span></div>
+    <div class="nav-it" data-pg="subscriptions"><i class="ti ti-rss"></i> <span data-lang="subscription">Subscription</span></div>
+    <div class="nav-it" data-pg="traffic"><i class="ti ti-chart-area"></i> <span data-lang="traffic">Traffic</span></div>
+    <div class="nav-it" data-pg="connections"><i class="ti ti-plug-connected"></i> <span data-lang="connections">Connections</span> <span class="nav-badge" id="conns-nb">0</span></div>
+    <div class="nav-sec" data-lang="system">System</div>
+    <div class="nav-it" data-pg="security"><i class="ti ti-shield-lock"></i> <span data-lang="security">Security</span></div>
+    <div class="nav-it" data-pg="logs"><i class="ti ti-history"></i> <span data-lang="activity_logs">Activity Logs</span></div>
+    <div class="nav-it" data-pg="errors"><i class="ti ti-alert-triangle"></i> <span data-lang="errors">Errors</span></div>
+    <div class="nav-it" data-pg="testws"><i class="ti ti-wifi"></i> <span data-lang="test_websocket">WebSocket Test</span></div>
+    <div class="nav-it" data-pg="settings"><i class="ti ti-settings"></i> <span data-lang="settings">Settings</span></div>
   </div>
   <div class="sb-foot">
-    <button class="theme-btn" onclick="toggleTheme()"><i class="ti ti-moon" id="theme-icon"></i> <span id="theme-label" data-lang="تم روشن">Light Theme</span></button>
-    <a class="tg-btn" href="https://t.me/CBeeNet" target="_blank" rel="noopener"><i class="ti ti-brand-telegram"></i> <span data-lang="کانال تلگرام">@CBeeNet</span></a>
-    <button class="logout-btn" id="logout-btn"><i class="ti ti-logout"></i> <span data-lang="خروج">Logout</span></button>
+    <button class="theme-btn" onclick="toggleTheme()"><i class="ti ti-moon" id="theme-icon"></i> <span id="theme-label" data-lang="dark_theme">Dark Theme</span></button>
+    <a class="tg-btn" href="https://t.me/CBeeNet" target="_blank" rel="noopener"><i class="ti ti-brand-telegram"></i> <span data-lang="telegram_btn">@CBeeNet</span></a>
+    <button class="logout-btn" id="logout-btn"><i class="ti ti-logout"></i> <span data-lang="logout_btn">Logout</span></button>
   </div>
 </aside>
 
 <!-- ===== Main Content ===== -->
 <main class="main">
 
-<!-- ===== DASHBOARD ===== -->
+<!-- ============================================================ -->
+<!-- ==================== DASHBOARD ============================== -->
+<!-- ============================================================ -->
 <section class="pg on" id="pg-overview">
   <div class="topbar">
-    <div><div class="tb-title"><i class="ti ti-layout-dashboard"></i> <span data-lang="داشبورد">Dashboard</span></div><div class="tb-sub" id="last-upd">Loading...</div></div>
+    <div><div class="tb-title"><i class="ti ti-layout-dashboard"></i> <span data-lang="dashboard">Dashboard</span></div><div class="tb-sub" id="last-upd">Loading...</div></div>
     <div class="tb-right">
-      <span class="badge bg-green"><span class="dot dg pulse"></span> <span data-lang="فعال">Active</span></span>
+      <span class="badge bg-green"><span class="dot dg pulse"></span> <span data-lang="active">Active</span></span>
       <span class="badge bg-blue" id="uptime-badge">—</span>
-      <button class="btn btn-p btn-sm" onclick="refreshAll()"><i class="ti ti-refresh"></i> <span data-lang="رفرش">Refresh</span></button>
+      <button class="btn btn-p btn-sm" onclick="refreshAll()"><i class="ti ti-refresh"></i> <span data-lang="refresh">Refresh</span></button>
     </div>
   </div>
 
-  <!-- Stats Cards -->
+  <!-- ===== STATS CARDS ===== -->
   <div class="dash-stats-grid" id="dash-stats">
     <div class="dash-stat-card">
       <i class="ti ti-plug-connected icon"></i>
-      <div class="label" data-lang="اتصالات فعال">Active Connections</div>
+      <div class="label" data-lang="active_connections">Active Connections</div>
       <div class="value" id="dash-conns">0</div>
-      <div class="sub" data-lang="لحظه‌ای">Live</div>
+      <div class="sub" data-lang="live">Live</div>
     </div>
     <div class="dash-stat-card">
       <i class="ti ti-database icon"></i>
-      <div class="label" data-lang="کل ترافیک">Total Traffic</div>
+      <div class="label" data-lang="total_traffic">Total Traffic</div>
       <div class="value" id="dash-traffic">0 <small style="font-size:14px;font-weight:400;">MB</small></div>
-      <div class="sub" data-lang="از راه‌اندازی">Since Start</div>
+      <div class="sub" data-lang="since_start">Since Start</div>
     </div>
     <div class="dash-stat-card">
       <i class="ti ti-users icon"></i>
-      <div class="label" data-lang="کانفیگ‌ها">Configs</div>
+      <div class="label" data-lang="total_links">Configs</div>
       <div class="value" id="dash-links">0</div>
-      <div class="sub" id="dash-links-sub" data-lang="فعال / کل">Active / Total</div>
+      <div class="sub" id="dash-links-sub">Active / Total</div>
     </div>
     <div class="dash-stat-card">
       <i class="ti ti-clock icon"></i>
-      <div class="label" data-lang="آپتایم">Uptime</div>
+      <div class="label" data-lang="uptime">Uptime</div>
       <div class="value" id="dash-uptime">00:00:00</div>
-      <div class="sub" data-lang="مدت روشن بودن">Running Time</div>
+      <div class="sub" data-lang="running_time">Running Time</div>
     </div>
   </div>
 
-  <!-- First Row Charts -->
+  <!-- ===== SPARKLINE CHARTS (Load, Traffic, Connections) ===== -->
+  <div class="dash-sparkline-row">
+    <div class="dash-spark-card">
+      <div class="spark-top">
+        <span class="spark-label"><i class="ti ti-gauge"></i> <span data-lang="load">Load</span></span>
+        <span class="spark-value" id="spark-load">0<span class="unit">%</span></span>
+      </div>
+      <div class="spark-chart"><canvas id="sparkLoad"></canvas></div>
+      <div class="spark-sub"><span class="dot"></span> <span data-lang="live">Live</span></div>
+    </div>
+    <div class="dash-spark-card">
+      <div class="spark-top">
+        <span class="spark-label"><i class="ti ti-database"></i> <span data-lang="total_traffic">Total Traffic</span></span>
+        <span class="spark-value" id="spark-traffic">0<span class="unit">MB</span></span>
+      </div>
+      <div class="spark-chart"><canvas id="sparkTraffic"></canvas></div>
+      <div class="spark-sub"><span class="dot"></span> <span data-lang="since_start">Since Start</span></div>
+    </div>
+    <div class="dash-spark-card">
+      <div class="spark-top">
+        <span class="spark-label"><i class="ti ti-plug-connected"></i> <span data-lang="connections_live">Live Connections</span></span>
+        <span class="spark-value" id="spark-conns">0</span>
+      </div>
+      <div class="spark-chart"><canvas id="sparkConns"></canvas></div>
+      <div class="spark-sub"><span class="dot"></span> <span data-lang="live">Live</span></div>
+    </div>
+  </div>
+
+  <!-- ===== MAIN CHART ROW ===== -->
   <div class="dash-chart-row">
     <div class="dash-chart-card">
-      <div class="card-title"><i class="ti ti-activity"></i> <span data-lang="روند مصرف ترافیک">Traffic Usage Trend</span></div>
+      <div class="card-title"><i class="ti ti-activity"></i> <span data-lang="traffic_trend">Traffic Usage Trend</span></div>
       <div class="dash-chart-wrap"><canvas id="dashTrafficChart"></canvas></div>
     </div>
     <div class="dash-right-panel">
       <div class="dash-right-card">
-        <div class="mini-title"><i class="ti ti-server"></i> <span data-lang="وضعیت سرویس">Service Status</span></div>
+        <div class="mini-title"><i class="ti ti-server"></i> <span data-lang="service_status">Service Status</span></div>
         <div id="dash-service-status">
-          <div class="dash-conn-item"><span>UUID Auth</span><span style="color:var(--green-t)">● <span data-lang="فعال">Active</span></span></div>
-          <div class="dash-conn-item"><span>VLESS / WS</span><span style="color:var(--green-t)">● <span data-lang="فعال">Active</span></span></div>
-          <div class="dash-conn-item"><span>XHTTP Ultra</span><span style="color:var(--green-t)">● <span data-lang="فعال">Active</span></span></div>
-          <div class="dash-conn-item"><span>Sub Groups</span><span style="color:var(--green-t)">● <span data-lang="فعال">Active</span></span></div>
-          <div class="dash-conn-item"><span>Subscription API</span><span style="color:var(--green-t)">● <span data-lang="فعال">Active</span></span></div>
+          <div class="dash-conn-item"><span>UUID Auth</span><span style="color:var(--green-t)">● <span data-lang="active">Active</span></span></div>
+          <div class="dash-conn-item"><span>VLESS / WS</span><span style="color:var(--green-t)">● <span data-lang="active">Active</span></span></div>
+          <div class="dash-conn-item"><span>XHTTP Ultra</span><span style="color:var(--green-t)">● <span data-lang="active">Active</span></span></div>
+          <div class="dash-conn-item"><span>Sub Groups</span><span style="color:var(--green-t)">● <span data-lang="active">Active</span></span></div>
+          <div class="dash-conn-item"><span>Subscription API</span><span style="color:var(--green-t)">● <span data-lang="active">Active</span></span></div>
         </div>
       </div>
       <div class="dash-right-card">
-        <div class="mini-title"><i class="ti ti-plug-connected"></i> <span data-lang="اتصال‌های لحظه‌ای">Live Connections</span></div>
+        <div class="mini-title"><i class="ti ti-plug-connected"></i> <span data-lang="top_connections">Live Connections</span></div>
         <div id="dash-top-conns">—</div>
       </div>
     </div>
   </div>
 
-  <!-- Second Row Charts -->
+  <!-- ===== SECOND ROW CHARTS (Protocols, Daily, Usage) ===== -->
   <div class="dash-charts-second">
     <div class="dash-small-chart">
-      <div class="chart-title"><i class="ti ti-chart-bar"></i> <span data-lang="پروتکل‌ها">Protocols</span></div>
+      <div class="chart-title"><i class="ti ti-chart-bar"></i> <span data-lang="protocol_distribution">Protocol Distribution</span></div>
       <div class="chart-wrap"><canvas id="dashProtoChart"></canvas></div>
     </div>
     <div class="dash-small-chart">
-      <div class="chart-title"><i class="ti ti-arrow-up-right"></i> <span data-lang="مصرف روزانه">Daily Usage</span></div>
+      <div class="chart-title"><i class="ti ti-calendar"></i> <span data-lang="daily_usage">Daily Usage</span></div>
       <div class="chart-wrap"><canvas id="dashDailyChart"></canvas></div>
+    </div>
+    <div class="dash-small-chart">
+      <div class="chart-title"><i class="ti ti-arrow-up-right"></i> <span data-lang="hourly">Hourly Avg</span></div>
+      <div class="chart-wrap"><canvas id="dashHourlyChart"></canvas></div>
     </div>
   </div>
 
-  <!-- Connections Table -->
+  <!-- ===== CONNECTIONS TABLE ===== -->
   <div class="dash-conn-table-wrap">
-    <div class="table-title"><i class="ti ti-list-details"></i> <span data-lang="اتصالات فعال">Active Connections</span></div>
+    <div class="table-title"><i class="ti ti-list-details"></i> <span data-lang="active_conns_table">Active Connections</span></div>
     <table class="dash-conn-table">
       <thead>
         <tr>
-          <th data-lang="آی‌پی">IP</th>
-          <th data-lang="پروتکل">Protocol</th>
-          <th data-lang="آپلود">Upload</th>
-          <th data-lang="دانلود">Download</th>
-          <th data-lang="مدت">Duration</th>
-          <th data-lang="وضعیت">Status</th>
+          <th data-lang="ip_address">IP</th>
+          <th data-lang="protocol">Protocol</th>
+          <th data-lang="upload">Upload</th>
+          <th data-lang="download">Download</th>
+          <th data-lang="duration">Duration</th>
+          <th data-lang="status">Status</th>
         </tr>
       </thead>
       <tbody id="dash-conn-table-body">
-        <tr><td colspan="6" style="text-align:center;color:var(--t3);padding:20px;" data-lang="هیچ اتصالی">No connections</td></tr>
+        <tr><td colspan="6" style="text-align:center;color:var(--t3);padding:20px;" data-lang="no_connections">No connections</td></tr>
       </tbody>
     </table>
   </div>
@@ -1423,160 +1802,164 @@ a{color:inherit;text-decoration:none}
   </div>
 </section>
 
+<!-- ============================================================ -->
+<!-- ==================== OTHER PAGES ============================ -->
+<!-- ============================================================ -->
+
 <!-- ===== LINKS ===== -->
 <section class="pg" id="pg-links">
   <div class="topbar">
-    <div><div class="tb-title"><i class="ti ti-link-plus"></i> <span data-lang="کانفیگ‌ها">Configs</span></div><div class="tb-sub" data-lang="ساخت و مدیریت کانفیگ با سهمیه، انقضا و گروه‌بندی">Create and manage configs with quota, expiry and grouping</div></div>
-    <div class="tb-right"><span class="badge bg-blue" id="links-pg-cnt">۰ <span data-lang="کانفیگ">Configs</span></span></div>
+    <div><div class="tb-title"><i class="ti ti-link-plus"></i> <span data-lang="configs">Configs</span></div><div class="tb-sub" data-lang="configs_management">Create and manage configs with quota, expiry and grouping</div></div>
+    <div class="tb-right"><span class="badge bg-blue" id="links-pg-cnt">0 <span data-lang="configs">Configs</span></span></div>
   </div>
   <div class="create-panel">
     <div class="cp-head">
       <div class="cp-head-icon"><i class="ti ti-square-rounded-plus"></i></div>
       <div class="cp-head-text">
-        <div class="cp-head-title" data-lang="ساخت کانفیگ جدید">Create New Config</div>
-        <div class="cp-head-sub" data-lang="UUID تصادفی · سهمیه، انقضا و پروتکل رو انتخاب کن">Random UUID · Choose quota, expiry and protocol</div>
+        <div class="cp-head-title" data-lang="create_config">Create New Config</div>
+        <div class="cp-head-sub" data-lang="random_uuid">Random UUID · Choose quota, expiry and protocol</div>
       </div>
     </div>
     <div class="cp-body">
       <div class="cp-row">
         <div class="cp-block">
-          <div class="cp-block-label"><i class="ti ti-id-badge-2"></i> <span data-lang="شناسه کانفیگ">Config ID</span></div>
-          <input class="cp-input-full" id="nl-label" placeholder="مثلاً: کاربر علی">
+          <div class="cp-block-label"><i class="ti ti-id-badge-2"></i> <span data-lang="config_id">Config ID</span></div>
+          <input class="cp-input-full" id="nl-label" placeholder="e.g. User Ali">
           <div class="cp-mini-row">
-            <input class="cp-input-full" id="nl-note" placeholder="یادداشت (اختیاری)">
+            <input class="cp-input-full" id="nl-note" placeholder="Note (optional)">
           </div>
         </div>
         <div class="cp-block">
-          <div class="cp-block-label"><i class="ti ti-folders"></i> <span data-lang="گروه ساب و انقضا">Sub Group & Expiry</span></div>
-          <select class="cp-input-full fs" id="nl-sub"><option value="">— <span data-lang="بدون گروه">No Group</span> —</option></select>
+          <div class="cp-block-label"><i class="ti ti-folders"></i> <span data-lang="sub_group_expiry">Sub Group & Expiry</span></div>
+          <select class="cp-input-full fs" id="nl-sub"><option value="">— <span data-lang="no_group">No Group</span> —</option></select>
           <div class="cp-mini-row">
-            <input class="cp-input-full" id="nl-exp" type="number" min="0" step="1" placeholder="انقضا (روز) · 0 = نامحدود">
+            <input class="cp-input-full" id="nl-exp" type="number" min="0" step="1" placeholder="Expiry (days) · 0 = unlimited">
           </div>
           <div class="chip-row" id="exp-chips">
-            <span class="chip" onclick="setExpiry(0,this)" data-lang="نامحدود">Unlimited</span>
-            <span class="chip" onclick="setExpiry(7,this)">۷ <span data-lang="روز">Days</span></span>
-            <span class="chip active" onclick="setExpiry(30,this)">۳۰ <span data-lang="روز">Days</span></span>
-            <span class="chip" onclick="setExpiry(90,this)">۹۰ <span data-lang="روز">Days</span></span>
+            <span class="chip" onclick="setExpiry(0,this)" data-lang="unlimited">Unlimited</span>
+            <span class="chip" onclick="setExpiry(7,this)">7 <span data-lang="days">Days</span></span>
+            <span class="chip active" onclick="setExpiry(30,this)">30 <span data-lang="days">Days</span></span>
+            <span class="chip" onclick="setExpiry(90,this)">90 <span data-lang="days">Days</span></span>
           </div>
         </div>
       </div>
       <div class="cp-block mb16">
-        <div class="cp-block-label"><i class="ti ti-gauge"></i> <span data-lang="سهمیه ترافیک">Traffic Quota</span></div>
+        <div class="cp-block-label"><i class="ti ti-gauge"></i> <span data-lang="traffic_quota">Traffic Quota</span></div>
         <div class="cp-quota-inputs">
-          <input class="cp-input-full" id="nl-val" type="number" min="0" step="0.1" placeholder="0 = نامحدود">
+          <input class="cp-input-full" id="nl-val" type="number" min="0" step="0.1" placeholder="0 = unlimited">
           <select class="cp-input-full fs" id="nl-unit"><option value="GB">GB</option><option value="MB" selected>MB</option></select>
         </div>
         <div class="chip-row" id="quota-chips">
-          <span class="chip" onclick="setQuota(0,'GB',this)" data-lang="نامحدود">Unlimited</span>
-          <span class="chip" onclick="setQuota(500,'MB',this)">۵۰۰ MB</span>
-          <span class="chip active" onclick="setQuota(1,'GB',this)">۱ GB</span>
-          <span class="chip" onclick="setQuota(5,'GB',this)">۵ GB</span>
-          <span class="chip" onclick="setQuota(10,'GB',this)">۱۰ GB</span>
-          <span class="chip" onclick="setQuota(50,'GB',this)">۵۰ GB</span>
+          <span class="chip" onclick="setQuota(0,'GB',this)" data-lang="unlimited">Unlimited</span>
+          <span class="chip" onclick="setQuota(500,'MB',this)">500 MB</span>
+          <span class="chip active" onclick="setQuota(1,'GB',this)">1 GB</span>
+          <span class="chip" onclick="setQuota(5,'GB',this)">5 GB</span>
+          <span class="chip" onclick="setQuota(10,'GB',this)">10 GB</span>
+          <span class="chip" onclick="setQuota(50,'GB',this)">50 GB</span>
         </div>
       </div>
       <div class="cp-block mb16">
-        <div class="cp-block-label"><i class="ti ti-plug-connected"></i> <span data-lang="پروتکل‌های انتقال">Transport Protocols</span></div>
+        <div class="cp-block-label"><i class="ti ti-plug-connected"></i> <span data-lang="transport_protocols">Transport Protocols</span></div>
         <div class="proto-group" id="proto-group">
           <button class="proto-btn active" data-proto="vless-ws" onclick="toggleProtoBtn(this)">VLESS / WS <span class="proto-badge">WebSocket</span></button>
           <button class="proto-btn" data-proto="xhttp-packet-up" onclick="toggleProtoBtn(this)">XHTTP · packet-up <span class="proto-badge">Siz10</span></button>
           <button class="proto-btn" data-proto="xhttp-stream-up" onclick="toggleProtoBtn(this)">XHTTP · stream-up <span class="proto-badge">Siz10</span></button>
         </div>
         <div style="margin-top:12px;display:flex;align-items:center;gap:10px;padding:8px 12px;background:var(--accent-d);border-radius:10px;border:1px solid var(--card-b)">
-          <span style="font-size:12px;font-weight:700;color:var(--t2)"><i class="ti ti-layers-intersect"></i> <span data-lang="تعداد ساخت هم‌زمان">Bulk Count</span></span>
+          <span style="font-size:12px;font-weight:700;color:var(--t2)"><i class="ti ti-layers-intersect"></i> <span data-lang="bulk_count">Bulk Count</span></span>
           <div class="count-chips">
-            <span class="count-chip active" onclick="setCount(1,this)">۱</span>
-            <span class="count-chip" onclick="setCount(5,this)">۵</span>
-            <span class="count-chip" onclick="setCount(10,this)">۱۰</span>
-            <span class="count-chip" onclick="setCount(50,this)">۵۰</span>
+            <span class="count-chip active" onclick="setCount(1,this)">1</span>
+            <span class="count-chip" onclick="setCount(5,this)">5</span>
+            <span class="count-chip" onclick="setCount(10,this)">10</span>
+            <span class="count-chip" onclick="setCount(50,this)">50</span>
           </div>
         </div>
       </div>
       <div class="cp-footer">
-        <div class="cp-footer-note"><i class="ti ti-info-circle"></i> <span data-lang="UUID کاملاً رندوم تولید می‌شود · فقط UUID‌های ثبت‌شده اجازه اتصال دارند · پروتکل پس از ساخت قابل تغییر نیست.">UUID is generated randomly · Only registered UUIDs can connect · Protocol cannot be changed after creation.</span></div>
-        <button class="cp-submit-btn" onclick="createLink()"><i class="ti ti-link-plus"></i> <span data-lang="ساخت کانفیگ">Create Config</span></button>
+        <div class="cp-footer-note"><i class="ti ti-info-circle"></i> <span data-lang="uuid_note">UUID is generated randomly · Only registered UUIDs can connect · Protocol cannot be changed after creation.</span></div>
+        <button class="cp-submit-btn" onclick="createLink()"><i class="ti ti-link-plus"></i> <span data-lang="create_config">Create Config</span></button>
       </div>
     </div>
   </div>
   <div class="cfg-grid" id="links-grid"></div>
-  <div class="empty" id="links-empty" style="display:none"><i class="ti ti-link-off"></i><p data-lang="هنوز کانفیگی وجود ندارد">No configs yet</p></div>
+  <div class="empty" id="links-empty" style="display:none"><i class="ti ti-link-off"></i><p data-lang="no_configs">No configs yet</p></div>
 </section>
 
 <!-- ===== SUB GROUPS ===== -->
 <section class="pg" id="pg-subgroups">
   <div class="topbar">
-    <div><div class="tb-title"><i class="ti ti-folders"></i> <span data-lang="گروه‌های ساب">Sub Groups</span></div><div class="tb-sub" data-lang="هر گروه یک صفحه پابلیک مجزا با کانفیگ‌های خودش دارد">Each group has its own public page with its configs</div></div>
+    <div><div class="tb-title"><i class="ti ti-folders"></i> <span data-lang="sub_groups_short">Sub Groups</span></div><div class="tb-sub" data-lang="each_group_public">Each group has its own public page with its configs</div></div>
     <div class="tb-right">
-      <span class="badge bg-purple" id="subs-pg-cnt">۰ <span data-lang="گروه">Groups</span></span>
-      <button class="btn btn-pur" onclick="openModal('modal-create-sub')"><i class="ti ti-folder-plus"></i> <span data-lang="گروه جدید">New Group</span></button>
+      <span class="badge bg-purple" id="subs-pg-cnt">0 <span data-lang="groups">Groups</span></span>
+      <button class="btn btn-pur" onclick="openModal('modal-create-sub')"><i class="ti ti-folder-plus"></i> <span data-lang="new_group">New Group</span></button>
     </div>
   </div>
   <div class="subs-toolbar">
     <div class="subs-search">
       <i class="ti ti-search"></i>
-      <input type="text" id="subs-search-inp" placeholder="جستجو در گروه‌ها..." oninput="filterSubs(this.value)">
+      <input type="text" id="subs-search-inp" placeholder="Search groups..." oninput="filterSubs(this.value)">
     </div>
   </div>
   <div class="sub-grid" id="subs-grid">
-    <div class="subs-empty-v2"><div class="subs-empty-v2-icon"><i class="ti ti-folders"></i></div><div class="subs-empty-v2-title" data-lang="هنوز گروهی وجود ندارد">No groups yet</div><div class="subs-empty-v2-sub" data-lang="یک گروه جدید بسازید تا کانفیگ‌ها را دسته‌بندی کنید">Create a new group to organize your configs</div></div>
+    <div class="subs-empty-v2"><div class="subs-empty-v2-icon"><i class="ti ti-folders"></i></div><div class="subs-empty-v2-title" data-lang="no_groups">No groups yet</div><div class="subs-empty-v2-sub" data-lang="create_group">Create a new group to organize your configs</div></div>
   </div>
 </section>
 
 <!-- ===== SUBSCRIPTION ===== -->
 <section class="pg" id="pg-subscriptions">
-  <div class="topbar"><div><div class="tb-title"><i class="ti ti-rss"></i> <span data-lang="سابسکریپشن">Subscription</span></div><div class="tb-sub" data-lang="لینک‌های اشتراک برای اپ‌های v2ray">Subscription links for v2ray apps</div></div></div>
+  <div class="topbar"><div><div class="tb-title"><i class="ti ti-rss"></i> <span data-lang="subscription">Subscription</span></div><div class="tb-sub" data-lang="subscription_links">Subscription links for v2ray apps</div></div></div>
   <div class="g2">
     <div class="card">
-      <div class="card-title"><i class="ti ti-rss"></i> <span data-lang="سابسکریپشن تکی (هر کانفیگ)">Single Subscription (per config)</span></div>
-      <p style="font-size:11.5px;color:var(--t3);line-height:1.8;margin-bottom:12px"><span data-lang="هر کانفیگ URL سابسکریپشن مخصوص دارد. از کارت کانفیگ روی آیکون">Each config has its own subscription URL. Click the</span> <i class="ti ti-rss"></i> <span data-lang="کلیک کنید.">icon on the config card.</span></p>
+      <div class="card-title"><i class="ti ti-rss"></i> <span data-lang="single_sub">Single Subscription (per config)</span></div>
+      <p style="font-size:11.5px;color:var(--t3);line-height:1.8;margin-bottom:12px"><span data-lang="single_sub_desc">Each config has its own subscription URL. Click the</span> <i class="ti ti-rss"></i> <span data-lang="icon_on_card">icon on the config card.</span></p>
     </div>
     <div class="card">
-      <div class="card-title"><i class="ti ti-database"></i> <span data-lang="سابسکریپشن کامل (ادمین)">Full Subscription (Admin)</span></div>
-      <p style="font-size:11.5px;color:var(--t3);line-height:1.8;margin-bottom:4px"><span data-lang="شامل تمام کانفیگ‌های فعال.">Includes all active configs.</span></p>
+      <div class="card-title"><i class="ti ti-database"></i> <span data-lang="full_sub">Full Subscription (Admin)</span></div>
+      <p style="font-size:11.5px;color:var(--t3);line-height:1.8;margin-bottom:4px" data-lang="full_sub_desc">Includes all active configs.</p>
       <div class="sub-box"><span class="sub-url" id="sub-all-url">Loading...</span><div style="display:flex;gap:6px"><button class="btn btn-sm btn-g" onclick="cpSubAll()"><i class="ti ti-copy"></i></button><button class="btn btn-sm btn-g" onclick="window.open(location.protocol+'//'+location.host+'/sub-all')"><i class="ti ti-external-link"></i></button></div></div>
-      <div class="cl amber" style="margin-top:11px"><i class="ti ti-alert-triangle"></i><span data-lang="این آدرس فقط در مرورگری که به پنل وارد شده کار می‌کند (نیاز به کوکی سشن).">This URL only works in the browser where you're logged in (requires session cookie).</span></div>
+      <div class="cl amber" style="margin-top:11px"><i class="ti ti-alert-triangle"></i><span data-lang="full_sub_note">This URL only works in the browser where you're logged in (requires session cookie).</span></div>
     </div>
   </div>
   <div class="card">
-    <div class="card-title"><i class="ti ti-folders"></i> <span data-lang="لینک سابسکریپشن گروه‌ها">Group Subscription Links</span></div>
-    <div id="sub-groups-list" data-lang="در حال بارگذاری...">Loading...</div>
+    <div class="card-title"><i class="ti ti-folders"></i> <span data-lang="group_sub_links">Group Subscription Links</span></div>
+    <div id="sub-groups-list" data-lang="loading">Loading...</div>
   </div>
 </section>
 
 <!-- ===== TRAFFIC ===== -->
 <section class="pg" id="pg-traffic">
   <div class="topbar">
-    <div><div class="tb-title"><i class="ti ti-chart-area"></i> <span data-lang="ترافیک">Traffic</span></div><div class="tb-sub" data-lang="تحلیل و مانیتورینگ مصرف پهنای باند">Bandwidth usage analysis & monitoring</div></div>
-    <div class="tb-right"><button class="btn btn-p btn-sm" onclick="refreshAll()"><i class="ti ti-refresh"></i> <span data-lang="رفرش">Refresh</span></button></div>
+    <div><div class="tb-title"><i class="ti ti-chart-area"></i> <span data-lang="traffic">Traffic</span></div><div class="tb-sub" data-lang="traffic_analysis">Bandwidth usage analysis & monitoring</div></div>
+    <div class="tb-right"><button class="btn btn-p btn-sm" onclick="refreshAll()"><i class="ti ti-refresh"></i> <span data-lang="refresh">Refresh</span></button></div>
   </div>
   <div class="traf-hero">
     <div class="traf-main-stat">
-      <div class="traf-main-label"><i class="ti ti-database"></i> <span data-lang="کل ترافیک مصرفی">Total Traffic Used</span></div>
+      <div class="traf-main-label"><i class="ti ti-database"></i> <span data-lang="total_traffic_used">Total Traffic Used</span></div>
       <div class="traf-main-val" id="t-traffic">—<span>MB</span></div>
       <div class="traf-trend up" id="t-trend"><i class="ti ti-trending-up"></i> <span id="t-trend-val">—</span></div>
     </div>
     <div class="traf-mini">
-      <div class="traf-mini-top"><div class="traf-mini-icon"><i class="ti ti-arrow-up-right"></i></div><span class="traf-mini-label" data-lang="میانگین ساعتی">Hourly Average</span></div>
-      <div><div class="traf-mini-val" id="t-avg">—</div><div class="traf-mini-sub">MB<span data-lang="در ساعت">/h</span></div></div>
+      <div class="traf-mini-top"><div class="traf-mini-icon"><i class="ti ti-arrow-up-right"></i></div><span class="traf-mini-label" data-lang="hourly_average">Hourly Average</span></div>
+      <div><div class="traf-mini-val" id="t-avg">—</div><div class="traf-mini-sub">MB <span data-lang="per_hour">/h</span></div></div>
     </div>
     <div class="traf-mini">
-      <div class="traf-mini-top"><div class="traf-mini-icon pk"><i class="ti ti-chart-bar"></i></div><span class="traf-mini-label" data-lang="پیک مصرف">Peak Usage</span></div>
-      <div><div class="traf-mini-val" id="t-peak">—</div><div class="traf-mini-sub" id="t-peak-time" data-lang="بالاترین ساعت">Peak Hour</div></div>
+      <div class="traf-mini-top"><div class="traf-mini-icon pk"><i class="ti ti-chart-bar"></i></div><span class="traf-mini-label" data-lang="peak_usage">Peak Usage</span></div>
+      <div><div class="traf-mini-val" id="t-peak">—</div><div class="traf-mini-sub" id="t-peak-time" data-lang="peak_hour">Peak Hour</div></div>
     </div>
     <div class="traf-mini">
-      <div class="traf-mini-top"><div class="traf-mini-icon lo"><i class="ti ti-clock-hour-4"></i></div><span class="traf-mini-label" data-lang="کمترین مصرف">Lowest Usage</span></div>
-      <div><div class="traf-mini-val" id="t-low">—</div><div class="traf-mini-sub">MB<span data-lang="در ساعت">/h</span></div></div>
+      <div class="traf-mini-top"><div class="traf-mini-icon lo"><i class="ti ti-clock-hour-4"></i></div><span class="traf-mini-label" data-lang="lowest_usage">Lowest Usage</span></div>
+      <div><div class="traf-mini-val" id="t-low">—</div><div class="traf-mini-sub">MB <span data-lang="per_hour">/h</span></div></div>
     </div>
   </div>
   <div class="traf-chart-card">
     <div class="traf-chart-head">
       <div>
-        <div class="traf-chart-title"><i class="ti ti-activity"></i> <span data-lang="روند مصرف ترافیک">Traffic Usage Trend</span></div>
-        <div class="traf-chart-sub" data-lang="بر اساس مگابایت در هر ساعت">Based on MB per hour</div>
+        <div class="traf-chart-title"><i class="ti ti-activity"></i> <span data-lang="traffic_trend">Traffic Usage Trend</span></div>
+        <div class="traf-chart-sub" data-lang="based_on_mb">Based on MB per hour</div>
       </div>
       <div class="traf-legend">
-        <div class="traf-legend-item"><span class="traf-legend-dot" style="background:var(--accent)"></span> <span data-lang="مصرف">Usage</span></div>
-        <div class="traf-legend-item"><span class="traf-legend-dot" style="background:var(--amber)"></span> <span data-lang="میانگین">Average</span></div>
+        <div class="traf-legend-item"><span class="traf-legend-dot" style="background:var(--accent)"></span> <span data-lang="usage">Usage</span></div>
+        <div class="traf-legend-item"><span class="traf-legend-dot" style="background:var(--amber)"></span> <span data-lang="average">Average</span></div>
       </div>
     </div>
     <div class="traf-chart-body"><canvas id="ch3"></canvas></div>
@@ -1586,76 +1969,76 @@ a{color:inherit;text-decoration:none}
 <!-- ===== CONNECTIONS ===== -->
 <section class="pg" id="pg-connections">
   <div class="topbar">
-    <div><div class="tb-title"><i class="ti ti-plug-connected"></i> <span data-lang="اتصالات فعال">Active Connections</span></div><div class="tb-sub" data-lang="مانیتورینگ زنده‌ی آی‌پی و ترافیک هر اتصال">Live IP and traffic monitoring per connection</div></div>
-    <div class="tb-right"><span class="badge bg-green" id="conns-live">—</span><button class="btn btn-p btn-sm" onclick="refreshAll()"><i class="ti ti-refresh"></i> <span data-lang="رفرش">Refresh</span></button></div>
+    <div><div class="tb-title"><i class="ti ti-plug-connected"></i> <span data-lang="connections">Connections</span></div><div class="tb-sub" data-lang="connections_monitor">Live IP and traffic monitoring per connection</div></div>
+    <div class="tb-right"><span class="badge bg-green" id="conns-live">—</span><button class="btn btn-p btn-sm" onclick="refreshAll()"><i class="ti ti-refresh"></i> <span data-lang="refresh">Refresh</span></button></div>
   </div>
   <div class="conn-hero">
-    <div class="conn-hero-tile"><div class="conn-hero-icon"><i class="ti ti-plug-connected"></i></div><div class="conn-hero-label" data-lang="اتصالات زنده">Live Connections</div><div class="conn-hero-val" id="ch-count">—</div></div>
-    <div class="conn-hero-tile"><div class="conn-hero-icon"><i class="ti ti-transfer"></i></div><div class="conn-hero-label" data-lang="مجموع ترافیک لحظه‌ای">Total Traffic</div><div class="conn-hero-val" id="ch-traffic">—</div></div>
-    <div class="conn-hero-tile"><div class="conn-hero-icon"><i class="ti ti-clock"></i></div><div class="conn-hero-label" data-lang="میانگین مدت اتصال">Avg Duration</div><div class="conn-hero-val" id="ch-avgdur">—</div></div>
-    <div class="conn-hero-tile"><div class="conn-hero-icon"><i class="ti ti-map-pin"></i></div><div class="conn-hero-label" data-lang="آی‌پی‌های یکتا">Unique IPs</div><div class="conn-hero-val" id="ch-uniq">—</div></div>
+    <div class="conn-hero-tile"><div class="conn-hero-icon"><i class="ti ti-plug-connected"></i></div><div class="conn-hero-label" data-lang="live_connections">Live Connections</div><div class="conn-hero-val" id="ch-count">—</div></div>
+    <div class="conn-hero-tile"><div class="conn-hero-icon"><i class="ti ti-transfer"></i></div><div class="conn-hero-label" data-lang="total_traffic_live">Total Traffic</div><div class="conn-hero-val" id="ch-traffic">—</div></div>
+    <div class="conn-hero-tile"><div class="conn-hero-icon"><i class="ti ti-clock"></i></div><div class="conn-hero-label" data-lang="avg_duration">Avg Duration</div><div class="conn-hero-val" id="ch-avgdur">—</div></div>
+    <div class="conn-hero-tile"><div class="conn-hero-icon"><i class="ti ti-map-pin"></i></div><div class="conn-hero-label" data-lang="unique_ips">Unique IPs</div><div class="conn-hero-val" id="ch-uniq">—</div></div>
   </div>
   <div class="conn-toolbar">
-    <div class="conn-toolbar-title"><i class="ti ti-list-details"></i> <span data-lang="لیست اتصالات">Connections List</span></div>
-    <div class="conn-live-badge"><span class="conn-live-dot"></span> <span data-lang="بروزرسانی خودکار هر ۵ ثانیه">Auto-update every 5s</span></div>
+    <div class="conn-toolbar-title"><i class="ti ti-list-details"></i> <span data-lang="connections_list">Connections List</span></div>
+    <div class="conn-live-badge"><span class="conn-live-dot"></span> <span data-lang="auto_update">Auto-update every 5s</span></div>
   </div>
   <div class="conn-grid-v2" id="conns-grid"></div>
   <div class="conn-empty-v2" id="conns-empty" style="display:none">
     <div class="conn-empty-v2-icon"><i class="ti ti-plug-off"></i></div>
-    <div class="conn-empty-v2-title" data-lang="هیچ اتصال فعالی نیست">No active connections</div>
-    <div class="conn-empty-v2-sub" data-lang="به محض اتصال کلاینت‌ها، اینجا نمایش داده می‌شوند">They will appear here as soon as clients connect</div>
+    <div class="conn-empty-v2-title" data-lang="no_active_connections">No active connections</div>
+    <div class="conn-empty-v2-sub" data-lang="will_appear">They will appear here as soon as clients connect</div>
   </div>
 </section>
 
 <!-- ===== SECURITY ===== -->
 <section class="pg" id="pg-security">
-  <div class="topbar"><div><div class="tb-title"><i class="ti ti-shield-lock"></i> <span data-lang="امنیت">Security</span></div></div></div>
+  <div class="topbar"><div><div class="tb-title"><i class="ti ti-shield-lock"></i> <span data-lang="security">Security</span></div></div></div>
   <div class="g2">
-    <div class="card"><div class="card-title"><i class="ti ti-lock"></i> <span data-lang="رمزنگاری">Encryption</span></div>
-      <div class="sr"><span class="sr-k"><i class="ti ti-certificate"></i> TLS/HTTPS</span><span class="sr-v" style="color:var(--green-t)">● <span data-lang="فعال">Active</span> (443)</span></div>
+    <div class="card"><div class="card-title"><i class="ti ti-lock"></i> <span data-lang="encryption">Encryption</span></div>
+      <div class="sr"><span class="sr-k"><i class="ti ti-certificate"></i> TLS/HTTPS</span><span class="sr-v" style="color:var(--green-t)">● <span data-lang="active">Active</span> (443)</span></div>
       <div class="sr"><span class="sr-k"><i class="ti ti-fingerprint"></i> Fingerprint</span><span class="sr-v">Chrome Spoof</span></div>
-      <div class="sr"><span class="sr-k"><i class="ti ti-network"></i> <span data-lang="پروتکل‌ها">Protocols</span></span><span class="sr-v">VLESS/WS + XHTTP Ultra</span></div>
-      <div class="sr"><span class="sr-k"><i class="ti ti-key"></i> <span data-lang="هش رمز">Hash</span></span><span class="sr-v">SHA-256+Salt</span></div>
-      <div class="sr"><span class="sr-k"><i class="ti ti-cookie"></i> <span data-lang="سشن">Session</span></span><span class="sr-v">HttpOnly · 7 <span data-lang="روز">Days</span></span></div>
+      <div class="sr"><span class="sr-k"><i class="ti ti-network"></i> <span data-lang="protocols">Protocols</span></span><span class="sr-v">VLESS/WS + XHTTP Ultra</span></div>
+      <div class="sr"><span class="sr-k"><i class="ti ti-key"></i> <span data-lang="hash">Hash</span></span><span class="sr-v">SHA-256+Salt</span></div>
+      <div class="sr"><span class="sr-k"><i class="ti ti-cookie"></i> <span data-lang="session">Session</span></span><span class="sr-v">HttpOnly · 7 <span data-lang="days">Days</span></span></div>
     </div>
-    <div class="card"><div class="card-title"><i class="ti ti-shield-check"></i> <span data-lang="کنترل دسترسی">Access Control</span></div>
-      <div class="sr"><span class="sr-k"><i class="ti ti-id-badge"></i> UUID Auth</span><span class="sr-v" style="color:var(--green-t)">● <span data-lang="فعال">Active</span></span></div>
-      <div class="sr"><span class="sr-k"><i class="ti ti-toggle-right"></i> <span data-lang="فعال/غیرفعال">Active/Inactive</span></span><span class="sr-v" style="color:var(--green-t)">● <span data-lang="فعال">Active</span></span></div>
-      <div class="sr"><span class="sr-k"><i class="ti ti-gauge"></i> <span data-lang="سهمیه ترافیک">Traffic Quota</span></span><span class="sr-v" style="color:var(--green-t)">● <span data-lang="فعال">Active</span></span></div>
-      <div class="sr"><span class="sr-k"><i class="ti ti-calendar-x"></i> <span data-lang="تاریخ انقضا">Expiry Date</span></span><span class="sr-v" style="color:var(--green-t)">● <span data-lang="فعال">Active</span></span></div>
-      <div class="sr"><span class="sr-k"><i class="ti ti-lock"></i> <span data-lang="رمز صفحه پابلیک">Public Page Password</span></span><span class="sr-v" style="color:var(--green-t)">● <span data-lang="اختیاری">Optional</span></span></div>
+    <div class="card"><div class="card-title"><i class="ti ti-shield-check"></i> <span data-lang="access_control">Access Control</span></div>
+      <div class="sr"><span class="sr-k"><i class="ti ti-id-badge"></i> UUID Auth</span><span class="sr-v" style="color:var(--green-t)">● <span data-lang="active">Active</span></span></div>
+      <div class="sr"><span class="sr-k"><i class="ti ti-toggle-right"></i> <span data-lang="active_inactive">Active/Inactive</span></span><span class="sr-v" style="color:var(--green-t)">● <span data-lang="active">Active</span></span></div>
+      <div class="sr"><span class="sr-k"><i class="ti ti-gauge"></i> <span data-lang="traffic_quota">Traffic Quota</span></span><span class="sr-v" style="color:var(--green-t)">● <span data-lang="active">Active</span></span></div>
+      <div class="sr"><span class="sr-k"><i class="ti ti-calendar-x"></i> <span data-lang="expiry_date">Expiry Date</span></span><span class="sr-v" style="color:var(--green-t)">● <span data-lang="active">Active</span></span></div>
+      <div class="sr"><span class="sr-k"><i class="ti ti-lock"></i> <span data-lang="public_page_pw">Public Page Password</span></span><span class="sr-v" style="color:var(--green-t)">● <span data-lang="optional">Optional</span></span></div>
     </div>
   </div>
 </section>
 
 <!-- ===== LOGS ===== -->
 <section class="pg" id="pg-logs">
-  <div class="topbar"><div><div class="tb-title"><i class="ti ti-history"></i> <span data-lang="لاگ فعالیت‌ها">Activity Logs</span></div><div class="tb-sub" data-lang="تاریخچه‌ی کامل رخدادهای پنل">Complete event history</div></div><div class="tb-right"><button class="btn btn-p btn-sm" onclick="loadActivity()"><i class="ti ti-refresh"></i></button></div></div>
-  <div class="card"><div class="log-timeline" id="logs-list">—</div><div class="empty" id="logs-empty" style="display:none"><i class="ti ti-history-toggle"></i><p data-lang="هنوز لاگی ثبت نشده">No logs yet</p></div></div>
+  <div class="topbar"><div><div class="tb-title"><i class="ti ti-history"></i> <span data-lang="activity_logs">Activity Logs</span></div><div class="tb-sub" data-lang="activity_logs_full">Complete event history</div></div><div class="tb-right"><button class="btn btn-p btn-sm" onclick="loadActivity()"><i class="ti ti-refresh"></i></button></div></div>
+  <div class="card"><div class="log-timeline" id="logs-list">—</div><div class="empty" id="logs-empty" style="display:none"><i class="ti ti-history-toggle"></i><p data-lang="no_logs">No logs yet</p></div></div>
 </section>
 
 <!-- ===== ERRORS ===== -->
 <section class="pg" id="pg-errors">
-  <div class="topbar"><div><div class="tb-title"><i class="ti ti-alert-triangle"></i> <span data-lang="خطاها">Errors</span></div></div><div class="tb-right"><span class="badge bg-red" id="errs-badge">۰</span><button class="btn btn-p btn-sm" onclick="refreshAll()"><i class="ti ti-refresh"></i></button></div></div>
-  <div class="card"><div class="card-title"><i class="ti ti-bug"></i> <span data-lang="لاگ خطاها">Error Logs</span></div><div id="errs-full">—</div></div>
+  <div class="topbar"><div><div class="tb-title"><i class="ti ti-alert-triangle"></i> <span data-lang="errors">Errors</span></div></div><div class="tb-right"><span class="badge bg-red" id="errs-badge">0</span><button class="btn btn-p btn-sm" onclick="refreshAll()"><i class="ti ti-refresh"></i></button></div></div>
+  <div class="card"><div class="card-title"><i class="ti ti-bug"></i> <span data-lang="error_logs">Error Logs</span></div><div id="errs-full">—</div></div>
 </section>
 
 <!-- ===== WEBSOCKET TEST ===== -->
 <section class="pg" id="pg-testws">
-  <div class="topbar"><div><div class="tb-title"><i class="ti ti-wifi"></i> <span data-lang="تست WebSocket">WebSocket Test</span></div></div></div>
+  <div class="topbar"><div><div class="tb-title"><i class="ti ti-wifi"></i> <span data-lang="websocket_test">WebSocket Test</span></div></div></div>
   <div class="card" style="max-width:660px">
-    <div class="cl amber" style="margin-top:0;margin-bottom:12px"><i class="ti ti-alert-triangle"></i><span data-lang="فقط UUID‌های ثبت‌شده و فعال اتصال برقرار می‌کنند.">Only registered and active UUIDs can connect.</span></div>
+    <div class="cl amber" style="margin-top:0;margin-bottom:12px"><i class="ti ti-alert-triangle"></i><span data-lang="ws_note">Only registered and active UUIDs can connect.</span></div>
     <div class="form-row" style="margin-bottom:12px">
-      <div class="fg" style="flex:1"><label>UUID</label><input class="fi" id="ws-uuid" placeholder="UUID یک کانفیگ فعال" style="width:100%"></div>
-      <button class="btn btn-p" onclick="wsConn()"><i class="ti ti-plug-connected"></i> <span data-lang="اتصال">Connect</span></button>
-      <button class="btn btn-d" onclick="wsDisc()"><i class="ti ti-plug-x"></i> <span data-lang="قطع">Disconnect</span></button>
+      <div class="fg" style="flex:1"><label>UUID</label><input class="fi" id="ws-uuid" placeholder="Active config UUID" style="width:100%"></div>
+      <button class="btn btn-p" onclick="wsConn()"><i class="ti ti-plug-connected"></i> <span data-lang="connect">Connect</span></button>
+      <button class="btn btn-d" onclick="wsDisc()"><i class="ti ti-plug-x"></i> <span data-lang="disconnect">Disconnect</span></button>
     </div>
     <div class="form-row" style="margin-bottom:12px">
-      <input class="fi" id="ws-msg" placeholder="پیام تست..." style="flex:1">
-      <button class="btn btn-o" onclick="wsSend()"><i class="ti ti-send"></i> <span data-lang="ارسال">Send</span></button>
+      <input class="fi" id="ws-msg" placeholder="Test message..." style="flex:1">
+      <button class="btn btn-o" onclick="wsSend()"><i class="ti ti-send"></i> <span data-lang="send">Send</span></button>
     </div>
     <div style="background:rgba(0,0,0,.3);border:1px solid var(--card-b);border-radius:10px;padding:14px;height:250px;overflow-y:auto;font-family:ui-monospace,monospace;font-size:10.5px;line-height:1.9" id="ws-log">
-      <p style="color:var(--t3)" data-lang="منتظر اتصال...">Waiting for connection...</p>
+      <p style="color:var(--t3)" data-lang="waiting_ws">Waiting for connection...</p>
     </div>
   </div>
 </section>
@@ -1663,60 +2046,60 @@ a{color:inherit;text-decoration:none}
 <!-- ===== SETTINGS ===== -->
 <section class="pg" id="pg-settings">
   <div class="topbar">
-    <div><div class="tb-title"><i class="ti ti-settings"></i> <span data-lang="تنظیمات">Settings</span></div><div class="tb-sub" data-lang="مدیریت پیکربندی پنل">Panel configuration</div></div>
+    <div><div class="tb-title"><i class="ti ti-settings"></i> <span data-lang="settings">Settings</span></div><div class="tb-sub" data-lang="system_settings">System configuration</div></div>
     <div class="tb-right"><span class="badge bg-blue">v1.0.0</span></div>
   </div>
   <div class="g2">
     <!-- Theme -->
     <div class="card">
-      <div class="card-title"><i class="ti ti-palette"></i> <span data-lang="تغییر تم">Change Theme</span></div>
+      <div class="card-title"><i class="ti ti-palette"></i> <span data-lang="theme_settings">Theme Settings</span></div>
       <div style="display:flex;flex-direction:column;gap:12px">
         <div>
-          <label style="font-size:10.5px;color:var(--t3);font-weight:700;text-transform:uppercase;letter-spacing:.06em;display:block;margin-bottom:6px" data-lang="تم تاریک">Dark Theme</label>
+          <label style="font-size:10.5px;color:var(--t3);font-weight:700;text-transform:uppercase;letter-spacing:.06em;display:block;margin-bottom:6px" data-lang="dark_theme">Dark Theme</label>
           <div style="display:flex;gap:10px;flex-wrap:wrap" id="dark-themes">
-            <button class="btn btn-p theme-btn-select" data-theme="dark-blue" style="background:#1677ff;color:#fff;box-shadow:0 2px 8px rgba(22,119,255,0.4)" onclick="setTheme('dark-blue')"><i class="ti ti-circle"></i> <span data-lang="آبی">Blue</span></button>
-            <button class="btn btn-p theme-btn-select" data-theme="dark-red" style="background:#ef4444;color:#fff;box-shadow:0 2px 8px rgba(239,68,68,0.4)" onclick="setTheme('dark-red')"><i class="ti ti-circle"></i> <span data-lang="قرمز">Red</span></button>
-            <button class="btn btn-p theme-btn-select" data-theme="dark-yellow" style="background:#f59e0b;color:#000;box-shadow:0 2px 8px rgba(245,158,11,0.4)" onclick="setTheme('dark-yellow')"><i class="ti ti-circle"></i> <span data-lang="زرد">Yellow</span></button>
-            <button class="btn btn-p theme-btn-select" data-theme="dark-royal" style="background:linear-gradient(135deg,#8b5cf6,#d946ef);color:#fff;box-shadow:0 2px 8px rgba(139,92,246,0.5)" onclick="setTheme('dark-royal')"><i class="ti ti-circle"></i> <span data-lang="شاهی">Royal</span></button>
+            <button class="btn btn-p theme-btn-select" data-theme="dark-blue" style="background:#1677ff;color:#fff;box-shadow:0 2px 8px rgba(22,119,255,0.4)" onclick="setTheme('dark-blue')"><i class="ti ti-circle"></i> <span data-lang="blue">Blue</span></button>
+            <button class="btn btn-p theme-btn-select" data-theme="dark-red" style="background:#ef4444;color:#fff;box-shadow:0 2px 8px rgba(239,68,68,0.4)" onclick="setTheme('dark-red')"><i class="ti ti-circle"></i> <span data-lang="red">Red</span></button>
+            <button class="btn btn-p theme-btn-select" data-theme="dark-yellow" style="background:#f59e0b;color:#000;box-shadow:0 2px 8px rgba(245,158,11,0.4)" onclick="setTheme('dark-yellow')"><i class="ti ti-circle"></i> <span data-lang="yellow">Yellow</span></button>
+            <button class="btn btn-p theme-btn-select" data-theme="dark-imperial" style="background:linear-gradient(135deg,#d4af37,#b8860b);color:#000;box-shadow:0 2px 8px rgba(212,175,55,0.5)" onclick="setTheme('dark-imperial')"><i class="ti ti-circle"></i> <span data-lang="imperial_theme">Imperial</span></button>
           </div>
         </div>
         <div>
-          <label style="font-size:10.5px;color:var(--t3);font-weight:700;text-transform:uppercase;letter-spacing:.06em;display:block;margin-bottom:6px" data-lang="تم روشن">Light Theme</label>
+          <label style="font-size:10.5px;color:var(--t3);font-weight:700;text-transform:uppercase;letter-spacing:.06em;display:block;margin-bottom:6px" data-lang="light_theme">Light Theme</label>
           <div style="display:flex;gap:10px;flex-wrap:wrap" id="light-themes">
-            <button class="btn btn-p theme-btn-select" data-theme="light-blue" style="background:#1677ff;color:#fff;box-shadow:0 2px 8px rgba(22,119,255,0.3)" onclick="setTheme('light-blue')"><i class="ti ti-circle"></i> <span data-lang="آبی">Blue</span></button>
-            <button class="btn btn-p theme-btn-select" data-theme="light-red" style="background:#ef4444;color:#fff;box-shadow:0 2px 8px rgba(239,68,68,0.3)" onclick="setTheme('light-red')"><i class="ti ti-circle"></i> <span data-lang="قرمز">Red</span></button>
-            <button class="btn btn-p theme-btn-select" data-theme="light-yellow" style="background:#f59e0b;color:#000;box-shadow:0 2px 8px rgba(245,158,11,0.3)" onclick="setTheme('light-yellow')"><i class="ti ti-circle"></i> <span data-lang="زرد">Yellow</span></button>
+            <button class="btn btn-p theme-btn-select" data-theme="light-blue" style="background:#1677ff;color:#fff;box-shadow:0 2px 8px rgba(22,119,255,0.3)" onclick="setTheme('light-blue')"><i class="ti ti-circle"></i> <span data-lang="blue">Blue</span></button>
+            <button class="btn btn-p theme-btn-select" data-theme="light-red" style="background:#ef4444;color:#fff;box-shadow:0 2px 8px rgba(239,68,68,0.3)" onclick="setTheme('light-red')"><i class="ti ti-circle"></i> <span data-lang="red">Red</span></button>
+            <button class="btn btn-p theme-btn-select" data-theme="light-yellow" style="background:#f59e0b;color:#000;box-shadow:0 2px 8px rgba(245,158,11,0.3)" onclick="setTheme('light-yellow')"><i class="ti ti-circle"></i> <span data-lang="yellow">Yellow</span></button>
           </div>
         </div>
-        <div class="cl"><i class="ti ti-info-circle"></i><span data-lang="تم پیش‌فرض">Current Theme</span>: <strong id="current-theme-display">dark-blue</strong></div>
+        <div class="cl"><i class="ti ti-info-circle"></i><span data-lang="current_theme">Current Theme</span>: <strong id="current-theme-display">dark-blue</strong></div>
       </div>
     </div>
 
     <!-- Language -->
     <div class="card">
-      <div class="card-title"><i class="ti ti-language"></i> <span data-lang="زبان">Language</span></div>
+      <div class="card-title"><i class="ti ti-language"></i> <span data-lang="language_settings">Language Settings</span></div>
       <div style="display:flex;gap:10px;flex-wrap:wrap">
-        <button class="btn-lang active" data-lang-code="fa" onclick="setLanguage('fa')"><i class="ti ti-check" style="display:none"></i> فارسی</button>
-        <button class="btn-lang" data-lang-code="en" onclick="setLanguage('en')"><i class="ti ti-check" style="display:none"></i> English</button>
+        <button class="btn-lang active" data-lang-code="en" onclick="setLanguage('en')"><i class="ti ti-check" style="display:none"></i> English</button>
+        <button class="btn-lang" data-lang-code="fa" onclick="setLanguage('fa')"><i class="ti ti-check" style="display:none"></i> فارسی</button>
       </div>
-      <div class="cl" style="margin-top:12px"><i class="ti ti-info-circle"></i><span data-lang="زبان پیش‌فرض فارسی است. پس از تغییر، صفحه رفرش می‌شود.">Default language is Persian. Page will refresh after change.</span></div>
+      <div class="cl" style="margin-top:12px"><i class="ti ti-info-circle"></i><span data-lang="lang_note">Default language is English. Page will refresh after change.</span></div>
     </div>
 
     <!-- Server Settings -->
     <div class="card">
-      <div class="card-title"><i class="ti ti-server-2"></i> <span data-lang="تنظیمات سرور و نام لینک‌ها">Server & Link Settings</span></div>
+      <div class="card-title"><i class="ti ti-server-2"></i> <span data-lang="server_link_settings">Server & Link Settings</span></div>
       <div style="display:flex;flex-direction:column;gap:12px">
         <div class="fg">
-          <label data-lang="نام سرور">Server Name</label>
-          <input class="fi" id="server-name-input" placeholder="مثلاً: CBeeNet" style="width:100%">
+          <label data-lang="server_name">Server Name</label>
+          <input class="fi" id="server-name-input" placeholder="e.g. CBeeNet" style="width:100%">
         </div>
         <div class="fg">
-          <label data-lang="پیشوند لینک‌ها">Link Prefix</label>
-          <input class="fi" id="server-prefix-input" placeholder="مثلاً: MyServer" style="width:100%">
+          <label data-lang="server_prefix">Link Prefix</label>
+          <input class="fi" id="server-prefix-input" placeholder="e.g. MyServer" style="width:100%">
         </div>
         <div class="fg">
-          <label data-lang="قالب نام کانفیگ‌ها">Link Name Template</label>
-          <input class="fi" id="link-name-template" placeholder="مثلاً: {server}-{label}" style="width:100%">
+          <label data-lang="link_template">Link Name Template</label>
+          <input class="fi" id="link-name-template" placeholder="e.g. {server}-{label}" style="width:100%">
           <div style="font-size:9.5px;color:var(--t3);margin-top:4px;display:flex;flex-wrap:wrap;gap:6px">
             <span style="background:var(--accent-d);padding:2px 8px;border-radius:4px">{server}</span>
             <span style="background:var(--accent-d);padding:2px 8px;border-radius:4px">{prefix}</span>
@@ -1724,9 +2107,9 @@ a{color:inherit;text-decoration:none}
             <span style="background:var(--accent-d);padding:2px 8px;border-radius:4px">{protocol}</span>
           </div>
         </div>
-        <div class="cl"><i class="ti ti-info-circle"></i><span data-lang="اگر `{protocol}` در قالب نباشد، پروتکل در نام نمایش داده نمی‌شود.">If `{protocol}` is not in the template, the protocol will not be shown.</span></div>
-        <button class="btn btn-p" onclick="saveServerSettings()"><i class="ti ti-device-floppy"></i> <span data-lang="ذخیره تنظیمات">Save Settings</span></button>
-        <div id="server-save-result" style="font-size:11px;color:var(--green-t);display:none">✓ <span data-lang="ذخیره شد">Saved</span></div>
+        <div class="cl"><i class="ti ti-info-circle"></i><span data-lang="template_note">If `{protocol}` is not in the template, the protocol will not be shown.</span></div>
+        <button class="btn btn-p" onclick="saveServerSettings()"><i class="ti ti-device-floppy"></i> <span data-lang="save_settings">Save Settings</span></button>
+        <div id="server-save-result" style="font-size:11px;color:var(--green-t);display:none">✓ <span data-lang="saved">Saved</span></div>
       </div>
     </div>
   </div>
@@ -1738,33 +2121,33 @@ a{color:inherit;text-decoration:none}
         <div class="srv-hero-icon"><i class="ti ti-server-2"></i></div>
         <div class="srv-hero-text">
           <div class="srv-hero-domain" id="set-host">—</div>
-          <div class="srv-hero-sub"><span class="dot dg pulse"></span> <span data-lang="آنلاین">Online</span> · Railway</div>
+          <div class="srv-hero-sub"><span class="dot dg pulse"></span> <span data-lang="online_status">Online</span> · Railway</div>
         </div>
       </div>
       <div class="srv-tiles">
-        <div class="srv-tile"><div class="srv-tile-icon"><i class="ti ti-route"></i></div><div class="srv-tile-text"><div class="srv-tile-label" data-lang="پورت">Port</div><div class="srv-tile-val">443 (TLS)</div></div></div>
-        <div class="srv-tile"><div class="srv-tile-icon"><i class="ti ti-versions"></i></div><div class="srv-tile-text"><div class="srv-tile-label" data-lang="نسخه">Version</div><div class="srv-tile-val">v1.0.0</div></div></div>
-        <div class="srv-tile"><div class="srv-tile-icon"><i class="ti ti-brand-fastapi"></i></div><div class="srv-tile-text"><div class="srv-tile-label" data-lang="فریم‌ورک">Framework</div><div class="srv-tile-val">FastAPI + Uvicorn</div></div></div>
-        <div class="srv-tile"><div class="srv-tile-icon"><i class="ti ti-cloud"></i></div><div class="srv-tile-text"><div class="srv-tile-label" data-lang="پلتفرم">Platform</div><div class="srv-tile-val">Railway</div></div></div>
-        <div class="srv-tile" style="grid-column:1/-1"><div class="srv-tile-icon"><i class="ti ti-device-floppy"></i></div><div class="srv-tile-text"><div class="srv-tile-label" data-lang="ذخیره‌سازی">Storage</div><div class="srv-tile-val">JSON File (/data)</div></div></div>
+        <div class="srv-tile"><div class="srv-tile-icon"><i class="ti ti-route"></i></div><div class="srv-tile-text"><div class="srv-tile-label" data-lang="port">Port</div><div class="srv-tile-val">443 (TLS)</div></div></div>
+        <div class="srv-tile"><div class="srv-tile-icon"><i class="ti ti-versions"></i></div><div class="srv-tile-text"><div class="srv-tile-label" data-lang="version">Version</div><div class="srv-tile-val">v1.0.0</div></div></div>
+        <div class="srv-tile"><div class="srv-tile-icon"><i class="ti ti-brand-fastapi"></i></div><div class="srv-tile-text"><div class="srv-tile-label" data-lang="framework">Framework</div><div class="srv-tile-val">FastAPI + Uvicorn</div></div></div>
+        <div class="srv-tile"><div class="srv-tile-icon"><i class="ti ti-cloud"></i></div><div class="srv-tile-text"><div class="srv-tile-label" data-lang="platform">Platform</div><div class="srv-tile-val">Railway</div></div></div>
+        <div class="srv-tile" style="grid-column:1/-1"><div class="srv-tile-icon"><i class="ti ti-device-floppy"></i></div><div class="srv-tile-text"><div class="srv-tile-label" data-lang="storage">Storage</div><div class="srv-tile-val">JSON File (/data)</div></div></div>
       </div>
     </div>
     <div class="pw-panel">
       <div class="pw-hero">
         <div class="pw-hero-icon"><i class="ti ti-key"></i></div>
         <div class="pw-hero-text">
-          <div class="pw-hero-title" data-lang="تغییر رمز عبور">Change Password</div>
-          <div class="pw-hero-sub" data-lang="رمز قوی انتخاب کنید و آن را جایی امن نگه دارید">Choose a strong password and keep it safe</div>
+          <div class="pw-hero-title" data-lang="change_password_title">Change Password</div>
+          <div class="pw-hero-sub" data-lang="change_password_sub">Choose a strong password and keep it safe</div>
         </div>
       </div>
       <div class="pw-body">
-        <div class="pw-field"><label data-lang="رمز فعلی">Current Password</label><input class="pw-input" type="password" id="cp-cur" placeholder="رمز فعلی"><button class="pw-eye" type="button" onclick="togglePwField('cp-cur',this)"><i class="ti ti-eye"></i></button></div>
-        <div class="pw-field" style="margin-bottom:6px"><label data-lang="رمز جدید">New Password</label><input class="pw-input" type="password" id="cp-new" placeholder="حداقل ۴ کاراکتر" oninput="checkPwStrength(this.value)"><button class="pw-eye" type="button" onclick="togglePwField('cp-new',this)"><i class="ti ti-eye"></i></button></div>
+        <div class="pw-field"><label data-lang="current_pw">Current Password</label><input class="pw-input" type="password" id="cp-cur" placeholder="Current password"><button class="pw-eye" type="button" onclick="togglePwField('cp-cur',this)"><i class="ti ti-eye"></i></button></div>
+        <div class="pw-field" style="margin-bottom:6px"><label data-lang="new_pw">New Password</label><input class="pw-input" type="password" id="cp-new" placeholder="Min 4 characters" oninput="checkPwStrength(this.value)"><button class="pw-eye" type="button" onclick="togglePwField('cp-new',this)"><i class="ti ti-eye"></i></button></div>
         <div class="pw-strength" id="pw-strength-bar"><div class="pw-strength-seg"></div><div class="pw-strength-seg"></div><div class="pw-strength-seg"></div><div class="pw-strength-seg"></div></div>
-        <div class="pw-strength-label" id="pw-strength-label"><i class="ti ti-shield"></i> <span data-lang="قدرت رمز">Password Strength</span></div>
-        <div class="pw-reqs"><span class="pw-req" id="req-len"><i class="ti ti-circle-dashed"></i> <span data-lang="حداقل ۴ کاراکتر">At least 4 chars</span></span><span class="pw-req" id="req-num"><i class="ti ti-circle-dashed"></i> <span data-lang="شامل عدد">Contains number</span></span><span class="pw-req" id="req-case"><i class="ti ti-circle-dashed"></i> <span data-lang="حروف بزرگ/کوچک">Uppercase/Lowercase</span></span></div>
-        <div class="pw-field" style="margin-bottom:18px"><label data-lang="تکرار رمز جدید">Confirm Password</label><input class="pw-input" type="password" id="cp-cf" placeholder="تکرار رمز جدید"><button class="pw-eye" type="button" onclick="togglePwField('cp-cf',this)"><i class="ti ti-eye"></i></button></div>
-        <button class="pw-submit" onclick="changePw()"><i class="ti ti-shield-check"></i> <span data-lang="ذخیره رمز جدید">Save New Password</span></button>
+        <div class="pw-strength-label" id="pw-strength-label"><i class="ti ti-shield"></i> <span data-lang="password_strength">Password Strength</span></div>
+        <div class="pw-reqs"><span class="pw-req" id="req-len"><i class="ti ti-circle-dashed"></i> <span data-lang="min_4_chars">At least 4 chars</span></span><span class="pw-req" id="req-num"><i class="ti ti-circle-dashed"></i> <span data-lang="contains_num">Contains number</span></span><span class="pw-req" id="req-case"><i class="ti ti-circle-dashed"></i> <span data-lang="contains_case_letters">Uppercase/Lowercase</span></span></div>
+        <div class="pw-field" style="margin-bottom:18px"><label data-lang="confirm_pw">Confirm Password</label><input class="pw-input" type="password" id="cp-cf" placeholder="Confirm new password"><button class="pw-eye" type="button" onclick="togglePwField('cp-cf',this)"><i class="ti ti-eye"></i></button></div>
+        <button class="pw-submit" onclick="changePw()"><i class="ti ti-shield-check"></i> <span data-lang="save_new_pw">Save New Password</span></button>
       </div>
     </div>
   </div>
@@ -1773,131 +2156,10 @@ a{color:inherit;text-decoration:none}
 </main>
 
 <script>
-// ===== MULTI-LANGUAGE =====
-const LANG = {
-  "fa": {
-    "dashboard": "داشبورد", "dashboard_sub": "نمای کلی سیستم",
-    "active_connections": "اتصالات فعال", "total_traffic": "کل ترافیک",
-    "total_links": "کانفیگ‌ها", "uptime": "آپتایم",
-    "since_start": "از راه‌اندازی", "active": "فعال", "inactive": "غیرفعال",
-    "refresh": "رفرش", "traffic_trend": "روند مصرف ترافیک",
-    "service_status": "وضعیت سرویس", "top_connections": "اتصال‌های لحظه‌ای",
-    "no_connections": "هیچ اتصالی", "server": "سرور",
-    "settings": "تنظیمات", "language": "زبان",
-    "farsi": "فارسی", "english": "انگلیسی",
-    "save": "ذخیره", "cancel": "انصراف", "delete": "حذف",
-    "edit": "ویرایش", "copy": "کپی", "created": "ساخته شده",
-    "expires": "انقضا", "unlimited": "نامحدود",
-    "used": "مصرف", "of": "از", "daily": "روزانه",
-    "hourly": "ساعتی", "bandwidth": "پهنای باند",
-    "connections": "اتصالات", "protocol": "پروتکل",
-    "ip_address": "آدرس آی‌پی", "port": "پورت",
-    "upload": "آپلود", "download": "دانلود",
-    "duration": "مدت", "status": "وضعیت",
-    "online": "آنلاین", "offline": "آفلاین",
-    "total": "کل", "users": "کاربران",
-    "protocols": "پروتکل‌ها", "traffic_usage": "مصرف ترافیک",
-    "links": "کانفیگ‌ها", "sub_groups": "گروه‌های ساب",
-    "subscription": "سابسکریپشن", "security": "امنیت",
-    "logs": "لاگ فعالیت‌ها", "errors": "خطاها",
-    "test_websocket": "تست WebSocket",
-    "dark_theme": "تم تاریک", "light_theme": "تم روشن",
-    "royal_theme": "تم شاهی", "blue": "آبی",
-    "red": "قرمز", "yellow": "زرد",
-    "current_theme": "تم پیش‌فرض",
-    "server_settings": "تنظیمات سرور و نام لینک‌ها",
-    "server_name": "نام سرور", "server_prefix": "پیشوند لینک‌ها",
-    "link_template": "قالب نام کانفیگ‌ها",
-    "template_vars": "متغیرهای قابل استفاده",
-    "template_note": "اگر `{protocol}` در قالب نباشد، پروتکل در نام نمایش داده نمی‌شود.",
-    "change_password": "تغییر رمز عبور",
-    "current_password": "رمز فعلی", "new_password": "رمز جدید",
-    "confirm_password": "تکرار رمز جدید",
-    "password_strength": "قدرت رمز",
-    "min_chars": "حداقل ۴ کاراکتر", "contains_number": "شامل عدد",
-    "contains_case": "حروف بزرگ/کوچک",
-    "weak": "خیلی ضعیف", "medium": "متوسط", "strong": "قوی",
-    "save_password": "ذخیره رمز جدید",
-    "login": "ورود", "logout": "خروج",
-    "login_title": "ورود به پنل",
-    "login_sub": "رمز عبور را برای دسترسی به داشبورد وارد کنید",
-    "password": "رمز عبور", "login_button": "ورود به داشبورد",
-    "telegram_channel": "کانال تلگرام",
-    "panel": "پنل", "system": "سیستم",
-    "configs": "کانفیگ‌ها", "sub_groups_short": "گروه‌های ساب",
-    "activity_logs": "لاگ فعالیت‌ها",
-    "config_id": "شناسه کانفیگ",
-    "sub_group_expiry": "گروه ساب و انقضا",
-    "no_group": "بدون گروه",
-    "days": "روز", "traffic_quota": "سهمیه ترافیک",
-    "transport_protocols": "پروتکل‌های انتقال",
-    "bulk_count": "تعداد ساخت هم‌زمان",
-    "create_config": "ساخت کانفیگ",
-    "no_configs": "هنوز کانفیگی وجود ندارد",
-    "new_group": "گروه جدید",
-    "no_groups": "هنوز گروهی وجود ندارد",
-    "create_group": "یک گروه جدید بسازید تا کانفیگ‌ها را دسته‌بندی کنید",
-    "single_sub": "سابسکریپشن تکی (هر کانفیگ)",
-    "full_sub": "سابسکریپشن کامل (ادمین)",
-    "full_sub_desc": "شامل تمام کانفیگ‌های فعال.",
-    "group_sub_links": "لینک سابسکریپشن گروه‌ها",
-    "loading": "در حال بارگذاری...",
-    "traffic_analysis": "تحلیل و مانیتورینگ مصرف پهنای باند",
-    "total_traffic_used": "کل ترافیک مصرفی",
-    "hourly_average": "میانگین ساعتی",
-    "per_hour": "در ساعت",
-    "peak_usage": "پیک مصرف",
-    "peak_hour": "بالاترین ساعت",
-    "lowest_usage": "کمترین مصرف",
-    "live_connections": "اتصالات زنده",
-    "total_traffic_live": "مجموع ترافیک لحظه‌ای",
-    "avg_duration": "میانگین مدت اتصال",
-    "unique_ips": "آی‌پی‌های یکتا",
-    "connections_list": "لیست اتصالات",
-    "auto_update": "بروزرسانی خودکار هر ۵ ثانیه",
-    "no_active_connections": "هیچ اتصال فعالی نیست",
-    "will_appear": "به محض اتصال کلاینت‌ها، اینجا نمایش داده می‌شوند",
-    "encryption": "رمزنگاری",
-    "access_control": "کنترل دسترسی",
-    "hash": "هش رمز",
-    "session": "سشن",
-    "active_inactive": "فعال/غیرفعال",
-    "expiry_date": "تاریخ انقضا",
-    "public_page_pw": "رمز صفحه پابلیک",
-    "optional": "اختیاری",
-    "activity_logs_full": "تاریخچه‌ی کامل رخدادهای پنل",
-    "no_logs": "هنوز لاگی ثبت نشده",
-    "error_logs": "لاگ خطاها",
-    "websocket_test": "تست WebSocket",
-    "ws_note": "فقط UUID‌های ثبت‌شده و فعال اتصال برقرار می‌کنند.",
-    "connect": "اتصال",
-    "disconnect": "قطع",
-    "send": "ارسال",
-    "waiting_ws": "منتظر اتصال...",
-    "change_theme": "تغییر تم",
-    "server_link_settings": "تنظیمات سرور و نام لینک‌ها",
-    "save_settings": "ذخیره تنظیمات",
-    "saved": "ذخیره شد",
-    "online_status": "آنلاین",
-    "version": "نسخه",
-    "framework": "فریم‌ورک",
-    "platform": "پلتفرم",
-    "storage": "ذخیره‌سازی",
-    "change_password_title": "تغییر رمز عبور",
-    "change_password_sub": "رمز قوی انتخاب کنید و آن را جایی امن نگه دارید",
-    "current_pw": "رمز فعلی",
-    "new_pw": "رمز جدید",
-    "confirm_pw": "تکرار رمز جدید",
-    "save_new_pw": "ذخیره رمز جدید",
-    "min_4_chars": "حداقل ۴ کاراکتر",
-    "contains_num": "شامل عدد",
-    "contains_case_letters": "حروف بزرگ/کوچک",
-    "very_weak": "خیلی ضعیف",
-    "medium_strength": "متوسط",
-    "strong_strength": "قوی",
-    "logout_btn": "خروج",
-    "telegram_btn": "کانال تلگرام",
-  },
+// =====================================================================
+// ==================== MULTI-LANGUAGE SYSTEM ==========================
+// =====================================================================
+const LANG_DICT = {
   "en": {
     "dashboard": "Dashboard", "dashboard_sub": "System Overview",
     "active_connections": "Active Connections", "total_traffic": "Total Traffic",
@@ -1925,7 +2187,7 @@ const LANG = {
     "logs": "Activity Logs", "errors": "Errors",
     "test_websocket": "WebSocket Test",
     "dark_theme": "Dark Theme", "light_theme": "Light Theme",
-    "royal_theme": "Royal Theme", "blue": "Blue",
+    "imperial_theme": "Imperial Theme", "blue": "Blue",
     "red": "Red", "yellow": "Yellow",
     "current_theme": "Current Theme",
     "server_settings": "Server & Link Settings",
@@ -1952,7 +2214,8 @@ const LANG = {
     "config_id": "Config ID",
     "sub_group_expiry": "Sub Group & Expiry",
     "no_group": "No Group",
-    "days": "Days", "traffic_quota": "Traffic Quota",
+    "days": "Days",
+    "traffic_quota": "Traffic Quota",
     "transport_protocols": "Transport Protocols",
     "bulk_count": "Bulk Count",
     "create_config": "Create Config",
@@ -1993,43 +2256,244 @@ const LANG = {
     "error_logs": "Error Logs",
     "websocket_test": "WebSocket Test",
     "ws_note": "Only registered and active UUIDs can connect.",
-    "connect": "Connect",
-    "disconnect": "Disconnect",
-    "send": "Send",
+    "connect": "Connect", "disconnect": "Disconnect", "send": "Send",
     "waiting_ws": "Waiting for connection...",
     "change_theme": "Change Theme",
     "server_link_settings": "Server & Link Settings",
     "save_settings": "Save Settings",
     "saved": "Saved",
     "online_status": "Online",
-    "version": "Version",
-    "framework": "Framework",
-    "platform": "Platform",
-    "storage": "Storage",
+    "version": "Version", "framework": "Framework",
+    "platform": "Platform", "storage": "Storage",
     "change_password_title": "Change Password",
     "change_password_sub": "Choose a strong password and keep it safe",
-    "current_pw": "Current Password",
-    "new_pw": "New Password",
+    "current_pw": "Current Password", "new_pw": "New Password",
     "confirm_pw": "Confirm Password",
     "save_new_pw": "Save New Password",
     "min_4_chars": "At least 4 chars",
     "contains_num": "Contains number",
     "contains_case_letters": "Uppercase/Lowercase",
-    "very_weak": "Very Weak",
-    "medium_strength": "Medium",
+    "very_weak": "Very Weak", "medium_strength": "Medium",
     "strong_strength": "Strong",
-    "logout_btn": "Logout",
-    "telegram_btn": "Telegram Channel",
+    "logout_btn": "Logout", "telegram_btn": "Telegram Channel",
+    "load": "Load", "connections_live": "Live Connections",
+    "traffic_chart": "Traffic Chart",
+    "protocol_distribution": "Protocol Distribution",
+    "daily_usage": "Daily Usage",
+    "active_conns_table": "Active Connections",
+    "configs_management": "Configs Management",
+    "sub_groups_management": "Sub Groups Management",
+    "subscription_links": "Subscription Links",
+    "traffic_monitor": "Traffic Monitor",
+    "connections_monitor": "Connections Monitor",
+    "security_settings": "Security Settings",
+    "activity_logs_title": "Activity Logs",
+    "error_logs_title": "Error Logs",
+    "websocket_tester": "WebSocket Tester",
+    "system_settings": "System Settings",
+    "language_settings": "Language Settings",
+    "theme_settings": "Theme Settings",
+    "server_info": "Server Info",
+    "password_change": "Password Change",
+    "save_changes": "Save Changes",
+    "cancel_changes": "Cancel",
+    "live": "Live", "running_time": "Running Time",
+    "manage_configs": "Manage Configs for",
+    "select_configs": "Select configs to include in this group",
+    "select_all": "Select All", "deselect_all": "Deselect All",
+    "changes_apply": "Changes apply immediately",
+    "new_group_title": "Create New Group",
+    "new_group_sub": "Create a separate public page to manage configs",
+    "group_name": "Group Name",
+    "description_optional": "Description (optional)",
+    "public_page_password": "Public Page Password (optional)",
+    "public_page_info": "This group's public page will be accessible via a unique link.",
+    "edit_config": "Edit Config",
+    "quota_0_unlimited": "Quota (0 = unlimited)",
+    "expiry_days": "Expiry (days from now, 0 = no change/unlimited)",
+    "expiry_note": "To keep current expiry, leave expiry field as 0.",
+    "random_uuid": "Random UUID · Choose quota, expiry and protocol",
+    "uuid_note": "UUID is generated randomly · Only registered UUIDs can connect · Protocol cannot be changed after creation.",
+    "each_group_public": "Each group has its own public page with its configs",
+    "single_sub_desc": "Each config has its own subscription URL. Click the",
+    "icon_on_card": "icon on the config card.",
+    "full_sub_note": "This URL only works in the browser where you're logged in (requires session cookie).",
+    "based_on_mb": "Based on MB per hour",
+    "lang_note": "Default language is English. Page will refresh after change.",
+    "groups": "Groups",
+    "usage": "Usage", "average": "Average",
+  },
+  "fa": {
+    "dashboard": "داشبورد", "dashboard_sub": "نمای کلی سیستم",
+    "active_connections": "اتصالات فعال", "total_traffic": "کل ترافیک",
+    "total_links": "کانفیگ‌ها", "uptime": "آپتایم",
+    "since_start": "از راه‌اندازی", "active": "فعال", "inactive": "غیرفعال",
+    "refresh": "رفرش", "traffic_trend": "روند مصرف ترافیک",
+    "service_status": "وضعیت سرویس", "top_connections": "اتصال‌های لحظه‌ای",
+    "no_connections": "هیچ اتصالی", "server": "سرور",
+    "settings": "تنظیمات", "language": "زبان",
+    "farsi": "فارسی", "english": "انگلیسی",
+    "save": "ذخیره", "cancel": "انصراف", "delete": "حذف",
+    "edit": "ویرایش", "copy": "کپی", "created": "ساخته شده",
+    "expires": "انقضا", "unlimited": "نامحدود",
+    "used": "مصرف", "of": "از", "daily": "روزانه",
+    "hourly": "ساعتی", "bandwidth": "پهنای باند",
+    "connections": "اتصالات", "protocol": "پروتکل",
+    "ip_address": "آدرس آی‌پی", "port": "پورت",
+    "upload": "آپلود", "download": "دانلود",
+    "duration": "مدت", "status": "وضعیت",
+    "online": "آنلاین", "offline": "آفلاین",
+    "total": "کل", "users": "کاربران",
+    "protocols": "پروتکل‌ها", "traffic_usage": "مصرف ترافیک",
+    "links": "کانفیگ‌ها", "sub_groups": "گروه‌های ساب",
+    "subscription": "سابسکریپشن", "security": "امنیت",
+    "logs": "لاگ فعالیت‌ها", "errors": "خطاها",
+    "test_websocket": "تست WebSocket",
+    "dark_theme": "تم تاریک", "light_theme": "تم روشن",
+    "imperial_theme": "تم امپراتوری", "blue": "آبی",
+    "red": "قرمز", "yellow": "زرد",
+    "current_theme": "تم پیش‌فرض",
+    "server_settings": "تنظیمات سرور و نام لینک‌ها",
+    "server_name": "نام سرور", "server_prefix": "پیشوند لینک‌ها",
+    "link_template": "قالب نام کانفیگ‌ها",
+    "template_vars": "متغیرهای قابل استفاده",
+    "template_note": "اگر `{protocol}` در قالب نباشد، پروتکل در نام نمایش داده نمی‌شود.",
+    "change_password": "تغییر رمز عبور",
+    "current_password": "رمز فعلی", "new_password": "رمز جدید",
+    "confirm_password": "تکرار رمز جدید",
+    "password_strength": "قدرت رمز",
+    "min_chars": "حداقل ۴ کاراکتر", "contains_number": "شامل عدد",
+    "contains_case": "حروف بزرگ/کوچک",
+    "weak": "خیلی ضعیف", "medium": "متوسط", "strong": "قوی",
+    "save_password": "ذخیره رمز جدید",
+    "login": "ورود", "logout": "خروج",
+    "login_title": "ورود به پنل",
+    "login_sub": "رمز عبور را برای دسترسی به داشبورد وارد کنید",
+    "password": "رمز عبور", "login_button": "ورود به داشبورد",
+    "telegram_channel": "کانال تلگرام",
+    "panel": "پنل", "system": "سیستم",
+    "configs": "کانفیگ‌ها", "sub_groups_short": "گروه‌های ساب",
+    "activity_logs": "لاگ فعالیت‌ها",
+    "config_id": "شناسه کانفیگ",
+    "sub_group_expiry": "گروه ساب و انقضا",
+    "no_group": "بدون گروه",
+    "days": "روز",
+    "traffic_quota": "سهمیه ترافیک",
+    "transport_protocols": "پروتکل‌های انتقال",
+    "bulk_count": "تعداد ساخت هم‌زمان",
+    "create_config": "ساخت کانفیگ",
+    "no_configs": "هنوز کانفیگی وجود ندارد",
+    "new_group": "گروه جدید",
+    "no_groups": "هنوز گروهی وجود ندارد",
+    "create_group": "یک گروه جدید بسازید تا کانفیگ‌ها را دسته‌بندی کنید",
+    "single_sub": "سابسکریپشن تکی (هر کانفیگ)",
+    "full_sub": "سابسکریپشن کامل (ادمین)",
+    "full_sub_desc": "شامل تمام کانفیگ‌های فعال.",
+    "group_sub_links": "لینک سابسکریپشن گروه‌ها",
+    "loading": "در حال بارگذاری...",
+    "traffic_analysis": "تحلیل و مانیتورینگ مصرف پهنای باند",
+    "total_traffic_used": "کل ترافیک مصرفی",
+    "hourly_average": "میانگین ساعتی",
+    "per_hour": "در ساعت",
+    "peak_usage": "پیک مصرف",
+    "peak_hour": "بالاترین ساعت",
+    "lowest_usage": "کمترین مصرف",
+    "live_connections": "اتصالات زنده",
+    "total_traffic_live": "مجموع ترافیک لحظه‌ای",
+    "avg_duration": "میانگین مدت اتصال",
+    "unique_ips": "آی‌پی‌های یکتا",
+    "connections_list": "لیست اتصالات",
+    "auto_update": "بروزرسانی خودکار هر ۵ ثانیه",
+    "no_active_connections": "هیچ اتصال فعالی نیست",
+    "will_appear": "به محض اتصال کلاینت‌ها، اینجا نمایش داده می‌شوند",
+    "encryption": "رمزنگاری",
+    "access_control": "کنترل دسترسی",
+    "hash": "هش رمز",
+    "session": "سشن",
+    "active_inactive": "فعال/غیرفعال",
+    "expiry_date": "تاریخ انقضا",
+    "public_page_pw": "رمز صفحه پابلیک",
+    "optional": "اختیاری",
+    "activity_logs_full": "تاریخچه‌ی کامل رخدادهای پنل",
+    "no_logs": "هنوز لاگی ثبت نشده",
+    "error_logs": "لاگ خطاها",
+    "websocket_test": "تست WebSocket",
+    "ws_note": "فقط UUID‌های ثبت‌شده و فعال اتصال برقرار می‌کنند.",
+    "connect": "اتصال", "disconnect": "قطع", "send": "ارسال",
+    "waiting_ws": "منتظر اتصال...",
+    "change_theme": "تغییر تم",
+    "server_link_settings": "تنظیمات سرور و نام لینک‌ها",
+    "save_settings": "ذخیره تنظیمات",
+    "saved": "ذخیره شد",
+    "online_status": "آنلاین",
+    "version": "نسخه", "framework": "فریم‌ورک",
+    "platform": "پلتفرم", "storage": "ذخیره‌سازی",
+    "change_password_title": "تغییر رمز عبور",
+    "change_password_sub": "رمز قوی انتخاب کنید و آن را جایی امن نگه دارید",
+    "current_pw": "رمز فعلی", "new_pw": "رمز جدید",
+    "confirm_pw": "تکرار رمز جدید",
+    "save_new_pw": "ذخیره رمز جدید",
+    "min_4_chars": "حداقل ۴ کاراکتر",
+    "contains_num": "شامل عدد",
+    "contains_case_letters": "حروف بزرگ/کوچک",
+    "very_weak": "خیلی ضعیف", "medium_strength": "متوسط",
+    "strong_strength": "قوی",
+    "logout_btn": "خروج", "telegram_btn": "کانال تلگرام",
+    "load": "بار نسبی", "connections_live": "اتصالات لحظه‌ای",
+    "traffic_chart": "نمودار ترافیک",
+    "protocol_distribution": "توزیع پروتکل",
+    "daily_usage": "مصرف روزانه",
+    "active_conns_table": "اتصالات فعال",
+    "configs_management": "مدیریت کانفیگ‌ها",
+    "sub_groups_management": "مدیریت گروه‌های ساب",
+    "subscription_links": "لینک‌های سابسکریپشن",
+    "traffic_monitor": "مانیتورینگ ترافیک",
+    "connections_monitor": "مانیتورینگ اتصالات",
+    "security_settings": "تنظیمات امنیتی",
+    "activity_logs_title": "لاگ فعالیت‌ها",
+    "error_logs_title": "لاگ خطاها",
+    "websocket_tester": "تست WebSocket",
+    "system_settings": "تنظیمات سیستم",
+    "language_settings": "تنظیمات زبان",
+    "theme_settings": "تنظیمات تم",
+    "server_info": "اطلاعات سرور",
+    "password_change": "تغییر رمز عبور",
+    "save_changes": "ذخیره تغییرات",
+    "cancel_changes": "انصراف",
+    "live": "لحظه‌ای", "running_time": "مدت روشن بودن",
+    "manage_configs": "مدیریت کانفیگ‌های",
+    "select_configs": "کانفیگ‌هایی که می‌خواهید در این گروه باشند را انتخاب کنید",
+    "select_all": "انتخاب همه", "deselect_all": "لغو همه",
+    "changes_apply": "تغییرات بلافاصله اعمال می‌شود",
+    "new_group_title": "ساخت گروه جدید",
+    "new_group_sub": "یک صفحه پابلیک مجزا برای مدیریت کانفیگ‌ها بسازید",
+    "group_name": "نام گروه",
+    "description_optional": "توضیحات (اختیاری)",
+    "public_page_password": "رمز صفحه پابلیک (اختیاری)",
+    "public_page_info": "صفحه پابلیک این گروه با یک لینک منحصر‌به‌فرد در اینترنت در دسترس خواهد بود.",
+    "edit_config": "ویرایش کانفیگ",
+    "quota_0_unlimited": "سهمیه (0 = نامحدود)",
+    "expiry_days": "انقضا (روز از الان، 0 = بدون تغییر/نامحدود)",
+    "expiry_note": "برای حفظ انقضای فعلی، فیلد انقضا را صفر بگذارید.",
+    "random_uuid": "UUID تصادفی · سهمیه، انقضا و پروتکل رو انتخاب کن",
+    "uuid_note": "UUID کاملاً رندوم تولید می‌شود · فقط UUID‌های ثبت‌شده اجازه اتصال دارند · پروتکل پس از ساخت قابل تغییر نیست.",
+    "each_group_public": "هر گروه یک صفحه پابلیک مجزا با کانفیگ‌های خودش دارد",
+    "single_sub_desc": "هر کانفیگ URL سابسکریپشن مخصوص دارد. از کارت کانفیگ روی آیکون",
+    "icon_on_card": "کلیک کنید.",
+    "full_sub_note": "این آدرس فقط در مرورگری که به پنل وارد شده کار می‌کند (نیاز به کوکی سشن).",
+    "based_on_mb": "بر اساس مگابایت در هر ساعت",
+    "lang_note": "زبان پیش‌فرض انگلیسی است. پس از تغییر، صفحه رفرش می‌شود.",
+    "groups": "گروه",
+    "usage": "مصرف", "average": "میانگین",
   }
 };
 
-let currentLang = localStorage.getItem('CBeeNet-lang') || 'fa';
+let currentLang = localStorage.getItem('CBeeNet-lang') || 'en';
 
 function setLanguage(lang){
   currentLang = lang;
   localStorage.setItem('CBeeNet-lang', lang);
   applyLanguage();
-  // Highlight active language button
   document.querySelectorAll('.btn-lang').forEach(btn => {
     btn.classList.toggle('active', btn.dataset.langCode === lang);
     const check = btn.querySelector('i');
@@ -2039,20 +2503,17 @@ function setLanguage(lang){
 }
 
 function applyLanguage(){
-  const dict = LANG[currentLang] || LANG['fa'];
+  const dict = LANG_DICT[currentLang] || LANG_DICT['en'];
   document.documentElement.dir = currentLang === 'fa' ? 'rtl' : 'ltr';
   document.documentElement.lang = currentLang;
   
-  // Update all elements with data-lang attribute
   document.querySelectorAll('[data-lang]').forEach(el => {
     const key = el.getAttribute('data-lang');
     if(dict[key] !== undefined){
-      // Preserve HTML inside if any
       el.textContent = dict[key];
     }
   });
   
-  // Update placeholder texts with data-lang-placeholder
   document.querySelectorAll('[data-lang-placeholder]').forEach(el => {
     const key = el.getAttribute('data-lang-placeholder');
     if(dict[key] !== undefined){
@@ -2061,7 +2522,9 @@ function applyLanguage(){
   });
 }
 
-// ===== Theme =====
+// =====================================================================
+// ==================== THEME SYSTEM ===================================
+// =====================================================================
 let currentTheme = localStorage.getItem('CBeeNet-theme') || 'dark-blue';
 
 function applyTheme(theme){
@@ -2080,7 +2543,7 @@ function applyTheme(theme){
   const isLight = theme.startsWith('light');
   const icon = isLight ? 'ti-moon' : 'ti-sun';
   const labelKey = isLight ? 'light_theme' : 'dark_theme';
-  const dict = LANG[currentLang] || LANG['fa'];
+  const dict = LANG_DICT[currentLang] || LANG_DICT['en'];
   document.getElementById('theme-icon').className = 'ti ' + icon;
   document.getElementById('theme-label').textContent = dict[labelKey] || (isLight ? 'Light Theme' : 'Dark Theme');
   document.getElementById('theme-mob-icon').className = 'ti ' + icon;
@@ -2098,7 +2561,9 @@ function toggleTheme(){
   applyTheme(newTheme);
 }
 
-// ===== Utility Functions =====
+// =====================================================================
+// ==================== UTILITY FUNCTIONS ==============================
+// =====================================================================
 function toast(msg, type=''){
   const t = document.getElementById('toast');
   t.textContent = msg;
@@ -2132,8 +2597,8 @@ function expChip(exp, expired){
   if(!exp) return '<span class="exp-chip ec-inf"><i class="ti ti-infinity"></i> Unlimited</span>';
   const d = daysLeft(exp);
   if(d <= 0) return '<span class="exp-chip ec-exp"><i class="ti ti-calendar-x"></i> Expired</span>';
-  if(d <= 3) return `<span class="exp-chip ec-warn"><i class="ti ti-alert-triangle"></i> ${toFa(d)} days left</span>`;
-  return `<span class="exp-chip ec-ok"><i class="ti ti-calendar-check"></i> ${toFa(d)} days left</span>`;
+  if(d <= 3) return `<span class="exp-chip ec-warn"><i class="ti ti-alert-triangle"></i> ${d} days left</span>`;
+  return `<span class="exp-chip ec-ok"><i class="ti ti-calendar-check"></i> ${d} days left</span>`;
 }
 
 function protoBadge(protocols){
@@ -2170,7 +2635,9 @@ async function authF(url, opts={}){
   return r;
 }
 
-// ===== Protocol Functions =====
+// =====================================================================
+// ==================== PROTOCOL FUNCTIONS =============================
+// =====================================================================
 function toggleProtoBtn(el){ el.classList.toggle('active'); }
 
 function getSelectedProtocols(){
@@ -2199,7 +2666,9 @@ function setCount(val, el){
   el.classList.add('active');
 }
 
-// ===== Server Settings =====
+// =====================================================================
+// ==================== SERVER SETTINGS ================================
+// =====================================================================
 async function loadServerSettings(){
   try {
     const r = await authF('/api/settings/server');
@@ -2228,9 +2697,8 @@ async function saveServerSettings(){
       localStorage.setItem('CBeeNet-server-name', name);
       localStorage.setItem('CBeeNet-server-prefix', prefix);
       localStorage.setItem('CBeeNet-link-template', template);
-      const saveResult = document.getElementById('server-save-result');
-      saveResult.style.display = 'block';
-      setTimeout(() => saveResult.style.display = 'none', 3000);
+      document.getElementById('server-save-result').style.display = 'block';
+      setTimeout(() => document.getElementById('server-save-result').style.display = 'none', 3000);
       toast('Settings saved ✓', 'ok');
       loadLinks();
     } else {
@@ -2259,7 +2727,9 @@ function formatLinkName(label, protocol){
   return result;
 }
 
-// ===== Navigation =====
+// =====================================================================
+// ==================== NAVIGATION =====================================
+// =====================================================================
 const sb = document.getElementById('sb'), overlay = document.getElementById('overlay');
 function openSb(){ sb.classList.add('open'); overlay.classList.add('show'); }
 function closeSb(){ sb.classList.remove('open'); overlay.classList.remove('show'); }
@@ -2280,14 +2750,57 @@ document.querySelectorAll('.nav-it').forEach(el => el.addEventListener('click', 
 function openModal(id){ document.getElementById(id).classList.add('open'); }
 function closeModal(id){ document.getElementById(id).classList.remove('open'); }
 
-// ===== Charts =====
+// =====================================================================
+// ==================== CHARTS =========================================
+// =====================================================================
 let dashTrafficChart = null;
 let dashProtoChart = null;
 let dashDailyChart = null;
+let dashHourlyChart = null;
 let ch3 = null;
+let sparkLoadChart, sparkTrafficChart, sparkConnsChart;
+const sparkData = { load: [], traffic: [], conns: [] };
+const MAX_SPARK = 60;
+
+function initSparklineCharts(){
+  const accentColor = getComputedStyle(document.documentElement).getPropertyValue('--accent').trim() || '#1677ff';
+  const accentBg = getComputedStyle(document.documentElement).getPropertyValue('--accent-d').trim() || 'rgba(22,119,255,0.12)';
+  
+  const ctxLoad = document.getElementById('sparkLoad').getContext('2d');
+  sparkLoadChart = new Chart(ctxLoad, {
+    type: 'line',
+    data: { labels: [], datasets: [{ data: [], borderColor: accentColor, backgroundColor: accentBg, borderWidth: 2, pointRadius: 0, fill: true, tension: 0.3 }] },
+    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false }, tooltip: { enabled: false } }, scales: { x: { display: false, grid: { display: false } }, y: { display: false, grid: { display: false }, min: 0, max: 100 } }, animation: { duration: 100 } }
+  });
+  
+  const ctxTraffic = document.getElementById('sparkTraffic').getContext('2d');
+  sparkTrafficChart = new Chart(ctxTraffic, {
+    type: 'line',
+    data: { labels: [], datasets: [{ data: [], borderColor: accentColor, backgroundColor: accentBg, borderWidth: 2, pointRadius: 0, fill: true, tension: 0.3 }] },
+    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false }, tooltip: { enabled: false } }, scales: { x: { display: false, grid: { display: false } }, y: { display: false, grid: { display: false }, min: 0 } }, animation: { duration: 100 } }
+  });
+  
+  const ctxConns = document.getElementById('sparkConns').getContext('2d');
+  sparkConnsChart = new Chart(ctxConns, {
+    type: 'line',
+    data: { labels: [], datasets: [{ data: [], borderColor: accentColor, backgroundColor: accentBg, borderWidth: 2, pointRadius: 0, fill: true, tension: 0.3 }] },
+    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false }, tooltip: { enabled: false } }, scales: { x: { display: false, grid: { display: false } }, y: { display: false, grid: { display: false }, min: 0 } }, animation: { duration: 100 } }
+  });
+}
+
+function updateSparkline(chart, data, maxVal){
+  if(!chart) return;
+  if(data.length > MAX_SPARK) data.shift();
+  const labels = data.map((_, i) => i);
+  chart.data.labels = labels;
+  chart.data.datasets[0].data = data;
+  if(maxVal){
+    chart.options.scales.y.max = maxVal;
+  }
+  chart.update('none');
+}
 
 function initCharts(){
-  // Traffic chart is initialized in fetchStats
   // Proto chart
   const ctxProto = document.getElementById('dashProtoChart');
   if(ctxProto){
@@ -2312,9 +2825,23 @@ function initCharts(){
       options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { x: { grid: { display: false }, ticks: { color: 'var(--t3)', font: { size: 8 } } }, y: { grid: { color: 'var(--card-b)' }, ticks: { color: 'var(--t3)', font: { size: 8 }, callback: v => v + 'MB' } } } }
     });
   }
+  // Hourly chart
+  const ctxHourly = document.getElementById('dashHourlyChart');
+  if(ctxHourly){
+    dashHourlyChart = new Chart(ctxHourly.getContext('2d'), {
+      type: 'line',
+      data: {
+        labels: ['00', '04', '08', '12', '16', '20'],
+        datasets: [{ data: [0,0,0,0,0,0], borderColor: 'var(--amber)', backgroundColor: 'rgba(245,158,11,0.1)', fill: true, tension: 0.3, pointRadius: 0 }]
+      },
+      options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { x: { grid: { display: false }, ticks: { color: 'var(--t3)', font: { size: 8 } } }, y: { grid: { color: 'var(--card-b)' }, ticks: { color: 'var(--t3)', font: { size: 8 }, callback: v => v + 'MB' } } } }
+    });
+  }
 }
 
-// ===== Fetch Stats & Dashboard =====
+// =====================================================================
+// ==================== FETCH STATS & DASHBOARD =======================
+// =====================================================================
 let prevTraf = 0;
 
 async function fetchStats(){
@@ -2322,7 +2849,7 @@ async function fetchStats(){
     const r = await authF('/stats');
     const d = await r.json();
     
-    // Update stats cards
+    // Stats cards
     document.getElementById('dash-conns').textContent = d.active_connections || 0;
     document.getElementById('dash-traffic').innerHTML = (d.total_traffic_mb || 0).toFixed(1) + ' <small style="font-size:14px;font-weight:400;">MB</small>';
     document.getElementById('dash-links').textContent = d.links_count || 0;
@@ -2330,6 +2857,26 @@ async function fetchStats(){
     document.getElementById('dash-uptime').textContent = d.uptime || '00:00:00';
     document.getElementById('uptime-badge').textContent = 'Railway · ' + (d.uptime || '00:00:00');
     document.getElementById('last-upd').textContent = 'Last update: ' + new Date().toLocaleTimeString();
+    
+    // Sparkline data
+    const delta = d.total_traffic_mb - prevTraf;
+    const pct = Math.min(100, Math.max(0, Math.round((delta / 50) * 100 * 10) / 10));
+    prevTraf = d.total_traffic_mb;
+    sparkData.load.push(pct);
+    document.getElementById('spark-load').innerHTML = pct + '<span class="unit">%</span>';
+    updateSparkline(sparkLoadChart, sparkData.load, 100);
+    
+    const trafficVal = parseFloat(d.total_traffic_mb.toFixed(2));
+    sparkData.traffic.push(trafficVal);
+    document.getElementById('spark-traffic').innerHTML = trafficVal + '<span class="unit">MB</span>';
+    const maxTraffic = Math.max(10, ...sparkData.traffic);
+    updateSparkline(sparkTrafficChart, sparkData.traffic, maxTraffic * 1.2);
+    
+    const connsVal = d.active_connections || 0;
+    sparkData.conns.push(connsVal);
+    document.getElementById('spark-conns').textContent = connsVal;
+    const maxConns = Math.max(5, ...sparkData.conns);
+    updateSparkline(sparkConnsChart, sparkData.conns, maxConns * 1.2);
     
     // Top connections
     const conns = d.connections || [];
@@ -2368,7 +2915,7 @@ async function fetchStats(){
       }).join('');
     }
     
-    // Traffic chart (hourly)
+    // Traffic chart
     const hourly = d.hourly || {};
     const labels = Object.keys(hourly).sort();
     const data = labels.map(h => (hourly[h] || 0) / (1024*1024));
@@ -2408,26 +2955,34 @@ async function fetchStats(){
       });
     }
     
-    // Update proto chart
+    // Update proto chart with sample data (will be improved with real data from links)
     if(dashProtoChart){
+      // Use real data from links if available
       const protoCounts = { 'vless-ws': 0, 'xhttp-packet-up': 0, 'xhttp-stream-up': 0 };
-      if(d.links_count > 0){
-        // We need to fetch links or use existing data
-        // For now, update later via loadLinks
-      }
+      // Will be updated via loadLinks
     }
     
-    // Update daily chart (mock data for demo)
+    // Update daily chart (mock for now, can be replaced with real data)
     if(dashDailyChart){
-      const dailyData = Array(7).fill(0).map(() => Math.random() * 50);
+      const dailyData = Array(7).fill(0).map(() => Math.random() * 50 + 10);
       dashDailyChart.data.datasets[0].data = dailyData;
       dashDailyChart.update();
+    }
+    
+    // Update hourly chart
+    if(dashHourlyChart && labels.length){
+      const hourlyData = labels.map(h => (hourly[h] || 0) / (1024*1024));
+      dashHourlyChart.data.labels = labels.slice(0, 6);
+      dashHourlyChart.data.datasets[0].data = hourlyData.slice(0, 6);
+      dashHourlyChart.update();
     }
     
   } catch(e){ console.error(e); }
 }
 
-// ===== Links =====
+// =====================================================================
+// ==================== LINKS ==========================================
+// =====================================================================
 let allSubsList = [];
 let allLinksList = [];
 
@@ -2610,7 +3165,9 @@ async function deleteLink(uuid){
 
 function showQR(link){ window.open('https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=' + encodeURIComponent(link), '_blank'); }
 
-// ===== Sub Groups =====
+// =====================================================================
+// ==================== SUB GROUPS =====================================
+// =====================================================================
 let allSubsRaw = [];
 
 async function loadSubs(){
@@ -2623,7 +3180,7 @@ async function loadSubs(){
     document.getElementById('subs-pg-cnt').textContent = subs.length + ' Groups';
     const grid = document.getElementById('subs-grid');
     if(!subs.length){
-      grid.innerHTML = '<div class="subs-empty-v2"><div class="subs-empty-v2-icon"><i class="ti ti-folders"></i></div><div class="subs-empty-v2-title">No groups yet</div><div class="subs-empty-v2-sub">Create a new group to organize your configs</div></div>';
+      grid.innerHTML = '<div class="subs-empty-v2"><div class="subs-empty-v2-icon"><i class="ti ti-folders"></i></div><div class="subs-empty-v2-title" data-lang="no_groups">No groups yet</div><div class="subs-empty-v2-sub" data-lang="create_group">Create a new group to organize your configs</div></div>';
       return;
     }
     grid.innerHTML = subs.map(s => `
@@ -2635,15 +3192,15 @@ async function loadSubs(){
             <div class="sub-card-lock-badge ${s.has_password ? 'locked' : 'open'}"><i class="ti ${s.has_password ? 'ti-lock' : 'ti-lock-open'}"></i></div>
           </div>
           <div class="sub-card-stats">
-            <div class="sub-card-stat"><div class="sub-card-stat-val">${toFa(s.links_count)}</div><div class="sub-card-stat-label">Configs</div></div>
-            <div class="sub-card-stat"><div class="sub-card-stat-val" style="color:var(--green-t)">${toFa(s.active_count)}</div><div class="sub-card-stat-label">Active</div></div>
-            <div class="sub-card-stat"><div class="sub-card-stat-val" style="font-size:12px">${esc(s.total_used_fmt)}</div><div class="sub-card-stat-label">Usage</div></div>
+            <div class="sub-card-stat"><div class="sub-card-stat-val">${toFa(s.links_count)}</div><div class="sub-card-stat-label" data-lang="configs">Configs</div></div>
+            <div class="sub-card-stat"><div class="sub-card-stat-val" style="color:var(--green-t)">${toFa(s.active_count)}</div><div class="sub-card-stat-label" data-lang="active">Active</div></div>
+            <div class="sub-card-stat"><div class="sub-card-stat-val" style="font-size:12px">${esc(s.total_used_fmt)}</div><div class="sub-card-stat-label" data-lang="usage">Usage</div></div>
           </div>
         </div>
         <div class="sub-card-url-row"><span class="sub-card-url-text">${esc(s.public_url)}</span><button class="sub-card-url-copy" onclick="navigator.clipboard.writeText('${esc(s.public_url)}').then(()=>toast('Copied','ok'))"><i class="ti ti-copy"></i></button><button class="sub-card-url-copy" onclick="window.open('${esc(s.public_url)}','_blank')"><i class="ti ti-external-link"></i></button></div>
         <div class="sub-card-bottom">
-          <button class="btn btn-sm btn-g" onclick="openSubLinks('${esc(s.sub_id)}','${esc(s.name)}')"><i class="ti ti-link-plus"></i> Configs</button>
-          <button class="btn btn-sm btn-pur" onclick="copyAllSubLinks('${esc(s.sub_id)}')"><i class="ti ti-copy"></i> Copy All</button>
+          <button class="btn btn-sm btn-g" onclick="openSubLinks('${esc(s.sub_id)}','${esc(s.name)}')"><i class="ti ti-link-plus"></i> <span data-lang="configs">Configs</span></button>
+          <button class="btn btn-sm btn-pur" onclick="copyAllSubLinks('${esc(s.sub_id)}')"><i class="ti ti-copy"></i> <span data-lang="copy">Copy All</span></button>
           <button class="btn btn-sm btn-g btn-icon" onclick="showQR('${esc(s.sub_url)}')"><i class="ti ti-qrcode"></i></button>
           <button class="btn btn-sm btn-d btn-icon" onclick="deleteSub('${esc(s.sub_id)}')"><i class="ti ti-trash"></i></button>
         </div>
@@ -2656,19 +3213,36 @@ function filterSubs(q){
   q = q.trim().toLowerCase();
   if(!q){ loadSubs(); return; }
   const filtered = allSubsRaw.filter(s => s.name.toLowerCase().includes(q) || (s.desc || '').toLowerCase().includes(q));
-  renderSubsGrid(filtered);
-}
-
-function renderSubsGrid(subs){
-  // Same as loadSubs but with filtered data
-  // For brevity, we reuse loadSubs logic
+  // simple re-render with filtered data
   const grid = document.getElementById('subs-grid');
-  if(!subs.length){
+  if(!filtered.length){
     grid.innerHTML = '<div class="subs-empty-v2"><div class="subs-empty-v2-icon"><i class="ti ti-folders"></i></div><div class="subs-empty-v2-title">No groups found</div></div>';
     return;
   }
-  // Reuse the same rendering as loadSubs
-  // ... (code omitted for brevity, same as above)
+  // re-use same rendering logic (simplified)
+  grid.innerHTML = filtered.map(s => `
+    <div class="sub-card">
+      <div class="sub-card-top">
+        <div class="sub-card-head-v2">
+          <div class="sub-card-icon"><i class="ti ti-folder"></i></div>
+          <div class="sub-card-titles"><div class="sub-card-name-v2">${esc(s.name)}</div><div class="sub-card-desc-v2">${s.desc || 'No description'}</div></div>
+          <div class="sub-card-lock-badge ${s.has_password ? 'locked' : 'open'}"><i class="ti ${s.has_password ? 'ti-lock' : 'ti-lock-open'}"></i></div>
+        </div>
+        <div class="sub-card-stats">
+          <div class="sub-card-stat"><div class="sub-card-stat-val">${toFa(s.links_count)}</div><div class="sub-card-stat-label">Configs</div></div>
+          <div class="sub-card-stat"><div class="sub-card-stat-val" style="color:var(--green-t)">${toFa(s.active_count)}</div><div class="sub-card-stat-label">Active</div></div>
+          <div class="sub-card-stat"><div class="sub-card-stat-val" style="font-size:12px">${esc(s.total_used_fmt)}</div><div class="sub-card-stat-label">Usage</div></div>
+        </div>
+      </div>
+      <div class="sub-card-url-row"><span class="sub-card-url-text">${esc(s.public_url)}</span><button class="sub-card-url-copy" onclick="navigator.clipboard.writeText('${esc(s.public_url)}').then(()=>toast('Copied','ok'))"><i class="ti ti-copy"></i></button><button class="sub-card-url-copy" onclick="window.open('${esc(s.public_url)}','_blank')"><i class="ti ti-external-link"></i></button></div>
+      <div class="sub-card-bottom">
+        <button class="btn btn-sm btn-g" onclick="openSubLinks('${esc(s.sub_id)}','${esc(s.name)}')"><i class="ti ti-link-plus"></i> Configs</button>
+        <button class="btn btn-sm btn-pur" onclick="copyAllSubLinks('${esc(s.sub_id)}')"><i class="ti ti-copy"></i> Copy All</button>
+        <button class="btn btn-sm btn-g btn-icon" onclick="showQR('${esc(s.sub_url)}')"><i class="ti ti-qrcode"></i></button>
+        <button class="btn btn-sm btn-d btn-icon" onclick="deleteSub('${esc(s.sub_id)}')"><i class="ti ti-trash"></i></button>
+      </div>
+    </div>
+  `).join('');
 }
 
 async function createSub(){
@@ -2768,7 +3342,9 @@ async function saveSubLinks(){
   } catch(e){ toast('Error saving', 'err'); }
 }
 
-// ===== Subscriptions =====
+// =====================================================================
+// ==================== SUBSCRIPTIONS ==================================
+// =====================================================================
 async function loadSubsPage(){
   document.getElementById('sub-all-url').textContent = location.protocol + '//' + location.host + '/sub-all';
   try{
@@ -2788,7 +3364,9 @@ async function loadSubsPage(){
 
 function cpSubAll(){ navigator.clipboard.writeText(location.protocol + '//' + location.host + '/sub-all').then(() => toast('Copied ✓', 'ok')); }
 
-// ===== Connections =====
+// =====================================================================
+// ==================== CONNECTIONS ====================================
+// =====================================================================
 async function loadConns(){
   try{
     const r = await authF('/api/connections');
@@ -2835,7 +3413,9 @@ async function loadConns(){
 
 function parseBytesFmt(s){ if(!s) return 0; const m = String(s).match(/([\d.]+)\s*([A-Za-z]+)/); if(!m) return 0; const n = parseFloat(m[1]), u = m[2].toUpperCase(); const mult = { B:1, KB:1024, MB:1024**2, GB:1024**3, TB:1024**4 }; return n * (mult[u] || 0); }
 
-// ===== Logs & Errors =====
+// =====================================================================
+// ==================== LOGS & ERRORS ==================================
+// =====================================================================
 async function loadActivity(){
   try{
     const r = await authF('/api/activity');
@@ -2874,7 +3454,9 @@ function renderErrs(errs){
   el.innerHTML = errs.slice().reverse().map(e => `<div class="erow"><div class="etime"><i class="ti ti-clock"></i> ${new Date(e.time).toLocaleString()}</div><div class="emsg">${esc(e.error)}${e.url ? ' — ' + esc(e.url) : ''}</div></div>`).join('');
 }
 
-// ===== WebSocket =====
+// =====================================================================
+// ==================== WEBSOCKET ======================================
+// =====================================================================
 let ws = null;
 function wsLog(c, m){
   const l = document.getElementById('ws-log');
@@ -2905,7 +3487,9 @@ function wsSend(){
 }
 function wsDisc(){ if(ws) ws.close(); }
 
-// ===== Password =====
+// =====================================================================
+// ==================== PASSWORD =======================================
+// =====================================================================
 async function changePw(){
   const cur = document.getElementById('cp-cur').value;
   const nw = document.getElementById('cp-new').value;
@@ -2953,7 +3537,9 @@ function checkPwStrength(val){
   label.innerHTML = `<i class="ti ti-shield-check" style="color:${colors[Math.max(0, score-1)]}"></i> ${labels[Math.max(0, score-1)]}`;
 }
 
-// ===== Refresh =====
+// =====================================================================
+// ==================== REFRESH ========================================
+// =====================================================================
 function refreshAll(){
   fetchStats();
   if(document.getElementById('pg-links').classList.contains('on')) loadLinks();
@@ -2976,7 +3562,9 @@ async function copyAllSubLinks(subId){
   navigator.clipboard.writeText(urls.join('\n')).then(() => toast(urls.length + ' links copied ✓', 'ok'));
 }
 
-// ===== Init =====
+// =====================================================================
+// ==================== INIT ===========================================
+// =====================================================================
 document.addEventListener('DOMContentLoaded', async () => {
   await checkAuth();
   
@@ -2992,6 +3580,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   applyTheme(currentTheme);
   
   // Init charts
+  initSparklineCharts();
   initCharts();
   
   // Set host
@@ -3013,7 +3602,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   }, 10000);
 });
 
-// ===== Hidden count input =====
+// Hidden count input for bulk creation
 document.addEventListener('DOMContentLoaded', function() {
   if(!document.getElementById('nl-count')) {
     const hidden = document.createElement('input');
@@ -3023,16 +3612,12 @@ document.addEventListener('DOMContentLoaded', function() {
     document.querySelector('.cp-body').appendChild(hidden);
   }
 });
-
-// ===== Catch-all for missing functions =====
-function initSparklineCharts(){}
-function updateSparkline(){}
 </script>
 </body></html>"""
 
 def get_public_page_html(uuid_key: str) -> str:
     return f"""<!DOCTYPE html>
-<html lang="fa" dir="rtl">
+<html lang="en" dir="ltr">
 <head>
 <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
 <title>CBee Sub</title>
@@ -3042,7 +3627,7 @@ def get_public_page_html(uuid_key: str) -> str:
 <style>
 *{{margin:0;padding:0;box-sizing:border-box}}
 :root{{--bg:#0d1117;--card:#161b22;--card-b:#30363d;--accent:#1677ff;--accent2:#4096ff;--t1:#f0f6fc;--t2:#8b949e;--t3:#6e7681;--radius:16px}}
-body{{font-family:'Vazirmatn',sans-serif;background:var(--bg);color:var(--t1);min-height:100vh;display:flex;justify-content:center;align-items:center;padding:20px}}
+body{{font-family:'Vazirmatn','Segoe UI',sans-serif;background:var(--bg);color:var(--t1);min-height:100vh;display:flex;justify-content:center;align-items:center;padding:20px}}
 .wrap{{max-width:800px;width:100%}}
 .brand{{font-size:28px;font-weight:900;text-align:center;margin-bottom:20px;color:var(--accent2)}}
 .loading{{text-align:center;padding:40px;color:var(--t3)}}
