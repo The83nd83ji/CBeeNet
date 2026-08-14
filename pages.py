@@ -2440,29 +2440,42 @@ const MAX_SPARK = 60;
 let sparkLoadChart, sparkTrafficChart, sparkConnsChart;
 
 function initSparklineCharts(){
-  const accentColor = getComputedStyle(document.documentElement).getPropertyValue('--accent').trim() || '#1677ff';
-  const accentBg = getComputedStyle(document.documentElement).getPropertyValue('--accent-d').trim() || 'rgba(22,119,255,0.12)';
-  
-  const ctxLoad = document.getElementById('sparkLoad').getContext('2d');
-  sparkLoadChart = new Chart(ctxLoad, {
-    type: 'line',
-    data: { labels: [], datasets: [{ data: [], borderColor: accentColor, backgroundColor: accentBg, borderWidth: 2, pointRadius: 0, fill: true, tension: 0.3 }] },
-    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false }, tooltip: { enabled: false } }, scales: { x: { display: false, grid: { display: false } }, y: { display: false, grid: { display: false }, min: 0, max: 100 } }, animation: { duration: 100 } }
-  });
-  
-  const ctxTraffic = document.getElementById('sparkTraffic').getContext('2d');
-  sparkTrafficChart = new Chart(ctxTraffic, {
-    type: 'line',
-    data: { labels: [], datasets: [{ data: [], borderColor: accentColor, backgroundColor: accentBg, borderWidth: 2, pointRadius: 0, fill: true, tension: 0.3 }] },
-    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false }, tooltip: { enabled: false } }, scales: { x: { display: false, grid: { display: false } }, y: { display: false, grid: { display: false }, min: 0 } }, animation: { duration: 100 } }
-  });
-  
-  const ctxConns = document.getElementById('sparkConns').getContext('2d');
-  sparkConnsChart = new Chart(ctxConns, {
-    type: 'line',
-    data: { labels: [], datasets: [{ data: [], borderColor: accentColor, backgroundColor: accentBg, borderWidth: 2, pointRadius: 0, fill: true, tension: 0.3 }] },
-    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false }, tooltip: { enabled: false } }, scales: { x: { display: false, grid: { display: false } }, y: { display: false, grid: { display: false }, min: 0 } }, animation: { duration: 100 } }
-  });
+  try {
+    const accentColor = getComputedStyle(document.documentElement).getPropertyValue('--accent').trim() || '#1677ff';
+    const accentBg = getComputedStyle(document.documentElement).getPropertyValue('--accent-d').trim() || 'rgba(22,119,255,0.12)';
+    
+    const loadEl = document.getElementById('sparkLoad');
+    if(loadEl) {
+      const ctxLoad = loadEl.getContext('2d');
+      sparkLoadChart = new Chart(ctxLoad, {
+        type: 'line',
+        data: { labels: [], datasets: [{ data: [], borderColor: accentColor, backgroundColor: accentBg, borderWidth: 2, pointRadius: 0, fill: true, tension: 0.3 }] },
+        options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false }, tooltip: { enabled: false } }, scales: { x: { display: false, grid: { display: false } }, y: { display: false, grid: { display: false }, min: 0, max: 100 } }, animation: { duration: 100 } }
+      });
+    }
+    
+    const trafficEl = document.getElementById('sparkTraffic');
+    if(trafficEl) {
+      const ctxTraffic = trafficEl.getContext('2d');
+      sparkTrafficChart = new Chart(ctxTraffic, {
+        type: 'line',
+        data: { labels: [], datasets: [{ data: [], borderColor: accentColor, backgroundColor: accentBg, borderWidth: 2, pointRadius: 0, fill: true, tension: 0.3 }] },
+        options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false }, tooltip: { enabled: false } }, scales: { x: { display: false, grid: { display: false } }, y: { display: false, grid: { display: false }, min: 0 } }, animation: { duration: 100 } }
+      });
+    }
+    
+    const connsEl = document.getElementById('sparkConns');
+    if(connsEl) {
+      const ctxConns = connsEl.getContext('2d');
+      sparkConnsChart = new Chart(ctxConns, {
+        type: 'line',
+        data: { labels: [], datasets: [{ data: [], borderColor: accentColor, backgroundColor: accentBg, borderWidth: 2, pointRadius: 0, fill: true, tension: 0.3 }] },
+        options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false }, tooltip: { enabled: false } }, scales: { x: { display: false, grid: { display: false } }, y: { display: false, grid: { display: false }, min: 0 } }, animation: { duration: 100 } }
+      });
+    }
+  } catch(e) {
+    console.warn('Sparkline init error:', e);
+  }
 }
 
 function updateSparkline(chart, data, maxVal){
@@ -2484,43 +2497,47 @@ let dashBandwidthChart = null;
 let ch3 = null;
 
 function initCharts(){
-  const ctxProto = document.getElementById('dashProtoChart');
-  if(ctxProto){
-    dashProtoChart = new Chart(ctxProto.getContext('2d'), {
-      type: 'doughnut',
-      data: {
-        labels: ['VLESS/WS', 'XHTTP-packet', 'XHTTP-stream'],
-        datasets: [{ data: [0, 0, 0], backgroundColor: ['var(--accent)', 'var(--purple)', 'var(--green)'], borderWidth: 0 }]
-      },
-      options: { 
-        responsive: true, 
-        maintainAspectRatio: false, 
-        plugins: { 
-          legend: { position: 'bottom', labels: { color: 'var(--t2)', font: { size: 10 } } } 
-        }, 
-        cutout: '70%' 
-      }
-    });
-  }
-  
-  const ctxBand = document.getElementById('dashBandwidthChart');
-  if(ctxBand){
-    dashBandwidthChart = new Chart(ctxBand.getContext('2d'), {
-      type: 'bar',
-      data: {
-        labels: ['VLESS', 'XHTTP', 'ULTRA'],
-        datasets: [{ data: [0, 0, 0], backgroundColor: ['var(--accent-d)', 'var(--purple-bg)', 'var(--green-bg)'], borderColor: ['var(--accent)', 'var(--purple)', 'var(--green)'], borderWidth: 1 }]
-      },
-      options: { 
-        responsive: true, 
-        maintainAspectRatio: false, 
-        plugins: { legend: { display: false } }, 
-        scales: { 
-          x: { grid: { display: false }, ticks: { color: 'var(--t3)', font: { size: 9 } } }, 
-          y: { grid: { color: 'var(--card-b)' }, ticks: { color: 'var(--t3)', font: { size: 9 }, callback: v => v + 'MB' } } 
-        } 
-      }
-    });
+  try {
+    const ctxProto = document.getElementById('dashProtoChart');
+    if(ctxProto){
+      dashProtoChart = new Chart(ctxProto.getContext('2d'), {
+        type: 'doughnut',
+        data: {
+          labels: ['VLESS/WS', 'XHTTP-packet', 'XHTTP-stream'],
+          datasets: [{ data: [0, 0, 0], backgroundColor: ['var(--accent)', 'var(--purple)', 'var(--green)'], borderWidth: 0 }]
+        },
+        options: { 
+          responsive: true, 
+          maintainAspectRatio: false, 
+          plugins: { 
+            legend: { position: 'bottom', labels: { color: 'var(--t2)', font: { size: 10 } } } 
+          }, 
+          cutout: '70%' 
+        }
+      });
+    }
+    
+    const ctxBand = document.getElementById('dashBandwidthChart');
+    if(ctxBand){
+      dashBandwidthChart = new Chart(ctxBand.getContext('2d'), {
+        type: 'bar',
+        data: {
+          labels: ['VLESS', 'XHTTP', 'ULTRA'],
+          datasets: [{ data: [0, 0, 0], backgroundColor: ['var(--accent-d)', 'var(--purple-bg)', 'var(--green-bg)'], borderColor: ['var(--accent)', 'var(--purple)', 'var(--green)'], borderWidth: 1 }]
+        },
+        options: { 
+          responsive: true, 
+          maintainAspectRatio: false, 
+          plugins: { legend: { display: false } }, 
+          scales: { 
+            x: { grid: { display: false }, ticks: { color: 'var(--t3)', font: { size: 9 } } }, 
+            y: { grid: { color: 'var(--card-b)' }, ticks: { color: 'var(--t3)', font: { size: 9 }, callback: v => v + 'MB' } } 
+          } 
+        }
+      });
+    }
+  } catch(e) {
+    console.warn('Chart init error:', e);
   }
 }
 
@@ -2606,34 +2623,36 @@ async function fetchStats(){
       dashTrafficChart.update();
     } else {
       const ctx = document.getElementById('dashTrafficChart').getContext('2d');
-      const grad = ctx.createLinearGradient(0, 0, 0, 220);
-      grad.addColorStop(0, 'rgba(22,119,255,0.4)');
-      grad.addColorStop(1, 'rgba(22,119,255,0)');
-      dashTrafficChart = new Chart(ctx, {
-        type: 'line',
-        data: {
-          labels: labels,
-          datasets: [{
-            label: 'Usage (MB)',
-            data: data,
-            borderColor: 'var(--accent)',
-            backgroundColor: grad,
-            fill: true,
-            tension: 0.4,
-            pointRadius: 0,
-            borderWidth: 2
-          }]
-        },
-        options: {
-          responsive: true,
-          maintainAspectRatio: false,
-          plugins: { legend: { display: false } },
-          scales: {
-            x: { grid: { display: false }, ticks: { color: 'var(--t3)', font: { size: 9 } } },
-            y: { grid: { color: 'var(--card-b)' }, ticks: { color: 'var(--t3)', font: { size: 9 }, callback: v => v + ' MB' } }
+      if(ctx) {
+        const grad = ctx.createLinearGradient(0, 0, 0, 220);
+        grad.addColorStop(0, 'rgba(22,119,255,0.4)');
+        grad.addColorStop(1, 'rgba(22,119,255,0)');
+        dashTrafficChart = new Chart(ctx, {
+          type: 'line',
+          data: {
+            labels: labels,
+            datasets: [{
+              label: 'Usage (MB)',
+              data: data,
+              borderColor: 'var(--accent)',
+              backgroundColor: grad,
+              fill: true,
+              tension: 0.4,
+              pointRadius: 0,
+              borderWidth: 2
+            }]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: { legend: { display: false } },
+            scales: {
+              x: { grid: { display: false }, ticks: { color: 'var(--t3)', font: { size: 9 } } },
+              y: { grid: { color: 'var(--card-b)' }, ticks: { color: 'var(--t3)', font: { size: 9 }, callback: v => v + ' MB' } }
+            }
           }
-        }
-      });
+        });
+      }
     }
     
     // Protocol chart - update from links
@@ -2664,7 +2683,7 @@ async function fetchStats(){
       dashBandwidthChart.update();
     }
     
-  } catch(e){ console.error(e); }
+  } catch(e){ console.error('fetchStats error:', e); }
 }
 
 // ===== LINKS =====
@@ -2741,7 +2760,7 @@ async function loadLinks(){
         </div>
       </div>`;
     }).join('');
-  } catch(e){ console.error(e); }
+  } catch(e){ console.error('loadLinks error:', e); }
 }
 
 async function createLink(){
@@ -2878,7 +2897,7 @@ async function loadSubs(){
         </div>
       </div>
     `).join('');
-  } catch(e){ console.error(e); }
+  } catch(e){ console.error('loadSubs error:', e); }
 }
 
 function filterSubs(q){
@@ -2946,7 +2965,6 @@ let lmodalLinks = [], lmodalInSub = new Set(), currentSubId = '';
 
 async function openSubLinks(sub_id, name){
   currentSubId = sub_id;
-  // Update modal title with group name
   const titleEl = document.querySelector('#modal-links .lmodal-title-v2');
   if(titleEl) titleEl.textContent = 'Select configs for group: ' + name;
   document.getElementById('modal-links-body').innerHTML = '<div style="padding:20px;text-align:center">Loading...</div>';
@@ -3029,7 +3047,7 @@ async function loadSubsPage(){
         <div style="display:flex;gap:5px"><button class="btn btn-sm btn-pur" onclick="navigator.clipboard.writeText('${esc(s.sub_url)}')"><i class="ti ti-copy"></i> Sub</button><button class="btn btn-sm btn-g" onclick="showQR('${esc(s.sub_url)}')"><i class="ti ti-qrcode"></i></button></div>
       </div>
     `).join('');
-  } catch(e){}
+  } catch(e){ console.error('loadSubsPage error:', e); }
 }
 
 function cpSubAll(){ navigator.clipboard.writeText(location.protocol + '//' + location.host + '/sub-all').then(() => toast('Copied ✓', 'ok')); }
@@ -3076,7 +3094,7 @@ async function loadConns(){
         </div>
       </div>`;
     }).join('');
-  } catch(e){ console.error(e); }
+  } catch(e){ console.error('loadConns error:', e); }
 }
 
 function parseBytesFmt(s){ if(!s) return 0; const m = String(s).match(/([\d.]+)\s*([A-Za-z]+)/); if(!m) return 0; const n = parseFloat(m[1]), u = m[2].toUpperCase(); const mult = { B:1, KB:1024, MB:1024**2, GB:1024**3, TB:1024**4 }; return n * (mult[u] || 0); }
@@ -3102,7 +3120,7 @@ async function loadActivity(){
         </div>
       </div>
     `).join('');
-  } catch(e){ console.error(e); }
+  } catch(e){ console.error('loadActivity error:', e); }
 }
 
 async function loadErrs(){
@@ -3110,7 +3128,7 @@ async function loadErrs(){
     const r = await authF('/stats');
     const d = await r.json();
     renderErrs(d.recent_errors || []);
-  } catch(e){}
+  } catch(e){ console.error('loadErrs error:', e); }
 }
 
 function renderErrs(errs){
@@ -3235,8 +3253,10 @@ document.addEventListener('DOMContentLoaded', async () => {
     });
     
     applyTheme(currentTheme);
-    initSparklineCharts();
-    initCharts();
+    
+    // Initialize charts safely
+    try { initSparklineCharts(); } catch(e) { console.warn('Sparkline init error:', e); }
+    try { initCharts(); } catch(e) { console.warn('Chart init error:', e); }
     
     document.getElementById('set-host').textContent = location.host;
     document.getElementById('sub-all-url').textContent = location.protocol + '//' + location.host + '/sub-all';
@@ -3247,15 +3267,18 @@ document.addEventListener('DOMContentLoaded', async () => {
       hidden.type = 'hidden';
       hidden.id = 'nl-count';
       hidden.value = 1;
-      document.querySelector('.cp-body').appendChild(hidden);
+      const cpBody = document.querySelector('.cp-body');
+      if(cpBody) cpBody.appendChild(hidden);
     }
     
-    await loadServerSettings();
-    fetchStats();
-    loadLinks();
-    loadSubs();
-    loadSubsPage();
+    // Load data with separate error handling
+    try { await loadServerSettings(); } catch(e) { console.warn('loadServerSettings error:', e); }
+    try { await fetchStats(); } catch(e) { console.warn('fetchStats error:', e); }
+    try { await loadLinks(); } catch(e) { console.warn('loadLinks error:', e); }
+    try { await loadSubs(); } catch(e) { console.warn('loadSubs error:', e); }
+    try { await loadSubsPage(); } catch(e) { console.warn('loadSubsPage error:', e); }
     
+    // Set intervals
     setInterval(fetchStats, 5000);
     setInterval(() => {
       if(document.getElementById('pg-connections').classList.contains('on')) loadConns();
