@@ -1,7 +1,7 @@
-# pages.py - CBee Gateway v1.0.0 (Imperial Theme + Full Responsive)
+# pages.py - CBee Gateway v1.0.1 (Royal Theme + Fixed Language)
 import json
 
-# ===== دیکشنری ترجمه کامل =====
+# ===== دیکشنری ترجمه کامل (بدون تغییر) =====
 LANG = {
     "en": {
         "login_title": "Login to Panel",
@@ -66,7 +66,7 @@ LANG = {
         "websocket_test": "WebSocket Test",
         "dark_theme": "Dark Theme",
         "light_theme": "Light Theme",
-        "imperial_theme": "Imperial Theme",
+        "royal_theme": "Royal Theme",
         "blue": "Blue",
         "red": "Red",
         "gold": "Gold",
@@ -197,6 +197,8 @@ LANG = {
         "password_confirm": "Confirm New Password",
         "protocol_distribution": "Protocol Distribution",
         "bandwidth_usage": "Bandwidth Usage",
+        "groups": "Groups",
+        "average": "Average"
     },
     "fa": {
         "login_title": "ورود به پنل",
@@ -261,7 +263,7 @@ LANG = {
         "websocket_test": "تست WebSocket",
         "dark_theme": "تم تاریک",
         "light_theme": "تم روشن",
-        "imperial_theme": "تم امپراتوری",
+        "royal_theme": "تم سلطنتی",
         "blue": "آبی",
         "red": "قرمز",
         "gold": "طلایی",
@@ -391,6 +393,8 @@ LANG = {
         "password_confirm": "تکرار رمز جدید",
         "protocol_distribution": "تقسیم‌بندی پروتکل‌ها",
         "bandwidth_usage": "مصرف پهنای باند",
+        "groups": "گروه‌ها",
+        "average": "میانگین"
     }
 }
 
@@ -634,6 +638,8 @@ input:focus + .ic { color: #1677ff; }
   gap: 6px;
   margin-bottom: 16px;
   justify-content: center;
+  /* ثابت نگه‌داشتن ترتیب دکمه‌ها مستقل از راست‌چینی */
+  direction: ltr;
 }
 .lang-btn {
   background: transparent;
@@ -661,7 +667,7 @@ input:focus + .ic { color: #1677ff; }
   <div class="card">
     <div class="brand">
       <div class="brand-name">CBee</div>
-      <div class="brand-sub">Gateway · v1.0.0</div>
+      <div class="brand-sub">Gateway · v1.0.1</div>
     </div>
     <div class="lang-switch">
       <button class="lang-btn active" data-lang="en" onclick="setLoginLang('en')">English</button>
@@ -799,17 +805,17 @@ DASHBOARD_HTML = r"""<!DOCTYPE html>
 [data-theme="dark-blue"]{--accent:#1677ff;--accent2:#4096ff;--accent-d:rgba(22,119,255,0.12);--accent-glow:rgba(22,119,255,0.35);--card-bh:rgba(22,119,255,0.20);}
 [data-theme="dark-red"]{--accent:#ef4444;--accent2:#f87171;--accent-d:rgba(239,68,68,0.12);--accent-glow:rgba(239,68,68,0.35);--card-bh:rgba(239,68,68,0.20);}
 [data-theme="dark-gold"]{--accent:#C9A84C;--accent2:#D4AF37;--accent-d:rgba(201,168,76,0.15);--accent-glow:rgba(201,168,76,0.35);--card-bh:rgba(201,168,76,0.25);}
-[data-theme="imperial"]{
+[data-theme="royal"]{
   --bg:#0A0718;
   --bg2:#110D24;
   --bg3:#1A1438;
   --card:#110D24;
   --card-b:#2D1F5A;
-  --card-bh:rgba(201,168,76,0.25);
-  --accent:#C9A84C;
-  --accent2:#D4AF37;
-  --accent-d:rgba(201,168,76,0.15);
-  --accent-glow:rgba(201,168,76,0.30);
+  --card-bh:rgba(196,181,100,0.25);
+  --accent:#D4AF37;
+  --accent2:#E5C55A;
+  --accent-d:rgba(196,181,100,0.15);
+  --accent-glow:rgba(196,181,100,0.30);
   --green:#10b981;
   --green-bg:rgba(16,185,129,0.10);
   --green-t:#34d399;
@@ -1666,7 +1672,7 @@ a{color:inherit;text-decoration:none}
   <button class="sb-close" id="close-sb"><i class="ti ti-x"></i></button>
   <div class="logo">
     <span class="logo-text">CBee</span>
-    <div style="font-size:10px;color:var(--t3);margin-top:1px">Gateway · v1.0.0</div>
+    <div style="font-size:10px;color:var(--t3);margin-top:1px">Gateway · v1.0.1</div>
   </div>
   <div class="nav-wrap">
     <div class="nav-sec" data-lang="panel">Panel</div>
@@ -1817,7 +1823,7 @@ a{color:inherit;text-decoration:none}
   </div>
 
   <div class="dash-footer">
-    <span class="df-text">CBee Gateway v1.0.0 · 2026 · Railway</span>
+    <span class="df-text">CBee Gateway v1.0.1 · 2026 · Railway</span>
     <a class="df-link" href="https://t.me/CBeeNet" target="_blank"><i class="ti ti-brand-telegram"></i> t.me/CBeeNet</a>
   </div>
 </section>
@@ -2064,7 +2070,7 @@ a{color:inherit;text-decoration:none}
 <section class="pg" id="pg-settings">
   <div class="topbar">
     <div><div class="tb-title"><i class="ti ti-settings"></i> <span data-lang="settings">Settings</span></div><div class="tb-sub" data-lang="settings">Panel configuration</div></div>
-    <div class="tb-right"><span class="badge bg-blue">v1.0.0</span></div>
+    <div class="tb-right"><span class="badge bg-blue">v1.0.1</span></div>
   </div>
   <div class="g2">
     <!-- Theme -->
@@ -2077,7 +2083,7 @@ a{color:inherit;text-decoration:none}
             <button class="btn btn-p theme-btn-select" data-theme="dark-blue" style="background:#1677ff;color:#fff;box-shadow:0 2px 8px rgba(22,119,255,0.4)" onclick="setTheme('dark-blue')"><i class="ti ti-circle"></i> <span data-lang="blue">Blue</span></button>
             <button class="btn btn-p theme-btn-select" data-theme="dark-red" style="background:#ef4444;color:#fff;box-shadow:0 2px 8px rgba(239,68,68,0.4)" onclick="setTheme('dark-red')"><i class="ti ti-circle"></i> <span data-lang="red">Red</span></button>
             <button class="btn btn-p theme-btn-select" data-theme="dark-gold" style="background:#C9A84C;color:#fff;box-shadow:0 2px 8px rgba(201,168,76,0.4)" onclick="setTheme('dark-gold')"><i class="ti ti-circle"></i> <span data-lang="gold">Gold</span></button>
-            <button class="btn btn-p theme-btn-select" data-theme="imperial" style="background:linear-gradient(135deg,#6C2BD9,#C9A84C);color:#fff;box-shadow:0 2px 8px rgba(108,43,217,0.5)" onclick="setTheme('imperial')"><i class="ti ti-circle"></i> <span data-lang="imperial_theme">Imperial</span></button>
+            <button class="btn btn-p theme-btn-select" data-theme="royal" style="background:linear-gradient(135deg,#2d1f5a,#D4AF37);color:#fff;box-shadow:0 2px 8px rgba(45,31,90,0.5)" onclick="setTheme('royal')"><i class="ti ti-crown"></i> <span data-lang="royal_theme">Royal</span></button>
           </div>
         </div>
         <div>
@@ -2095,7 +2101,7 @@ a{color:inherit;text-decoration:none}
     <!-- Language -->
     <div class="card">
       <div class="card-title"><i class="ti ti-language"></i> <span data-lang="language">Language</span></div>
-      <div style="display:flex;gap:10px;flex-wrap:wrap">
+      <div style="display:flex;gap:10px;flex-wrap:wrap;direction:ltr">
         <button class="btn-lang active" data-lang-code="en" onclick="setLanguage('en')"><i class="ti ti-check" style="display:none"></i> English</button>
         <button class="btn-lang" data-lang-code="fa" onclick="setLanguage('fa')"><i class="ti ti-check" style="display:none"></i> فارسی</button>
       </div>
@@ -2143,7 +2149,7 @@ a{color:inherit;text-decoration:none}
       </div>
       <div class="srv-tiles">
         <div class="srv-tile"><div class="srv-tile-icon"><i class="ti ti-route"></i></div><div class="srv-tile-text"><div class="srv-tile-label" data-lang="port">Port</div><div class="srv-tile-val">443 (TLS)</div></div></div>
-        <div class="srv-tile"><div class="srv-tile-icon"><i class="ti ti-versions"></i></div><div class="srv-tile-text"><div class="srv-tile-label" data-lang="version">Version</div><div class="srv-tile-val">v1.0.0</div></div></div>
+        <div class="srv-tile"><div class="srv-tile-icon"><i class="ti ti-versions"></i></div><div class="srv-tile-text"><div class="srv-tile-label" data-lang="version">Version</div><div class="srv-tile-val">v1.0.1</div></div></div>
         <div class="srv-tile"><div class="srv-tile-icon"><i class="ti ti-brand-fastapi"></i></div><div class="srv-tile-text"><div class="srv-tile-label" data-lang="framework">Framework</div><div class="srv-tile-val">FastAPI + Uvicorn</div></div></div>
         <div class="srv-tile"><div class="srv-tile-icon"><i class="ti ti-cloud"></i></div><div class="srv-tile-text"><div class="srv-tile-label" data-lang="platform">Platform</div><div class="srv-tile-val">Railway</div></div></div>
         <div class="srv-tile" style="grid-column:1/-1"><div class="srv-tile-icon"><i class="ti ti-device-floppy"></i></div><div class="srv-tile-text"><div class="srv-tile-label" data-lang="storage">Storage</div><div class="srv-tile-val">JSON File (/data)</div></div></div>
@@ -3220,33 +3226,38 @@ async function copyAllSubLinks(subId){
 
 // ===== Init =====
 document.addEventListener('DOMContentLoaded', async () => {
-  await checkAuth();
-  
-  applyLanguage();
-  document.querySelectorAll('.btn-lang').forEach(btn => {
-    btn.classList.toggle('active', btn.dataset.langCode === currentLang);
-    const check = btn.querySelector('i');
-    if(check) check.style.display = btn.dataset.langCode === currentLang ? 'inline' : 'none';
-  });
-  
-  applyTheme(currentTheme);
-  initSparklineCharts();
-  initCharts();
-  
-  document.getElementById('set-host').textContent = location.host;
-  document.getElementById('sub-all-url').textContent = location.protocol + '//' + location.host + '/sub-all';
-  
-  await loadServerSettings();
-  fetchStats();
-  loadLinks();
-  loadSubs();
-  loadSubsPage();
-  
-  setInterval(fetchStats, 5000);
-  setInterval(() => {
-    if(document.getElementById('pg-connections').classList.contains('on')) loadConns();
-    if(document.getElementById('pg-logs').classList.contains('on')) loadActivity();
-  }, 10000);
+  try {
+    await checkAuth();
+    
+    applyLanguage();
+    document.querySelectorAll('.btn-lang').forEach(btn => {
+      btn.classList.toggle('active', btn.dataset.langCode === currentLang);
+      const check = btn.querySelector('i');
+      if(check) check.style.display = btn.dataset.langCode === currentLang ? 'inline' : 'none';
+    });
+    
+    applyTheme(currentTheme);
+    initSparklineCharts();
+    initCharts();
+    
+    document.getElementById('set-host').textContent = location.host;
+    document.getElementById('sub-all-url').textContent = location.protocol + '//' + location.host + '/sub-all';
+    
+    await loadServerSettings();
+    fetchStats();
+    loadLinks();
+    loadSubs();
+    loadSubsPage();
+    
+    setInterval(fetchStats, 5000);
+    setInterval(() => {
+      if(document.getElementById('pg-connections').classList.contains('on')) loadConns();
+      if(document.getElementById('pg-logs').classList.contains('on')) loadActivity();
+    }, 10000);
+  } catch(e) {
+    console.error('Init error:', e);
+    toast('Error loading panel, check console', 'err');
+  }
 });
 
 // ===== Hidden count input =====
@@ -3280,7 +3291,7 @@ body{{font-family:'Inter','Vazirmatn',sans-serif;background:var(--bg);color:var(
 .brand{{font-size:28px;font-weight:900;text-align:center;margin-bottom:20px;color:var(--accent2)}}
 .loading{{text-align:center;padding:40px;color:var(--t3)}}
 .card{{background:var(--card);border:1px solid var(--card-b);border-radius:var(--radius);padding:20px}}
-.lang-switch{{display:flex;gap:8px;justify-content:center;margin-bottom:16px}}
+.lang-switch{{display:flex;gap:8px;justify-content:center;margin-bottom:16px;direction:ltr}}
 .lang-btn{{background:transparent;border:1px solid var(--card-b);color:var(--t2);padding:4px 12px;border-radius:6px;cursor:pointer;font-family:inherit;font-size:11px;transition:.2s}}
 .lang-btn:hover{{border-color:var(--accent);color:var(--t1)}}
 .lang-btn.active{{background:var(--accent);border-color:var(--accent);color:#fff}}
