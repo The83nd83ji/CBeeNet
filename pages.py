@@ -1,4 +1,4 @@
-# pages.py - CBee Gateway v1.0.0 - Full Dashboard with Premium Charts
+# pages.py - CBee Gateway v1.0.0 - Premium Dashboard with Fixed Issues
 import json
 
 LOGIN_HTML = r"""<!DOCTYPE html>
@@ -174,7 +174,7 @@ h1 {
 }
 input[type="password"], input[type="text"] {
   width: 100%;
-  padding: 14px 48px 14px 18px;
+  padding: 14px 18px 14px 48px;
   border-radius: 14px;
   border: 1px solid #30363d;
   background: rgba(0,0,0,0.3);
@@ -184,6 +184,9 @@ input[type="password"], input[type="text"] {
   outline: none;
   transition: all 0.25s;
 }
+[dir="rtl"] input[type="password"], [dir="rtl"] input[type="text"] {
+  padding: 14px 48px 14px 18px;
+}
 input[type="password"]:focus, input[type="text"]:focus {
   border-color: rgba(22,119,255,0.5);
   background: rgba(0,0,0,0.4);
@@ -191,13 +194,17 @@ input[type="password"]:focus, input[type="text"]:focus {
 }
 .ic {
   position: absolute;
-  left: 14px;
+  right: 14px;
   top: 50%;
   transform: translateY(-50%);
   color: #8b949e;
   font-size: 18px;
   pointer-events: none;
   transition: 0.2s;
+}
+[dir="rtl"] .ic {
+  right: auto;
+  left: 14px;
 }
 input:focus + .ic { color: #1677ff; }
 .btn {
@@ -2036,31 +2043,64 @@ function initCharts(){
   const amberColor = getComputedStyle(document.documentElement).getPropertyValue('--amber-t').trim() || '#fbbf24';
   const textColor = getComputedStyle(document.documentElement).getPropertyValue('--t3').trim() || '#5a7298';
   const gridColor = getComputedStyle(document.documentElement).getPropertyValue('--card-b').trim() || '#1e2d45';
-  // Main Traffic Chart - Premium Design
+  // MAIN TRAFFIC CHART - PREMIUM DESIGN
   const ctxTraffic = document.getElementById('dashTrafficChart').getContext('2d');
   const gradient = ctxTraffic.createLinearGradient(0, 0, 0, 220);
   gradient.addColorStop(0, 'rgba(26, 122, 255, 0.35)');
-  gradient.addColorStop(0.4, 'rgba(139, 92, 246, 0.15)');
+  gradient.addColorStop(0.3, 'rgba(139, 92, 246, 0.20)');
   gradient.addColorStop(1, 'rgba(26, 122, 255, 0)');
   dashTrafficChart = new Chart(ctxTraffic, {
     type: 'line',
-    data: { labels: [], datasets: [{ label: 'Traffic (MB)', data: [], borderColor: accentColor, backgroundColor: gradient, borderWidth: 3, pointRadius: 0, pointHoverRadius: 8, pointHoverBorderWidth: 3, pointHoverBorderColor: '#fff', fill: true, tension: 0.4 }] },
+    data: { labels: [], datasets: [{
+      label: 'Traffic (MB)',
+      data: [],
+      borderColor: accentColor,
+      backgroundColor: gradient,
+      borderWidth: 3,
+      pointRadius: 2,
+      pointBackgroundColor: '#ffffff',
+      pointBorderColor: accentColor,
+      pointBorderWidth: 3,
+      pointHoverRadius: 9,
+      pointHoverBorderWidth: 4,
+      pointHoverBorderColor: '#fff',
+      pointHoverBackgroundColor: accentColor,
+      fill: true,
+      tension: 0.4
+    }] },
     options: {
       responsive: true, maintainAspectRatio: false,
       interaction: { intersect: false, mode: 'index' },
       plugins: {
         legend: { display: false },
         tooltip: {
-          backgroundColor: 'rgba(11, 17, 29, 0.9)',
-          borderColor: accentColor, borderWidth: 1,
-          titleColor: '#fff', bodyColor: '#fff',
-          cornerRadius: 8, padding: 10,
-          callbacks: { label: function(context){ let label = context.dataset.label || ''; if(label) label += ': '; if(context.parsed.y !== null) label += context.parsed.y.toFixed(2) + ' MB'; return label; } }
+          backgroundColor: 'rgba(11, 17, 29, 0.92)',
+          borderColor: accentColor,
+          borderWidth: 1.5,
+          titleColor: '#fff',
+          bodyColor: '#e8edf5',
+          cornerRadius: 12,
+          padding: 12,
+          boxShadow: '0 8px 30px rgba(0,0,0,0.6)',
+          callbacks: {
+            label: function(context){
+              let label = context.dataset.label || '';
+              if(label) label += ': ';
+              if(context.parsed.y !== null) label += context.parsed.y.toFixed(2) + ' MB';
+              return label;
+            }
+          }
         }
       },
       scales: {
-        x: { grid: { display: false }, ticks: { color: textColor, font: { size: 10, family: 'Vazirmatn, sans-serif' }, maxTicksLimit: 10 } },
-        y: { grid: { color: gridColor, drawBorder: false }, ticks: { color: textColor, font: { size: 10, family: 'Vazirmatn, sans-serif' }, callback: function(value) { return value + ' MB'; } } }
+        x: {
+          grid: { display: false },
+          ticks: { color: textColor, font: { size: 10, family: 'Vazirmatn, sans-serif' }, maxTicksLimit: 12 }
+        },
+        y: {
+          grid: { color: gridColor, drawBorder: false },
+          ticks: { color: textColor, font: { size: 10, family: 'Vazirmatn, sans-serif' }, callback: function(value) { return value.toFixed(1) + ' MB'; } }
+        }
       },
       animation: { duration: 500, easing: 'easeOutQuart' }
     }
@@ -2072,20 +2112,8 @@ function initCharts(){
     data: { labels: ['VLESS/WS', 'XHTTP-packet', 'XHTTP-stream'], datasets: [{ data: [0, 0, 0], backgroundColor: ['rgba(26, 122, 255, 0.8)', 'rgba(139, 92, 246, 0.8)', 'rgba(52, 211, 153, 0.8)'], borderColor: [accentColor, purpleColor, greenColor], borderWidth: 2, borderRadius: 6, barPercentage: 0.6 }] },
     options: {
       responsive: true, maintainAspectRatio: false,
-      plugins: {
-        legend: { display: false },
-        tooltip: {
-          backgroundColor: 'rgba(11, 17, 29, 0.9)',
-          borderColor: accentColor, borderWidth: 1,
-          titleColor: '#fff', bodyColor: '#fff',
-          cornerRadius: 8, padding: 10,
-          callbacks: { label: function(context){ return context.parsed.y + ' configs'; } }
-        }
-      },
-      scales: {
-        x: { grid: { display: false }, ticks: { color: textColor, font: { size: 9, family: 'Vazirmatn, sans-serif' } } },
-        y: { grid: { color: gridColor, drawBorder: false }, ticks: { color: textColor, font: { size: 9, family: 'Vazirmatn, sans-serif' }, stepSize: 1 } }
-      },
+      plugins: { legend: { display: false }, tooltip: { backgroundColor: 'rgba(11, 17, 29, 0.9)', borderColor: accentColor, borderWidth: 1, titleColor: '#fff', bodyColor: '#fff', cornerRadius: 8, padding: 10, callbacks: { label: function(context){ return context.parsed.y + ' configs'; } } } },
+      scales: { x: { grid: { display: false }, ticks: { color: textColor, font: { size: 9, family: 'Vazirmatn, sans-serif' } } }, y: { grid: { color: gridColor, drawBorder: false }, ticks: { color: textColor, font: { size: 9, family: 'Vazirmatn, sans-serif' }, stepSize: 1 } } },
       animation: { duration: 400, easing: 'easeOutQuart' }
     }
   });
@@ -2096,20 +2124,8 @@ function initCharts(){
     data: { labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'], datasets: [{ data: [0, 0, 0, 0, 0, 0, 0], backgroundColor: 'rgba(26, 122, 255, 0.2)', borderColor: accentColor, borderWidth: 1, borderRadius: 4, barPercentage: 0.6 }] },
     options: {
       responsive: true, maintainAspectRatio: false,
-      plugins: {
-        legend: { display: false },
-        tooltip: {
-          backgroundColor: 'rgba(11, 17, 29, 0.9)',
-          borderColor: accentColor, borderWidth: 1,
-          titleColor: '#fff', bodyColor: '#fff',
-          cornerRadius: 8, padding: 10,
-          callbacks: { label: function(context){ return context.parsed.y + ' MB'; } }
-        }
-      },
-      scales: {
-        x: { grid: { display: false }, ticks: { color: textColor, font: { size: 8, family: 'Vazirmatn, sans-serif' } } },
-        y: { grid: { color: gridColor, drawBorder: false }, ticks: { color: textColor, font: { size: 8, family: 'Vazirmatn, sans-serif' }, callback: function(value) { return value + ' MB'; } } }
-      },
+      plugins: { legend: { display: false }, tooltip: { backgroundColor: 'rgba(11, 17, 29, 0.9)', borderColor: accentColor, borderWidth: 1, titleColor: '#fff', bodyColor: '#fff', cornerRadius: 8, padding: 10, callbacks: { label: function(context){ return context.parsed.y + ' MB'; } } } },
+      scales: { x: { grid: { display: false }, ticks: { color: textColor, font: { size: 8, family: 'Vazirmatn, sans-serif' } } }, y: { grid: { color: gridColor, drawBorder: false }, ticks: { color: textColor, font: { size: 8, family: 'Vazirmatn, sans-serif' }, callback: function(value) { return value + ' MB'; } } } },
       animation: { duration: 400, easing: 'easeOutQuart' }
     }
   });
@@ -2120,20 +2136,8 @@ function initCharts(){
     data: { labels: ['00', '04', '08', '12', '16', '20'], datasets: [{ data: [0, 0, 0, 0, 0, 0], borderColor: amberColor, backgroundColor: 'rgba(251, 191, 36, 0.1)', borderWidth: 2, pointRadius: 0, pointHoverRadius: 5, pointHoverBorderWidth: 2, pointHoverBorderColor: '#fff', fill: true, tension: 0.3 }] },
     options: {
       responsive: true, maintainAspectRatio: false,
-      plugins: {
-        legend: { display: false },
-        tooltip: {
-          backgroundColor: 'rgba(11, 17, 29, 0.9)',
-          borderColor: amberColor, borderWidth: 1,
-          titleColor: '#fff', bodyColor: '#fff',
-          cornerRadius: 8, padding: 10,
-          callbacks: { label: function(context){ return context.parsed.y + ' MB'; } }
-        }
-      },
-      scales: {
-        x: { grid: { display: false }, ticks: { color: textColor, font: { size: 8, family: 'Vazirmatn, sans-serif' } } },
-        y: { grid: { color: gridColor, drawBorder: false }, ticks: { color: textColor, font: { size: 8, family: 'Vazirmatn, sans-serif' }, callback: function(value) { return value + ' MB'; } } }
-      },
+      plugins: { legend: { display: false }, tooltip: { backgroundColor: 'rgba(11, 17, 29, 0.9)', borderColor: amberColor, borderWidth: 1, titleColor: '#fff', bodyColor: '#fff', cornerRadius: 8, padding: 10, callbacks: { label: function(context){ return context.parsed.y + ' MB'; } } } },
+      scales: { x: { grid: { display: false }, ticks: { color: textColor, font: { size: 8, family: 'Vazirmatn, sans-serif' } } }, y: { grid: { color: gridColor, drawBorder: false }, ticks: { color: textColor, font: { size: 8, family: 'Vazirmatn, sans-serif' }, callback: function(value) { return value + ' MB'; } } } },
       animation: { duration: 400, easing: 'easeOutQuart' }
     }
   });
@@ -2182,7 +2186,11 @@ async function fetchStats(){
   try{
     const r = await authF('/stats');
     const d = await r.json();
-    document.getElementById('dash-conns').textContent = d.active_connections || 0;
+    // Active Connections - count unique IPs only
+    const conns = d.connections || [];
+    const uniqueIps = new Set(conns.map(c => c.ip));
+    const activeCount = uniqueIps.size;
+    document.getElementById('dash-conns').textContent = activeCount;
     document.getElementById('dash-traffic').innerHTML = (d.total_traffic_mb || 0).toFixed(1) + ' <small style="font-size:14px;font-weight:400;">MB</small>';
     document.getElementById('dash-links').textContent = d.links_count || 0;
     document.getElementById('dash-links-sub').textContent = (d.active_links || 0) + ' / ' + (d.links_count || 0);
@@ -2200,14 +2208,12 @@ async function fetchStats(){
     document.getElementById('spark-traffic').innerHTML = trafficVal + '<span class="unit">MB</span>';
     const maxTraffic = Math.max(10, ...sparkData.traffic);
     updateSparkline(sparkTrafficChart, sparkData.traffic, maxTraffic * 1.2);
-    const connsVal = d.active_connections || 0;
+    const connsVal = activeCount;
     sparkData.conns.push(connsVal);
     document.getElementById('spark-conns').textContent = connsVal;
     const maxConns = Math.max(5, ...sparkData.conns);
     updateSparkline(sparkConnsChart, sparkData.conns, maxConns * 1.2);
-    const conns = d.connections || [];
-    const uniqueIps = new Set(conns.map(c => c.ip)).size;
-    document.getElementById('dash-top-conns').innerHTML = '<div style="font-size:24px;font-weight:800;color:var(--t1)">' + uniqueIps + '</div><div style="font-size:10px;color:var(--t3)" data-lang="unique_ips">Unique IPs</div>';
+    document.getElementById('dash-top-conns').innerHTML = '<div style="font-size:24px;font-weight:800;color:var(--t1)">' + uniqueIps.size + '</div><div style="font-size:10px;color:var(--t3)" data-lang="unique_ips">Unique IPs</div>';
     const tbody = document.getElementById('dash-conn-table-body');
     if(!conns.length){ tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:var(--t3);padding:20px;" data-lang="no_connections">No connections</td></tr>'; }
     else {
@@ -2216,7 +2222,8 @@ async function fetchStats(){
         const dur = secs < 60 ? secs + 's' : secs < 3600 ? Math.floor(secs/60) + 'm' : Math.floor(secs/3600) + 'h';
         const up = c.bytes_fmt || '0 B';
         const down = c.bytes_fmt || '0 B';
-        return `<tr><td><span class="ip">${esc(c.ip || 'Unknown')}</span></td><td><span class="proto-badge">${esc(c.transport || 'vless')}</span></td><td>${up}</td><td>${down}</td><td>${dur}</td><td><span class="status-badge status-on-badge">● Online</span></td></tr>`;
+        const proto = c.transport || 'vless';
+        return `<tr><td><span class="ip">${esc(c.ip || 'Unknown')}</span></td><td><span class="proto-badge">${esc(proto)}</span></td><td>${up}</td><td>${down}</td><td>${dur}</td><td><span class="status-badge status-on-badge">● Online</span></td></tr>`;
       }).join('');
     }
     updateCharts(d, allLinksList);
@@ -2676,9 +2683,7 @@ async function copyAllSubLinks(subId){
 }
 document.addEventListener('DOMContentLoaded', async () => {
   await checkAuth();
-  // Apply language first
   applyLanguage();
-  // Set active language buttons (no check icon)
   document.querySelectorAll('.btn-lang').forEach(btn => {
     btn.classList.toggle('active', btn.dataset.langCode === currentLang);
   });
