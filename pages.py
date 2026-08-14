@@ -1307,7 +1307,7 @@ a{color:inherit;text-decoration:none}
             <button class="btn btn-p" style="background:#f59e0b;color:#000;box-shadow:0 2px 8px rgba(245,158,11,0.3)" onclick="setTheme('light-yellow')"><i class="ti ti-circle"></i> زرد</button>
           </div>
         </div>
-        <div class="cl"><i class="ti ti-info-circle"></i><span>تم پیش‌فرض: <strong id="current-theme-display">dark-yellow</strong></span></div>
+        <div class="cl"><i class="ti ti-info-circle"></i><span>تم پیش‌فرض: <strong id="current-theme-display">dark-blue</strong></span></div>
       </div>
     </div>
 
@@ -1325,7 +1325,7 @@ a{color:inherit;text-decoration:none}
         </div>
         <div class="fg">
           <label>قالب نام کانفیگ‌ها (از متغیرهای زیر استفاده کنید)</label>
-          <input class="fi" id="link-name-template" placeholder="مثلاً: [{server}][{label}]" style="width:100%">
+          <input class="fi" id="link-name-template" placeholder="مثلاً: {server}-{label}" style="width:100%">
           <div style="font-size:9.5px;color:var(--t3);margin-top:4px;display:flex;flex-wrap:wrap;gap:6px">
             <span style="background:var(--accent-d);padding:2px 8px;border-radius:4px">{server}</span>
             <span style="background:var(--accent-d);padding:2px 8px;border-radius:4px">{prefix}</span>
@@ -1333,7 +1333,7 @@ a{color:inherit;text-decoration:none}
             <span style="background:var(--accent-d);padding:2px 8px;border-radius:4px">{protocol}</span>
           </div>
         </div>
-        <div class="cl"><i class="ti ti-info-circle"></i><span>مثال‌های قالب: <code>{server}-{label}</code> ، <code>{label}</code> ، <code>[{server}][{protocol}]</code></span></div>
+        <div class="cl"><i class="ti ti-info-circle"></i><span>مثال‌های قالب: <code>{server}-{label}</code> ، <code>{label}</code> ، <code>{server}-{protocol}-{label}</code></span></div>
         <button class="btn btn-p" onclick="saveServerSettings()"><i class="ti ti-device-floppy"></i> ذخیره تنظیمات</button>
         <div id="server-save-result" style="font-size:11px;color:var(--green-t);display:none">✓ ذخیره شد</div>
       </div>
@@ -1381,7 +1381,7 @@ a{color:inherit;text-decoration:none}
 
 <script>
 // ========== متغیرهای سراسری ==========
-let currentTheme = localStorage.getItem('CBeeNet-theme') || 'dark-yellow';
+let currentTheme = localStorage.getItem('CBeeNet-theme') || 'dark-blue';
 
 // ========== توابع تم (اصلاح‌شده) ==========
 function applyTheme(theme){
@@ -1414,13 +1414,13 @@ function setTheme(theme){
 
 function toggleTheme(){
   const isLight = currentTheme.startsWith('light');
-  const color = currentTheme.split('-')[1] || 'yellow';
+  const color = currentTheme.split('-')[1] || 'blue';
   const newTheme = isLight ? 'dark-' + color : 'light-' + color;
   applyTheme(newTheme);
 }
 
 // اعمال تم ذخیره‌شده
-applyTheme(localStorage.getItem('CBeeNet-theme') || 'dark-yellow');
+applyTheme(localStorage.getItem('CBeeNet-theme') || 'dark-blue');
 
 // ========== توابع کمکی ==========
 function toast(msg,type=''){
@@ -1494,23 +1494,35 @@ document.addEventListener('DOMContentLoaded', function() {
     hidden.value = 1;
     document.querySelector('.cp-body').appendChild(hidden);
   }
-  // بارگذاری تنظیمات ذخیره‌شده
-  const savedServer = localStorage.getItem('CBeeNet-server-name') || 'CBeeNet';
-  const savedPrefix = localStorage.getItem('CBeeNet-server-prefix') || '';
-  const savedTemplate = localStorage.getItem('CBeeNet-link-template') || '[{server}][{prefix}][{protocol}]';
-  const nameInput = document.getElementById('server-name-input');
-  const prefixInput = document.getElementById('server-prefix-input');
-  const templateInput = document.getElementById('link-name-template');
-  if(nameInput) nameInput.value = savedServer;
-  if(prefixInput) prefixInput.value = savedPrefix;
-  if(templateInput) templateInput.value = savedTemplate;
+  // بارگذاری تنظیمات ذخیره‌شده از سرور
+  loadServerSettings();
 });
+
+// ========== بارگذاری تنظیمات سرور از سرور ==========
+async function loadServerSettings(){
+  try {
+    const r = await authF('/api/settings/server');
+    const data = await r.json();
+    const nameInput = document.getElementById('server-name-input');
+    const prefixInput = document.getElementById('server-prefix-input');
+    const templateInput = document.getElementById('link-name-template');
+    if(nameInput) nameInput.value = data.server_name || 'CBeeNet';
+    if(prefixInput) prefixInput.value = data.server_prefix || '';
+    if(templateInput) templateInput.value = data.link_template || '{server}-{label}';
+    // ذخیره در localStorage برای استفاده در formatLinkName
+    localStorage.setItem('CBeeNet-server-name', data.server_name || 'CBeeNet');
+    localStorage.setItem('CBeeNet-server-prefix', data.server_prefix || '');
+    localStorage.setItem('CBeeNet-link-template', data.link_template || '{server}-{label}');
+  } catch(e) {
+    console.warn('Could not load server settings:', e);
+  }
+}
 
 // ========== ذخیره تنظیمات سرور ==========
 async function saveServerSettings(){
   const name = document.getElementById('server-name-input').value.trim() || 'CBeeNet';
   const prefix = document.getElementById('server-prefix-input').value.trim() || '';
-  const template = document.getElementById('link-name-template').value.trim() || '[{server}][{prefix}][{protocol}]';
+  const template = document.getElementById('link-name-template').value.trim() || '{server}-{label}';
   try {
     const r = await authF('/api/settings/server', {
       method: 'POST',
@@ -1528,6 +1540,8 @@ async function saveServerSettings(){
         setTimeout(() => saveResult.style.display = 'none', 3000);
       }
       toast('تنظیمات سرور ذخیره شد ✓', 'ok');
+      // بارگذاری مجدد لینک‌ها برای اعمال تغییرات قالب
+      loadLinks();
     } else {
       toast('خطا در ذخیره تنظیمات', 'err');
     }
@@ -1673,10 +1687,10 @@ async function loadLinks(){
     const grid=document.getElementById('links-grid'),empty=document.getElementById('links-empty');
     if(!links.length){grid.innerHTML='';empty.style.display='block';document.getElementById('lsummary').innerHTML='<div class="empty"><i class="ti ti-link-off"></i><p>کانفیگی وجود ندارد</p></div>';return}
     empty.style.display='none';
-    // گرفتن تنظیمات از localStorage
+    // گرفتن تنظیمات از localStorage (که از سرور بارگذاری شده)
     const serverName = localStorage.getItem('CBeeNet-server-name') || 'CBeeNet';
     const serverPrefix = localStorage.getItem('CBeeNet-server-prefix') || '';
-    const linkTemplate = localStorage.getItem('CBeeNet-link-template') || '[{server}][{prefix}][{protocol}]';
+    const linkTemplate = localStorage.getItem('CBeeNet-link-template') || '{server}-{label}';
     // تابع جایگزین‌کننده متغیرها
     function formatLinkName(label, protocol){
       let result = linkTemplate;
@@ -2043,6 +2057,8 @@ document.addEventListener('DOMContentLoaded',async()=>{
   initCharts();
   document.getElementById('set-host').textContent=location.host;
   document.getElementById('sub-all-url')&&(document.getElementById('sub-all-url').textContent=location.protocol+'//'+location.host+'/sub-all');
+  // بارگذاری تنظیمات سرور
+  await loadServerSettings();
   fetchStats();loadLinks();loadSubs();
   setInterval(fetchStats,3000);
   setInterval(()=>{
