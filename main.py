@@ -23,12 +23,9 @@ IRAN_TZ = ZoneInfo("Asia/Tehran")
 
 app = FastAPI(title="CBeeNet Gateway", docs_url=None, redoc_url=None)
 
-# ── کلید مخفی ثابت (اگر محیطی تنظیم نشود) ─────────────────────────────────────
-FIXED_SECRET = "CBeeNet-Secret-2025"  # این مقدار را به دلخواه تغییر دهید
-
 CONFIG = {
     "port": int(os.environ.get("PORT", 8000)),
-    "secret": os.environ.get("SECRET_KEY", FIXED_SECRET),  # اولویت با محیطی است
+    "secret": os.environ.get("SECRET_KEY", secrets.token_urlsafe(32)),
     "host": os.environ.get("RAILWAY_PUBLIC_DOMAIN", "localhost"),
 }
 
@@ -52,21 +49,19 @@ async def load_state():
         if DATA_FILE.exists():
             async with aiofiles.open(DATA_FILE, "r", encoding="utf-8") as f:
                 data = json.loads(await f.read())
-            # تبدیل protocol قدیمی به protocols
             for uid, link in data.get("links", {}).items():
                 if "protocol" in link and "protocols" not in link:
                     link["protocols"] = [link.pop("protocol")]
             LINKS.update(data.get("links", {}))
             SUBS.update(data.get("subs", {}))
             RESELLERS.update(data.get("resellers", {}))
-            if "global_settings" in data: GLOBAL_SETTINGS.update(data["global_settings"])
-            if "password_hash" in data: AUTH["password_hash"] = data["password_hash"]
-            # secret_key را از فایل نادیده می‌گیریم تا همیشه از CONFIG استفاده شود
+            if "global_settings" in data:
+                GLOBAL_SETTINGS.update(data["global_settings"])
+            if "password_hash" in data:
+                AUTH["password_hash"] = data["password_hash"]
             logger.info(f"Loaded state from {DATA_FILE}: {len(LINKS)} links")
         else:
             logger.info("No existing state file found, starting fresh")
-            # اگر فایل وجود ندارد، state اولیه را با رمز پیش‌فرض ذخیره می‌کنیم
-            await save_state()
     except Exception as e:
         logger.error(f"Error loading state: {e}")
 
@@ -77,8 +72,7 @@ async def save_state():
             "subs": dict(SUBS),
             "resellers": dict(RESELLERS),
             "global_settings": dict(GLOBAL_SETTINGS),
-            "password_hash": AUTH["password_hash"],
-            "secret_key": CONFIG["secret"]  # فقط برای اطلاع ذخیره می‌شود، اما هنگام بارگذاری نادیده گرفته می‌شود
+            "password_hash": AUTH["password_hash"]
         }
         DATA_DIR.mkdir(parents=True, exist_ok=True)
         async with aiofiles.open(DATA_FILE, "w", encoding="utf-8") as f:
@@ -104,7 +98,10 @@ RESELLERS_LOCK = asyncio.Lock()
 
 GLOBAL_SETTINGS = {
     "ips": [],
-    "port": None
+    "port": None,
+    "server_name": "CBeeNet",
+    "server_prefix": "",
+    "link_template": "{server}-{label}"
 }
 
 PROTOCOLS = ("vless-ws", "xhttp-packet-up", "xhttp-stream-up", "xhttp-stream-one")
@@ -125,9 +122,7 @@ SESSION_TTL = 60 * 60 * 24 * 7
 def hash_password(pw: str) -> str:
     return hashlib.sha256(f"{pw}{CONFIG['secret']}".encode()).hexdigest()
 
-# رمز پیش‌فرض ثابت (در صورت نبود متغیر محیطی)
-DEFAULT_ADMIN_PASSWORD = "admin"
-AUTH = {"password_hash": hash_password(os.environ.get("ADMIN_PASSWORD", DEFAULT_ADMIN_PASSWORD))}
+AUTH = {"password_hash": hash_password(os.environ.get("ADMIN_PASSWORD", "admin"))}
 SESSIONS: dict = {}
 SESSIONS_LOCK = asyncio.Lock()
 
@@ -209,6 +204,26 @@ async def fetch_ip_flag(ip: str) -> str:
         pass
     return ""
 
+def format_link_remark(label: str, protocol: str) -> str:
+    """Generates remark based on global template and settings."""
+    template = GLOBAL_SETTINGS.get("link_template", "{server}-{label}")
+    server_name = GLOBAL_SETTINGS.get("server_name", "CBeeNet")
+    server_prefix = GLOBAL_SETTINGS.get("server_prefix", "")
+    result = template
+    result = result.replace("{server}", server_name)
+    result = result.replace("{prefix}", server_prefix)
+    result = result.replace("{label}", label)
+    # Protocol mapping for cleaner display
+    proto_map = {
+        "vless-ws": "VLESS-WS",
+        "xhttp-packet-up": "XHTTP-packet",
+        "xhttp-stream-up": "XHTTP-stream",
+        "xhttp-stream-one": "XHTTP-ultra"
+    }
+    proto_display = proto_map.get(protocol, protocol)
+    result = result.replace("{protocol}", proto_display)
+    return result
+
 def _format_vless_uri(uuid: str, ip: str, port: int, remark: str, protocol: str, original_host: str) -> str:
     if protocol == "vless-ws":
         path = f"/ws/{uuid}"
@@ -237,9 +252,16 @@ def generate_vless_links(link_data: dict, uuid: str, host: str) -> list[str]:
     if not port:
         port = 443
 
+    label = link_data['label']
     for ip in ips:
         for proto in protocols:
-            remark = f"CBeeNet-{link_data['label']}-{proto}" if len(ips) > 1 or len(protocols) > 1 else f"CBeeNet-{link_data['label']}"
+            remark = format_link_remark(label, proto)
+            # If multiple IPs or protocols, add suffix to distinguish
+            if len(ips) > 1 or len(protocols) > 1:
+                suffix = f"-{proto}" if len(protocols) > 1 else ""
+                if len(ips) > 1:
+                    suffix += f"-{ip.replace('.', '-')}"
+                remark += suffix
             links.append(_format_vless_uri(uuid, ip, port, remark, proto, host))
     return links
 
@@ -536,6 +558,25 @@ async def update_global_ips(request: Request, _=Depends(require_auth)):
     log_activity("system", "تنظیمات IP/پورت سراسری بروزرسانی شد", "info")
     return {"ok": True, "settings": dict(GLOBAL_SETTINGS)}
 
+# ── Server Settings (server name, prefix, template) ────────────────────────
+@app.get("/api/settings/server")
+async def get_server_settings(_=Depends(require_auth)):
+    return {
+        "server_name": GLOBAL_SETTINGS.get("server_name", "CBeeNet"),
+        "server_prefix": GLOBAL_SETTINGS.get("server_prefix", ""),
+        "link_template": GLOBAL_SETTINGS.get("link_template", "{server}-{label}")
+    }
+
+@app.post("/api/settings/server")
+async def update_server_settings(request: Request, _=Depends(require_auth)):
+    body = await request.json()
+    GLOBAL_SETTINGS["server_name"] = str(body.get("server_name", "CBeeNet")).strip() or "CBeeNet"
+    GLOBAL_SETTINGS["server_prefix"] = str(body.get("server_prefix", "")).strip()
+    GLOBAL_SETTINGS["link_template"] = str(body.get("link_template", "{server}-{label}")).strip() or "{server}-{label}"
+    asyncio.create_task(save_state())
+    log_activity("system", "تنظیمات سرور بروزرسانی شد", "info")
+    return {"ok": True, "settings": dict(GLOBAL_SETTINGS)}
+
 # ── Stats ─────────────────────────────────────────────────────────────────────
 @app.get("/stats")
 async def get_stats(_=Depends(require_auth)):
@@ -599,12 +640,10 @@ async def create_link(request: Request):
     is_personal = bool(body.get("is_personal", False))
     sub_id = body.get("sub_id")
     
-    # دریافت پروتکل‌ها (لیست)
     protocols = body.get("protocols")
     if not protocols:
         proto = body.get("protocol", DEFAULT_PROTOCOL)
         protocols = [proto]
-    # اعتبارسنجی
     protocols = [p for p in protocols if p in PROTOCOLS]
     if not protocols:
         protocols = [DEFAULT_PROTOCOL]
@@ -643,7 +682,6 @@ async def create_links_bulk(request: Request):
     s = await require_reseller_auth(request)
     body = await request.json()
     
-    # Parse count safely
     try:
         count = int(body.get("count", 1))
     except (ValueError, TypeError):
@@ -673,16 +711,13 @@ async def create_links_bulk(request: Request):
         await check_reseller_capacity(s["user_id"], limit_bytes * count)
         is_personal = True
 
-    # Pre-fetch flags for unique IPs to avoid repeated API calls
     ip_flags = {}
     for ip in ips:
         if ip not in ip_flags:
             ip_flags[ip] = await fetch_ip_flag(ip) if ip else ""
 
     created_uids = []
-    # Acquire LINKS_LOCK once for all creations to improve performance and avoid deadlocks
     async with LINKS_LOCK:
-        # Prepare sub object if needed
         sub_obj = None
         if sub_id:
             async with SUBS_LOCK:
@@ -1009,7 +1044,7 @@ async def dashboard(request: Request):
     await ensure_default_link()
     return HTMLResponse(content=DASHBOARD_HTML)
 
-@app.get("/CFOX", response_class=HTMLResponse)
+@app.get("/Cbee", response_class=HTMLResponse)
 async def cfox_dashboard(request: Request):
     s = await get_session_data(request.cookies.get(SESSION_COOKIE))
     if not s or s["role"] != "admin": return RedirectResponse(url="/login")
