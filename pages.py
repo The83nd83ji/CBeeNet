@@ -872,7 +872,7 @@ a{color:inherit;text-decoration:none}
 .dash-conn-item .ip{font-family:monospace;color:var(--t1)}
 .dash-conn-item .proto{font-size:9px;padding:2px 7px;border-radius:5px;background:var(--accent-d);color:var(--accent2)}
 .dash-conn-item .traffic{color:var(--t2)}
-.dash-charts-second{display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;margin-bottom:22px}
+.dash-charts-second{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:22px}
 .dash-small-chart{background:var(--card);border:1px solid var(--card-b);border-radius:var(--radius);padding:16px 18px}
 .dash-small-chart .chart-title{font-size:11px;font-weight:600;color:var(--t2);margin-bottom:10px;display:flex;align-items:center;gap:6px}
 .dash-small-chart .chart-title i{color:var(--accent)}
@@ -1478,10 +1478,6 @@ a{color:inherit;text-decoration:none}
       <div class="chart-wrap"><canvas id="dashProtoChart"></canvas></div>
     </div>
     <div class="dash-small-chart">
-      <div class="chart-title"><i class="ti ti-calendar"></i> <span data-lang="daily_usage">Daily Usage</span></div>
-      <div class="chart-wrap"><canvas id="dashDailyChart"></canvas></div>
-    </div>
-    <div class="dash-small-chart">
       <div class="chart-title"><i class="ti ti-arrow-up-right"></i> <span data-lang="hourly_average">Hourly Avg</span></div>
       <div class="chart-wrap"><canvas id="dashHourlyChart"></canvas></div>
     </div>
@@ -2009,7 +2005,7 @@ function navTo(name){
 document.querySelectorAll('.nav-it').forEach(el => el.addEventListener('click', () => navTo(el.dataset.pg)));
 function openModal(id){ document.getElementById(id).classList.add('open'); }
 function closeModal(id){ document.getElementById(id).classList.remove('open'); }
-let dashTrafficChart = null, dashProtoChart = null, dashDailyChart = null, dashHourlyChart = null, ch3 = null;
+let dashTrafficChart = null, dashProtoChart = null, dashHourlyChart = null, ch3 = null;
 let sparkLoadChart, sparkTrafficChart, sparkConnsChart;
 const sparkData = { load: [], traffic: [], conns: [] };
 const MAX_SPARK = 60;
@@ -2043,16 +2039,16 @@ function initCharts(){
   const amberColor = getComputedStyle(document.documentElement).getPropertyValue('--amber-t').trim() || '#fbbf24';
   const textColor = getComputedStyle(document.documentElement).getPropertyValue('--t3').trim() || '#5a7298';
   const gridColor = getComputedStyle(document.documentElement).getPropertyValue('--card-b').trim() || '#1e2d45';
-  // PREMIUM 3-LINE BANDWIDTH CHART (Download, Upload, Total)
+  // PREMIUM 3-LINE BANDWIDTH CHART (Download, Upload, Total) with real data support
   const ctxTraffic = document.getElementById('dashTrafficChart').getContext('2d');
   dashTrafficChart = new Chart(ctxTraffic, {
     type: 'line',
     data: {
-      labels: ['00:00', '02:00', '04:00', '06:00', '08:00', '10:00', '12:00', '14:00', '16:00', '18:00', '20:00', '22:00', '24:00'],
+      labels: [],
       datasets: [
         {
           label: 'Download',
-          data: [0.2, 0.5, 0.3, 0.8, 1.2, 2.0, 2.8, 3.5, 4.0, 5.2, 6.1, 5.5, 4.8],
+          data: [],
           borderColor: '#1677ff',
           backgroundColor: 'rgba(22,119,255,0.15)',
           borderWidth: 3,
@@ -2066,7 +2062,7 @@ function initCharts(){
         },
         {
           label: 'Upload',
-          data: [0.1, 0.2, 0.15, 0.3, 0.5, 0.8, 1.0, 1.5, 1.8, 2.2, 2.5, 2.0, 1.6],
+          data: [],
           borderColor: '#10b981',
           backgroundColor: 'rgba(16,185,129,0.10)',
           borderWidth: 3,
@@ -2080,7 +2076,7 @@ function initCharts(){
         },
         {
           label: 'Total',
-          data: [0.3, 0.7, 0.45, 1.1, 1.7, 2.8, 3.8, 5.0, 5.8, 7.4, 8.6, 7.5, 6.4],
+          data: [],
           borderColor: '#f59e0b',
           backgroundColor: 'rgba(245,158,11,0.08)',
           borderWidth: 3,
@@ -2118,12 +2114,11 @@ function initCharts(){
           bodyColor: '#e8edf5',
           cornerRadius: 12,
           padding: 14,
-          boxShadow: '0 8px 30px rgba(0,0,0,0.6)',
           callbacks: {
             label: function(context) {
               let label = context.dataset.label || '';
               if (label) label += ': ';
-              if (context.parsed.y !== null) label += context.parsed.y.toFixed(2) + ' Gbps';
+              if (context.parsed.y !== null) label += context.parsed.y.toFixed(3) + ' GB';
               return label;
             }
           }
@@ -2136,8 +2131,8 @@ function initCharts(){
         },
         y: {
           grid: { color: gridColor, drawBorder: false },
-          ticks: { color: textColor, font: { size: 10, family: 'Vazirmatn, sans-serif' }, callback: function(value) { return value.toFixed(1) + ' Gbps'; } },
-          min: 0
+          ticks: { color: textColor, font: { size: 10, family: 'Vazirmatn, sans-serif' }, callback: function(value) { return value.toFixed(1) + ' GB'; } },
+          beginAtZero: true
         }
       },
       animation: { duration: 600, easing: 'easeOutQuart' }
@@ -2155,18 +2150,6 @@ function initCharts(){
       animation: { duration: 400, easing: 'easeOutQuart' }
     }
   });
-  // Daily Usage
-  const ctxDaily = document.getElementById('dashDailyChart').getContext('2d');
-  dashDailyChart = new Chart(ctxDaily, {
-    type: 'bar',
-    data: { labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'], datasets: [{ data: [0, 0, 0, 0, 0, 0, 0], backgroundColor: 'rgba(26, 122, 255, 0.2)', borderColor: accentColor, borderWidth: 1, borderRadius: 4, barPercentage: 0.6 }] },
-    options: {
-      responsive: true, maintainAspectRatio: false,
-      plugins: { legend: { display: false }, tooltip: { backgroundColor: 'rgba(11, 17, 29, 0.9)', borderColor: accentColor, borderWidth: 1, titleColor: '#fff', bodyColor: '#fff', cornerRadius: 8, padding: 10, callbacks: { label: function(context){ return context.parsed.y + ' MB'; } } } },
-      scales: { x: { grid: { display: false }, ticks: { color: textColor, font: { size: 8, family: 'Vazirmatn, sans-serif' } } }, y: { grid: { color: gridColor, drawBorder: false }, ticks: { color: textColor, font: { size: 8, family: 'Vazirmatn, sans-serif' }, callback: function(value) { return value + ' MB'; } } } },
-      animation: { duration: 400, easing: 'easeOutQuart' }
-    }
-  });
   // Hourly Average
   const ctxHourly = document.getElementById('dashHourlyChart').getContext('2d');
   dashHourlyChart = new Chart(ctxHourly, {
@@ -2181,18 +2164,30 @@ function initCharts(){
   });
 }
 function updateCharts(statsData, linksData){
+  // Update main traffic chart with real data (GB)
   if(dashTrafficChart){
-    // Use real data if available, otherwise keep sample data
     const hourly = statsData.hourly || {};
     const labels = Object.keys(hourly).sort();
     if(labels.length > 0){
-      const downloadData = labels.map(h => (hourly[h]?.download || 0) / (1024 * 1024 * 1024)); // Gbps
+      // Convert bytes to GB with 3 decimal precision
+      const downloadData = labels.map(h => (hourly[h]?.download || 0) / (1024 * 1024 * 1024));
       const uploadData = labels.map(h => (hourly[h]?.upload || 0) / (1024 * 1024 * 1024));
       const totalData = labels.map((h, i) => downloadData[i] + uploadData[i]);
       dashTrafficChart.data.labels = labels;
       dashTrafficChart.data.datasets[0].data = downloadData;
       dashTrafficChart.data.datasets[1].data = uploadData;
       dashTrafficChart.data.datasets[2].data = totalData;
+      // Auto-scale Y to max value + 10% padding
+      const maxVal = Math.max(...totalData, ...downloadData, ...uploadData, 0.001);
+      dashTrafficChart.options.scales.y.max = Math.ceil((maxVal * 1.2) * 100) / 100;
+      dashTrafficChart.update('none');
+    } else {
+      // No real data, keep sample but show zero
+      dashTrafficChart.data.labels = ['00:00','02:00','04:00','06:00','08:00','10:00','12:00','14:00','16:00','18:00','20:00','22:00','24:00'];
+      dashTrafficChart.data.datasets[0].data = new Array(13).fill(0);
+      dashTrafficChart.data.datasets[1].data = new Array(13).fill(0);
+      dashTrafficChart.data.datasets[2].data = new Array(13).fill(0);
+      dashTrafficChart.options.scales.y.max = 1.0;
       dashTrafficChart.update('none');
     }
   }
@@ -2205,13 +2200,6 @@ function updateCharts(statsData, linksData){
     const counts = [protoCounts['vless-ws'], protoCounts['xhttp-packet-up'], protoCounts['xhttp-stream-up']];
     dashProtoChart.data.datasets[0].data = counts;
     dashProtoChart.update('none');
-  }
-  if(dashDailyChart){
-    const totalTraffic = statsData.total_traffic_mb || 0;
-    const base = totalTraffic / 7;
-    const dailyData = Array(7).fill(0).map((_, i) => Math.max(0, Math.round(base * (0.5 + Math.random() * 0.8))));
-    dashDailyChart.data.datasets[0].data = dailyData;
-    dashDailyChart.update('none');
   }
   if(dashHourlyChart){
     const hourly = statsData.hourly || {};
