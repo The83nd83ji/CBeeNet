@@ -1,4 +1,4 @@
-# pages.py - CBee Gateway v1.0.1 (Royal Theme + Fixed Language)
+# pages.py - CBee Gateway v1.0.1 (Royal Theme + Fixed Language) - FIXED
 import json
 
 # ===== دیکشنری ترجمه کامل (بدون تغییر) =====
@@ -760,6 +760,7 @@ document.getElementById('form').addEventListener('submit', async e => {
 </script>
 </body></html>"""
 
+# ===== DASHBOARD_HTML با اصلاحات =====
 DASHBOARD_HTML = r"""<!DOCTYPE html>
 <html lang="en" dir="ltr">
 <head>
@@ -1709,7 +1710,7 @@ a{color:inherit;text-decoration:none}
     </div>
   </div>
 
-  <!-- ===== SPARKLINE CARDS ===== -->
+  <!-- ===== SPARKLINE CARDS (top of dashboard) ===== -->
   <div class="sparkline-row">
     <div class="sparkline-card">
       <div class="sparkline-top">
@@ -1789,7 +1790,7 @@ a{color:inherit;text-decoration:none}
     </div>
   </div>
 
-  <!-- ===== PROTOCOL DISTRIBUTION + BANDWIDTH USAGE ===== -->
+  <!-- ===== PROTOCOL DISTRIBUTION + BANDWIDTH USAGE (like 3x-UI) ===== -->
   <div class="dash-charts-second">
     <div class="dash-protocol-card">
       <div class="chart-title"><i class="ti ti-chart-pie"></i> <span data-lang="protocol_distribution">Protocol Distribution</span></div>
@@ -2222,7 +2223,8 @@ function applyTheme(theme){
   localStorage.setItem('CBeeNet-theme', theme);
   currentTheme = theme;
   
-  document.getElementById('current-theme-display').textContent = theme;
+  const disp = document.getElementById('current-theme-display');
+  if(disp) disp.textContent = theme;
   
   document.querySelectorAll('.theme-btn-select').forEach(btn => {
     btn.classList.toggle('active', btn.dataset.theme === theme);
@@ -2234,9 +2236,12 @@ function applyTheme(theme){
   const icon = isLight ? 'ti-moon' : 'ti-sun';
   const labelKey = isLight ? 'light_theme' : 'dark_theme';
   const dict = LANG[currentLang] || LANG['en'];
-  document.getElementById('theme-icon').className = 'ti ' + icon;
-  document.getElementById('theme-label').textContent = dict[labelKey] || (isLight ? 'Light Theme' : 'Dark Theme');
-  document.getElementById('theme-mob-icon').className = 'ti ' + icon;
+  const themeIcon = document.getElementById('theme-icon');
+  const themeLabel = document.getElementById('theme-label');
+  const mobIcon = document.getElementById('theme-mob-icon');
+  if(themeIcon) themeIcon.className = 'ti ' + icon;
+  if(themeLabel) themeLabel.textContent = dict[labelKey] || (isLight ? 'Light Theme' : 'Dark Theme');
+  if(mobIcon) mobIcon.className = 'ti ' + icon;
 }
 
 function setTheme(theme){
@@ -2254,6 +2259,7 @@ function toggleTheme(){
 // ===== Utility Functions =====
 function toast(msg, type=''){
   const t = document.getElementById('toast');
+  if(!t) return;
   t.textContent = msg;
   t.className = 'toast show' + (type ? ' ' + type : '');
   setTimeout(() => t.classList.remove('show'), 2400);
@@ -2358,9 +2364,12 @@ async function loadServerSettings(){
   try {
     const r = await authF('/api/settings/server');
     const data = await r.json();
-    document.getElementById('server-name-input').value = data.server_name || 'CBeeNet';
-    document.getElementById('server-prefix-input').value = data.server_prefix || '';
-    document.getElementById('link-name-template').value = data.link_template || '{server}-{label}';
+    const nameInput = document.getElementById('server-name-input');
+    const prefixInput = document.getElementById('server-prefix-input');
+    const templateInput = document.getElementById('link-name-template');
+    if(nameInput) nameInput.value = data.server_name || 'CBeeNet';
+    if(prefixInput) prefixInput.value = data.server_prefix || '';
+    if(templateInput) templateInput.value = data.link_template || '{server}-{label}';
     localStorage.setItem('CBeeNet-server-name', data.server_name || 'CBeeNet');
     localStorage.setItem('CBeeNet-server-prefix', data.server_prefix || '');
     localStorage.setItem('CBeeNet-link-template', data.link_template || '{server}-{label}');
@@ -2368,9 +2377,9 @@ async function loadServerSettings(){
 }
 
 async function saveServerSettings(){
-  const name = document.getElementById('server-name-input').value.trim() || 'CBeeNet';
-  const prefix = document.getElementById('server-prefix-input').value.trim() || '';
-  const template = document.getElementById('link-name-template').value.trim() || '{server}-{label}';
+  const name = document.getElementById('server-name-input')?.value?.trim() || 'CBeeNet';
+  const prefix = document.getElementById('server-prefix-input')?.value?.trim() || '';
+  const template = document.getElementById('link-name-template')?.value?.trim() || '{server}-{label}';
   try {
     const r = await authF('/api/settings/server', {
       method: 'POST',
@@ -2383,8 +2392,10 @@ async function saveServerSettings(){
       localStorage.setItem('CBeeNet-server-prefix', prefix);
       localStorage.setItem('CBeeNet-link-template', template);
       const saveResult = document.getElementById('server-save-result');
-      saveResult.style.display = 'block';
-      setTimeout(() => saveResult.style.display = 'none', 3000);
+      if(saveResult) {
+        saveResult.style.display = 'block';
+        setTimeout(() => saveResult.style.display = 'none', 3000);
+      }
       toast('Settings saved ✓', 'ok');
       loadLinks();
     } else {
@@ -2415,11 +2426,13 @@ function formatLinkName(label, protocol){
 
 // ===== Navigation =====
 const sb = document.getElementById('sb'), overlay = document.getElementById('overlay');
-function openSb(){ sb.classList.add('open'); overlay.classList.add('show'); }
-function closeSb(){ sb.classList.remove('open'); overlay.classList.remove('show'); }
-document.getElementById('open-sb').addEventListener('click', openSb);
-document.getElementById('close-sb').addEventListener('click', closeSb);
-overlay.addEventListener('click', closeSb);
+function openSb(){ if(sb) sb.classList.add('open'); if(overlay) overlay.classList.add('show'); }
+function closeSb(){ if(sb) sb.classList.remove('open'); if(overlay) overlay.classList.remove('show'); }
+const openSbBtn = document.getElementById('open-sb');
+const closeSbBtn = document.getElementById('close-sb');
+if(openSbBtn) openSbBtn.addEventListener('click', openSb);
+if(closeSbBtn) closeSbBtn.addEventListener('click', closeSb);
+if(overlay) overlay.addEventListener('click', closeSb);
 
 function navTo(name){
   document.querySelectorAll('.nav-it').forEach(n => n.classList.toggle('on', n.dataset.pg === name));
@@ -2431,8 +2444,8 @@ function navTo(name){
 }
 document.querySelectorAll('.nav-it').forEach(el => el.addEventListener('click', () => navTo(el.dataset.pg)));
 
-function openModal(id){ document.getElementById(id).classList.add('open'); }
-function closeModal(id){ document.getElementById(id).classList.remove('open'); }
+function openModal(id){ const el = document.getElementById(id); if(el) el.classList.add('open'); }
+function closeModal(id){ const el = document.getElementById(id); if(el) el.classList.remove('open'); }
 
 // ===== SPARKLINE CHARTS =====
 const sparkData = { load: [], traffic: [], conns: [] };
@@ -2445,7 +2458,7 @@ function initSparklineCharts(){
     const accentBg = getComputedStyle(document.documentElement).getPropertyValue('--accent-d').trim() || 'rgba(22,119,255,0.12)';
     
     const loadEl = document.getElementById('sparkLoad');
-    if(loadEl) {
+    if(loadEl && typeof Chart !== 'undefined') {
       const ctxLoad = loadEl.getContext('2d');
       sparkLoadChart = new Chart(ctxLoad, {
         type: 'line',
@@ -2455,7 +2468,7 @@ function initSparklineCharts(){
     }
     
     const trafficEl = document.getElementById('sparkTraffic');
-    if(trafficEl) {
+    if(trafficEl && typeof Chart !== 'undefined') {
       const ctxTraffic = trafficEl.getContext('2d');
       sparkTrafficChart = new Chart(ctxTraffic, {
         type: 'line',
@@ -2465,7 +2478,7 @@ function initSparklineCharts(){
     }
     
     const connsEl = document.getElementById('sparkConns');
-    if(connsEl) {
+    if(connsEl && typeof Chart !== 'undefined') {
       const ctxConns = connsEl.getContext('2d');
       sparkConnsChart = new Chart(ctxConns, {
         type: 'line',
@@ -2498,6 +2511,8 @@ let ch3 = null;
 
 function initCharts(){
   try {
+    if(typeof Chart === 'undefined') return;
+    
     const ctxProto = document.getElementById('dashProtoChart');
     if(ctxProto){
       dashProtoChart = new Chart(ctxProto.getContext('2d'), {
@@ -2542,8 +2557,6 @@ function initCharts(){
 }
 
 // ===== Fetch Stats & Dashboard =====
-let prevTraf = 0;
-
 async function fetchStats(){
   try{
     const r = await authF('/stats');
@@ -2552,65 +2565,79 @@ async function fetchStats(){
     // Sparklines
     const pct = d.bw_pct || 0;
     sparkData.load.push(pct);
-    document.getElementById('spark-load').innerHTML = pct.toFixed(1) + '<span class="unit">%</span>';
+    const sparkLoadEl = document.getElementById('spark-load');
+    if(sparkLoadEl) sparkLoadEl.innerHTML = pct.toFixed(1) + '<span class="unit">%</span>';
     updateSparkline(sparkLoadChart, sparkData.load, 100);
     
     const trafficVal = parseFloat((d.total_traffic_mb || 0).toFixed(2));
     sparkData.traffic.push(trafficVal);
-    document.getElementById('spark-traffic').innerHTML = trafficVal.toFixed(1) + '<span class="unit">MB</span>';
+    const sparkTrafficEl = document.getElementById('spark-traffic');
+    if(sparkTrafficEl) sparkTrafficEl.innerHTML = trafficVal.toFixed(1) + '<span class="unit">MB</span>';
     const maxTraffic = Math.max(10, ...sparkData.traffic);
     updateSparkline(sparkTrafficChart, sparkData.traffic, maxTraffic * 1.2);
     
     const connsVal = d.active_connections || 0;
     sparkData.conns.push(connsVal);
-    document.getElementById('spark-conns').textContent = connsVal;
+    const sparkConnsEl = document.getElementById('spark-conns');
+    if(sparkConnsEl) sparkConnsEl.textContent = connsVal;
     const maxConns = Math.max(5, ...sparkData.conns);
     updateSparkline(sparkConnsChart, sparkData.conns, maxConns * 1.2);
     
     // Stats
-    document.getElementById('dash-conns').textContent = d.active_connections || 0;
-    document.getElementById('dash-traffic').innerHTML = (d.total_traffic_mb || 0).toFixed(1) + ' <small style="font-size:14px;font-weight:400;">MB</small>';
-    document.getElementById('dash-links').textContent = d.links_count || 0;
-    document.getElementById('dash-links-sub').textContent = (d.active_links || 0) + ' / ' + (d.links_count || 0);
-    document.getElementById('dash-uptime').textContent = d.uptime || '00:00:00';
-    document.getElementById('uptime-badge').textContent = 'Railway · ' + (d.uptime || '00:00:00');
-    document.getElementById('last-upd').textContent = 'Last update: ' + new Date().toLocaleTimeString();
+    const dashConns = document.getElementById('dash-conns');
+    if(dashConns) dashConns.textContent = d.active_connections || 0;
+    const dashTraffic = document.getElementById('dash-traffic');
+    if(dashTraffic) dashTraffic.innerHTML = (d.total_traffic_mb || 0).toFixed(1) + ' <small style="font-size:14px;font-weight:400;">MB</small>';
+    const dashLinks = document.getElementById('dash-links');
+    if(dashLinks) dashLinks.textContent = d.links_count || 0;
+    const dashLinksSub = document.getElementById('dash-links-sub');
+    if(dashLinksSub) dashLinksSub.textContent = (d.active_links || 0) + ' / ' + (d.links_count || 0);
+    const dashUptime = document.getElementById('dash-uptime');
+    if(dashUptime) dashUptime.textContent = d.uptime || '00:00:00';
+    const uptimeBadge = document.getElementById('uptime-badge');
+    if(uptimeBadge) uptimeBadge.textContent = 'Railway · ' + (d.uptime || '00:00:00');
+    const lastUpd = document.getElementById('last-upd');
+    if(lastUpd) lastUpd.textContent = 'Last update: ' + new Date().toLocaleTimeString();
     
     // Top connections
     const conns = d.connections || [];
     const top = conns.slice(0, 5);
     const container = document.getElementById('dash-top-conns');
-    if(!top.length){
-      container.innerHTML = '<span data-lang="no_connections">No connections</span>';
-    } else {
-      container.innerHTML = top.map(c => `
-        <div class="dash-conn-item">
-          <span class="ip">${esc(c.ip || 'Unknown')}</span>
-          <span class="proto">${esc(c.transport || 'vless')}</span>
-          <span class="traffic">${esc(c.bytes_fmt || '0 B')}</span>
-        </div>
-      `).join('');
+    if(container) {
+      if(!top.length){
+        container.innerHTML = '<span data-lang="no_connections">No connections</span>';
+      } else {
+        container.innerHTML = top.map(c => `
+          <div class="dash-conn-item">
+            <span class="ip">${esc(c.ip || 'Unknown')}</span>
+            <span class="proto">${esc(c.transport || 'vless')}</span>
+            <span class="traffic">${esc(c.bytes_fmt || '0 B')}</span>
+          </div>
+        `).join('');
+      }
     }
     
     // Connections table
     const tbody = document.getElementById('dash-conn-table-body');
-    if(!conns.length){
-      tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:var(--t3);padding:20px;" data-lang="no_connections">No connections</td></tr>';
-    } else {
-      tbody.innerHTML = conns.slice(0, 10).map(c => {
-        const secs = c.connected_at ? Math.max(0, Math.floor((Date.now() - new Date(c.connected_at).getTime()) / 1000)) : 0;
-        const dur = secs < 60 ? secs + 's' : secs < 3600 ? Math.floor(secs/60) + 'm' : Math.floor(secs/3600) + 'h';
-        const up = c.bytes_fmt || '0 B';
-        const down = c.bytes_fmt || '0 B';
-        return `<tr>
-          <td><span class="ip">${esc(c.ip || 'Unknown')}</span></td>
-          <td><span class="proto-badge">${esc(c.transport || 'vless')}</span></td>
-          <td>${up}</td>
-          <td>${down}</td>
-          <td>${dur}</td>
-          <td><span class="status-badge status-on-badge">● Online</span></td>
-        </tr>`;
-      }).join('');
+    if(tbody) {
+      if(!conns.length){
+        tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:var(--t3);padding:20px;" data-lang="no_connections">No connections</td></tr>';
+      } else {
+        tbody.innerHTML = conns.slice(0, 10).map(c => {
+          const secs = c.connected_at ? Math.max(0, Math.floor((Date.now() - new Date(c.connected_at).getTime()) / 1000)) : 0;
+          const dur = secs < 60 ? secs + 's' : secs < 3600 ? Math.floor(secs/60) + 'm' : Math.floor(secs/3600) + 'h';
+          const up = c.bytes_fmt || '0 B';
+          const down = c.bytes_fmt || '0 B';
+          return `<tr>
+            <td><span class="ip">${esc(c.ip || 'Unknown')}</span></td>
+            <td><span class="proto-badge">${esc(c.transport || 'vless')}</span></td>
+            <td>${up}</td>
+            <td>${down}</td>
+            <td>${dur}</td>
+            <td><span class="status-badge status-on-badge">● Online</span></td>
+          </tr>`;
+        }).join('');
+      }
     }
     
     // Traffic chart
@@ -2622,12 +2649,13 @@ async function fetchStats(){
       dashTrafficChart.data.datasets[0].data = data;
       dashTrafficChart.update();
     } else {
-      const ctx = document.getElementById('dashTrafficChart').getContext('2d');
-      if(ctx) {
-        const grad = ctx.createLinearGradient(0, 0, 0, 220);
+      const ctx = document.getElementById('dashTrafficChart');
+      if(ctx && typeof Chart !== 'undefined') {
+        const c = ctx.getContext('2d');
+        const grad = c.createLinearGradient(0, 0, 0, 220);
         grad.addColorStop(0, 'rgba(22,119,255,0.4)');
         grad.addColorStop(1, 'rgba(22,119,255,0)');
-        dashTrafficChart = new Chart(ctx, {
+        dashTrafficChart = new Chart(c, {
           type: 'line',
           data: {
             labels: labels,
@@ -2699,80 +2727,90 @@ async function loadLinks(){
     allLinksList = links;
     
     const nlSub = document.getElementById('nl-sub');
-    const curSub = nlSub.value;
-    const dict = LANG[currentLang] || LANG['en'];
-    nlSub.innerHTML = '<option value="">— ' + dict.no_group + ' —</option>' + subs.map(s => `<option value="${esc(s.sub_id)}">${esc(s.name)}</option>`).join('');
-    if(curSub) nlSub.value = curSub;
+    if(nlSub) {
+      const curSub = nlSub.value;
+      const dict = LANG[currentLang] || LANG['en'];
+      nlSub.innerHTML = '<option value="">— ' + dict.no_group + ' —</option>' + subs.map(s => `<option value="${esc(s.sub_id)}">${esc(s.name)}</option>`).join('');
+      if(curSub) nlSub.value = curSub;
+    }
     
-    document.getElementById('links-nb').textContent = links.length;
-    document.getElementById('links-pg-cnt').textContent = links.length + ' ' + dict.configs;
+    const linksNb = document.getElementById('links-nb');
+    if(linksNb) linksNb.textContent = links.length;
+    const linksPgCnt = document.getElementById('links-pg-cnt');
+    if(linksPgCnt) {
+      const dict = LANG[currentLang] || LANG['en'];
+      linksPgCnt.textContent = links.length + ' ' + dict.configs;
+    }
     
     const grid = document.getElementById('links-grid');
     const empty = document.getElementById('links-empty');
-    if(!links.length){ grid.innerHTML = ''; empty.style.display = 'block'; return; }
-    empty.style.display = 'none';
+    if(!links.length){ if(grid) grid.innerHTML = ''; if(empty) empty.style.display = 'block'; return; }
+    if(empty) empty.style.display = 'none';
     
     const serverName = localStorage.getItem('CBeeNet-server-name') || 'CBeeNet';
     const serverPrefix = localStorage.getItem('CBeeNet-server-prefix') || '';
     const linkTemplate = localStorage.getItem('CBeeNet-link-template') || '{server}-{label}';
     
-    grid.innerHTML = links.map(l => {
-      const lim = l.limit_bytes === 0 ? '∞' : fmtB(l.limit_bytes);
-      const pct = l.limit_bytes === 0 ? 0 : Math.min(100, l.used_bytes / l.limit_bytes * 100);
-      const bc = pct > 90 ? 'var(--red)' : pct > 70 ? 'var(--amber)' : 'var(--accent)';
-      const allowed = l.active && !l.expired;
-      const cardCls = !l.active ? 'is-off' : (l.expired ? 'is-exp' : '');
-      const proto = (l.protocols && l.protocols[0]) || 'vless-ws';
-      const protoLabel = proto === 'vless-ws' ? 'VLESS-WS' : proto.replace('xhttp-', '').toUpperCase();
-      const displayLabel = formatLinkName(l.label, protoLabel);
-      return `<div class="cfg-card ${cardCls}">
-        <div class="cfg-row">
-          <span class="cfg-status-dot ${allowed ? 'pulse' : ''}"></span>
-          <div class="cfg-identity">
-            <div class="cfg-label">${esc(displayLabel)}</div>
-            <div class="cfg-sub-meta">
-              <span class="cfg-uuid-mini" onclick="navigator.clipboard.writeText('${l.uuid}').then(()=>toast('UUID copied','ok'))" title="${l.uuid}"><i class="ti ti-fingerprint"></i> ${l.uuid.slice(0,10)}…</span>
-              <span>${new Date(l.created_at).toLocaleDateString()}</span>
+    if(grid) {
+      grid.innerHTML = links.map(l => {
+        const lim = l.limit_bytes === 0 ? '∞' : fmtB(l.limit_bytes);
+        const pct = l.limit_bytes === 0 ? 0 : Math.min(100, l.used_bytes / l.limit_bytes * 100);
+        const bc = pct > 90 ? 'var(--red)' : pct > 70 ? 'var(--amber)' : 'var(--accent)';
+        const allowed = l.active && !l.expired;
+        const cardCls = !l.active ? 'is-off' : (l.expired ? 'is-exp' : '');
+        const proto = (l.protocols && l.protocols[0]) || 'vless-ws';
+        const protoLabel = proto === 'vless-ws' ? 'VLESS-WS' : proto.replace('xhttp-', '').toUpperCase();
+        const displayLabel = formatLinkName(l.label, protoLabel);
+        const dict = LANG[currentLang] || LANG['en'];
+        return `<div class="cfg-card ${cardCls}">
+          <div class="cfg-row">
+            <span class="cfg-status-dot ${allowed ? 'pulse' : ''}"></span>
+            <div class="cfg-identity">
+              <div class="cfg-label">${esc(displayLabel)}</div>
+              <div class="cfg-sub-meta">
+                <span class="cfg-uuid-mini" onclick="navigator.clipboard.writeText('${l.uuid}').then(()=>toast('UUID copied','ok'))" title="${l.uuid}"><i class="ti ti-fingerprint"></i> ${l.uuid.slice(0,10)}…</span>
+                <span>${new Date(l.created_at).toLocaleDateString()}</span>
+              </div>
+            </div>
+            <div class="cfg-divider-v"></div>
+            <div class="cfg-usage-col">
+              <div class="ubar"><div class="ubar-f" style="width:${pct}%;background:${bc}"></div></div>
+              <div class="utxt"><span>${fmtB(l.used_bytes)}</span><span>${dict.of} ${lim}</span></div>
+            </div>
+            <div class="cfg-divider-v"></div>
+            <div class="cfg-exp-col">${expChip(l.expires_at, l.expired)}</div>
+            <div class="cfg-divider-v"></div>
+            <div class="cfg-badges-col">
+              ${protoBadge(l.protocols || ['vless-ws'])}
+              ${l.sub_id && allSubsList.find(s => s.sub_id === l.sub_id) ? `<span class="cfg-sub-tag"><i class="ti ti-folder"></i> ${esc(allSubsList.find(s => s.sub_id === l.sub_id).name)}</span>` : ''}
+            </div>
+            <div class="cfg-divider-v"></div>
+            <div class="cfg-actions">
+              <button class="tog${allowed ? ' on' : ''}" onclick="toggleActive('${l.uuid}', ${!l.active})" title="${dict.toggle_status}"></button>
+              <button class="btn btn-sm btn-g btn-icon" onclick="navigator.clipboard.writeText('${esc(l.vless_link)}').then(()=>toast('${dict.copy_link}','ok'))" title="${dict.copy_link}"><i class="ti ti-copy"></i></button>
+              <button class="btn btn-sm btn-g btn-icon" onclick="navigator.clipboard.writeText('${esc(l.sub_url)}').then(()=>toast('${dict.sub_url}','ok'))" title="${dict.sub_url}"><i class="ti ti-rss"></i></button>
+              <button class="btn btn-sm btn-g btn-icon" onclick="showQR('${esc(l.vless_link)}')" title="${dict.qr_code}"><i class="ti ti-qrcode"></i></button>
+              <button class="btn btn-sm btn-amber btn-icon" onclick="openEditLink('${l.uuid}')" title="${dict.edit_config}"><i class="ti ti-edit"></i></button>
+              <button class="btn btn-sm btn-g btn-icon" onclick="resetUsage('${l.uuid}')" title="${dict.reset_usage_btn}"><i class="ti ti-rotate"></i></button>
+              <button class="btn btn-sm btn-d btn-icon" onclick="deleteLink('${l.uuid}')" title="${dict.delete_btn}"><i class="ti ti-trash"></i></button>
             </div>
           </div>
-          <div class="cfg-divider-v"></div>
-          <div class="cfg-usage-col">
-            <div class="ubar"><div class="ubar-f" style="width:${pct}%;background:${bc}"></div></div>
-            <div class="utxt"><span>${fmtB(l.used_bytes)}</span><span>${dict.of} ${lim}</span></div>
-          </div>
-          <div class="cfg-divider-v"></div>
-          <div class="cfg-exp-col">${expChip(l.expires_at, l.expired)}</div>
-          <div class="cfg-divider-v"></div>
-          <div class="cfg-badges-col">
-            ${protoBadge(l.protocols || ['vless-ws'])}
-            ${l.sub_id && allSubsList.find(s => s.sub_id === l.sub_id) ? `<span class="cfg-sub-tag"><i class="ti ti-folder"></i> ${esc(allSubsList.find(s => s.sub_id === l.sub_id).name)}</span>` : ''}
-          </div>
-          <div class="cfg-divider-v"></div>
-          <div class="cfg-actions">
-            <button class="tog${allowed ? ' on' : ''}" onclick="toggleActive('${l.uuid}', ${!l.active})" title="${dict.toggle_status}"></button>
-            <button class="btn btn-sm btn-g btn-icon" onclick="navigator.clipboard.writeText('${esc(l.vless_link)}').then(()=>toast('${dict.copy_link}','ok'))" title="${dict.copy_link}"><i class="ti ti-copy"></i></button>
-            <button class="btn btn-sm btn-g btn-icon" onclick="navigator.clipboard.writeText('${esc(l.sub_url)}').then(()=>toast('${dict.sub_url}','ok'))" title="${dict.sub_url}"><i class="ti ti-rss"></i></button>
-            <button class="btn btn-sm btn-g btn-icon" onclick="showQR('${esc(l.vless_link)}')" title="${dict.qr_code}"><i class="ti ti-qrcode"></i></button>
-            <button class="btn btn-sm btn-amber btn-icon" onclick="openEditLink('${l.uuid}')" title="${dict.edit_config}"><i class="ti ti-edit"></i></button>
-            <button class="btn btn-sm btn-g btn-icon" onclick="resetUsage('${l.uuid}')" title="${dict.reset_usage_btn}"><i class="ti ti-rotate"></i></button>
-            <button class="btn btn-sm btn-d btn-icon" onclick="deleteLink('${l.uuid}')" title="${dict.delete_btn}"><i class="ti ti-trash"></i></button>
-          </div>
-        </div>
-      </div>`;
-    }).join('');
+        </div>`;
+      }).join('');
+    }
   } catch(e){ console.error('loadLinks error:', e); }
 }
 
 async function createLink(){
-  const label = document.getElementById('nl-label').value.trim() || 'New Config';
-  const val = document.getElementById('nl-val').value;
-  const unit = document.getElementById('nl-unit').value;
-  const exp = document.getElementById('nl-exp').value;
-  const note = document.getElementById('nl-note').value.trim();
-  const sub_id = document.getElementById('nl-sub').value || null;
+  const label = document.getElementById('nl-label')?.value?.trim() || 'New Config';
+  const val = document.getElementById('nl-val')?.value;
+  const unit = document.getElementById('nl-unit')?.value;
+  const exp = document.getElementById('nl-exp')?.value;
+  const note = document.getElementById('nl-note')?.value?.trim();
+  const sub_id = document.getElementById('nl-sub')?.value || null;
   const protocols = getSelectedProtocols();
   if(!protocols.length){ toast('Select at least one protocol', 'err'); return; }
-  const count = parseInt(document.getElementById('nl-count').value) || 1;
+  const count = parseInt(document.getElementById('nl-count')?.value) || 1;
   const body = { label, limit_value: val || 0, limit_unit: unit, expires_days: exp || 0, note, sub_id, protocols, count };
   try{
     let r, d;
@@ -2785,15 +2823,22 @@ async function createLink(){
       d = await r.json();
       toast('Config created ✓', 'ok');
     }
-    document.getElementById('nl-label').value = '';
-    document.getElementById('nl-val').value = '';
-    document.getElementById('nl-exp').value = '';
-    document.getElementById('nl-note').value = '';
+    const nlLabel = document.getElementById('nl-label');
+    const nlVal = document.getElementById('nl-val');
+    const nlExp = document.getElementById('nl-exp');
+    const nlNote = document.getElementById('nl-note');
+    if(nlLabel) nlLabel.value = '';
+    if(nlVal) nlVal.value = '';
+    if(nlExp) nlExp.value = '';
+    if(nlNote) nlNote.value = '';
     document.querySelectorAll('.proto-btn').forEach(btn => btn.classList.remove('active'));
-    document.querySelector('.proto-btn[data-proto="vless-ws"]').classList.add('active');
-    document.getElementById('nl-count').value = 1;
+    const defaultProto = document.querySelector('.proto-btn[data-proto="vless-ws"]');
+    if(defaultProto) defaultProto.classList.add('active');
+    const nlCount = document.getElementById('nl-count');
+    if(nlCount) nlCount.value = 1;
     document.querySelectorAll('.count-chip').forEach(c => c.classList.remove('active'));
-    document.querySelector('.count-chip').classList.add('active');
+    const firstChip = document.querySelector('.count-chip');
+    if(firstChip) firstChip.classList.add('active');
     loadLinks();
   } catch(e){ toast('Error creating config', 'err'); }
 }
@@ -2801,22 +2846,28 @@ async function createLink(){
 function openEditLink(uuid){
   const l = allLinksList.find(x => x.uuid === uuid);
   if(!l) return;
-  document.getElementById('el-uuid').value = uuid;
-  document.getElementById('el-label').value = l.label;
-  document.getElementById('el-note').value = l.note || '';
-  if(l.limit_bytes === 0){ document.getElementById('el-val').value = ''; document.getElementById('el-unit').value = 'GB'; }
-  else { document.getElementById('el-val').value = (l.limit_bytes / 1024 / 1024).toFixed(0); document.getElementById('el-unit').value = 'MB'; }
-  document.getElementById('el-exp').value = '';
+  const elUuid = document.getElementById('el-uuid');
+  const elLabel = document.getElementById('el-label');
+  const elNote = document.getElementById('el-note');
+  const elVal = document.getElementById('el-val');
+  const elUnit = document.getElementById('el-unit');
+  const elExp = document.getElementById('el-exp');
+  if(elUuid) elUuid.value = uuid;
+  if(elLabel) elLabel.value = l.label;
+  if(elNote) elNote.value = l.note || '';
+  if(l.limit_bytes === 0){ if(elVal) elVal.value = ''; if(elUnit) elUnit.value = 'GB'; }
+  else { if(elVal) elVal.value = (l.limit_bytes / 1024 / 1024).toFixed(0); if(elUnit) elUnit.value = 'MB'; }
+  if(elExp) elExp.value = '';
   openModal('modal-edit-link');
 }
 
 async function saveEditLink(){
-  const uuid = document.getElementById('el-uuid').value;
-  const label = document.getElementById('el-label').value.trim();
-  const note = document.getElementById('el-note').value.trim();
-  const val = document.getElementById('el-val').value;
-  const unit = document.getElementById('el-unit').value;
-  const exp = document.getElementById('el-exp').value;
+  const uuid = document.getElementById('el-uuid')?.value;
+  const label = document.getElementById('el-label')?.value?.trim();
+  const note = document.getElementById('el-note')?.value?.trim();
+  const val = document.getElementById('el-val')?.value;
+  const unit = document.getElementById('el-unit')?.value;
+  const exp = document.getElementById('el-exp')?.value;
   const body = { label, note, limit_value: val || 0, limit_unit: unit };
   if(exp && Number(exp) > 0) body.expires_days = Number(exp);
   try{
@@ -2867,9 +2918,12 @@ async function loadSubs(){
     const d = await r.json();
     const subs = d.subs || [];
     allSubsRaw = subs;
-    document.getElementById('subs-nb').textContent = subs.length;
-    document.getElementById('subs-pg-cnt').textContent = subs.length + ' Groups';
+    const subsNb = document.getElementById('subs-nb');
+    if(subsNb) subsNb.textContent = subs.length;
+    const subsPgCnt = document.getElementById('subs-pg-cnt');
+    if(subsPgCnt) subsPgCnt.textContent = subs.length + ' Groups';
     const grid = document.getElementById('subs-grid');
+    if(!grid) return;
     if(!subs.length){
       grid.innerHTML = '<div class="subs-empty-v2"><div class="subs-empty-v2-icon"><i class="ti ti-folders"></i></div><div class="subs-empty-v2-title">No groups yet</div><div class="subs-empty-v2-sub">Create a new group to organize your configs</div></div>';
       return;
@@ -2905,6 +2959,7 @@ function filterSubs(q){
   if(!q){ loadSubs(); return; }
   const filtered = allSubsRaw.filter(s => s.name.toLowerCase().includes(q) || (s.desc || '').toLowerCase().includes(q));
   const grid = document.getElementById('subs-grid');
+  if(!grid) return;
   if(!filtered.length){
     grid.innerHTML = '<div class="subs-empty-v2"><div class="subs-empty-v2-icon"><i class="ti ti-folders"></i></div><div class="subs-empty-v2-title">No groups found</div></div>';
     return;
@@ -2935,15 +2990,18 @@ function filterSubs(q){
 }
 
 async function createSub(){
-  const name = document.getElementById('ns-name').value.trim() || 'New Group';
-  const desc = document.getElementById('ns-desc').value.trim();
-  const pw = document.getElementById('ns-pw').value;
+  const name = document.getElementById('ns-name')?.value?.trim() || 'New Group';
+  const desc = document.getElementById('ns-desc')?.value?.trim();
+  const pw = document.getElementById('ns-pw')?.value;
   try{
     const r = await authF('/api/subs', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ name, desc, password: pw }) });
     if(!r.ok) throw new Error('failed');
-    document.getElementById('ns-name').value = '';
-    document.getElementById('ns-desc').value = '';
-    document.getElementById('ns-pw').value = '';
+    const nsName = document.getElementById('ns-name');
+    const nsDesc = document.getElementById('ns-desc');
+    const nsPw = document.getElementById('ns-pw');
+    if(nsName) nsName.value = '';
+    if(nsDesc) nsDesc.value = '';
+    if(nsPw) nsPw.value = '';
     closeModal('modal-create-sub');
     toast('Group created ✓', 'ok');
     loadSubs();
@@ -2967,7 +3025,8 @@ async function openSubLinks(sub_id, name){
   currentSubId = sub_id;
   const titleEl = document.querySelector('#modal-links .lmodal-title-v2');
   if(titleEl) titleEl.textContent = 'Select configs for group: ' + name;
-  document.getElementById('modal-links-body').innerHTML = '<div style="padding:20px;text-align:center">Loading...</div>';
+  const bodyEl = document.getElementById('modal-links-body');
+  if(bodyEl) bodyEl.innerHTML = '<div style="padding:20px;text-align:center">Loading...</div>';
   openModal('modal-links');
   try{
     const [lr, sr] = await Promise.all([authF('/api/links'), authF('/api/subs')]);
@@ -2982,6 +3041,7 @@ async function openSubLinks(sub_id, name){
 
 function renderLmodalList(links){
   const body = document.getElementById('modal-links-body');
+  if(!body) return;
   if(!links.length){ body.innerHTML = '<div class="empty">No configs</div>'; updateLmodalCount(); return; }
   body.innerHTML = links.map(l => {
     const checked = lmodalInSub.has(l.uuid);
@@ -3008,7 +3068,8 @@ function lmodalSelectAll(state){
 }
 
 function updateLmodalCount(){
-  document.getElementById('lmodal-count').textContent = lmodalInSub.size + ' selected';
+  const countEl = document.getElementById('lmodal-count');
+  if(countEl) countEl.textContent = lmodalInSub.size + ' selected';
 }
 
 function filterLmodal(q){
@@ -3034,12 +3095,14 @@ async function saveSubLinks(){
 
 // ===== Subscriptions =====
 async function loadSubsPage(){
-  document.getElementById('sub-all-url').textContent = location.protocol + '//' + location.host + '/sub-all';
+  const subAllUrl = document.getElementById('sub-all-url');
+  if(subAllUrl) subAllUrl.textContent = location.protocol + '//' + location.host + '/sub-all';
   try{
     const r = await authF('/api/subs');
     const d = await r.json();
     const subs = d.subs || [];
     const el = document.getElementById('sub-groups-list');
+    if(!el) return;
     if(!subs.length){ el.innerHTML = '<div class="empty">No groups yet</div>'; return; }
     el.innerHTML = subs.map(s => `
       <div style="padding:13px 15px;background:var(--accent-d);border:1px solid var(--card-b);border-radius:10px;margin-bottom:8px;display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap">
@@ -3059,41 +3122,49 @@ async function loadConns(){
     const d = await r.json();
     const grid = document.getElementById('conns-grid');
     const ce = document.getElementById('conns-empty');
-    document.getElementById('ch-count').textContent = toFa(d.count);
+    const chCount = document.getElementById('ch-count');
+    if(chCount) chCount.textContent = toFa(d.count);
     const conns = d.connections || [];
-    if(!d.count){ grid.innerHTML = ''; ce.style.display = 'block'; document.getElementById('ch-traffic').textContent = '—'; document.getElementById('ch-avgdur').textContent = '—'; document.getElementById('ch-uniq').textContent = '—'; return; }
-    ce.style.display = 'none';
+    if(!d.count){ if(grid) grid.innerHTML = ''; if(ce) ce.style.display = 'block'; 
+      const chTraffic = document.getElementById('ch-traffic'); if(chTraffic) chTraffic.textContent = '—';
+      const chAvgdur = document.getElementById('ch-avgdur'); if(chAvgdur) chAvgdur.textContent = '—';
+      const chUniq = document.getElementById('ch-uniq'); if(chUniq) chUniq.textContent = '—';
+      return; }
+    if(ce) ce.style.display = 'none';
     const totalBytes = conns.reduce((s, c) => s + parseBytesFmt(c.bytes_fmt), 0);
-    document.getElementById('ch-traffic').textContent = fmtB(totalBytes);
+    const chTraffic = document.getElementById('ch-traffic'); if(chTraffic) chTraffic.textContent = fmtB(totalBytes);
     const uniqIps = new Set(conns.map(c => c.ip)).size;
-    document.getElementById('ch-uniq').textContent = toFa(uniqIps);
+    const chUniq = document.getElementById('ch-uniq'); if(chUniq) chUniq.textContent = toFa(uniqIps);
     const durs = conns.map(c => c.connected_at ? Math.max(0, Math.floor((Date.now() - new Date(c.connected_at).getTime()) / 1000)) : 0);
     const avgSec = durs.length ? Math.floor(durs.reduce((a,b) => a+b, 0) / durs.length) : 0;
-    document.getElementById('ch-avgdur').textContent = avgSec < 60 ? avgSec + 's' : avgSec < 3600 ? Math.floor(avgSec/60) + 'm' : Math.floor(avgSec/3600) + 'h';
+    const chAvgdur = document.getElementById('ch-avgdur');
+    if(chAvgdur) chAvgdur.textContent = avgSec < 60 ? avgSec + 's' : avgSec < 3600 ? Math.floor(avgSec/60) + 'm' : Math.floor(avgSec/3600) + 'h';
     const maxDur = Math.max(...durs, 1);
-    grid.innerHTML = conns.map(c => {
-      const secs = c.connected_at ? Math.max(0, Math.floor((Date.now() - new Date(c.connected_at).getTime()) / 1000)) : 0;
-      const dur = secs < 60 ? secs + 's' : secs < 3600 ? Math.floor(secs/60) + 'm' : Math.floor(secs/3600) + 'h';
-      const durPct = Math.min(100, Math.round((secs / maxDur) * 100));
-      const protoVal = c.transport === 'vless-ws' ? 'vless-ws' : (c.transport || '').replace('xhttp-', 'xhttp-');
-      return `<div class="conn-card-v2">
-        <div class="conn-card-v2-glow"></div>
-        <div class="conn-card-v2-top">
-          <div class="conn-avatar"><i class="ti ti-device-desktop"></i></div>
-          <div class="conn-card-v2-id"><div class="conn-ip-v2">${esc(c.ip)}<button class="conn-ip-copy" onclick="navigator.clipboard.writeText('${esc(c.ip)}')"><i class="ti ti-copy"></i></button></div><div class="conn-label-v2">${esc(c.label)}</div></div>
-          <span class="conn-status-pill"><span class="dot dg pulse"></span> Live</span>
-        </div>
-        <div class="conn-card-v2-divider"></div>
-        <div class="conn-card-v2-body">
-          <div class="conn-proto-row">${protoBadge([protoVal])}</div>
-          <div class="conn-stat-row">
-            <div class="conn-stat-box"><div class="conn-stat-icon"><i class="ti ti-transfer"></i></div><div><div class="conn-stat-text-label">Traffic</div><div class="conn-stat-text-val">${esc(c.bytes_fmt)}</div></div></div>
-            <div class="conn-stat-box"><div class="conn-stat-icon time"><i class="ti ti-clock"></i></div><div><div class="conn-stat-text-label">Duration</div><div class="conn-stat-text-val">${dur}</div></div></div>
+    if(grid) {
+      grid.innerHTML = conns.map(c => {
+        const secs = c.connected_at ? Math.max(0, Math.floor((Date.now() - new Date(c.connected_at).getTime()) / 1000)) : 0;
+        const dur = secs < 60 ? secs + 's' : secs < 3600 ? Math.floor(secs/60) + 'm' : Math.floor(secs/3600) + 'h';
+        const durPct = Math.min(100, Math.round((secs / maxDur) * 100));
+        const protoVal = c.transport === 'vless-ws' ? 'vless-ws' : (c.transport || '').replace('xhttp-', 'xhttp-');
+        return `<div class="conn-card-v2">
+          <div class="conn-card-v2-glow"></div>
+          <div class="conn-card-v2-top">
+            <div class="conn-avatar"><i class="ti ti-device-desktop"></i></div>
+            <div class="conn-card-v2-id"><div class="conn-ip-v2">${esc(c.ip)}<button class="conn-ip-copy" onclick="navigator.clipboard.writeText('${esc(c.ip)}')"><i class="ti ti-copy"></i></button></div><div class="conn-label-v2">${esc(c.label)}</div></div>
+            <span class="conn-status-pill"><span class="dot dg pulse"></span> Live</span>
           </div>
-          <div class="conn-duration-track"><div class="conn-duration-fill" style="width:${durPct}%"></div></div>
-        </div>
-      </div>`;
-    }).join('');
+          <div class="conn-card-v2-divider"></div>
+          <div class="conn-card-v2-body">
+            <div class="conn-proto-row">${protoBadge([protoVal])}</div>
+            <div class="conn-stat-row">
+              <div class="conn-stat-box"><div class="conn-stat-icon"><i class="ti ti-transfer"></i></div><div><div class="conn-stat-text-label">Traffic</div><div class="conn-stat-text-val">${esc(c.bytes_fmt)}</div></div></div>
+              <div class="conn-stat-box"><div class="conn-stat-icon time"><i class="ti ti-clock"></i></div><div><div class="conn-stat-text-label">Duration</div><div class="conn-stat-text-val">${dur}</div></div></div>
+            </div>
+            <div class="conn-duration-track"><div class="conn-duration-fill" style="width:${durPct}%"></div></div>
+          </div>
+        </div>`;
+      }).join('');
+    }
   } catch(e){ console.error('loadConns error:', e); }
 }
 
@@ -3107,19 +3178,21 @@ async function loadActivity(){
     const logs = (d.logs || []).slice().reverse();
     const el = document.getElementById('logs-list');
     const em = document.getElementById('logs-empty');
-    if(!logs.length){ el.innerHTML = ''; em.style.display = 'block'; return; }
-    em.style.display = 'none';
+    if(!logs.length){ if(el) el.innerHTML = ''; if(em) em.style.display = 'block'; return; }
+    if(em) em.style.display = 'none';
     const icMap = { ok: 'ti-circle-check', err: 'ti-circle-x', warn: 'ti-alert-triangle', info: 'ti-info-circle' };
     const kindFa = { link: 'Config', sub: 'Group', auth: 'Login', connection: 'Connection', system: 'System' };
-    el.innerHTML = logs.map(l => `
-      <div class="log-item">
-        <div class="log-ic ${l.level}"><i class="ti ${icMap[l.level] || 'ti-info-circle'}"></i></div>
-        <div class="log-body">
-          <div class="log-msg">${esc(l.message)}</div>
-          <div class="log-time"><i class="ti ti-clock"></i> ${new Date(l.time).toLocaleString()} <span class="log-kind">${kindFa[l.kind] || l.kind}</span></div>
+    if(el) {
+      el.innerHTML = logs.map(l => `
+        <div class="log-item">
+          <div class="log-ic ${l.level}"><i class="ti ${icMap[l.level] || 'ti-info-circle'}"></i></div>
+          <div class="log-body">
+            <div class="log-msg">${esc(l.message)}</div>
+            <div class="log-time"><i class="ti ti-clock"></i> ${new Date(l.time).toLocaleString()} <span class="log-kind">${kindFa[l.kind] || l.kind}</span></div>
+          </div>
         </div>
-      </div>
-    `).join('');
+      `).join('');
+    }
   } catch(e){ console.error('loadActivity error:', e); }
 }
 
@@ -3142,6 +3215,7 @@ function renderErrs(errs){
 let ws = null;
 function wsLog(c, m){
   const l = document.getElementById('ws-log');
+  if(!l) return;
   const p = document.createElement('p');
   const colors = { ok: '#10b981', err: '#ef4444', info: '#8b949e', sent: '#1677ff' };
   p.style.color = colors[c] || '#fff';
@@ -3150,7 +3224,7 @@ function wsLog(c, m){
   l.scrollTop = l.scrollHeight;
 }
 function wsConn(){
-  const u = document.getElementById('ws-uuid').value.trim();
+  const u = document.getElementById('ws-uuid')?.value?.trim();
   if(!u){ toast('Enter UUID', 'err'); return; }
   const url = (location.protocol === 'https:' ? 'wss' : 'ws') + '://' + location.host + '/ws/' + u;
   wsLog('info', 'Connecting: ' + url);
@@ -3161,19 +3235,20 @@ function wsConn(){
   ws.onclose = e => wsLog('err', 'Disconnected (' + e.code + ')');
 }
 function wsSend(){
-  const m = document.getElementById('ws-msg').value;
+  const m = document.getElementById('ws-msg')?.value;
   if(!m || !ws || ws.readyState !== 1) return;
   ws.send(m);
   wsLog('sent', 'Sent: ' + m);
-  document.getElementById('ws-msg').value = '';
+  const wsMsg = document.getElementById('ws-msg');
+  if(wsMsg) wsMsg.value = '';
 }
 function wsDisc(){ if(ws) ws.close(); }
 
 // ===== Password =====
 async function changePw(){
-  const cur = document.getElementById('cp-cur').value;
-  const nw = document.getElementById('cp-new').value;
-  const cf = document.getElementById('cp-cf').value;
+  const cur = document.getElementById('cp-cur')?.value;
+  const nw = document.getElementById('cp-new')?.value;
+  const cf = document.getElementById('cp-cf')?.value;
   if(!cur || !nw || !cf){ toast('Fill all fields', 'err'); return; }
   if(nw.length < 4){ toast('Min 4 characters', 'err'); return; }
   if(nw !== cf){ toast('Passwords do not match', 'err'); return; }
@@ -3182,18 +3257,22 @@ async function changePw(){
     const d = await r.json().catch(() => ({}));
     if(!r.ok) throw new Error(d.detail || 'Error');
     toast('Password changed ✓', 'ok');
-    document.getElementById('cp-cur').value = '';
-    document.getElementById('cp-new').value = '';
-    document.getElementById('cp-cf').value = '';
+    const cpCur = document.getElementById('cp-cur');
+    const cpNew = document.getElementById('cp-new');
+    const cpCf = document.getElementById('cp-cf');
+    if(cpCur) cpCur.value = '';
+    if(cpNew) cpNew.value = '';
+    if(cpCf) cpCf.value = '';
   } catch(e){ toast('✗ ' + e.message, 'err'); }
 }
 
 function togglePwField(id, btn){
   const inp = document.getElementById(id);
+  if(!inp) return;
   const icon = btn.querySelector('i');
   const toText = inp.type === 'password';
   inp.type = toText ? 'text' : 'password';
-  icon.className = 'ti ' + (toText ? 'ti-eye-off' : 'ti-eye');
+  if(icon) icon.className = 'ti ' + (toText ? 'ti-eye-off' : 'ti-eye');
 }
 
 function checkPwStrength(val){
@@ -3206,13 +3285,14 @@ function checkPwStrength(val){
   const hasNum = /\d/.test(val);
   const hasCase = /[a-z]/.test(val) && /[A-Z]/.test(val);
   const hasLong = val.length >= 8;
-  reqLen.classList.toggle('met', hasLen);
-  reqNum.classList.toggle('met', hasNum);
-  reqCase.classList.toggle('met', hasCase);
+  if(reqLen) reqLen.classList.toggle('met', hasLen);
+  if(reqNum) reqNum.classList.toggle('met', hasNum);
+  if(reqCase) reqCase.classList.toggle('met', hasCase);
   let score = 0; if(hasLen) score++; if(hasNum) score++; if(hasCase) score++; if(hasLong) score++;
   const colors = ['#1677ff', '#4096ff', '#0050b3', '#003a8c'];
   const labels = ['Very Weak', 'Weak', 'Medium', 'Strong'];
   segs.forEach((s, i) => { s.style.background = i < score ? colors[Math.max(0, score-1)] : 'rgba(100,116,139,.2)'; });
+  if(!label) return;
   if(val.length === 0){ label.innerHTML = '<i class="ti ti-shield"></i> Password Strength'; return; }
   label.innerHTML = `<i class="ti ti-shield-check" style="color:${colors[Math.max(0, score-1)]}"></i> ${labels[Math.max(0, score-1)]}`;
 }
@@ -3220,11 +3300,11 @@ function checkPwStrength(val){
 // ===== Refresh =====
 function refreshAll(){
   fetchStats();
-  if(document.getElementById('pg-links').classList.contains('on')) loadLinks();
-  if(document.getElementById('pg-subgroups').classList.contains('on')) loadSubs();
-  if(document.getElementById('pg-subscriptions').classList.contains('on')) loadSubsPage();
-  if(document.getElementById('pg-connections').classList.contains('on')) loadConns();
-  if(document.getElementById('pg-logs').classList.contains('on')) loadActivity();
+  if(document.getElementById('pg-links')?.classList?.contains('on')) loadLinks();
+  if(document.getElementById('pg-subgroups')?.classList?.contains('on')) loadSubs();
+  if(document.getElementById('pg-subscriptions')?.classList?.contains('on')) loadSubsPage();
+  if(document.getElementById('pg-connections')?.classList?.contains('on')) loadConns();
+  if(document.getElementById('pg-logs')?.classList?.contains('on')) loadActivity();
   toast('Refreshed ✓', 'ok');
 }
 
@@ -3253,13 +3333,13 @@ document.addEventListener('DOMContentLoaded', async () => {
     });
     
     applyTheme(currentTheme);
+    initSparklineCharts();
+    initCharts();
     
-    // Initialize charts safely
-    try { initSparklineCharts(); } catch(e) { console.warn('Sparkline init error:', e); }
-    try { initCharts(); } catch(e) { console.warn('Chart init error:', e); }
-    
-    document.getElementById('set-host').textContent = location.host;
-    document.getElementById('sub-all-url').textContent = location.protocol + '//' + location.host + '/sub-all';
+    const setHost = document.getElementById('set-host');
+    if(setHost) setHost.textContent = location.host;
+    const subAllUrl = document.getElementById('sub-all-url');
+    if(subAllUrl) subAllUrl.textContent = location.protocol + '//' + location.host + '/sub-all';
     
     // Ensure nl-count exists
     if(!document.getElementById('nl-count')) {
@@ -3271,18 +3351,16 @@ document.addEventListener('DOMContentLoaded', async () => {
       if(cpBody) cpBody.appendChild(hidden);
     }
     
-    // Load data with separate error handling
-    try { await loadServerSettings(); } catch(e) { console.warn('loadServerSettings error:', e); }
-    try { await fetchStats(); } catch(e) { console.warn('fetchStats error:', e); }
-    try { await loadLinks(); } catch(e) { console.warn('loadLinks error:', e); }
-    try { await loadSubs(); } catch(e) { console.warn('loadSubs error:', e); }
-    try { await loadSubsPage(); } catch(e) { console.warn('loadSubsPage error:', e); }
+    await loadServerSettings();
+    fetchStats();
+    loadLinks();
+    loadSubs();
+    loadSubsPage();
     
-    // Set intervals
     setInterval(fetchStats, 5000);
     setInterval(() => {
-      if(document.getElementById('pg-connections').classList.contains('on')) loadConns();
-      if(document.getElementById('pg-logs').classList.contains('on')) loadActivity();
+      if(document.getElementById('pg-connections')?.classList?.contains('on')) loadConns();
+      if(document.getElementById('pg-logs')?.classList?.contains('on')) loadActivity();
     }, 10000);
   } catch(e) {
     console.error('Init error:', e);
