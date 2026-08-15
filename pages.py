@@ -1,4 +1,4 @@
-# pages.py - CBee Gateway v1.0.0 (Fully Fixed & Enhanced)
+# pages.py - CBee Gateway v1.0.0 (Fully Fixed, Charts & Login Enhanced)
 import json
 
 LOGIN_HTML = r"""<!DOCTYPE html>
@@ -21,67 +21,67 @@ body {
   padding: 20px;
   position: relative;
 }
-/* Premium Grid Background */
+/* Fine Grid Background */
 .bg-grid {
   position: fixed;
   inset: 0;
   z-index: 0;
   background-image: 
-    linear-gradient(rgba(255,255,255,0.02) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(255,255,255,0.02) 1px, transparent 1px);
-  background-size: 60px 60px;
-  mask-image: radial-gradient(ellipse at center, black 40%, transparent 70%);
-  -webkit-mask-image: radial-gradient(ellipse at center, black 40%, transparent 70%);
+    linear-gradient(rgba(255,255,255,0.04) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,0.04) 1px, transparent 1px);
+  background-size: 24px 24px;
+  mask-image: radial-gradient(ellipse at center, black 50%, transparent 75%);
+  -webkit-mask-image: radial-gradient(ellipse at center, black 50%, transparent 75%);
 }
 .orb {
   position: fixed;
   border-radius: 50%;
-  filter: blur(120px);
+  filter: blur(100px);
   z-index: 0;
   pointer-events: none;
   animation: floatOrb 22s ease-in-out infinite alternate;
 }
-.o1 { width: 500px; height: 500px; background: rgba(22,119,255,0.10); top: -200px; right: -150px; animation-delay: 0s; }
-.o2 { width: 400px; height: 400px; background: rgba(22,119,255,0.06); bottom: -150px; left: -100px; animation-delay: 7s; }
+.o1 { width: 400px; height: 400px; background: rgba(22,119,255,0.08); top: -150px; right: -100px; animation-delay: 0s; }
+.o2 { width: 350px; height: 350px; background: rgba(22,119,255,0.05); bottom: -120px; left: -80px; animation-delay: 7s; }
 @keyframes floatOrb {
   0% { transform: translate(0,0) scale(1); }
-  33% { transform: translate(70px,-80px) scale(1.1); }
-  66% { transform: translate(-50px,50px) scale(0.85); }
-  100% { transform: translate(40px,-30px) scale(1.05); }
+  33% { transform: translate(50px,-60px) scale(1.1); }
+  66% { transform: translate(-40px,40px) scale(0.85); }
+  100% { transform: translate(30px,-20px) scale(1.05); }
 }
-.wrap { position: relative; z-index: 10; width: 100%; max-width: 440px; animation: fadeUp 0.6s cubic-bezier(0.22, 1, 0.36, 1); }
+.wrap { position: relative; z-index: 10; width: 100%; max-width: 400px; animation: fadeUp 0.6s cubic-bezier(0.22, 1, 0.36, 1); }
 @keyframes fadeUp { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
 .card {
-  background: rgba(16, 20, 30, 0.6);
+  background: rgba(16, 20, 30, 0.55);
   backdrop-filter: blur(24px);
   -webkit-backdrop-filter: blur(24px);
-  border: 1px solid rgba(255,255,255,0.08);
-  border-radius: 32px;
-  padding: 44px 38px 38px;
-  box-shadow: 0 30px 80px rgba(0,0,0,0.6), inset 0 1px 0 rgba(255,255,255,0.05);
+  border: 1px solid rgba(255,255,255,0.06);
+  border-radius: 28px;
+  padding: 40px 32px 32px;
+  box-shadow: 0 30px 80px rgba(0,0,0,0.6), inset 0 1px 0 rgba(255,255,255,0.04);
   position: relative;
   overflow: hidden;
 }
 .card::before {
   content: '';
   position: absolute;
-  top: -150px;
-  right: -150px;
-  width: 300px;
-  height: 300px;
-  background: radial-gradient(circle, rgba(22,119,255,0.08), transparent 70%);
+  top: -120px;
+  right: -120px;
+  width: 260px;
+  height: 260px;
+  background: radial-gradient(circle, rgba(22,119,255,0.06), transparent 70%);
   pointer-events: none;
 }
 .brand {
   display: flex;
   flex-direction: column;
   align-items: center;
-  margin-bottom: 32px;
+  margin-bottom: 28px;
   position: relative;
   z-index: 1;
 }
 .brand-name {
-  font-size: 48px;
+  font-size: 44px;
   font-weight: 900;
   font-family: 'Vazirmatn', sans-serif;
   background: linear-gradient(135deg, #1677ff, #4096ff);
@@ -89,11 +89,11 @@ body {
   background-clip: text;
   color: transparent;
   letter-spacing: -0.02em;
-  text-shadow: 0 0 60px rgba(22,119,255,0.2);
+  text-shadow: 0 0 60px rgba(22,119,255,0.15);
 }
 .brand-sub {
   font-size: 10px;
-  color: rgba(139,148,158,0.8);
+  color: rgba(139,148,158,0.7);
   letter-spacing: 0.3em;
   text-transform: uppercase;
   font-weight: 600;
@@ -103,41 +103,43 @@ body {
   display: flex;
   justify-content: center;
   gap: 10px;
-  margin-bottom: 24px;
+  margin-bottom: 22px;
   dir: ltr;
 }
 .lang-btn {
   background: transparent;
-  border: 1px solid rgba(255,255,255,0.1);
+  border: 1px solid rgba(255,255,255,0.08);
   color: #8b949e;
-  padding: 5px 18px;
+  padding: 5px 16px;
   border-radius: 20px;
-  font-size: 11px;
+  font-size: 10.5px;
   font-weight: 700;
   cursor: pointer;
   font-family: inherit;
   transition: 0.25s;
 }
 .lang-btn:hover { border-color: #1677ff; color: #f0f6fc; }
-.lang-btn.active { background: #1677ff; border-color: #1677ff; color: #fff; box-shadow: 0 4px 14px rgba(22,119,255,0.3); }
+.lang-btn.active { background: #1677ff; border-color: #1677ff; color: #fff; box-shadow: 0 4px 14px rgba(22,119,255,0.25); }
 h1 {
-  font-size: 22px;
+  font-size: 20px;
   font-weight: 800;
   color: #f0f6fc;
   margin-bottom: 4px;
   letter-spacing: -0.02em;
+  text-align: center;
 }
 .sub {
   font-size: 12px;
   color: #8b949e;
-  margin-bottom: 26px;
+  margin-bottom: 24px;
   line-height: 1.7;
+  text-align: center;
 }
 .err {
   display: none;
   background: rgba(239,68,68,0.12);
   border: 1px solid rgba(239,68,68,0.3);
-  border-radius: 14px;
+  border-radius: 12px;
   padding: 10px 14px;
   margin-bottom: 18px;
   font-size: 12px;
@@ -166,17 +168,25 @@ h1 {
   align-items: center;
   background: rgba(0,0,0,0.3);
   border: 1px solid rgba(255,255,255,0.08);
-  border-radius: 14px;
+  border-radius: 12px;
   transition: all 0.25s;
+  padding: 0 14px;
 }
 .inp-wrap:focus-within {
   border-color: #1677ff;
   box-shadow: 0 0 0 4px rgba(22,119,255,0.08);
-  background: rgba(0,0,0,0.4);
+  background: rgba(0,0,0,0.45);
 }
+.inp-wrap i {
+  color: #8b949e;
+  font-size: 18px;
+  margin-right: 10px;
+  transition: 0.2s;
+}
+.inp-wrap:focus-within i { color: #1677ff; }
 input[type="password"], input[type="text"] {
-  width: 100%;
-  padding: 14px 18px;
+  flex: 1;
+  padding: 14px 0;
   border: none;
   background: transparent;
   color: #f0f6fc;
@@ -184,17 +194,10 @@ input[type="password"], input[type="text"] {
   font-size: 14px;
   outline: none;
 }
-.ic {
-  color: #8b949e;
-  font-size: 18px;
-  padding: 0 16px;
-  transition: 0.2s;
-}
-.inp-wrap:focus-within .ic { color: #1677ff; }
 .btn {
   width: 100%;
   padding: 15px;
-  border-radius: 14px;
+  border-radius: 12px;
   border: none;
   cursor: pointer;
   background: linear-gradient(135deg, #1677ff, #0050b3);
@@ -206,7 +209,7 @@ input[type="password"], input[type="text"] {
   align-items: center;
   justify-content: center;
   gap: 8px;
-  box-shadow: 0 6px 28px rgba(22,119,255,0.25);
+  box-shadow: 0 6px 28px rgba(22,119,255,0.2);
   transition: all 0.25s;
   position: relative;
   overflow: hidden;
@@ -220,14 +223,14 @@ input[type="password"], input[type="text"] {
   transition: opacity 0.3s;
 }
 .btn:hover::before { opacity: 1; }
-.btn:hover { transform: translateY(-2px); box-shadow: 0 10px 40px rgba(22,119,255,0.4); }
+.btn:hover { transform: translateY(-2px); box-shadow: 0 10px 40px rgba(22,119,255,0.3); }
 .btn:active { transform: translateY(0) scale(0.98); }
 .btn:disabled { opacity: 0.5; cursor: not-allowed; }
 .btn span { position: relative; z-index: 1; display: flex; align-items: center; gap: 6px; }
 .footer {
-  margin-top: 28px;
-  padding-top: 20px;
-  border-top: 1px solid rgba(255,255,255,0.06);
+  margin-top: 26px;
+  padding-top: 18px;
+  border-top: 1px solid rgba(255,255,255,0.05);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -247,7 +250,7 @@ input[type="password"], input[type="text"] {
 .footer a:hover { color: #4096ff; text-decoration: underline; }
 @keyframes spin { to { transform: rotate(360deg); } }
 @media (max-width: 440px) {
-  .card { padding: 28px 20px 24px; }
+  .card { padding: 28px 18px 24px; }
   .brand-name { font-size: 32px; }
 }
 </style>
@@ -272,7 +275,7 @@ input[type="password"], input[type="text"] {
       <div class="field">
         <label id="login-pw-label">Password</label>
         <div class="inp-wrap">
-          <i class="ti ti-key ic"></i>
+          <i class="ti ti-key"></i>
           <input type="password" id="pw" placeholder="••••••••" autofocus required>
         </div>
       </div>
@@ -742,6 +745,7 @@ DASHBOARD_HTML = r"""<!DOCTYPE html>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.19.0/dist/tabler-icons.min.css">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-zoom@2.0.1/dist/chartjs-plugin-zoom.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-3d@1.0.0/dist/chartjs-plugin-3d.umd.min.js"></script>
 <style>
 /* ===== RESET & VARIABLES ===== */
 *{margin:0;padding:0;box-sizing:border-box}
@@ -1466,7 +1470,7 @@ a{color:inherit;text-decoration:none}
     </div>
   </div>
 
-  <!-- 3 Premium Charts with 4-box grid under axis (Fixed 3D) -->
+  <!-- 3 Premium Charts with 4-box grid under axis (FIXED 3D Plugin) -->
   <div class="chart-grid">
     <div class="chart-premium" id="chart-load-container">
       <div class="ch-header">
@@ -2175,7 +2179,7 @@ function formatLinkName(label, protocol, protoSettings){
   return result;
 }
 
-// ========== PREMIUM CHARTS (فقط ۵ دقیقه آخر) - FIXED ==========
+// ========== PREMIUM CHARTS (فقط ۵ دقیقه آخر) - FIXED 3D ==========
 const CHART_STORAGE_KEY = 'CBeeNet_chartData';
 const PREV_TRAF_KEY = 'CBeeNet_prevTraf';
 let chartData = { load: [], traffic: [], conns: [] };
@@ -2233,7 +2237,7 @@ function getChartColors(type) {
   const accentD = getComputedStyle(root).getPropertyValue('--accent-d').trim() || 'rgba(22,119,255,0.12)';
   return { line: accent, fill: accentD };
 }
-// ===== FIXED buildChart (SINGLE dataset, 4-box Grid under axis) =====
+// ===== FIXED buildChart (SINGLE dataset, 4-box Grid under axis via chartjs-plugin-3d) =====
 function buildChart(type) {
   const colors = getChartColors(type);
   const accent = colors.line;
@@ -2301,12 +2305,21 @@ function buildChart(type) {
             return val.toFixed(1) + unit;
           }
         }
+      },
+      // 3D Plugin configuration (creates the 4-box grid under the chart)
+      '3d': {
+        enabled: true,
+        perspective: 0.25,
+        depth: 0.5,
+        angle: 25,
+        wireframe: true,
+        color: accent + '80'
       }
     },
     scales: {
       x: {
         display: true,
-        grid: { display: true, color: accent + '30', drawBorder: false },
+        grid: { display: false, drawBorder: false },
         border: { display: false },
         ticks: {
           color: textColor,
@@ -2339,6 +2352,12 @@ function buildChart(type) {
       line: { borderJoinStyle: 'round' }
     }
   };
+
+  // Register 3D plugin if available
+  const plugin3d = window.Chart3D;
+  if (plugin3d) {
+    try { Chart.register(plugin3d); } catch(e) {}
+  }
 
   const config = {
     type: 'line',
@@ -2399,7 +2418,7 @@ function addDataPoint(type, value, time) {
   updateChartValue(type);
 }
 
-// ========== fetchStats (Traffic Delta Fix + Persistence) ==========
+// ========== fetchStats (Traffic Delta Fix + Persistence + Visibility) ==========
 async function fetchStats(){
   try{
     const connResp = await authF('/api/connections');
@@ -2440,6 +2459,14 @@ async function fetchStats(){
     updateSecondaryCharts(d, allLinksList);
   } catch(e){ console.error('fetchStats error:', e); }
 }
+
+// ========== Visibility Change Handler (Updates when tab becomes active) ==========
+document.addEventListener('visibilitychange', function() {
+  if (!document.hidden) {
+    // Force an immediate update when the user returns to the tab
+    fetchStats();
+  }
+});
 
 // ========== SECONDARY CHARTS ==========
 let dashProtoChart = null, dashHourlyChart = null;
