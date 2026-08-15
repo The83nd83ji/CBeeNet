@@ -44,7 +44,7 @@ DATA_FILE = DATA_DIR / "cbee_state.json"
 SAVE_LOCK = asyncio.Lock()
 
 async def load_state():
-    global LINKS, AUTH, SUBS, GLOBAL_SETTINGS, RESELLERS
+    global LINKS, AUTH, SUBS, GLOBAL_SETTINGS, RESELLERS, CONFIG
     try:
         DATA_DIR.mkdir(parents=True, exist_ok=True)
         if DATA_FILE.exists():
@@ -60,6 +60,12 @@ async def load_state():
                 GLOBAL_SETTINGS.update(data["global_settings"])
             if "password_hash" in data:
                 AUTH["password_hash"] = data["password_hash"]
+            # Load secret from state if present, otherwise keep current (from env or generated)
+            if "secret" in data:
+                CONFIG["secret"] = data["secret"]
+                logger.info("Loaded secret from state file")
+            else:
+                logger.info("No secret in state file, using current secret (may cause password mismatch if state was created with a different secret)")
             logger.info(f"Loaded state from {DATA_FILE}: {len(LINKS)} links")
         else:
             logger.info("No existing state file found, starting fresh")
@@ -73,7 +79,8 @@ async def save_state():
             "subs": dict(SUBS),
             "resellers": dict(RESELLERS),
             "global_settings": dict(GLOBAL_SETTINGS),
-            "password_hash": AUTH["password_hash"]
+            "password_hash": AUTH["password_hash"],
+            "secret": CONFIG["secret"],   # Save secret to keep password hashes consistent across restarts
         }
         DATA_DIR.mkdir(parents=True, exist_ok=True)
         async with aiofiles.open(DATA_FILE, "w", encoding="utf-8") as f:
@@ -181,6 +188,7 @@ async def startup():
     timeout = httpx.Timeout(30.0, connect=10.0)
     http_client = httpx.AsyncClient(limits=limits, timeout=timeout, follow_redirects=True)
     await load_state()
+    # If state had no secret, we keep the current one (from env or random). Ensure it gets saved later.
     log_activity("system", "Server started", "ok")
     logger.info(f"CBeeNet Gateway started on port {CONFIG['port']}")
 
