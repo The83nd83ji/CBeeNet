@@ -997,7 +997,6 @@ a{color:inherit;text-decoration:none}
 .proto-btn-v .proto-icon{width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0}
 .proto-btn-v .proto-icon.vless{background:rgba(22,119,255,0.2);color:#1677ff}
 .proto-btn-v .proto-icon.trojan{background:rgba(139,92,246,0.2);color:#8b5cf6}
-.proto-btn-v .proto-icon.vmess{background:rgba(16,185,129,0.2);color:#10b981}
 .proto-btn-v .proto-icon.xhttp{background:rgba(245,158,11,0.2);color:#f59e0b}
 .proto-btn-v .proto-info{flex:1;min-width:0}
 .proto-btn-v .proto-name{font-weight:700;font-size:12.5px;color:var(--t1)}
@@ -1584,7 +1583,7 @@ a{color:inherit;text-decoration:none}
       </div>
       <div class="cp-block mb16">
         <div class="cp-block-label"><i class="ti ti-plug-connected"></i> <span data-lang="transport_protocols">Transport Protocols</span></div>
-        <!-- پروتکل‌ها به صورت عمودی -->
+        <!-- پروتکل‌ها به صورت عمودی (بدون VMess) -->
         <div class="proto-group-v" id="proto-group-v">
           <button class="proto-btn-v active" data-proto="vless-ws" onclick="toggleProtoBtnV(this)">
             <span class="proto-icon vless"><i class="ti ti-brand-vscode"></i></span>
@@ -1601,14 +1600,6 @@ a{color:inherit;text-decoration:none}
               <span class="proto-desc">WebSocket · TLS</span>
             </span>
             <span class="proto-badge">Secure</span>
-          </button>
-          <button class="proto-btn-v" data-proto="vmess-ws" onclick="toggleProtoBtnV(this)">
-            <span class="proto-icon vmess"><i class="ti ti-zodiac-virgo"></i></span>
-            <span class="proto-info">
-              <span class="proto-name">VMess / WS</span>
-              <span class="proto-desc">WebSocket · TLS</span>
-            </span>
-            <span class="proto-badge">Compatible</span>
           </button>
           <button class="proto-btn-v" data-proto="xhttp-packet-up" onclick="toggleProtoBtnV(this)">
             <span class="proto-icon xhttp"><i class="ti ti-package"></i></span>
@@ -1873,7 +1864,7 @@ a{color:inherit;text-decoration:none}
       <div class="cl" style="margin-top:12px"><i class="ti ti-info-circle"></i><span data-lang="lang_note">Default language is English. Page will refresh after change.</span></div>
     </div>
 
-    <!-- ===== NEW: Protocol Custom Server Settings ===== -->
+    <!-- ===== ONLY Protocol Custom Server Settings (removed Default section) ===== -->
     <div class="card" style="grid-column:1/-1">
       <div class="card-title"><i class="ti ti-server-2"></i> <span>Protocol Custom Names & Templates</span></div>
       <div style="display:flex;flex-direction:column;gap:8px">
@@ -1898,29 +1889,22 @@ a{color:inherit;text-decoration:none}
           <input class="fi" id="ps-trojan-ws-prefix" placeholder="e.g. trojan" style="min-width:0;padding:6px 8px;font-size:11px">
           <input class="fi" id="ps-trojan-ws-template" placeholder="{server}-{label}" style="min-width:0;padding:6px 8px;font-size:11px">
         </div>
-        <!-- VMess-WS -->
-        <div style="display:grid;grid-template-columns:1.2fr 1.2fr 1.2fr 2fr;gap:8px;align-items:center;background:rgba(0,0,0,0.08);border-radius:8px;padding:6px 4px">
-          <div style="font-size:11px;color:var(--green-t)">VMess-WS</div>
-          <input class="fi" id="ps-vmess-ws-name" placeholder="e.g. VMess-Server" style="min-width:0;padding:6px 8px;font-size:11px">
-          <input class="fi" id="ps-vmess-ws-prefix" placeholder="e.g. vmess" style="min-width:0;padding:6px 8px;font-size:11px">
-          <input class="fi" id="ps-vmess-ws-template" placeholder="{server}-{label}" style="min-width:0;padding:6px 8px;font-size:11px">
-        </div>
         <!-- XHTTP-packet -->
-        <div style="display:grid;grid-template-columns:1.2fr 1.2fr 1.2fr 2fr;gap:8px;align-items:center;background:rgba(0,0,0,0.04);border-radius:8px;padding:6px 4px">
+        <div style="display:grid;grid-template-columns:1.2fr 1.2fr 1.2fr 2fr;gap:8px;align-items:center;background:rgba(0,0,0,0.08);border-radius:8px;padding:6px 4px">
           <div style="font-size:11px;color:var(--amber-t)">XHTTP-packet</div>
           <input class="fi" id="ps-xhttp-packet-up-name" placeholder="e.g. XHTTP-Packet" style="min-width:0;padding:6px 8px;font-size:11px">
           <input class="fi" id="ps-xhttp-packet-up-prefix" placeholder="e.g. xhttp-p" style="min-width:0;padding:6px 8px;font-size:11px">
           <input class="fi" id="ps-xhttp-packet-up-template" placeholder="{server}-{label}" style="min-width:0;padding:6px 8px;font-size:11px">
         </div>
         <!-- XHTTP-stream -->
-        <div style="display:grid;grid-template-columns:1.2fr 1.2fr 1.2fr 2fr;gap:8px;align-items:center;background:rgba(0,0,0,0.08);border-radius:8px;padding:6px 4px">
+        <div style="display:grid;grid-template-columns:1.2fr 1.2fr 1.2fr 2fr;gap:8px;align-items:center;background:rgba(0,0,0,0.04);border-radius:8px;padding:6px 4px">
           <div style="font-size:11px;color:var(--amber-t)">XHTTP-stream</div>
           <input class="fi" id="ps-xhttp-stream-up-name" placeholder="e.g. XHTTP-Stream" style="min-width:0;padding:6px 8px;font-size:11px">
           <input class="fi" id="ps-xhttp-stream-up-prefix" placeholder="e.g. xhttp-s" style="min-width:0;padding:6px 8px;font-size:11px">
           <input class="fi" id="ps-xhttp-stream-up-template" placeholder="{server}-{label}" style="min-width:0;padding:6px 8px;font-size:11px">
         </div>
         <!-- XHTTP-ultra -->
-        <div style="display:grid;grid-template-columns:1.2fr 1.2fr 1.2fr 2fr;gap:8px;align-items:center;background:rgba(0,0,0,0.04);border-radius:8px;padding:6px 4px">
+        <div style="display:grid;grid-template-columns:1.2fr 1.2fr 1.2fr 2fr;gap:8px;align-items:center;background:rgba(0,0,0,0.08);border-radius:8px;padding:6px 4px">
           <div style="font-size:11px;color:var(--amber-t)">XHTTP-ultra</div>
           <input class="fi" id="ps-xhttp-stream-one-name" placeholder="e.g. XHTTP-Ultra" style="min-width:0;padding:6px 8px;font-size:11px">
           <input class="fi" id="ps-xhttp-stream-one-prefix" placeholder="e.g. xhttp-u" style="min-width:0;padding:6px 8px;font-size:11px">
@@ -1928,34 +1912,6 @@ a{color:inherit;text-decoration:none}
         </div>
         <button class="btn btn-p" onclick="saveProtocolSettings()" style="margin-top:6px"><i class="ti ti-device-floppy"></i> <span data-lang="save_settings">Save Protocol Settings</span></button>
         <div id="protocol-save-result" style="font-size:11px;color:var(--green-t);display:none">✓ <span data-lang="saved">Saved</span></div>
-      </div>
-    </div>
-
-    <!-- Keep old server settings for backward compatibility (optional) -->
-    <div class="card">
-      <div class="card-title"><i class="ti ti-server-2"></i> <span data-lang="server_link_settings">Default Server & Link Settings</span></div>
-      <div style="display:flex;flex-direction:column;gap:12px">
-        <div class="fg">
-          <label data-lang="server_name">Default Server Name</label>
-          <input class="fi" id="server-name-input" placeholder="e.g. CBeeNet" style="width:100%">
-        </div>
-        <div class="fg">
-          <label data-lang="server_prefix">Default Link Prefix</label>
-          <input class="fi" id="server-prefix-input" placeholder="e.g. MyServer" style="width:100%">
-        </div>
-        <div class="fg">
-          <label data-lang="link_template">Default Link Template</label>
-          <input class="fi" id="link-name-template" placeholder="e.g. {server}-{label}" style="width:100%">
-          <div style="font-size:9.5px;color:var(--t3);margin-top:4px;display:flex;flex-wrap:wrap;gap:6px">
-            <span style="background:var(--accent-d);padding:2px 8px;border-radius:4px">{server}</span>
-            <span style="background:var(--accent-d);padding:2px 8px;border-radius:4px">{prefix}</span>
-            <span style="background:var(--accent-d);padding:2px 8px;border-radius:4px">{label}</span>
-            <span style="background:var(--accent-d);padding:2px 8px;border-radius:4px">{protocol}</span>
-          </div>
-        </div>
-        <div class="cl"><i class="ti ti-info-circle"></i><span data-lang="template_note">If `{protocol}` is not in the template, the protocol will not be shown.</span></div>
-        <button class="btn btn-p" onclick="saveServerSettings()"><i class="ti ti-device-floppy"></i> <span data-lang="save_settings">Save Default Settings</span></button>
-        <div id="server-save-result" style="font-size:11px;color:var(--green-t);display:none">✓ <span data-lang="saved">Saved</span></div>
       </div>
     </div>
   </div>
@@ -2120,7 +2076,6 @@ function protoBadge(protocols){
   const labels = {
     'vless-ws': ['VLESS · WS', 'pc-ws'],
     'trojan-ws': ['Trojan · WS', 'pc-ws'],
-    'vmess-ws': ['VMess · WS', 'pc-ws'],
     'xhttp-packet-up': ['XHTTP · packet-up', 'pc-xhttp'],
     'xhttp-stream-up': ['XHTTP · stream-up', 'pc-xhttp'],
     'xhttp-stream-one': ['XHTTP ULTRA', 'pc-ultra']
@@ -2139,9 +2094,6 @@ async function authF(url, opts={}){ const r = await fetch(url, opts); if(r.statu
 // ========== UI HELPERS ==========
 function toggleProtoBtnV(el){
   el.classList.toggle('active');
-  // اگر می‌خواهید فقط یکی فعال باشد، کامنت زیر را بردارید
-  // document.querySelectorAll('.proto-btn-v').forEach(b => b.classList.remove('active'));
-  // el.classList.add('active');
 }
 function getSelectedProtocolsV(){
   const btns = document.querySelectorAll('.proto-btn-v');
@@ -2183,12 +2135,12 @@ document.querySelectorAll('.nav-it').forEach(el => el.addEventListener('click', 
 function openModal(id){ document.getElementById(id).classList.add('open'); }
 function closeModal(id){ document.getElementById(id).classList.remove('open'); }
 
-// ========== PROTOCOL CUSTOM SETTINGS ==========
+// ========== PROTOCOL CUSTOM SETTINGS (ONLY THIS) ==========
 async function loadProtocolSettings(){
   try {
     const r = await authF('/api/settings/protocol');
     const data = await r.json();
-    for (const proto of ['vless-ws','trojan-ws','vmess-ws','xhttp-packet-up','xhttp-stream-up','xhttp-stream-one']) {
+    for (const proto of ['vless-ws','trojan-ws','xhttp-packet-up','xhttp-stream-up','xhttp-stream-one']) {
       const prefix = proto.replace('-','_');
       const nameEl = document.getElementById('ps-'+prefix+'-name');
       const prefEl = document.getElementById('ps-'+prefix+'-prefix');
@@ -2201,7 +2153,7 @@ async function loadProtocolSettings(){
 }
 async function saveProtocolSettings(){
   const payload = {};
-  for (const proto of ['vless-ws','trojan-ws','vmess-ws','xhttp-packet-up','xhttp-stream-up','xhttp-stream-one']) {
+  for (const proto of ['vless-ws','trojan-ws','xhttp-packet-up','xhttp-stream-up','xhttp-stream-one']) {
     const prefix = proto.replace('-','_');
     const nameEl = document.getElementById('ps-'+prefix+'-name');
     const prefEl = document.getElementById('ps-'+prefix+'-prefix');
@@ -2230,51 +2182,20 @@ async function saveProtocolSettings(){
   } catch(e){ toast('Server connection error', 'err'); }
 }
 
-// ========== SERVER SETTINGS (DEFAULT) ==========
-async function loadServerSettings(){
-  try {
-    const r = await authF('/api/settings/server');
-    const data = await r.json();
-    document.getElementById('server-name-input').value = data.server_name || 'CBeeNet';
-    document.getElementById('server-prefix-input').value = data.server_prefix || '';
-    document.getElementById('link-name-template').value = data.link_template || '{server}-{label}';
-    localStorage.setItem('CBeeNet-server-name', data.server_name || 'CBeeNet');
-    localStorage.setItem('CBeeNet-server-prefix', data.server_prefix || '');
-    localStorage.setItem('CBeeNet-link-template', data.link_template || '{server}-{label}');
-  } catch(e) { console.warn('Could not load server settings:', e); }
-}
-async function saveServerSettings(){
-  const name = document.getElementById('server-name-input').value.trim() || 'CBeeNet';
-  const prefix = document.getElementById('server-prefix-input').value.trim() || '';
-  const template = document.getElementById('link-name-template').value.trim() || '{server}-{label}';
-  try {
-    const r = await authF('/api/settings/server', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ server_name: name, server_prefix: prefix, link_template: template })
-    });
-    const result = await r.json();
-    if(result.ok){
-      localStorage.setItem('CBeeNet-server-name', name);
-      localStorage.setItem('CBeeNet-server-prefix', prefix);
-      localStorage.setItem('CBeeNet-link-template', template);
-      document.getElementById('server-save-result').style.display = 'block';
-      setTimeout(() => document.getElementById('server-save-result').style.display = 'none', 3000);
-      toast('Default settings saved ✓', 'ok');
-      loadLinks();
-    } else {
-      toast('Error saving default settings', 'err');
-    }
-  } catch(e) { toast('Server connection error', 'err'); }
-}
+// ========== FORMAT LINK NAME USING PROTOCOL SETTINGS ==========
 function formatLinkName(label, protocol, protoSettings){
-  // ابتدا تنظیمات پروتکل را دریافت می‌کنیم (از localStorage یا سرور)
-  // برای سادگی از localStorage استفاده می‌کنیم اما در عمل باید از سرور دریافت شود.
-  // اینجا یک نمونه ساده است:
-  const defaultTemplate = localStorage.getItem('CBeeNet-link-template') || '{server}-{label}';
-  const defaultServer = localStorage.getItem('CBeeNet-server-name') || 'CBeeNet';
-  const defaultPrefix = localStorage.getItem('CBeeNet-server-prefix') || '';
-  // تنظیمات اختصاصی پروتکل (از سرور بارگذاری می‌شود)
+  // default values (will be overridden by protocol settings if set)
+  const defaultNames = {
+    'vless-ws': 'VLESS-WS',
+    'trojan-ws': 'Trojan-WS',
+    'xhttp-packet-up': 'XHTTP-packet',
+    'xhttp-stream-up': 'XHTTP-stream',
+    'xhttp-stream-one': 'XHTTP-ultra'
+  };
+  // default template, server, prefix (fallback)
+  const defaultTemplate = '{server}-{label}';
+  const defaultServer = 'CBeeNet';
+  const defaultPrefix = '';
   let server = defaultServer, prefix = defaultPrefix, template = defaultTemplate;
   if(protoSettings && protoSettings[protocol]){
     if(protoSettings[protocol].server_name) server = protoSettings[protocol].server_name;
@@ -2286,14 +2207,6 @@ function formatLinkName(label, protocol, protoSettings){
   result = result.replace(/{prefix}/g, prefix);
   result = result.replace(/{label}/g, label);
   if(template.includes('{protocol}')){
-    const defaultNames = {
-      'vless-ws': 'VLESS-WS',
-      'trojan-ws': 'Trojan-WS',
-      'vmess-ws': 'VMess-WS',
-      'xhttp-packet-up': 'XHTTP-packet',
-      'xhttp-stream-up': 'XHTTP-stream',
-      'xhttp-stream-one': 'XHTTP-ultra'
-    };
     let displayName = defaultNames[protocol] || protocol;
     result = result.replace(/{protocol}/g, displayName);
   }
@@ -2557,7 +2470,7 @@ function initSecondaryCharts(){
   const ctxProto = document.getElementById('dashProtoChart').getContext('2d');
   dashProtoChart = new Chart(ctxProto, {
     type: 'bar',
-    data: { labels: ['VLESS/WS', 'Trojan/WS', 'VMess/WS', 'XHTTP-packet', 'XHTTP-stream'], datasets: [{ data: [0,0,0,0,0], backgroundColor: ['rgba(26, 122, 255, 0.8)', 'rgba(139, 92, 246, 0.8)', 'rgba(52, 211, 153, 0.8)', 'rgba(251, 191, 36, 0.8)', 'rgba(239, 68, 68, 0.8)'], borderColor: [accentColor, purpleColor, greenColor, amberColor, '#ef4444'], borderWidth: 2, borderRadius: 6, barPercentage: 0.6 }] },
+    data: { labels: ['VLESS/WS', 'Trojan/WS', 'XHTTP-packet', 'XHTTP-stream'], datasets: [{ data: [0,0,0,0], backgroundColor: ['rgba(26, 122, 255, 0.8)', 'rgba(139, 92, 246, 0.8)', 'rgba(251, 191, 36, 0.8)', 'rgba(239, 68, 68, 0.8)'], borderColor: [accentColor, purpleColor, amberColor, '#ef4444'], borderWidth: 2, borderRadius: 6, barPercentage: 0.6 }] },
     options: {
       responsive: true, maintainAspectRatio: false,
       plugins: { legend: { display: false }, tooltip: { backgroundColor: 'rgba(11, 17, 29, 0.9)', borderColor: accentColor, borderWidth: 1, titleColor: '#fff', bodyColor: '#fff', cornerRadius: 8, padding: 10, callbacks: { label: function(context){ return context.parsed.y + ' configs'; } } } },
@@ -2579,12 +2492,12 @@ function initSecondaryCharts(){
 }
 function updateSecondaryCharts(statsData, linksData){
   if(dashProtoChart && linksData){
-    const protoCounts = { 'vless-ws': 0, 'trojan-ws': 0, 'vmess-ws': 0, 'xhttp-packet-up': 0, 'xhttp-stream-up': 0 };
+    const protoCounts = { 'vless-ws': 0, 'trojan-ws': 0, 'xhttp-packet-up': 0, 'xhttp-stream-up': 0 };
     linksData.forEach(l => {
       const protos = l.protocols || ['vless-ws'];
       protos.forEach(p => { if(protoCounts[p] !== undefined) protoCounts[p]++; });
     });
-    const counts = [protoCounts['vless-ws'], protoCounts['trojan-ws'], protoCounts['vmess-ws'], protoCounts['xhttp-packet-up'], protoCounts['xhttp-stream-up']];
+    const counts = [protoCounts['vless-ws'], protoCounts['trojan-ws'], protoCounts['xhttp-packet-up'], protoCounts['xhttp-stream-up']];
     dashProtoChart.data.datasets[0].data = counts;
     dashProtoChart.update('none');
   }
@@ -2619,6 +2532,8 @@ async function loadLinks(){
     const empty = document.getElementById('links-empty');
     if(!links.length){ grid.innerHTML = ''; empty.style.display = 'block'; return; }
     empty.style.display = 'none';
+    // load protocol settings for formatting
+    const protoSettings = await authF('/api/settings/protocol').then(r => r.json()).catch(() => ({}));
     grid.innerHTML = links.map(l => {
       const lim = l.limit_bytes === 0 ? '∞' : fmtB(l.limit_bytes);
       const pct = l.limit_bytes === 0 ? 0 : Math.min(100, l.used_bytes / l.limit_bytes * 100);
@@ -2626,8 +2541,6 @@ async function loadLinks(){
       const allowed = l.active && !l.expired;
       const cardCls = !l.active ? 'is-off' : (l.expired ? 'is-exp' : '');
       const proto = (l.protocols && l.protocols[0]) || 'vless-ws';
-      // دریافت تنظیمات پروتکل (برای نمایش صحیح نام) - برای سادگی از یک شی خالی استفاده می‌کنیم
-      const protoSettings = {}; // در عمل از سرور دریافت شود
       const displayLabel = formatLinkName(l.label, proto, protoSettings);
       return `<div class="cfg-card ${cardCls}">
         <div class="cfg-row">
@@ -3220,8 +3133,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   document.getElementById('set-host').textContent = location.host;
   document.getElementById('sub-all-url').textContent = location.protocol + '//' + location.host + '/sub-all';
-  await loadServerSettings();
-  await loadProtocolSettings();
+  await loadProtocolSettings(); // Only protocol settings
   fetchStats();
   loadLinks();
   loadSubs();
