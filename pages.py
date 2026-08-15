@@ -1,4 +1,4 @@
-# pages.py - CBee Gateway v1.0.0 (Fully Fixed, Charts & Login Enhanced)
+# pages.py - CBee Gateway v1.0.0 (Fully Fixed Charts & Login Grid)
 import json
 
 LOGIN_HTML = r"""<!DOCTYPE html>
@@ -21,15 +21,15 @@ body {
   padding: 20px;
   position: relative;
 }
-/* Fine Grid Background */
+/* Fine Premium Grid Background */
 .bg-grid {
   position: fixed;
   inset: 0;
   z-index: 0;
   background-image: 
-    linear-gradient(rgba(255,255,255,0.04) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(255,255,255,0.04) 1px, transparent 1px);
-  background-size: 24px 24px;
+    linear-gradient(rgba(255,255,255,0.06) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,0.06) 1px, transparent 1px);
+  background-size: 16px 16px;
   mask-image: radial-gradient(ellipse at center, black 50%, transparent 75%);
   -webkit-mask-image: radial-gradient(ellipse at center, black 50%, transparent 75%);
 }
@@ -1470,7 +1470,7 @@ a{color:inherit;text-decoration:none}
     </div>
   </div>
 
-  <!-- 3 Premium Charts with 4-box grid under axis (FIXED 3D Plugin) -->
+  <!-- 3 Premium Charts with 4-box grid under axis (Fixed 3D) -->
   <div class="chart-grid">
     <div class="chart-premium" id="chart-load-container">
       <div class="ch-header">
@@ -2179,7 +2179,7 @@ function formatLinkName(label, protocol, protoSettings){
   return result;
 }
 
-// ========== PREMIUM CHARTS (فقط ۵ دقیقه آخر) - FIXED 3D ==========
+// ========== PREMIUM CHARTS (فقط ۵ دقیقه آخر) - FIXED 3D PERSPECTIVE ==========
 const CHART_STORAGE_KEY = 'CBeeNet_chartData';
 const PREV_TRAF_KEY = 'CBeeNet_prevTraf';
 let chartData = { load: [], traffic: [], conns: [] };
@@ -2251,10 +2251,13 @@ function buildChart(type) {
   const labels = timeArr.map(d => d ? d.toLocaleTimeString('en-US', {hour:'2-digit', minute:'2-digit'}) : '');
 
   const maxVal = dataArr.length > 0 ? Math.max(...dataArr, 1) : 1;
-  // تنظیم ی-محور با حداقل آستانه برای جلوگیری از کوچک شدن
   let yMax = type === 'load' ? 100 : Math.ceil(maxVal * 1.2);
   if(type === 'traffic' && yMax < 5) yMax = 5;
   if(type === 'conns' && yMax < 5) yMax = 5;
+  if(maxVal === 0) yMax = 1;
+
+  // Check if there is any data to show the 3D grid
+  const hasNonZero = dataArr.some(v => v !== 0);
 
   // یک Dataset اصلی با گرادیان و خط
   const datasets = [
@@ -2306,11 +2309,11 @@ function buildChart(type) {
           }
         }
       },
-      // 3D Plugin configuration (creates the 4-box grid under the chart)
+      // 3D Plugin configuration (creates the 4-box grid under the chart) - Disabled when data is zero
       '3d': {
-        enabled: true,
-        perspective: 0.25,
-        depth: 0.5,
+        enabled: hasNonZero,
+        perspective: 0.15,
+        depth: 0.4,
         angle: 25,
         wireframe: true,
         color: accent + '80'
@@ -2413,7 +2416,11 @@ function addDataPoint(type, value, time) {
   let yMax = type === 'load' ? 100 : Math.ceil(maxVal * 1.2);
   if(type === 'traffic' && yMax < 5) yMax = 5;
   if(type === 'conns' && yMax < 5) yMax = 5;
+  if(maxVal === 0) yMax = 1;
   chart.options.scales.y.max = yMax;
+  // به‌روزرسانی وضعیت 3D بر اساس وجود داده
+  const hasNonZero = chartData[type].some(v => v !== 0);
+  chart.options.plugins['3d'].enabled = hasNonZero;
   chart.update('none');
   updateChartValue(type);
 }
