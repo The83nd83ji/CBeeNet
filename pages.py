@@ -2122,10 +2122,9 @@ async function loadProtocolSettings(){
     const data = await r.json();
     const protos = ['vless-ws','xhttp-packet-up','xhttp-stream-up','xhttp-stream-one'];
     for (const proto of protos) {
-      const prefix = proto.replace('-','_');
-      const nameEl = document.getElementById('ps-'+prefix+'-name');
-      const prefEl = document.getElementById('ps-'+prefix+'-prefix');
-      const tmplEl = document.getElementById('ps-'+prefix+'-template');
+      const nameEl = document.getElementById('ps-'+proto+'-name');
+      const prefEl = document.getElementById('ps-'+proto+'-prefix');
+      const tmplEl = document.getElementById('ps-'+proto+'-template');
       if(nameEl) nameEl.value = data[proto]?.server_name || '';
       if(prefEl) prefEl.value = data[proto]?.link_prefix || '';
       if(tmplEl) tmplEl.value = data[proto]?.link_template || '';
@@ -2136,10 +2135,9 @@ async function saveProtocolSettings(){
   const protos = ['vless-ws','xhttp-packet-up','xhttp-stream-up','xhttp-stream-one'];
   const payload = {};
   for (const proto of protos) {
-    const prefix = proto.replace('-','_');
-    const nameEl = document.getElementById('ps-'+prefix+'-name');
-    const prefEl = document.getElementById('ps-'+prefix+'-prefix');
-    const tmplEl = document.getElementById('ps-'+prefix+'-template');
+    const nameEl = document.getElementById('ps-'+proto+'-name');
+    const prefEl = document.getElementById('ps-'+proto+'-prefix');
+    const tmplEl = document.getElementById('ps-'+proto+'-template');
     payload[proto] = {
       server_name: nameEl ? nameEl.value.trim() : '',
       link_prefix: prefEl ? prefEl.value.trim() : '',
@@ -2226,7 +2224,13 @@ function loadChartDataFromStorage(){
         return true;
       }
     }
-  } catch(e) {}
+  } catch(e) {
+    console.warn('Error loading chart data from storage:', e);
+    // در صورت خطا، داده‌ها را پاک می‌کنیم تا از داده‌های خراب استفاده نشود
+    chartData = { load: [], traffic: [], conns: [] };
+    chartTimes = { load: [], traffic: [], conns: [] };
+    return false;
+  }
   return false;
 }
 function saveChartDataToStorage(){
@@ -3126,7 +3130,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   const hasStored = loadChartDataFromStorage();
   initPremiumCharts();
   initSecondaryCharts();
-  if(!hasStored){
+  if(!hasStored || chartData.load.length === 0){
     const now = new Date();
     for(let i=0; i<10; i++){
       const t = new Date(now.getTime() - (10-i)*5000);
