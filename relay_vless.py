@@ -1,6 +1,6 @@
 # relay_vless.py
-# بخش Relay برای VLESS و Trojan WS
-# با پشتیبانی از پروتکل‌های مختلف WebSocket
+# بخش VLESS Relay — جدا شده از main.py (منطق اصلی دست‌نخورده)
+# تغییر: ثبت IP واقعی کلاینت (با احتساب هدر x-forwarded-for پشت پراکسی) در connections
 
 import asyncio
 import secrets
@@ -20,13 +20,10 @@ from main import (
     save_state,
     log_activity,
     now_ir,
-    get_host,
-    GLOBAL_SETTINGS,
-    DEFAULT_PROTOCOL,
 )
 
 # ══════════════════════════════════════════════════════════════════════════════
-# Relay — بهینه‌شده برای حداکثر throughput
+# VLESS Relay — بهینه‌شده برای حداکثر throughput
 # ══════════════════════════════════════════════════════════════════════════════
 
 RELAY_BUF = 256 * 1024   # 256 KB buffer
@@ -41,7 +38,6 @@ def _ws_client_ip(ws: WebSocket) -> str:
     return ws.client.host if ws.client else "نامشخص"
 
 async def parse_vless_header(chunk: bytes):
-    """پارس هدر VLESS برای استخراج آدرس و پورت مقصد"""
     if len(chunk) < 24:
         raise ValueError("chunk too small")
     pos = 1
@@ -63,7 +59,6 @@ async def parse_vless_header(chunk: bytes):
     return command, address, port, chunk[pos:]
 
 async def check_and_use(uid: str, n: int) -> bool:
-    """بررسی و افزایش مصرف ترافیک"""
     async with LINKS_LOCK:
         link = LINKS.get(uid)
         if link is None:
@@ -76,7 +71,6 @@ async def check_and_use(uid: str, n: int) -> bool:
     return True
 
 async def relay_ws_to_tcp(ws: WebSocket, writer: asyncio.StreamWriter, conn_id: str, uid: str):
-    """هدایت داده از WebSocket به TCP"""
     try:
         while True:
             msg = await ws.receive()
@@ -102,7 +96,6 @@ async def relay_ws_to_tcp(ws: WebSocket, writer: asyncio.StreamWriter, conn_id: 
             pass
 
 async def relay_tcp_to_ws(ws: WebSocket, reader: asyncio.StreamReader, conn_id: str, uid: str):
-    """هدایت داده از TCP به WebSocket"""
     first = True
     try:
         while True:
@@ -120,7 +113,6 @@ async def relay_tcp_to_ws(ws: WebSocket, reader: asyncio.StreamReader, conn_id: 
         pass
 
 async def websocket_tunnel(ws: WebSocket, uuid: str):
-    """پذیرش و مدیریت تونل WebSocket"""
     await ws.accept()
 
     async with LINKS_LOCK:
@@ -136,7 +128,7 @@ async def websocket_tunnel(ws: WebSocket, uuid: str):
     connections[conn_id] = {
         "uuid": uuid,
         "ip": ip,
-        "transport": "vless-ws",  # بعداً به‌روز می‌شود
+        "transport": "vless-ws",
         "connected_at": datetime.now().isoformat(),
         "bytes": 0,
     }
@@ -152,26 +144,7 @@ async def websocket_tunnel(ws: WebSocket, uuid: str):
         if not first_chunk:
             return
 
-        # تشخیص پروتکل از تنظیمات لینک (اولین پروتکل)
-        protocols = link.get("protocols", [DEFAULT_PROTOCOL])
-        protocol = protocols[0] if protocols else DEFAULT_PROTOCOL
-
-        # برای VLESS هدر را پارس کن، برای سایر پروتکل‌ها از host/port لینک استفاده کن
-        if protocol == "vless-ws":
-            command, address, port, payload = await parse_vless_header(first_chunk)
-        else:
-            # برای Trojan و سایر WS ها از host/port لینک یا تنظیمات عمومی استفاده کن
-            ips = link.get("ips", [])
-            if ips:
-                address = ips[0]
-            else:
-                address = get_host()
-            port = link.get("port") or GLOBAL_SETTINGS.get("port") or 443
-            command = 0  # بی‌اهمیت
-            payload = first_chunk  # کل داده را به سرور بفرست
-
-        # بروزرسانی transport در connections
-        connections[conn_id]["transport"] = protocol
+        command, address, port, payload = await parse_vless_header(first_chunk)
 
         if not await check_and_use(uuid, len(first_chunk)):
             await ws.close(code=1008, reason="quota/disabled")
@@ -179,7 +152,7 @@ async def websocket_tunnel(ws: WebSocket, uuid: str):
 
         stats["total_requests"] += 1
         connections[conn_id]["bytes"] += len(first_chunk)
-        logger.info(f"➡️  [{conn_id}] → {address}:{port} (proto={protocol})")
+        logger.info(f"➡️  [{conn_id}] → {address}:{port}")
 
         reader, writer = await asyncio.wait_for(
             asyncio.open_connection(address, port),
