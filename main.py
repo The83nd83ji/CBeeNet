@@ -25,7 +25,7 @@ app = FastAPI(title="CBeeNet Gateway", docs_url=None, redoc_url=None)
 
 CONFIG = {
     "port": int(os.environ.get("PORT", 8000)),
-    "secret": os.environ.get("SECRET_KEY", secrets.token_urlsafe(32)),
+    "secret": os.environ.get("SECRET_KEY", secrets.token_urlsafe(32)),  # will be overwritten by state if present
     "host": os.environ.get("RAILWAY_PUBLIC_DOMAIN", "localhost"),
 }
 
@@ -43,7 +43,8 @@ DATA_FILE = DATA_DIR / "rvg_state.json"
 SAVE_LOCK = asyncio.Lock()
 
 async def load_state():
-    global LINKS, AUTH, SUBS, GLOBAL_SETTINGS, RESELLERS
+    global LINKS, AUTH, SUBS, GLOBAL_SETTINGS, RESELLERS, CONFIG
+    secret_updated = False
     try:
         DATA_DIR.mkdir(parents=True, exist_ok=True)
         if DATA_FILE.exists():
@@ -59,11 +60,33 @@ async def load_state():
                 GLOBAL_SETTINGS.update(data["global_settings"])
             if "password_hash" in data:
                 AUTH["password_hash"] = data["password_hash"]
+
+            # ---- FIX: persist secret for consistent password hashing ----
+            if "secret" in data:
+                CONFIG["secret"] = data["secret"]
+                logger.info("Loaded secret from state")
+            else:
+                # State file exists but lacks secret → generate new secret and reset password from env
+                logger.warning("State file has no secret; generating new secret and resetting admin password from ADMIN_PASSWORD env")
+                CONFIG["secret"] = secrets.token_urlsafe(32)
+                # Overwrite stored password hash with one using new secret
+                default_pw = os.environ.get("ADMIN_PASSWORD", "admin")
+                AUTH["password_hash"] = hash_password(default_pw)
+                data["password_hash"] = AUTH["password_hash"]
+                secret_updated = True
+
             logger.info(f"Loaded state from {DATA_FILE}: {len(LINKS)} links")
         else:
             logger.info("No existing state file found, starting fresh")
+            # Ensure secret is stored on first save
+            secret_updated = True  # will cause save on shutdown anyway, but we can save now
     except Exception as e:
         logger.error(f"Error loading state: {e}")
+
+    # If we generated a new secret or modified state, save immediately
+    if secret_updated:
+        await save_state()
+        logger.info("State saved after secret update")
 
 async def save_state():
     try:
@@ -72,7 +95,8 @@ async def save_state():
             "subs": dict(SUBS),
             "resellers": dict(RESELLERS),
             "global_settings": dict(GLOBAL_SETTINGS),
-            "password_hash": AUTH["password_hash"]
+            "password_hash": AUTH["password_hash"],
+            "secret": CONFIG["secret"]   # store secret for consistency
         }
         DATA_DIR.mkdir(parents=True, exist_ok=True)
         async with aiofiles.open(DATA_FILE, "w", encoding="utf-8") as f:
@@ -119,6 +143,7 @@ def log_activity(kind: str, message: str, level: str = "info"):
 SESSION_COOKIE = "rvg_session"
 SESSION_TTL = 60 * 60 * 24 * 7
 
+# Fix: hash_password now uses CONFIG["secret"] (persistent) 
 def hash_password(pw: str) -> str:
     return hashlib.sha256(f"{pw}{CONFIG['secret']}".encode()).hexdigest()
 
@@ -309,7 +334,9 @@ async def ensure_default_link():
     if _default_link_created: return
     async with LINKS_LOCK:
         if not any(l.get("is_default") for l in LINKS.values()):
-            uid = hashlib.sha256(f"default{CONFIG['secret']}".encode()).hexdigest()
+            # Use a fixed salt for default link so it's consistent across restarts
+            default_uuid_salt = "DEFAULT_LINK_SALT_FIXED"
+            uid = hashlib.sha256(f"default{default_uuid_salt}".encode()).hexdigest()
             uid = f"{uid[:8]}-{uid[8:12]}-{uid[12:16]}-{uid[16:20]}-{uid[20:32]}"
             if uid not in LINKS:
                 LINKS[uid] = {
