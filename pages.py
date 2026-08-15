@@ -1577,6 +1577,8 @@ a{color:inherit;text-decoration:none}
         <div class="cp-block-label"><i class="ti ti-plug-connected"></i> <span data-lang="transport_protocols">Transport Protocols</span></div>
         <div class="proto-group" id="proto-group">
           <button class="proto-btn active" data-proto="vless-ws" onclick="toggleProtoBtn(this)">VLESS / WS <span class="proto-badge">WebSocket</span></button>
+          <button class="proto-btn" data-proto="trojan-ws" onclick="toggleProtoBtn(this)">Trojan / WS <span class="proto-badge">WebSocket</span></button>
+          <button class="proto-btn" data-proto="vmess-ws" onclick="toggleProtoBtn(this)">VMess / WS <span class="proto-badge">WebSocket</span></button>
           <button class="proto-btn" data-proto="xhttp-packet-up" onclick="toggleProtoBtn(this)">XHTTP · packet-up <span class="proto-badge">Siz10</span></button>
           <button class="proto-btn" data-proto="xhttp-stream-up" onclick="toggleProtoBtn(this)">XHTTP · stream-up <span class="proto-badge">Siz10</span></button>
         </div>
@@ -1843,7 +1845,35 @@ a{color:inherit;text-decoration:none}
             <span style="background:var(--accent-d);padding:2px 8px;border-radius:4px">{protocol}</span>
           </div>
         </div>
-        <div class="cl"><i class="ti ti-info-circle"></i><span data-lang="template_note">If `{protocol}` is not in the template, the protocol will not be shown.</span></div>
+
+        <!-- Protocol Display Names -->
+        <div class="fg" style="margin-top:8px">
+          <label style="margin-bottom:6px;display:block">Protocol Display Names</label>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;background:rgba(0,0,0,.1);padding:12px;border-radius:10px;border:1px solid var(--card-b)">
+            <div style="font-weight:700;font-size:10px;color:var(--t3)">Protocol</div>
+            <div style="font-weight:700;font-size:10px;color:var(--t3)">Display Name (overrides {protocol})</div>
+
+            <div style="font-size:11px;color:var(--accent2)">VLESS-WS</div>
+            <input class="fi" id="proto-name-vless-ws" placeholder="e.g. VLESS-WS">
+
+            <div style="font-size:11px;color:var(--accent2)">Trojan-WS</div>
+            <input class="fi" id="proto-name-trojan-ws" placeholder="e.g. Trojan-WS">
+
+            <div style="font-size:11px;color:var(--accent2)">VMess-WS</div>
+            <input class="fi" id="proto-name-vmess-ws" placeholder="e.g. VMess-WS">
+
+            <div style="font-size:11px;color:var(--accent2)">XHTTP-packet</div>
+            <input class="fi" id="proto-name-xhttp-packet-up" placeholder="e.g. XHTTP-packet">
+
+            <div style="font-size:11px;color:var(--accent2)">XHTTP-stream</div>
+            <input class="fi" id="proto-name-xhttp-stream-up" placeholder="e.g. XHTTP-stream">
+
+            <div style="font-size:11px;color:var(--accent2)">XHTTP-ultra</div>
+            <input class="fi" id="proto-name-xhttp-stream-one" placeholder="e.g. XHTTP-ultra">
+          </div>
+          <div class="cl" style="margin-top:8px"><i class="ti ti-info-circle"></i> These names replace <code>{protocol}</code> in the link template. Leave empty to use default names.</div>
+        </div>
+
         <button class="btn btn-p" onclick="saveServerSettings()"><i class="ti ti-device-floppy"></i> <span data-lang="save_settings">Save Settings</span></button>
         <div id="server-save-result" style="font-size:11px;color:var(--green-t);display:none">✓ <span data-lang="saved">Saved</span></div>
       </div>
@@ -1894,7 +1924,6 @@ a{color:inherit;text-decoration:none}
   <div id="tt-body"></div>
 </div>
 
-<!-- ===== JAVASCRIPT ===== -->
 <script>
 // ========== LANG DICT ==========
 const LANG_DICT = {
@@ -1936,16 +1965,12 @@ function applyLanguage(){
     if(dict[key] !== undefined) el.placeholder = dict[key];
   });
 }
-
 function applyBackgroundStyle(style) {
   let bg, bg2, bg3, card, cardB;
   switch(style) {
-    case 'black':
-      bg = '#000000'; bg2 = '#0a0a0a'; bg3 = '#141414'; card = '#0a0a0a'; cardB = '#1f1f1f'; break;
-    case 'grey':
-      bg = '#1a1a1a'; bg2 = '#242424'; bg3 = '#2e2e2e'; card = '#242424'; cardB = '#333333'; break;
-    default: // blue
-      bg = '#0d1117'; bg2 = '#161b22'; bg3 = '#1c2333'; card = '#161b22'; cardB = '#30363d'; break;
+    case 'black': bg = '#000000'; bg2 = '#0a0a0a'; bg3 = '#141414'; card = '#0a0a0a'; cardB = '#1f1f1f'; break;
+    case 'grey': bg = '#1a1a1a'; bg2 = '#242424'; bg3 = '#2e2e2e'; card = '#242424'; cardB = '#333333'; break;
+    default: bg = '#0d1117'; bg2 = '#161b22'; bg3 = '#1c2333'; card = '#161b22'; cardB = '#30363d'; break;
   }
   document.documentElement.style.setProperty('--bg', bg);
   document.documentElement.style.setProperty('--bg2', bg2);
@@ -1953,7 +1978,6 @@ function applyBackgroundStyle(style) {
   document.documentElement.style.setProperty('--card', card);
   document.documentElement.style.setProperty('--card-b', cardB);
 }
-
 function applyTheme(theme){
   document.documentElement.setAttribute('data-theme', theme);
   localStorage.setItem('CBeeNet-theme', theme);
@@ -1973,7 +1997,6 @@ function applyTheme(theme){
   document.getElementById('theme-mob-icon').className = 'ti ' + icon;
   applyBackgroundStyle(currentBgStyle);
 }
-
 function setTheme(theme){ applyTheme(theme); toast('Theme changed to ' + theme, 'ok'); }
 function setBackgroundStyle(style){
   currentBgStyle = style;
@@ -2012,7 +2035,14 @@ function expChip(exp, expired){
 }
 function protoBadge(protocols){
   if(!protocols || !protocols.length) protocols = ['vless-ws'];
-  const labels = { 'vless-ws': ['VLESS · WS', 'pc-ws'], 'xhttp-packet-up': ['XHTTP · packet-up', 'pc-xhttp'], 'xhttp-stream-up': ['XHTTP · stream-up', 'pc-xhttp'], 'xhttp-stream-one': ['XHTTP ULTRA', 'pc-ultra'] };
+  const labels = {
+    'vless-ws': ['VLESS · WS', 'pc-ws'],
+    'trojan-ws': ['Trojan · WS', 'pc-ws'],
+    'vmess-ws': ['VMess · WS', 'pc-ws'],
+    'xhttp-packet-up': ['XHTTP · packet-up', 'pc-xhttp'],
+    'xhttp-stream-up': ['XHTTP · stream-up', 'pc-xhttp'],
+    'xhttp-stream-one': ['XHTTP ULTRA', 'pc-ultra']
+  };
   return protocols.map(p => { const v = labels[p] || labels['vless-ws']; return `<span class="proto-chip ${v[1]}">${v[0]}</span>`; }).join('');
 }
 
@@ -2048,14 +2078,12 @@ function setCount(val, el){
   document.querySelectorAll('.count-chip').forEach(c => c.classList.remove('active'));
   el.classList.add('active');
 }
-
 const sb = document.getElementById('sb'), overlay = document.getElementById('overlay');
 function openSb(){ sb.classList.add('open'); overlay.classList.add('show'); }
 function closeSb(){ sb.classList.remove('open'); overlay.classList.remove('show'); }
 document.getElementById('open-sb').addEventListener('click', openSb);
 document.getElementById('close-sb').addEventListener('click', closeSb);
 overlay.addEventListener('click', closeSb);
-
 function navTo(name){
   document.querySelectorAll('.nav-it').forEach(n => n.classList.toggle('on', n.dataset.pg === name));
   document.querySelectorAll('.pg').forEach(p => p.classList.toggle('on', p.id === 'pg-' + name));
@@ -2068,7 +2096,7 @@ document.querySelectorAll('.nav-it').forEach(el => el.addEventListener('click', 
 function openModal(id){ document.getElementById(id).classList.add('open'); }
 function closeModal(id){ document.getElementById(id).classList.remove('open'); }
 
-// ========== SERVER SETTINGS ==========
+// ========== SERVER SETTINGS (با پشتیبانی از نام پروتکل‌ها) ==========
 async function loadServerSettings(){
   try {
     const r = await authF('/api/settings/server');
@@ -2076,6 +2104,14 @@ async function loadServerSettings(){
     document.getElementById('server-name-input').value = data.server_name || 'CBeeNet';
     document.getElementById('server-prefix-input').value = data.server_prefix || '';
     document.getElementById('link-name-template').value = data.link_template || '{server}-{label}';
+    // بارگذاری نام‌های پروتکل
+    const protoNames = data.protocol_names || {};
+    document.getElementById('proto-name-vless-ws').value = protoNames['vless-ws'] || '';
+    document.getElementById('proto-name-trojan-ws').value = protoNames['trojan-ws'] || '';
+    document.getElementById('proto-name-vmess-ws').value = protoNames['vmess-ws'] || '';
+    document.getElementById('proto-name-xhttp-packet-up').value = protoNames['xhttp-packet-up'] || '';
+    document.getElementById('proto-name-xhttp-stream-up').value = protoNames['xhttp-stream-up'] || '';
+    document.getElementById('proto-name-xhttp-stream-one').value = protoNames['xhttp-stream-one'] || '';
     localStorage.setItem('CBeeNet-server-name', data.server_name || 'CBeeNet');
     localStorage.setItem('CBeeNet-server-prefix', data.server_prefix || '');
     localStorage.setItem('CBeeNet-link-template', data.link_template || '{server}-{label}');
@@ -2085,11 +2121,24 @@ async function saveServerSettings(){
   const name = document.getElementById('server-name-input').value.trim() || 'CBeeNet';
   const prefix = document.getElementById('server-prefix-input').value.trim() || '';
   const template = document.getElementById('link-name-template').value.trim() || '{server}-{label}';
+  const protocol_names = {
+    'vless-ws': document.getElementById('proto-name-vless-ws').value.trim(),
+    'trojan-ws': document.getElementById('proto-name-trojan-ws').value.trim(),
+    'vmess-ws': document.getElementById('proto-name-vmess-ws').value.trim(),
+    'xhttp-packet-up': document.getElementById('proto-name-xhttp-packet-up').value.trim(),
+    'xhttp-stream-up': document.getElementById('proto-name-xhttp-stream-up').value.trim(),
+    'xhttp-stream-one': document.getElementById('proto-name-xhttp-stream-one').value.trim()
+  };
   try {
     const r = await authF('/api/settings/server', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ server_name: name, server_prefix: prefix, link_template: template })
+      body: JSON.stringify({
+        server_name: name,
+        server_prefix: prefix,
+        link_template: template,
+        protocol_names: protocol_names
+      })
     });
     const result = await r.json();
     if(result.ok){
@@ -2105,7 +2154,7 @@ async function saveServerSettings(){
     }
   } catch(e) { toast('Server connection error', 'err'); }
 }
-function formatLinkName(label, protocol){
+function formatLinkName(label, protocol, protoNamesOverride){
   const template = localStorage.getItem('CBeeNet-link-template') || '{server}-{label}';
   const server = localStorage.getItem('CBeeNet-server-name') || 'CBeeNet';
   const prefix = localStorage.getItem('CBeeNet-server-prefix') || '';
@@ -2114,60 +2163,74 @@ function formatLinkName(label, protocol){
   result = result.replace(/{prefix}/g, prefix);
   result = result.replace(/{label}/g, label);
   if(template.includes('{protocol}')){
-    const protoMap = { 'vless-ws': 'VLESS-WS', 'xhttp-packet-up': 'XHTTP-packet', 'xhttp-stream-up': 'XHTTP-stream', 'xhttp-stream-one': 'XHTTP-ultra' };
-    result = result.replace(/{protocol}/g, protoMap[protocol] || protocol);
+    const defaultNames = {
+      'vless-ws': 'VLESS-WS',
+      'trojan-ws': 'Trojan-WS',
+      'vmess-ws': 'VMess-WS',
+      'xhttp-packet-up': 'XHTTP-packet',
+      'xhttp-stream-up': 'XHTTP-stream',
+      'xhttp-stream-one': 'XHTTP-ultra'
+    };
+    let displayName = (protoNamesOverride && protoNamesOverride[protocol]) || defaultNames[protocol] || protocol;
+    result = result.replace(/{protocol}/g, displayName);
   }
   return result;
 }
 
-// ========== PREMIUM CHARTS ENGINE ==========
-function getChartColors(type, isNav = false) {
-  const theme = currentTheme;
+// ========== PREMIUM CHARTS ENGINE (با ذخیره‌سازی در localStorage) ==========
+const CHART_STORAGE_KEY = 'CBeeNet_chartData';
+let chartData = { load: [], traffic: [], conns: [] };
+let chartTimes = { load: [], traffic: [], conns: [] };
+const MAX_POINTS = 60;
+let chartInstances = { load: null, traffic: null, conns: null };
+
+function loadChartDataFromStorage(){
+  try {
+    const stored = localStorage.getItem(CHART_STORAGE_KEY);
+    if(stored){
+      const parsed = JSON.parse(stored);
+      if(parsed.data && parsed.times){
+        chartData = parsed.data;
+        chartTimes = parsed.times;
+        for(let key of ['load','traffic','conns']){
+          chartTimes[key] = chartTimes[key].map(t => new Date(t));
+        }
+        return true;
+      }
+    }
+  } catch(e) {}
+  return false;
+}
+function saveChartDataToStorage(){
+  try {
+    const times = {};
+    for(let key of ['load','traffic','conns']){
+      times[key] = chartTimes[key].map(d => d.toISOString());
+    }
+    localStorage.setItem(CHART_STORAGE_KEY, JSON.stringify({ data: chartData, times: times }));
+  } catch(e) {}
+}
+function getChartColors(type) {
   const root = document.documentElement;
   const accent = getComputedStyle(root).getPropertyValue('--accent').trim() || '#1677ff';
   const accentD = getComputedStyle(root).getPropertyValue('--accent-d').trim() || 'rgba(22,119,255,0.12)';
-  let line = accent;
-  let fill = accentD;
-  let bg = 'rgba(0,0,0,0.05)';
-  if (theme.startsWith('dark-mixed') || theme.startsWith('light-mixed')) {
-    line = '#00ffcc';
-    fill = 'rgba(0,255,204,0.25)';
-    bg = 'rgba(0,255,204,0.05)';
-  }
-  return { line, fill, bg };
+  return { line: accent, fill: accentD };
 }
-
-let chartData = { load: [], traffic: [], conns: [] };
-let chartTimes = { load: [], traffic: [], conns: [] };
-const MAX_POINTS = 60; // دقیقاً ۵ دقیقه (هر ۵ ثانیه یک نقطه = ۶۰ نقطه)
-let chartInstances = { load: null, traffic: null, conns: null };
-
-function getAccentColor() {
-  return getComputedStyle(document.documentElement).getPropertyValue('--accent').trim() || '#1a7aff';
-}
-function getTextColor() {
-  return getComputedStyle(document.documentElement).getPropertyValue('--t3').trim() || '#5a7298';
-}
-function getGridColor() {
-  return getComputedStyle(document.documentElement).getPropertyValue('--card-b').trim() || '#1e2d45';
-}
-
 function buildChart(type) {
   const colors = getChartColors(type);
   const accent = colors.line;
-  const textColor = getTextColor();
-  const gridColor = getGridColor();
+  const textColor = getComputedStyle(document.documentElement).getPropertyValue('--t3').trim() || '#5a7298';
+  const gridColor = getComputedStyle(document.documentElement).getPropertyValue('--card-b').trim() || '#1e2d45';
   const canvasId = 'chart-' + type;
   const ctx = document.getElementById(canvasId).getContext('2d');
 
-  const dataArr = chartData[type];
-  const timeArr = chartTimes[type];
+  const dataArr = chartData[type] || [];
+  const timeArr = chartTimes[type] || [];
   const labels = timeArr.map(d => d ? d.toLocaleTimeString('en-US', {hour:'2-digit', minute:'2-digit'}) : '');
 
   const maxVal = dataArr.length > 0 ? Math.max(...dataArr, 1) : 1;
   const yMax = type === 'load' ? 100 : Math.ceil(maxVal * 1.25);
 
-  // 3 لایه برای افکت نئون (درخشش، خط اصلی، پرکننده)
   const datasets = [
     {
       data: dataArr,
@@ -2199,15 +2262,8 @@ function buildChart(type) {
         const { ctx, chartArea } = chart;
         if (!chartArea) return colors.fill;
         const grad = ctx.createLinearGradient(0, chartArea.top, 0, chartArea.bottom);
-        if (currentTheme.startsWith('mixed')) {
-          // گرادیان سه رنگ برای تم ترکیبی (قرمز، زرد، آبی)
-          grad.addColorStop(0, 'rgba(255, 0, 0, 0.25)');
-          grad.addColorStop(0.5, 'rgba(255, 255, 0, 0.25)');
-          grad.addColorStop(1, 'rgba(0, 0, 255, 0.25)');
-        } else {
-          grad.addColorStop(0, colors.fill);
-          grad.addColorStop(1, 'rgba(0,0,0,0)');
-        }
+        grad.addColorStop(0, colors.fill);
+        grad.addColorStop(1, 'rgba(0,0,0,0)');
         return grad;
       },
       pointRadius: 0,
@@ -2245,7 +2301,7 @@ function buildChart(type) {
       x: {
         display: true,
         grid: { display: false, drawBorder: false },
-        border: { display: false }, // حذف خط ریز پایین محور X
+        border: { display: false },
         ticks: {
           color: textColor,
           font: { size: 9 },
@@ -2258,7 +2314,7 @@ function buildChart(type) {
       y: {
         display: true,
         grid: { color: gridColor, drawBorder: false },
-        border: { display: false }, // حذف خط ریز کنار محور Y
+        border: { display: false },
         ticks: {
           color: textColor,
           font: { size: 9 },
@@ -2278,7 +2334,6 @@ function buildChart(type) {
     }
   };
 
-  // فعال‌سازی پلاگین سه‌بعدی (برای ظاهر شبکه‌ای)
   const plugin3d = window.Chart3D;
   if (plugin3d) {
     try { Chart.register(plugin3d); } catch(e) {}
@@ -2299,14 +2354,12 @@ function buildChart(type) {
   };
   return new Chart(ctx, config);
 }
-
 function initPremiumCharts() {
   ['load', 'traffic', 'conns'].forEach(type => {
     chartInstances[type] = buildChart(type);
     updateChartValue(type);
   });
 }
-
 function updateChartValue(type) {
   const el = document.getElementById('chart-' + type + '-val');
   if (!el) return;
@@ -2315,7 +2368,6 @@ function updateChartValue(type) {
   const unit = type === 'load' ? '%' : type === 'traffic' ? 'MB' : '';
   el.innerHTML = last.toFixed(1) + (unit ? '<span class="unit">' + unit + '</span>' : '');
 }
-
 function addDataPoint(type, value, time) {
   chartData[type].push(value);
   chartTimes[type].push(time || new Date());
@@ -2323,7 +2375,8 @@ function addDataPoint(type, value, time) {
     chartData[type].shift();
     chartTimes[type].shift();
   }
-  // همیشه ۶۰ نقطه آخر رو نشون بده
+  saveChartDataToStorage();
+
   const chart = chartInstances[type];
   if (!chart) return;
   const labels = chartTimes[type].map(d => d ? d.toLocaleTimeString('en-US', {hour:'2-digit', minute:'2-digit'}) : '');
@@ -2337,7 +2390,6 @@ function addDataPoint(type, value, time) {
 
 // ========== fetchStats ==========
 let prevTraf = 0;
-
 async function fetchStats(){
   try{
     const connResp = await authF('/api/connections');
@@ -2357,17 +2409,12 @@ async function fetchStats(){
     document.getElementById('last-upd').textContent = 'Last update: ' + new Date().toLocaleTimeString();
 
     const now = new Date();
-    // Load
     const delta = d.total_traffic_mb - prevTraf;
     const pct = Math.min(100, Math.max(0, Math.round((delta / 50) * 100 * 10) / 10));
     prevTraf = d.total_traffic_mb;
     addDataPoint('load', pct, now);
-    
-    // Traffic
     const trafficVal = parseFloat(d.total_traffic_mb.toFixed(2));
     addDataPoint('traffic', trafficVal, now);
-    
-    // Connections
     addDataPoint('conns', activeCount, now);
     
     updateSecondaryCharts(d, allLinksList);
@@ -2377,17 +2424,17 @@ async function fetchStats(){
 // ========== SECONDARY CHARTS ==========
 let dashProtoChart = null, dashHourlyChart = null;
 function initSecondaryCharts(){
-  const accentColor = getAccentColor();
+  const accentColor = getComputedStyle(document.documentElement).getPropertyValue('--accent').trim() || '#1677ff';
   const purpleColor = getComputedStyle(document.documentElement).getPropertyValue('--purple').trim() || '#8b5cf6';
   const greenColor = getComputedStyle(document.documentElement).getPropertyValue('--green-t').trim() || '#34d399';
   const amberColor = getComputedStyle(document.documentElement).getPropertyValue('--amber-t').trim() || '#fbbf24';
-  const textColor = getTextColor();
-  const gridColor = getGridColor();
+  const textColor = getComputedStyle(document.documentElement).getPropertyValue('--t3').trim() || '#5a7298';
+  const gridColor = getComputedStyle(document.documentElement).getPropertyValue('--card-b').trim() || '#1e2d45';
   
   const ctxProto = document.getElementById('dashProtoChart').getContext('2d');
   dashProtoChart = new Chart(ctxProto, {
     type: 'bar',
-    data: { labels: ['VLESS/WS', 'XHTTP-packet', 'XHTTP-stream'], datasets: [{ data: [0, 0, 0], backgroundColor: ['rgba(26, 122, 255, 0.8)', 'rgba(139, 92, 246, 0.8)', 'rgba(52, 211, 153, 0.8)'], borderColor: [accentColor, purpleColor, greenColor], borderWidth: 2, borderRadius: 6, barPercentage: 0.6 }] },
+    data: { labels: ['VLESS/WS', 'Trojan/WS', 'VMess/WS', 'XHTTP-packet', 'XHTTP-stream'], datasets: [{ data: [0,0,0,0,0], backgroundColor: ['rgba(26, 122, 255, 0.8)', 'rgba(139, 92, 246, 0.8)', 'rgba(52, 211, 153, 0.8)', 'rgba(251, 191, 36, 0.8)', 'rgba(239, 68, 68, 0.8)'], borderColor: [accentColor, purpleColor, greenColor, amberColor, '#ef4444'], borderWidth: 2, borderRadius: 6, barPercentage: 0.6 }] },
     options: {
       responsive: true, maintainAspectRatio: false,
       plugins: { legend: { display: false }, tooltip: { backgroundColor: 'rgba(11, 17, 29, 0.9)', borderColor: accentColor, borderWidth: 1, titleColor: '#fff', bodyColor: '#fff', cornerRadius: 8, padding: 10, callbacks: { label: function(context){ return context.parsed.y + ' configs'; } } } },
@@ -2409,12 +2456,12 @@ function initSecondaryCharts(){
 }
 function updateSecondaryCharts(statsData, linksData){
   if(dashProtoChart && linksData){
-    const protoCounts = { 'vless-ws': 0, 'xhttp-packet-up': 0, 'xhttp-stream-up': 0 };
+    const protoCounts = { 'vless-ws': 0, 'trojan-ws': 0, 'vmess-ws': 0, 'xhttp-packet-up': 0, 'xhttp-stream-up': 0 };
     linksData.forEach(l => {
       const protos = l.protocols || ['vless-ws'];
       protos.forEach(p => { if(protoCounts[p] !== undefined) protoCounts[p]++; });
     });
-    const counts = [protoCounts['vless-ws'], protoCounts['xhttp-packet-up'], protoCounts['xhttp-stream-up']];
+    const counts = [protoCounts['vless-ws'], protoCounts['trojan-ws'], protoCounts['vmess-ws'], protoCounts['xhttp-packet-up'], protoCounts['xhttp-stream-up']];
     dashProtoChart.data.datasets[0].data = counts;
     dashProtoChart.update('none');
   }
@@ -2456,8 +2503,7 @@ async function loadLinks(){
       const allowed = l.active && !l.expired;
       const cardCls = !l.active ? 'is-off' : (l.expired ? 'is-exp' : '');
       const proto = (l.protocols && l.protocols[0]) || 'vless-ws';
-      const protoLabel = proto === 'vless-ws' ? 'VLESS-WS' : proto.replace('xhttp-', '').toUpperCase();
-      const displayLabel = formatLinkName(l.label, protoLabel);
+      const displayLabel = formatLinkName(l.label, proto);
       return `<div class="cfg-card ${cardCls}">
         <div class="cfg-row">
           <span class="cfg-status-dot ${allowed ? 'pulse' : ''}"></span>
@@ -3027,14 +3073,26 @@ document.addEventListener('DOMContentLoaded', async () => {
   applyLanguage();
   document.querySelectorAll('.btn-lang').forEach(btn => btn.classList.toggle('active', btn.dataset.langCode === currentLang));
   applyTheme(currentTheme);
-  // اعمال استایل پس‌زمینه
   applyBackgroundStyle(currentBgStyle);
   document.querySelectorAll('#bg-styles .btn').forEach(btn => {
     btn.style.outline = btn.dataset.bg === currentBgStyle ? '2px solid var(--accent)' : 'none';
     btn.style.outlineOffset = btn.dataset.bg === currentBgStyle ? '2px' : '0';
   });
+
+  // بارگذاری داده‌های نمودار از localStorage
+  const hasStored = loadChartDataFromStorage();
   initPremiumCharts();
   initSecondaryCharts();
+  if(!hasStored){
+    const now = new Date();
+    for(let i=0; i<10; i++){
+      const t = new Date(now.getTime() - (10-i)*5000);
+      addDataPoint('load', 0, t);
+      addDataPoint('traffic', 0, t);
+      addDataPoint('conns', 0, t);
+    }
+  }
+
   document.getElementById('set-host').textContent = location.host;
   document.getElementById('sub-all-url').textContent = location.protocol + '//' + location.host + '/sub-all';
   await loadServerSettings();
@@ -3058,7 +3116,8 @@ document.addEventListener('DOMContentLoaded', function() {
   }
 });
 </script>
-</body></html>"""
+</body>
+</html>"""
 
 def get_public_page_html(uuid_key: str) -> str:
     return f"""<!DOCTYPE html>
