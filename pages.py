@@ -1,4 +1,4 @@
-# pages.py - CBee Gateway v1.0.0 (Fixed & Enhanced)
+# pages.py - CBee Gateway v1.0.0 (Fully Fixed & Enhanced)
 import json
 
 LOGIN_HTML = r"""<!DOCTYPE html>
@@ -14,34 +14,24 @@ LOGIN_HTML = r"""<!DOCTYPE html>
 html, body { height:100%; overflow:hidden; }
 body {
   font-family: 'Vazirmatn', 'Segoe UI', sans-serif;
-  background: #0d1117;
+  background: #0a0d14;
   display: flex;
   align-items: center;
   justify-content: center;
   padding: 20px;
   position: relative;
 }
-.bg-canvas {
+/* Premium Grid Background */
+.bg-grid {
   position: fixed;
   inset: 0;
   z-index: 0;
-  background: radial-gradient(ellipse at 20% 30%, rgba(22,119,255,0.12) 0%, transparent 60%),
-              radial-gradient(ellipse at 80% 70%, rgba(22,119,255,0.06) 0%, transparent 55%),
-              #0d1117;
-}
-.bg-canvas::after {
-  content: '';
-  position: absolute;
-  inset: 0;
   background-image: 
-    linear-gradient(rgba(48,54,61,0.15) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(48,54,61,0.15) 1px, transparent 1px);
-  background-size: 50px 50px;
-  animation: gridMove 20s linear infinite;
-}
-@keyframes gridMove {
-  0% { transform: translate(0,0); }
-  100% { transform: translate(50px,50px); }
+    linear-gradient(rgba(255,255,255,0.02) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,0.02) 1px, transparent 1px);
+  background-size: 60px 60px;
+  mask-image: radial-gradient(ellipse at center, black 40%, transparent 70%);
+  -webkit-mask-image: radial-gradient(ellipse at center, black 40%, transparent 70%);
 }
 .orb {
   position: fixed;
@@ -51,60 +41,59 @@ body {
   pointer-events: none;
   animation: floatOrb 22s ease-in-out infinite alternate;
 }
-.o1 { width: 450px; height: 450px; background: rgba(22,119,255,0.08); top: -180px; right: -100px; animation-delay: 0s; }
-.o2 { width: 350px; height: 350px; background: rgba(22,119,255,0.05); bottom: -120px; left: -80px; animation-delay: 7s; }
-.o3 { width: 280px; height: 280px; background: rgba(22,119,255,0.04); top: 45%; left: 55%; animation-delay: 3.5s; }
-.o4 { width: 200px; height: 200px; background: rgba(22,119,255,0.03); bottom: 30%; right: 25%; animation-delay: 11s; }
+.o1 { width: 500px; height: 500px; background: rgba(22,119,255,0.10); top: -200px; right: -150px; animation-delay: 0s; }
+.o2 { width: 400px; height: 400px; background: rgba(22,119,255,0.06); bottom: -150px; left: -100px; animation-delay: 7s; }
 @keyframes floatOrb {
   0% { transform: translate(0,0) scale(1); }
   33% { transform: translate(70px,-80px) scale(1.1); }
   66% { transform: translate(-50px,50px) scale(0.85); }
   100% { transform: translate(40px,-30px) scale(1.05); }
 }
-.wrap { position: relative; z-index: 10; width: 100%; max-width: 420px; }
+.wrap { position: relative; z-index: 10; width: 100%; max-width: 440px; animation: fadeUp 0.6s cubic-bezier(0.22, 1, 0.36, 1); }
+@keyframes fadeUp { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
 .card {
-  background: rgba(22,27,34,0.75);
-  backdrop-filter: blur(32px);
-  -webkit-backdrop-filter: blur(32px);
-  border: 1px solid rgba(48,54,61,0.6);
-  border-radius: 36px;
-  padding: 42px 36px 36px;
-  box-shadow: 0 30px 80px rgba(0,0,0,0.7), 0 0 100px rgba(22,119,255,0.04);
+  background: rgba(16, 20, 30, 0.6);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 32px;
+  padding: 44px 38px 38px;
+  box-shadow: 0 30px 80px rgba(0,0,0,0.6), inset 0 1px 0 rgba(255,255,255,0.05);
   position: relative;
   overflow: hidden;
 }
 .card::before {
   content: '';
   position: absolute;
-  top: -100px;
-  right: -100px;
-  width: 260px;
-  height: 260px;
-  background: radial-gradient(circle, rgba(22,119,255,0.06), transparent 70%);
+  top: -150px;
+  right: -150px;
+  width: 300px;
+  height: 300px;
+  background: radial-gradient(circle, rgba(22,119,255,0.08), transparent 70%);
   pointer-events: none;
 }
 .brand {
   display: flex;
   flex-direction: column;
   align-items: center;
-  margin-bottom: 28px;
+  margin-bottom: 32px;
   position: relative;
   z-index: 1;
 }
 .brand-name {
-  font-size: 44px;
+  font-size: 48px;
   font-weight: 900;
   font-family: 'Vazirmatn', sans-serif;
-  background: linear-gradient(135deg, #1677ff, #0050b3);
+  background: linear-gradient(135deg, #1677ff, #4096ff);
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
   letter-spacing: -0.02em;
-  text-shadow: 0 0 50px rgba(22,119,255,0.15);
+  text-shadow: 0 0 60px rgba(22,119,255,0.2);
 }
 .brand-sub {
   font-size: 10px;
-  color: #8b949e;
+  color: rgba(139,148,158,0.8);
   letter-spacing: 0.3em;
   text-transform: uppercase;
   font-weight: 600;
@@ -114,15 +103,15 @@ body {
   display: flex;
   justify-content: center;
   gap: 10px;
-  margin-bottom: 22px;
+  margin-bottom: 24px;
   dir: ltr;
 }
 .lang-btn {
   background: transparent;
-  border: 1px solid #30363d;
+  border: 1px solid rgba(255,255,255,0.1);
   color: #8b949e;
-  padding: 5px 16px;
-  border-radius: 24px;
+  padding: 5px 18px;
+  border-radius: 20px;
   font-size: 11px;
   font-weight: 700;
   cursor: pointer;
@@ -132,7 +121,7 @@ body {
 .lang-btn:hover { border-color: #1677ff; color: #f0f6fc; }
 .lang-btn.active { background: #1677ff; border-color: #1677ff; color: #fff; box-shadow: 0 4px 14px rgba(22,119,255,0.3); }
 h1 {
-  font-size: 20px;
+  font-size: 22px;
   font-weight: 800;
   color: #f0f6fc;
   margin-bottom: 4px;
@@ -150,7 +139,7 @@ h1 {
   border: 1px solid rgba(239,68,68,0.3);
   border-radius: 14px;
   padding: 10px 14px;
-  margin-bottom: 14px;
+  margin-bottom: 18px;
   font-size: 12px;
   color: #f87171;
   align-items: center;
@@ -158,7 +147,7 @@ h1 {
 }
 .err.show { display: flex; }
 .field {
-  margin-bottom: 18px;
+  margin-bottom: 22px;
   position: relative;
   z-index: 1;
 }
@@ -167,52 +156,45 @@ h1 {
   font-size: 10.5px;
   font-weight: 700;
   color: #8b949e;
-  margin-bottom: 7px;
+  margin-bottom: 8px;
   text-transform: uppercase;
   letter-spacing: 0.06em;
 }
 .inp-wrap {
   position: relative;
+  display: flex;
+  align-items: center;
+  background: rgba(0,0,0,0.3);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 14px;
+  transition: all 0.25s;
+}
+.inp-wrap:focus-within {
+  border-color: #1677ff;
+  box-shadow: 0 0 0 4px rgba(22,119,255,0.08);
+  background: rgba(0,0,0,0.4);
 }
 input[type="password"], input[type="text"] {
   width: 100%;
-  padding: 14px 48px 14px 18px;
-  border-radius: 16px;
-  border: 1px solid #30363d;
-  background: rgba(0,0,0,0.35);
+  padding: 14px 18px;
+  border: none;
+  background: transparent;
   color: #f0f6fc;
   font-family: inherit;
   font-size: 14px;
   outline: none;
-  transition: all 0.25s;
-}
-[dir="rtl"] input[type="password"], [dir="rtl"] input[type="text"] {
-  padding: 14px 18px 14px 48px;
-}
-input[type="password"]:focus, input[type="text"]:focus {
-  border-color: rgba(22,119,255,0.6);
-  background: rgba(0,0,0,0.45);
-  box-shadow: 0 0 0 5px rgba(22,119,255,0.07);
 }
 .ic {
-  position: absolute;
-  right: 16px;
-  top: 50%;
-  transform: translateY(-50%);
   color: #8b949e;
   font-size: 18px;
-  pointer-events: none;
+  padding: 0 16px;
   transition: 0.2s;
 }
-[dir="rtl"] .ic {
-  right: auto;
-  left: 16px;
-}
-input:focus + .ic { color: #1677ff; }
+.inp-wrap:focus-within .ic { color: #1677ff; }
 .btn {
   width: 100%;
   padding: 15px;
-  border-radius: 16px;
+  border-radius: 14px;
   border: none;
   cursor: pointer;
   background: linear-gradient(135deg, #1677ff, #0050b3);
@@ -224,7 +206,7 @@ input:focus + .ic { color: #1677ff; }
   align-items: center;
   justify-content: center;
   gap: 8px;
-  box-shadow: 0 6px 28px rgba(22,119,255,0.3);
+  box-shadow: 0 6px 28px rgba(22,119,255,0.25);
   transition: all 0.25s;
   position: relative;
   overflow: hidden;
@@ -238,14 +220,14 @@ input:focus + .ic { color: #1677ff; }
   transition: opacity 0.3s;
 }
 .btn:hover::before { opacity: 1; }
-.btn:hover { transform: translateY(-2px); box-shadow: 0 10px 40px rgba(22,119,255,0.45); }
+.btn:hover { transform: translateY(-2px); box-shadow: 0 10px 40px rgba(22,119,255,0.4); }
 .btn:active { transform: translateY(0) scale(0.98); }
 .btn:disabled { opacity: 0.5; cursor: not-allowed; }
 .btn span { position: relative; z-index: 1; display: flex; align-items: center; gap: 6px; }
 .footer {
-  margin-top: 26px;
+  margin-top: 28px;
   padding-top: 20px;
-  border-top: 1px solid #30363d;
+  border-top: 1px solid rgba(255,255,255,0.06);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -262,7 +244,7 @@ input:focus + .ic { color: #1677ff; }
   gap: 5px;
   transition: 0.2s;
 }
-.footer a:hover { color: #0050b3; text-decoration: underline; }
+.footer a:hover { color: #4096ff; text-decoration: underline; }
 @keyframes spin { to { transform: rotate(360deg); } }
 @media (max-width: 440px) {
   .card { padding: 28px 20px 24px; }
@@ -271,8 +253,8 @@ input:focus + .ic { color: #1677ff; }
 </style>
 </head>
 <body>
-<div class="bg-canvas"></div>
-<div class="orb o1"></div><div class="orb o2"></div><div class="orb o3"></div><div class="orb o4"></div>
+<div class="bg-grid"></div>
+<div class="orb o1"></div><div class="orb o2"></div>
 <div class="wrap">
   <div class="card">
     <div class="brand">
@@ -290,8 +272,8 @@ input:focus + .ic { color: #1677ff; }
       <div class="field">
         <label id="login-pw-label">Password</label>
         <div class="inp-wrap">
-          <input type="password" id="pw" placeholder="••••••••" autofocus required>
           <i class="ti ti-key ic"></i>
+          <input type="password" id="pw" placeholder="••••••••" autofocus required>
         </div>
       </div>
       <button class="btn" type="submit" id="btn">
@@ -760,7 +742,6 @@ DASHBOARD_HTML = r"""<!DOCTYPE html>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.19.0/dist/tabler-icons.min.css">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-zoom@2.0.1/dist/chartjs-plugin-zoom.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-3d@1.0.0/dist/chartjs-plugin-3d.umd.min.js"></script>
 <style>
 /* ===== RESET & VARIABLES ===== */
 *{margin:0;padding:0;box-sizing:border-box}
@@ -802,7 +783,6 @@ DASHBOARD_HTML = r"""<!DOCTYPE html>
   --accent:#1a7aff;--accent2:#4d94ff;--accent-d:rgba(26,122,255,0.15);--accent-glow:rgba(26,122,255,0.35);
   --green:#10b981;--green-bg:rgba(16,185,129,0.10);--green-t:#34d399;--red:#ef4444;--red-bg:rgba(239,68,68,0.10);--red-t:#f87171;--amber:#f59e0b;--amber-bg:rgba(245,158,11,0.10);--amber-t:#fbbf24;--purple:#8b5cf6;--purple-bg:rgba(139,92,246,0.10);
 }
-/* ===== MIXED THEME (Red, Sky Blue, Yellow) ===== */
 [data-theme="dark-mixed"]{
   --bg:#0d1117; --bg2:#161b22; --bg3:#1c2333; --card:#161b22; --card-b:#30363d;
   --accent:#ff4d4d; --accent2:#00bfff; --accent-d:rgba(255,77,77,0.15); --accent-glow:rgba(255,77,77,0.4);
@@ -1486,7 +1466,7 @@ a{color:inherit;text-decoration:none}
     </div>
   </div>
 
-  <!-- 3 Premium Charts (only last 5 minutes) with 3D Grid -->
+  <!-- 3 Premium Charts with 4-box grid under axis (Fixed 3D) -->
   <div class="chart-grid">
     <div class="chart-premium" id="chart-load-container">
       <div class="ch-header">
@@ -2195,16 +2175,18 @@ function formatLinkName(label, protocol, protoSettings){
   return result;
 }
 
-// ========== PREMIUM CHARTS (فقط ۵ دقیقه آخر) ==========
+// ========== PREMIUM CHARTS (فقط ۵ دقیقه آخر) - FIXED ==========
 const CHART_STORAGE_KEY = 'CBeeNet_chartData';
+const PREV_TRAF_KEY = 'CBeeNet_prevTraf';
 let chartData = { load: [], traffic: [], conns: [] };
 let chartTimes = { load: [], traffic: [], conns: [] };
 const MAX_POINTS = 60; // 60 * 5s = 300s = 5 دقیقه
 let chartInstances = { load: null, traffic: null, conns: null };
-let lastTimestamp = { load: null, traffic: null, conns: null };
+let prevTraf = 0;
 
 function loadChartDataFromStorage(){
   try {
+    // Load traffic data
     const stored = localStorage.getItem(CHART_STORAGE_KEY);
     if(stored){
       const parsed = JSON.parse(stored);
@@ -2230,7 +2212,6 @@ function loadChartDataFromStorage(){
     }
   } catch(e) {
     console.warn('Error loading chart data from storage:', e);
-    // در صورت خطا، داده‌ها را پاک می‌کنیم تا از داده‌های خراب استفاده نشود
     chartData = { load: [], traffic: [], conns: [] };
     chartTimes = { load: [], traffic: [], conns: [] };
     return false;
@@ -2252,7 +2233,7 @@ function getChartColors(type) {
   const accentD = getComputedStyle(root).getPropertyValue('--accent-d').trim() || 'rgba(22,119,255,0.12)';
   return { line: accent, fill: accentD };
 }
-// ===== FIXED buildChart (SINGLE dataset, 3D grid) =====
+// ===== FIXED buildChart (SINGLE dataset, 4-box Grid under axis) =====
 function buildChart(type) {
   const colors = getChartColors(type);
   const accent = colors.line;
@@ -2320,21 +2301,12 @@ function buildChart(type) {
             return val.toFixed(1) + unit;
           }
         }
-      },
-      // 3D Plugin activation (creates the 4-box grid under the chart)
-      '3d': {
-        enabled: true,
-        perspective: 0.3,
-        depth: 0.5,
-        angle: 25,
-        wireframe: true,
-        color: accent + '80'
       }
     },
     scales: {
       x: {
         display: true,
-        grid: { display: false, drawBorder: false },
+        grid: { display: true, color: accent + '30', drawBorder: false },
         border: { display: false },
         ticks: {
           color: textColor,
@@ -2367,12 +2339,6 @@ function buildChart(type) {
       line: { borderJoinStyle: 'round' }
     }
   };
-
-  // Register 3D plugin if available
-  const plugin3d = window.Chart3D;
-  if (plugin3d) {
-    try { Chart.register(plugin3d); } catch(e) {}
-  }
 
   const config = {
     type: 'line',
@@ -2433,8 +2399,7 @@ function addDataPoint(type, value, time) {
   updateChartValue(type);
 }
 
-// ========== fetchStats ==========
-let prevTraf = 0;
+// ========== fetchStats (Traffic Delta Fix + Persistence) ==========
 async function fetchStats(){
   try{
     const connResp = await authF('/api/connections');
@@ -2456,10 +2421,20 @@ async function fetchStats(){
     const now = new Date();
     const delta = d.total_traffic_mb - prevTraf;
     const pct = Math.min(100, Math.max(0, Math.round((delta / 50) * 100 * 10) / 10));
+    
+    // Traffic Delta fix - only show consumption of the last 5 seconds
+    if(delta >= 0) {
+      addDataPoint('traffic', delta, now);
+    } else {
+      // In case of server restart or overflow, just add a small value to keep chart alive
+      addDataPoint('traffic', 0.01, now);
+    }
+    
+    // Update prevTraf and save to localStorage for persistence
     prevTraf = d.total_traffic_mb;
+    localStorage.setItem(PREV_TRAF_KEY, String(prevTraf));
+    
     addDataPoint('load', pct, now);
-    const trafficVal = parseFloat(d.total_traffic_mb.toFixed(2));
-    addDataPoint('traffic', trafficVal, now);
     addDataPoint('conns', activeCount, now);
     
     updateSecondaryCharts(d, allLinksList);
@@ -3125,6 +3100,9 @@ document.addEventListener('DOMContentLoaded', async () => {
     btn.style.outline = btn.dataset.bg === currentBgStyle ? '2px solid var(--accent)' : 'none';
     btn.style.outlineOffset = btn.dataset.bg === currentBgStyle ? '2px' : '0';
   });
+
+  // Restore prevTraf from localStorage for traffic continuity
+  prevTraf = parseFloat(localStorage.getItem(PREV_TRAF_KEY)) || 0;
 
   const hasStored = loadChartDataFromStorage();
   initPremiumCharts();
