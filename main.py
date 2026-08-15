@@ -287,11 +287,7 @@ def generate_links(link_data: dict, uuid: str, host: str) -> list[str]:
     for ip in ips:
         for proto in protocols:
             remark = format_link_remark(label, proto)
-            if len(ips) > 1 or len(protocols) > 1:
-                suffix = f"-{proto}" if len(protocols) > 1 else ""
-                if len(ips) > 1:
-                    suffix += f"-{ip.replace('.', '-')}"
-                remark += suffix
+            # دیگر هیچ پسوندی اضافه نمی‌شود - فقط قالب کاربر اعمال می‌شود
             links.append(_format_uri(uuid, ip, port, remark, proto, host))
     return links
 
