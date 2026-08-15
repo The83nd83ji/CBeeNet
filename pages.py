@@ -14,7 +14,7 @@ LOGIN_HTML = r"""<!DOCTYPE html>
 html, body { height:100%; overflow:hidden; }
 body {
   font-family: 'Vazirmatn', 'Segoe UI', sans-serif;
-  background: #000000;
+  background: #0d1117;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -25,15 +25,17 @@ body {
   position: fixed;
   inset: 0;
   z-index: 0;
-  background: #000000;
+  background: radial-gradient(ellipse at 20% 30%, rgba(22,119,255,0.12) 0%, transparent 60%),
+              radial-gradient(ellipse at 80% 70%, rgba(22,119,255,0.06) 0%, transparent 55%),
+              #0d1117;
 }
 .bg-canvas::after {
   content: '';
   position: absolute;
   inset: 0;
   background-image: 
-    linear-gradient(rgba(48,54,61,0.1) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(48,54,61,0.1) 1px, transparent 1px);
+    linear-gradient(rgba(48,54,61,0.15) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(48,54,61,0.15) 1px, transparent 1px);
   background-size: 50px 50px;
   animation: gridMove 20s linear infinite;
 }
@@ -61,13 +63,13 @@ body {
 }
 .wrap { position: relative; z-index: 10; width: 100%; max-width: 420px; }
 .card {
-  background: rgba(10,10,10,0.85);
+  background: rgba(22,27,34,0.75);
   backdrop-filter: blur(32px);
   -webkit-backdrop-filter: blur(32px);
-  border: 1px solid rgba(31,31,31,0.8);
+  border: 1px solid rgba(48,54,61,0.6);
   border-radius: 36px;
   padding: 42px 36px 36px;
-  box-shadow: 0 30px 80px rgba(0,0,0,0.9), 0 0 100px rgba(22,119,255,0.04);
+  box-shadow: 0 30px 80px rgba(0,0,0,0.7), 0 0 100px rgba(22,119,255,0.04);
   position: relative;
   overflow: hidden;
 }
@@ -102,7 +104,7 @@ body {
 }
 .brand-sub {
   font-size: 10px;
-  color: #6e7681;
+  color: #8b949e;
   letter-spacing: 0.3em;
   text-transform: uppercase;
   font-weight: 600;
@@ -117,8 +119,8 @@ body {
 }
 .lang-btn {
   background: transparent;
-  border: 1px solid #1f1f1f;
-  color: #6e7681;
+  border: 1px solid #30363d;
+  color: #8b949e;
   padding: 5px 16px;
   border-radius: 24px;
   font-size: 11px;
@@ -138,7 +140,7 @@ h1 {
 }
 .sub {
   font-size: 12px;
-  color: #6e7681;
+  color: #8b949e;
   margin-bottom: 26px;
   line-height: 1.7;
 }
@@ -164,7 +166,7 @@ h1 {
   display: block;
   font-size: 10.5px;
   font-weight: 700;
-  color: #6e7681;
+  color: #8b949e;
   margin-bottom: 7px;
   text-transform: uppercase;
   letter-spacing: 0.06em;
@@ -176,8 +178,8 @@ input[type="password"], input[type="text"] {
   width: 100%;
   padding: 14px 48px 14px 18px;
   border-radius: 16px;
-  border: 1px solid #1f1f1f;
-  background: rgba(0,0,0,0.45);
+  border: 1px solid #30363d;
+  background: rgba(0,0,0,0.35);
   color: #f0f6fc;
   font-family: inherit;
   font-size: 14px;
@@ -189,7 +191,7 @@ input[type="password"], input[type="text"] {
 }
 input[type="password"]:focus, input[type="text"]:focus {
   border-color: rgba(22,119,255,0.6);
-  background: rgba(0,0,0,0.55);
+  background: rgba(0,0,0,0.45);
   box-shadow: 0 0 0 5px rgba(22,119,255,0.07);
 }
 .ic {
@@ -197,7 +199,7 @@ input[type="password"]:focus, input[type="text"]:focus {
   right: 16px;
   top: 50%;
   transform: translateY(-50%);
-  color: #6e7681;
+  color: #8b949e;
   font-size: 18px;
   pointer-events: none;
   transition: 0.2s;
@@ -243,13 +245,13 @@ input:focus + .ic { color: #1677ff; }
 .footer {
   margin-top: 26px;
   padding-top: 20px;
-  border-top: 1px solid #1f1f1f;
+  border-top: 1px solid #30363d;
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 8px;
   font-size: 11px;
-  color: #6e7681;
+  color: #8b949e;
 }
 .footer a {
   color: #1677ff;
@@ -402,6 +404,10 @@ LANG = {
     "prestige_theme": "Prestige Theme", "blue": "Blue",
     "red": "Red", "yellow": "Yellow",
     "current_theme": "Current Theme",
+    "background_style": "Background Style",
+    "default_blue": "Default Blue",
+    "pure_black": "Pure Black",
+    "dark_grey": "Dark Grey",
     "server_settings": "Server & Link Settings",
     "server_name": "Server Name", "server_prefix": "Link Prefix",
     "link_template": "Link Name Template",
@@ -585,6 +591,10 @@ LANG = {
     "prestige_theme": "تم پرستیژ", "blue": "آبی",
     "red": "قرمز", "yellow": "زرد",
     "current_theme": "تم پیش‌فرض",
+    "background_style": "استایل پس‌زمینه",
+    "default_blue": "آبی پیش‌فرض",
+    "pure_black": "مشکی خالص",
+    "dark_grey": "خاکستری تیره",
     "server_settings": "تنظیمات سرور و نام لینک‌ها",
     "server_name": "نام سرور", "server_prefix": "پیشوند لینک‌ها",
     "link_template": "قالب نام کانفیگ‌ها",
@@ -755,11 +765,11 @@ DASHBOARD_HTML = r"""<!DOCTYPE html>
 /* ===== RESET & VARIABLES ===== */
 *{margin:0;padding:0;box-sizing:border-box}
 :root{
-  --bg:#000000;
-  --bg2:#0a0a0a;
-  --bg3:#141414;
-  --card:#0a0a0a;
-  --card-b:#1f1f1f;
+  --bg:#0d1117;
+  --bg2:#161b22;
+  --bg3:#1c2333;
+  --card:#161b22;
+  --card-b:#30363d;
   --card-bh:rgba(22,119,255,0.20);
   --accent:#1677ff;
   --accent2:#4096ff;
@@ -781,23 +791,21 @@ DASHBOARD_HTML = r"""<!DOCTYPE html>
   --t3:#6e7681;
   --sidebar-w:248px;
   --radius:16px;
-  --shadow:0 8px 32px rgba(0,0,0,0.8);
+  --shadow:0 8px 32px rgba(0,0,0,0.4);
   --font-family:'Vazirmatn','Segoe UI',sans-serif;
 }
-[data-theme="dark-blue"]{--bg:#000000;--bg2:#0a0a0a;--bg3:#141414;--card:#0a0a0a;--card-b:#1f1f1f;--card-bh:rgba(22,119,255,0.20);--accent:#1677ff;--accent2:#4096ff;--accent-d:rgba(22,119,255,0.12);--accent-glow:rgba(22,119,255,0.35);--t1:#f0f6fc;--t2:#8b949e;--t3:#6e7681;--shadow:0 8px 32px rgba(0,0,0,0.8);}
-[data-theme="dark-red"]{--bg:#000000;--bg2:#0a0a0a;--bg3:#141414;--card:#0a0a0a;--card-b:#1f1f1f;--card-bh:rgba(239,68,68,0.20);--accent:#ef4444;--accent2:#f87171;--accent-d:rgba(239,68,68,0.12);--accent-glow:rgba(239,68,68,0.35);--t1:#f0f6fc;--t2:#8b949e;--t3:#6e7681;}
-[data-theme="dark-yellow"]{--bg:#000000;--bg2:#0a0a0a;--bg3:#141414;--card:#0a0a0a;--card-b:#1f1f1f;--card-bh:rgba(245,158,11,0.20);--accent:#f59e0b;--accent2:#fbbf24;--accent-d:rgba(245,158,11,0.12);--accent-glow:rgba(245,158,11,0.35);--t1:#f0f6fc;--t2:#8b949e;--t3:#6e7681;}
+[data-theme="dark-blue"]{--bg:#0d1117;--bg2:#161b22;--bg3:#1c2333;--card:#161b22;--card-b:#30363d;--card-bh:rgba(22,119,255,0.20);--accent:#1677ff;--accent2:#4096ff;--accent-d:rgba(22,119,255,0.12);--accent-glow:rgba(22,119,255,0.35);}
+[data-theme="dark-red"]{--bg:#0d1117;--bg2:#161b22;--bg3:#1c2333;--card:#161b22;--card-b:#30363d;--card-bh:rgba(239,68,68,0.20);--accent:#ef4444;--accent2:#f87171;--accent-d:rgba(239,68,68,0.12);--accent-glow:rgba(239,68,68,0.35);}
+[data-theme="dark-yellow"]{--bg:#0d1117;--bg2:#161b22;--bg3:#1c2333;--card:#161b22;--card-b:#30363d;--card-bh:rgba(245,158,11,0.20);--accent:#f59e0b;--accent2:#fbbf24;--accent-d:rgba(245,158,11,0.12);--accent-glow:rgba(245,158,11,0.35);}
 [data-theme="dark-prestige"]{
-  --bg:#000000;--bg2:#0a0a0a;--bg3:#141414;--card:#0a0a0a;--card-b:#1f1f1f;--card-bh:rgba(26,122,255,0.25);
+  --bg:#0d1117;--bg2:#161b22;--bg3:#1c2333;--card:#161b22;--card-b:#30363d;--card-bh:rgba(26,122,255,0.25);
   --accent:#1a7aff;--accent2:#4d94ff;--accent-d:rgba(26,122,255,0.15);--accent-glow:rgba(26,122,255,0.35);
   --green:#10b981;--green-bg:rgba(16,185,129,0.10);--green-t:#34d399;--red:#ef4444;--red-bg:rgba(239,68,68,0.10);--red-t:#f87171;--amber:#f59e0b;--amber-bg:rgba(245,158,11,0.10);--amber-t:#fbbf24;--purple:#8b5cf6;--purple-bg:rgba(139,92,246,0.10);
-  --t1:#e8edf5;--t2:#8fa4c8;--t3:#5a7298;--shadow:0 8px 32px rgba(0,0,0,0.9);
 }
 [data-theme="dark-mixed"]{
-  --bg:#000000; --bg2:#0a0a0a; --bg3:#141414; --card:#0a0a0a; --card-b:#1f1f1f;
+  --bg:#0d1117; --bg2:#161b22; --bg3:#1c2333; --card:#161b22; --card-b:#30363d;
   --accent:#00ffcc; --accent2:#00f0ff; --accent-d:rgba(0,255,204,0.15); --accent-glow:rgba(0,255,204,0.4);
   --green:#10b981; --green-t:#34d399; --red:#ef4444; --red-t:#f87171; --amber:#f59e0b; --amber-t:#fbbf24; --purple:#8b5cf6;
-  --t1:#f0f6fc; --t2:#8b949e; --t3:#6e7681;
 }
 [data-theme="light-blue"]{--bg:#f6f8fa;--bg2:#ffffff;--bg3:#eaeef2;--card:#ffffff;--card-b:#d0d7de;--card-bh:rgba(22,119,255,0.25);--accent:#1677ff;--accent2:#4096ff;--accent-d:rgba(22,119,255,0.08);--accent-glow:rgba(22,119,255,0.25);--t1:#24292f;--t2:#57606a;--t3:#8b949e;--shadow:0 8px 28px rgba(0,0,0,0.08);}
 [data-theme="light-red"]{--bg:#f6f8fa;--bg2:#ffffff;--bg3:#eaeef2;--card:#ffffff;--card-b:#d0d7de;--card-bh:rgba(239,68,68,0.25);--accent:#ef4444;--accent2:#f87171;--accent-d:rgba(239,68,68,0.08);--accent-glow:rgba(239,68,68,0.25);--t1:#24292f;--t2:#57606a;--t3:#8b949e;--shadow:0 8px 28px rgba(0,0,0,0.08);}
@@ -806,7 +814,6 @@ DASHBOARD_HTML = r"""<!DOCTYPE html>
   --bg:#f6f8fa; --bg2:#ffffff; --bg3:#eaeef2; --card:#ffffff; --card-b:#d0d7de;
   --accent:#00ffcc; --accent2:#00e5ff; --accent-d:rgba(0,255,204,0.2); --accent-glow:rgba(0,255,204,0.3);
   --green:#10b981; --green-t:#059669; --red:#ef4444; --red-t:#dc2626; --amber:#f59e0b; --amber-t:#d97706; --purple:#8b5cf6;
-  --t1:#24292f; --t2:#57606a; --t3:#8b949e;
 }
 html,body{height:100%}
 body{font-family:var(--font-family);background:var(--bg);color:var(--t1);min-height:100vh;display:flex;font-size:14px;transition:background .3s,color .3s,border-color .3s}
@@ -884,8 +891,6 @@ a{color:inherit;text-decoration:none}
 .chart-premium .ch-value .unit{font-size:12px;font-weight:500;color:var(--t3);margin-left:3px}
 .chart-premium .ch-main{height:150px;position:relative;margin-top:2px}
 .chart-premium .ch-main canvas{width:100% !important;height:100% !important}
-.chart-premium .ch-nav{height:44px;position:relative;margin-top:6px;border-top:1px solid var(--card-b);padding-top:5px}
-.chart-premium .ch-nav canvas{width:100% !important;height:100% !important}
 .dash-charts-second{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:22px}
 .dash-small-chart{background:var(--card);border:1px solid var(--card-b);border-radius:var(--radius);padding:16px 18px}
 .dash-small-chart .chart-title{font-size:11px;font-weight:600;color:var(--t2);margin-bottom:10px;display:flex;align-items:center;gap:6px}
@@ -903,7 +908,7 @@ a{color:inherit;text-decoration:none}
 .chart-tooltip .tt-row .tt-value{font-weight:700;font-variant-numeric:tabular-nums}
 @media(max-width:1024px){.dash-stats-grid{grid-template-columns:1fr 1fr}.dash-charts-second{grid-template-columns:1fr 1fr}.chart-grid{grid-template-columns:1fr 1fr}}
 @media(max-width:768px){.chart-grid{grid-template-columns:1fr}.dash-charts-second{grid-template-columns:1fr}.dash-stats-grid{grid-template-columns:1fr}.main{padding:62px 12px 50px}.sidebar{transform:translateX(100%)}[dir="ltr"] .sidebar{transform:translateX(-100%)}.sidebar.open{transform:translateX(0)}.sb-close{display:flex}.main{margin-right:0;padding-top:70px}[dir="ltr"] .main{margin-left:0}.mob-top{display:flex}}
-/* ===== REST OF STYLES (unchanged from original) ===== */
+/* ===== REST OF STYLES ===== */
 .btn{font-family:inherit;font-size:12px;font-weight:500;border-radius:9px;padding:8px 14px;cursor:pointer;display:inline-flex;align-items:center;gap:5px;border:none;transition:all .15s;white-space:nowrap}
 .btn i{font-size:13px}
 .btn:disabled{opacity:.4;cursor:not-allowed}
@@ -950,10 +955,10 @@ a{color:inherit;text-decoration:none}
 .form-row{display:flex;gap:9px;flex-wrap:wrap;align-items:flex-end}
 .fg{display:flex;flex-direction:column;gap:5px}
 .fg label{font-size:10px;color:var(--t3);font-weight:700;text-transform:uppercase;letter-spacing:.06em}
-.fi,.fs{padding:9px 12px;border-radius:9px;border:1px solid var(--card-b);background:rgba(0,0,0,.25);color:var(--t1);font-family:inherit;font-size:12px;outline:none;transition:.15s;min-width:100px}
+.fi,.fs{padding:9px 12px;border-radius:9px;border:1px solid var(--card-b);background:rgba(0,0,0,.18);color:var(--t1);font-family:inherit;font-size:12px;outline:none;transition:.15s;min-width:100px}
 [data-theme^="light"] .fi,[data-theme^="light"] .fs{background:rgba(0,0,0,.04)}
 .fi::placeholder{color:var(--t3)}
-.fi:focus,.fs:focus{border-color:var(--accent);background:rgba(0,0,0,.35);box-shadow:0 0 0 3px var(--accent-d)}
+.fi:focus,.fs:focus{border-color:var(--accent);background:rgba(0,0,0,.25);box-shadow:0 0 0 3px var(--accent-d)}
 .fs option{background:var(--bg2)}
 [data-theme^="light"] .fs option{background:#fff}
 .cl{background:var(--accent-d);border:1px solid var(--card-b);border-radius:10px;padding:11px 13px;font-size:11px;color:var(--t2);display:flex;gap:9px;align-items:flex-start;line-height:1.8;margin-top:12px}
@@ -968,11 +973,11 @@ a{color:inherit;text-decoration:none}
 .cp-head-sub{font-size:11px;color:var(--t3);margin-top:2px}
 .cp-body{padding:2px 24px 22px;position:relative;z-index:1}
 .cp-row{display:grid;grid-template-columns:1.3fr 1fr;gap:14px;margin-bottom:16px}
-.cp-block{background:rgba(0,0,0,.25);border:1px solid var(--card-b);border-radius:14px;padding:14px 16px}
+.cp-block{background:rgba(0,0,0,.14);border:1px solid var(--card-b);border-radius:14px;padding:14px 16px}
 [data-theme^="light"] .cp-block{background:var(--accent-d)}
 .cp-block-label{font-size:10px;font-weight:800;color:var(--t2);text-transform:uppercase;letter-spacing:.08em;display:flex;align-items:center;gap:6px;margin-bottom:11px}
 .cp-block-label i{color:var(--accent);font-size:14px}
-.cp-input-full{width:100%;padding:10px 13px;border-radius:10px;border:1px solid var(--card-b);background:rgba(0,0,0,.25);color:var(--t1);font-family:inherit;font-size:12.5px;outline:none;transition:.15s}
+.cp-input-full{width:100%;padding:10px 13px;border-radius:10px;border:1px solid var(--card-b);background:rgba(0,0,0,.18);color:var(--t1);font-family:inherit;font-size:12.5px;outline:none;transition:.15s}
 [data-theme^="light"] .cp-input-full{background:#fff}
 .cp-input-full:focus{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-d)}
 .cp-input-full::placeholder{color:var(--t3)}
@@ -985,7 +990,7 @@ a{color:inherit;text-decoration:none}
 .chip:hover{background:var(--accent-d);color:var(--accent2)}
 .chip.active{background:var(--accent);color:#fff;border-color:var(--accent);box-shadow:0 3px 10px var(--accent-glow)}
 .proto-group{display:flex;gap:12px;flex-wrap:wrap;margin-top:10px}
-.proto-btn{padding:8px 18px;border-radius:12px;border:2px solid var(--card-b);background:rgba(0,0,0,0.25);color:var(--t2);font-family:inherit;font-size:11.5px;font-weight:600;cursor:pointer;transition:all 0.2s ease;user-select:none;outline:none;letter-spacing:0.02em}
+.proto-btn{padding:8px 18px;border-radius:12px;border:2px solid var(--card-b);background:rgba(0,0,0,0.2);color:var(--t2);font-family:inherit;font-size:11.5px;font-weight:600;cursor:pointer;transition:all 0.2s ease;user-select:none;outline:none;letter-spacing:0.02em}
 .proto-btn:hover{border-color:var(--card-bh);background:var(--accent-d);color:var(--t1)}
 .proto-btn.active{border-color:var(--accent);background:var(--accent-d);color:var(--accent2);box-shadow:0 0 0 1px var(--accent),0 4px 12px var(--accent-glow);transform:translateY(-1px)}
 .proto-btn .proto-badge{display:inline-block;font-size:8px;background:rgba(255,255,255,0.06);padding:1px 6px;border-radius:4px;margin-right:4px;color:var(--t3);font-weight:400}
@@ -1010,7 +1015,7 @@ a{color:inherit;text-decoration:none}
 .srv-hero-domain{font-size:15px;font-weight:800;color:var(--t1);word-break:break-all}
 .srv-hero-sub{font-size:10.5px;color:var(--t3);margin-top:4px;display:flex;align-items:center;gap:6px}
 .srv-tiles{display:grid;grid-template-columns:1fr 1fr;gap:11px;padding:20px 22px 22px;position:relative;z-index:1}
-.srv-tile{display:flex;align-items:center;gap:11px;background:rgba(0,0,0,.25);border:1px solid var(--card-b);border-radius:13px;padding:12px 14px;transition:.18s}
+.srv-tile{display:flex;align-items:center;gap:11px;background:rgba(0,0,0,.14);border:1px solid var(--card-b);border-radius:13px;padding:12px 14px;transition:.18s}
 [data-theme^="light"] .srv-tile{background:var(--accent-d)}
 .srv-tile:hover{border-color:var(--card-bh);transform:translateY(-1px)}
 .srv-tile-icon{width:34px;height:34px;border-radius:10px;background:var(--accent-d);color:var(--accent);display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0}
@@ -1027,7 +1032,7 @@ a{color:inherit;text-decoration:none}
 .pw-body{padding:2px 24px 22px;position:relative;z-index:1}
 .pw-field{position:relative;margin-bottom:13px}
 .pw-field label{display:block;font-size:10px;font-weight:700;color:var(--t2);text-transform:uppercase;letter-spacing:.06em;margin-bottom:7px}
-.pw-input{width:100%;padding:11px 42px 11px 14px;border-radius:11px;border:1px solid var(--card-b);background:rgba(0,0,0,.25);color:var(--t1);font-family:inherit;font-size:12.5px;outline:none;transition:.15s}
+.pw-input{width:100%;padding:11px 42px 11px 14px;border-radius:11px;border:1px solid var(--card-b);background:rgba(0,0,0,.18);color:var(--t1);font-family:inherit;font-size:12.5px;outline:none;transition:.15s}
 [data-theme^="light"] .pw-input{background:#fff}
 .pw-input:focus{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-d)}
 .pw-eye{position:absolute;left:12px;top:34px;background:none;border:none;color:var(--t3);cursor:pointer;font-size:16px;padding:4px;display:flex}
@@ -1117,7 +1122,7 @@ a{color:inherit;text-decoration:none}
 .sub-card-lock-badge{flex-shrink:0;width:26px;height:26px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:12px}
 .sub-card-lock-badge.locked{background:var(--amber-bg);color:var(--amber-t)}
 .sub-card-lock-badge.open{background:var(--green-bg);color:var(--green-t)}
-.sub-card-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:0;position:relative;z-index:1;margin-top:16px;background:rgba(0,0,0,.25);border:1px solid var(--card-b);border-radius:13px;overflow:hidden}
+.sub-card-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:0;position:relative;z-index:1;margin-top:16px;background:rgba(0,0,0,.14);border:1px solid var(--card-b);border-radius:13px;overflow:hidden}
 [data-theme^="light"] .sub-card-stats{background:var(--accent-d)}
 .sub-card-stat{padding:11px 8px;text-align:center;border-left:1px solid var(--card-b)}
 .sub-card-stat:last-child{border-left:none}
@@ -1147,10 +1152,10 @@ a{color:inherit;text-decoration:none}
 .modal-v2-field label i{color:var(--purple);font-size:13px}
 .modal-v2-input-wrap{position:relative}
 .modal-v2-input-wrap>i{position:absolute;right:13px;top:50%;transform:translateY(-50%);color:var(--t3);font-size:14px;pointer-events:none;transition:.15s;z-index:1}
-.modal-v2-input{width:100%;padding:9px 38px 9px 13px;border-radius:11px;border:1px solid var(--card-b);background:rgba(0,0,0,.25);color:var(--t1);font-family:inherit;font-size:12.5px;outline:none;transition:.18s}
+.modal-v2-input{width:100%;padding:9px 38px 9px 13px;border-radius:11px;border:1px solid var(--card-b);background:rgba(0,0,0,.2);color:var(--t1);font-family:inherit;font-size:12.5px;outline:none;transition:.18s}
 [data-theme^="light"] .modal-v2-input{background:rgba(255,255,255,0.8)}
 .modal-v2-input::placeholder{color:var(--t3)}
-.modal-v2-input:focus{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-d);background:rgba(0,0,0,.35)}
+.modal-v2-input:focus{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-d);background:rgba(0,0,0,.28)}
 [data-theme^="light"] .modal-v2-input:focus{background:#fff}
 .modal-v2-input:focus~i{color:var(--purple)}
 .modal-v2-hint{background:var(--accent-d);border:1px solid var(--card-b);border-radius:11px;padding:9px 12px;font-size:10px;color:var(--t2);display:flex;gap:7px;align-items:flex-start;line-height:1.6;margin-top:2px}
@@ -1167,7 +1172,7 @@ a{color:inherit;text-decoration:none}
 .lmodal-title-v2{font-size:14.5px;font-weight:800;color:var(--t1)}
 .lmodal-sub-v2{font-size:10.5px;color:var(--t3);margin-top:2px}
 .lmodal-search{margin-top:14px;position:relative}
-.lmodal-search input{width:100%;padding:10px 38px 10px 13px;border-radius:11px;border:1px solid var(--card-b);background:rgba(0,0,0,.25);color:var(--t1);font-family:inherit;font-size:12px;outline:none}
+.lmodal-search input{width:100%;padding:10px 38px 10px 13px;border-radius:11px;border:1px solid var(--card-b);background:rgba(0,0,0,.2);color:var(--t1);font-family:inherit;font-size:12px;outline:none}
 [data-theme^="light"] .lmodal-search input{background:#fff}
 .lmodal-search input:focus{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-d)}
 .lmodal-search i{position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--t3);font-size:14px}
@@ -1479,7 +1484,6 @@ a{color:inherit;text-decoration:none}
         <div class="ch-value" id="chart-load-val">0<span class="unit">%</span></div>
       </div>
       <div class="ch-main"><canvas id="chart-load"></canvas></div>
-      <div class="ch-nav"><canvas id="chart-load-nav"></canvas></div>
     </div>
     <!-- Traffic Chart -->
     <div class="chart-premium" id="chart-traffic-container">
@@ -1488,7 +1492,6 @@ a{color:inherit;text-decoration:none}
         <div class="ch-value" id="chart-traffic-val">0<span class="unit">MB</span></div>
       </div>
       <div class="ch-main"><canvas id="chart-traffic"></canvas></div>
-      <div class="ch-nav"><canvas id="chart-traffic-nav"></canvas></div>
     </div>
     <!-- Connections Chart -->
     <div class="chart-premium" id="chart-conns-container">
@@ -1497,7 +1500,6 @@ a{color:inherit;text-decoration:none}
         <div class="ch-value" id="chart-conns-val">0</div>
       </div>
       <div class="ch-main"><canvas id="chart-conns"></canvas></div>
-      <div class="ch-nav"><canvas id="chart-conns-nav"></canvas></div>
     </div>
   </div>
 
@@ -1802,7 +1804,14 @@ a{color:inherit;text-decoration:none}
             <button class="btn btn-p theme-btn-select" data-theme="light-mixed" style="background:linear-gradient(135deg,#00ffcc,#00b3a1);color:#fff;box-shadow:0 2px 8px rgba(0,255,204,0.3)" onclick="setTheme('light-mixed')"><i class="ti ti-circle"></i> <span data-lang="mixed">Mixed</span></button>
           </div>
         </div>
-        <div class="cl"><i class="ti ti-info-circle"></i><span data-lang="current_theme">Current Theme</span>: <strong id="current-theme-display">dark-prestige</strong></div>
+        <div class="cl"><i class="ti ti-info-circle"></i><span data-lang="current_theme">Current Theme</span>: <strong id="current-theme-display">dark-blue</strong></div>
+      </div>
+      <div class="cl" style="margin-top:16px"><i class="ti ti-info-circle"></i><span data-lang="background_style">Background Style</span>: 
+        <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:10px" id="bg-styles">
+          <button class="btn btn-g btn-sm" data-bg="blue" onclick="setBackgroundStyle('blue')" style="background:#0d1117;color:#f0f6fc;border:1px solid #30363d"><span data-lang="default_blue">Default Blue</span></button>
+          <button class="btn btn-g btn-sm" data-bg="black" onclick="setBackgroundStyle('black')" style="background:#000000;color:#f0f6fc;border:1px solid #1f1f1f"><span data-lang="pure_black">Pure Black</span></button>
+          <button class="btn btn-g btn-sm" data-bg="grey" onclick="setBackgroundStyle('grey')" style="background:#1a1a1a;color:#f0f6fc;border:1px solid #333333"><span data-lang="dark_grey">Dark Grey</span></button>
+        </div>
       </div>
     </div>
     <div class="card">
@@ -1890,16 +1899,17 @@ a{color:inherit;text-decoration:none}
 // ========== LANG DICT ==========
 const LANG_DICT = {
   "en": {
-    "dashboard":"Dashboard","dashboard_sub":"System Overview","active_connections":"Active Connections","total_traffic":"Total Traffic","total_links":"Configs","uptime":"Uptime","since_start":"Since Start","active":"Active","inactive":"Inactive","refresh":"Refresh","traffic_trend":"Bandwidth Usage","service_status":"Service Status","top_connections":"Live Connections","no_connections":"No connections","server":"Server","settings":"Settings","language":"Language","farsi":"Persian","english":"English","save":"Save","cancel":"Cancel","delete":"Delete","edit":"Edit","copy":"Copy","created":"Created","expires":"Expires","unlimited":"Unlimited","used":"Used","of":"of","daily":"Daily","hourly":"Hourly","bandwidth":"Bandwidth","connections":"Connections","protocol":"Protocol","ip_address":"IP Address","port":"Port","upload":"Upload","download":"Download","duration":"Duration","status":"Status","online":"Online","offline":"Offline","total":"Total","users":"Users","protocols":"Protocols","traffic_usage":"Traffic Usage","links":"Configs","sub_groups":"Sub Groups","subscription":"Subscription","security":"Security","logs":"Activity Logs","errors":"Errors","test_websocket":"WebSocket Test","dark_theme":"Dark Theme","light_theme":"Light Theme","prestige_theme":"Prestige Theme","blue":"Blue","red":"Red","yellow":"Yellow","current_theme":"Current Theme","server_settings":"Server & Link Settings","server_name":"Server Name","server_prefix":"Link Prefix","link_template":"Link Name Template","template_vars":"Available Variables","template_note":"If `{protocol}` is not in the template, the protocol will not be shown.","change_password":"Change Password","current_password":"Current Password","new_password":"New Password","confirm_password":"Confirm Password","password_strength":"Password Strength","min_chars":"At least 4 characters","contains_number":"Contains number","contains_case":"Uppercase/Lowercase","weak":"Very Weak","medium":"Medium","strong":"Strong","save_password":"Save New Password","login":"Login","logout":"Logout","login_title":"Login to Panel","login_sub":"Enter password to access the dashboard","password":"Password","login_button":"Login to Dashboard","telegram_channel":"Telegram Channel","panel":"Panel","system":"System","configs":"Configs","sub_groups_short":"Sub Groups","activity_logs":"Activity Logs","config_id":"Config ID","sub_group_expiry":"Sub Group & Expiry","no_group":"No Group","days":"Days","traffic_quota":"Traffic Quota","transport_protocols":"Transport Protocols","bulk_count":"Bulk Count","create_config":"Create Config","no_configs":"No configs yet","new_group":"New Group","no_groups":"No groups yet","create_group":"Create a new group to organize your configs","single_sub":"Single Subscription (per config)","full_sub":"Full Subscription (Admin)","full_sub_desc":"Includes all active configs.","group_sub_links":"Group Subscription Links","loading":"Loading...","traffic_analysis":"Bandwidth usage analysis & monitoring","total_traffic_used":"Total Traffic Used","hourly_average":"Hourly Average","per_hour":"/h","peak_usage":"Peak Usage","peak_hour":"Peak Hour","lowest_usage":"Lowest Usage","live_connections":"Live Connections","total_traffic_live":"Total Traffic","avg_duration":"Avg Duration","unique_ips":"Unique IPs","connections_list":"Connections List","auto_update":"Auto-update every 5s","no_active_connections":"No active connections","will_appear":"They will appear here as soon as clients connect","encryption":"Encryption","access_control":"Access Control","hash":"Hash","session":"Session","active_inactive":"Active/Inactive","expiry_date":"Expiry Date","public_page_pw":"Public Page Password","optional":"Optional","activity_logs_full":"Complete event history","no_logs":"No logs yet","error_logs":"Error Logs","websocket_test":"WebSocket Test","ws_note":"Only registered and active UUIDs can connect.","connect":"Connect","disconnect":"Disconnect","send":"Send","waiting_ws":"Waiting for connection...","change_theme":"Change Theme","server_link_settings":"Server & Link Settings","save_settings":"Save Settings","saved":"Saved","online_status":"Online","version":"Version","framework":"Framework","platform":"Platform","storage":"Storage","change_password_title":"Change Password","change_password_sub":"Choose a strong password and keep it safe","current_pw":"Current Password","new_pw":"New Password","confirm_pw":"Confirm Password","save_new_pw":"Save New Password","min_4_chars":"At least 4 chars","contains_num":"Contains number","contains_case_letters":"Uppercase/Lowercase","very_weak":"Very Weak","medium_strength":"Medium","strong_strength":"Strong","logout_btn":"Logout","telegram_btn":"Telegram Channel","load":"Load","connections_live":"Live Connections","traffic_chart":"Traffic Chart","protocol_distribution":"Protocol Distribution","daily_usage":"Daily Usage","active_conns_table":"Active Connections","configs_management":"Configs Management","sub_groups_management":"Sub Groups Management","subscription_links":"Subscription Links","traffic_monitor":"Traffic Monitor","connections_monitor":"Connections Monitor","security_settings":"Security Settings","activity_logs_title":"Activity Logs","error_logs_title":"Error Logs","websocket_tester":"WebSocket Tester","system_settings":"System Settings","language_settings":"Language Settings","theme_settings":"Theme Settings","server_info":"Server Info","password_change":"Password Change","save_changes":"Save Changes","cancel_changes":"Cancel","live":"Live","running_time":"Running Time","manage_configs":"Manage Configs for","select_configs":"Select configs to include in this group","select_all":"Select All","deselect_all":"Deselect All","changes_apply":"Changes apply immediately","new_group_title":"Create New Group","new_group_sub":"Create a separate public page to manage configs","group_name":"Group Name","description_optional":"Description (optional)","public_page_password":"Public Page Password (optional)","public_page_info":"This group's public page will be accessible via a unique link.","edit_config":"Edit Config","quota_0_unlimited":"Quota (0 = unlimited)","expiry_days":"Expiry (days from now, 0 = no change/unlimited)","expiry_note":"To keep current expiry, leave expiry field as 0.","random_uuid":"Random UUID · Choose quota, expiry and protocol","uuid_note":"UUID is generated randomly · Only registered UUIDs can connect · Protocol cannot be changed after creation.","each_group_public":"Each group has its own public page with its configs","single_sub_desc":"Each config has its own subscription URL. Click the","icon_on_card":"icon on the config card.","full_sub_note":"This URL only works in the browser where you're logged in (requires session cookie).","based_on_mb":"Based on MB per hour","lang_note":"Default language is English. Page will refresh after change.","groups":"Groups","usage":"Usage","average":"Average","protocols_legend":"Protocols","daily_legend":"Daily","hourly_legend":"Hourly","bandwidth_usage":"Bandwidth Usage","smart_alerts":"Smart Alerts","alerts_sub":"Important events & notifications","priority":"Priority","critical":"Critical","warning":"Warning","info":"Info","dismiss":"Dismiss","filter_all":"All","filter_critical":"Critical","filter_warning":"Warning","filter_info":"Info","alert_expiry":"Config expiring soon","alert_quota":"Traffic quota exceeded 80%","alert_errors":"Repeated connection errors","alert_new_ip":"New IP connected","no_alerts":"No alerts to show","mixed":"Mixed"
+    "dashboard":"Dashboard","dashboard_sub":"System Overview","active_connections":"Active Connections","total_traffic":"Total Traffic","total_links":"Configs","uptime":"Uptime","since_start":"Since Start","active":"Active","inactive":"Inactive","refresh":"Refresh","traffic_trend":"Bandwidth Usage","service_status":"Service Status","top_connections":"Live Connections","no_connections":"No connections","server":"Server","settings":"Settings","language":"Language","farsi":"Persian","english":"English","save":"Save","cancel":"Cancel","delete":"Delete","edit":"Edit","copy":"Copy","created":"Created","expires":"Expires","unlimited":"Unlimited","used":"Used","of":"of","daily":"Daily","hourly":"Hourly","bandwidth":"Bandwidth","connections":"Connections","protocol":"Protocol","ip_address":"IP Address","port":"Port","upload":"Upload","download":"Download","duration":"Duration","status":"Status","online":"Online","offline":"Offline","total":"Total","users":"Users","protocols":"Protocols","traffic_usage":"Traffic Usage","links":"Configs","sub_groups":"Sub Groups","subscription":"Subscription","security":"Security","logs":"Activity Logs","errors":"Errors","test_websocket":"WebSocket Test","dark_theme":"Dark Theme","light_theme":"Light Theme","prestige_theme":"Prestige Theme","blue":"Blue","red":"Red","yellow":"Yellow","current_theme":"Current Theme","background_style":"Background Style","default_blue":"Default Blue","pure_black":"Pure Black","dark_grey":"Dark Grey","server_settings":"Server & Link Settings","server_name":"Server Name","server_prefix":"Link Prefix","link_template":"Link Name Template","template_vars":"Available Variables","template_note":"If `{protocol}` is not in the template, the protocol will not be shown.","change_password":"Change Password","current_password":"Current Password","new_password":"New Password","confirm_password":"Confirm Password","password_strength":"Password Strength","min_chars":"At least 4 characters","contains_number":"Contains number","contains_case":"Uppercase/Lowercase","weak":"Very Weak","medium":"Medium","strong":"Strong","save_password":"Save New Password","login":"Login","logout":"Logout","login_title":"Login to Panel","login_sub":"Enter password to access the dashboard","password":"Password","login_button":"Login to Dashboard","telegram_channel":"Telegram Channel","panel":"Panel","system":"System","configs":"Configs","sub_groups_short":"Sub Groups","activity_logs":"Activity Logs","config_id":"Config ID","sub_group_expiry":"Sub Group & Expiry","no_group":"No Group","days":"Days","traffic_quota":"Traffic Quota","transport_protocols":"Transport Protocols","bulk_count":"Bulk Count","create_config":"Create Config","no_configs":"No configs yet","new_group":"New Group","no_groups":"No groups yet","create_group":"Create a new group to organize your configs","single_sub":"Single Subscription (per config)","full_sub":"Full Subscription (Admin)","full_sub_desc":"Includes all active configs.","group_sub_links":"Group Subscription Links","loading":"Loading...","traffic_analysis":"Bandwidth usage analysis & monitoring","total_traffic_used":"Total Traffic Used","hourly_average":"Hourly Average","per_hour":"/h","peak_usage":"Peak Usage","peak_hour":"Peak Hour","lowest_usage":"Lowest Usage","live_connections":"Live Connections","total_traffic_live":"Total Traffic","avg_duration":"Avg Duration","unique_ips":"Unique IPs","connections_list":"Connections List","auto_update":"Auto-update every 5s","no_active_connections":"No active connections","will_appear":"They will appear here as soon as clients connect","encryption":"Encryption","access_control":"Access Control","hash":"Hash","session":"Session","active_inactive":"Active/Inactive","expiry_date":"Expiry Date","public_page_pw":"Public Page Password","optional":"Optional","activity_logs_full":"Complete event history","no_logs":"No logs yet","error_logs":"Error Logs","websocket_test":"WebSocket Test","ws_note":"Only registered and active UUIDs can connect.","connect":"Connect","disconnect":"Disconnect","send":"Send","waiting_ws":"Waiting for connection...","change_theme":"Change Theme","server_link_settings":"Server & Link Settings","save_settings":"Save Settings","saved":"Saved","online_status":"Online","version":"Version","framework":"Framework","platform":"Platform","storage":"Storage","change_password_title":"Change Password","change_password_sub":"Choose a strong password and keep it safe","current_pw":"Current Password","new_pw":"New Password","confirm_pw":"Confirm Password","save_new_pw":"Save New Password","min_4_chars":"At least 4 chars","contains_num":"Contains number","contains_case_letters":"Uppercase/Lowercase","very_weak":"Very Weak","medium_strength":"Medium","strong_strength":"Strong","logout_btn":"Logout","telegram_btn":"Telegram Channel","load":"Load","connections_live":"Live Connections","traffic_chart":"Traffic Chart","protocol_distribution":"Protocol Distribution","daily_usage":"Daily Usage","active_conns_table":"Active Connections","configs_management":"Configs Management","sub_groups_management":"Sub Groups Management","subscription_links":"Subscription Links","traffic_monitor":"Traffic Monitor","connections_monitor":"Connections Monitor","security_settings":"Security Settings","activity_logs_title":"Activity Logs","error_logs_title":"Error Logs","websocket_tester":"WebSocket Tester","system_settings":"System Settings","language_settings":"Language Settings","theme_settings":"Theme Settings","server_info":"Server Info","password_change":"Password Change","save_changes":"Save Changes","cancel_changes":"Cancel","live":"Live","running_time":"Running Time","manage_configs":"Manage Configs for","select_configs":"Select configs to include in this group","select_all":"Select All","deselect_all":"Deselect All","changes_apply":"Changes apply immediately","new_group_title":"Create New Group","new_group_sub":"Create a separate public page to manage configs","group_name":"Group Name","description_optional":"Description (optional)","public_page_password":"Public Page Password (optional)","public_page_info":"This group's public page will be accessible via a unique link.","edit_config":"Edit Config","quota_0_unlimited":"Quota (0 = unlimited)","expiry_days":"Expiry (days from now, 0 = no change/unlimited)","expiry_note":"To keep current expiry, leave expiry field as 0.","random_uuid":"Random UUID · Choose quota, expiry and protocol","uuid_note":"UUID is generated randomly · Only registered UUIDs can connect · Protocol cannot be changed after creation.","each_group_public":"Each group has its own public page with its configs","single_sub_desc":"Each config has its own subscription URL. Click the","icon_on_card":"icon on the config card.","full_sub_note":"This URL only works in the browser where you're logged in (requires session cookie).","based_on_mb":"Based on MB per hour","lang_note":"Default language is English. Page will refresh after change.","groups":"Groups","usage":"Usage","average":"Average","protocols_legend":"Protocols","daily_legend":"Daily","hourly_legend":"Hourly","bandwidth_usage":"Bandwidth Usage","smart_alerts":"Smart Alerts","alerts_sub":"Important events & notifications","priority":"Priority","critical":"Critical","warning":"Warning","info":"Info","dismiss":"Dismiss","filter_all":"All","filter_critical":"Critical","filter_warning":"Warning","filter_info":"Info","alert_expiry":"Config expiring soon","alert_quota":"Traffic quota exceeded 80%","alert_errors":"Repeated connection errors","alert_new_ip":"New IP connected","no_alerts":"No alerts to show"
   },
   "fa": {
-    "dashboard":"داشبورد","dashboard_sub":"نمای کلی سیستم","active_connections":"اتصالات فعال","total_traffic":"کل ترافیک","total_links":"کانفیگ‌ها","uptime":"آپتایم","since_start":"از راه‌اندازی","active":"فعال","inactive":"غیرفعال","refresh":"رفرش","traffic_trend":"مصرف پهنای باند","service_status":"وضعیت سرویس","top_connections":"اتصال‌های لحظه‌ای","no_connections":"هیچ اتصالی","server":"سرور","settings":"تنظیمات","language":"زبان","farsi":"فارسی","english":"انگلیسی","save":"ذخیره","cancel":"انصراف","delete":"حذف","edit":"ویرایش","copy":"کپی","created":"ساخته شده","expires":"انقضا","unlimited":"نامحدود","used":"مصرف","of":"از","daily":"روزانه","hourly":"ساعتی","bandwidth":"پهنای باند","connections":"اتصالات","protocol":"پروتکل","ip_address":"آدرس آی‌پی","port":"پورت","upload":"آپلود","download":"دانلود","duration":"مدت","status":"وضعیت","online":"آنلاین","offline":"آفلاین","total":"کل","users":"کاربران","protocols":"پروتکل‌ها","traffic_usage":"مصرف ترافیک","links":"کانفیگ‌ها","sub_groups":"گروه‌های ساب","subscription":"سابسکریپشن","security":"امنیت","logs":"لاگ فعالیت‌ها","errors":"خطاها","test_websocket":"تست WebSocket","dark_theme":"تم تاریک","light_theme":"تم روشن","prestige_theme":"تم پرستیژ","blue":"آبی","red":"قرمز","yellow":"زرد","current_theme":"تم پیش‌فرض","server_settings":"تنظیمات سرور و نام لینک‌ها","server_name":"نام سرور","server_prefix":"پیشوند لینک‌ها","link_template":"قالب نام کانفیگ‌ها","template_vars":"متغیرهای قابل استفاده","template_note":"اگر `{protocol}` در قالب نباشد، پروتکل در نام نمایش داده نمی‌شود.","change_password":"تغییر رمز عبور","current_password":"رمز فعلی","new_password":"رمز جدید","confirm_password":"تکرار رمز جدید","password_strength":"قدرت رمز","min_chars":"حداقل ۴ کاراکتر","contains_number":"شامل عدد","contains_case":"حروف بزرگ/کوچک","weak":"خیلی ضعیف","medium":"متوسط","strong":"قوی","save_password":"ذخیره رمز جدید","login":"ورود","logout":"خروج","login_title":"ورود به پنل","login_sub":"رمز عبور را برای دسترسی به داشبورد وارد کنید","password":"رمز عبور","login_button":"ورود به داشبورد","telegram_channel":"کانال تلگرام","panel":"پنل","system":"سیستم","configs":"کانفیگ‌ها","sub_groups_short":"گروه‌های ساب","activity_logs":"لاگ فعالیت‌ها","config_id":"شناسه کانفیگ","sub_group_expiry":"گروه ساب و انقضا","no_group":"بدون گروه","days":"روز","traffic_quota":"سهمیه ترافیک","transport_protocols":"پروتکل‌های انتقال","bulk_count":"تعداد ساخت هم‌زمان","create_config":"ساخت کانفیگ","no_configs":"هنوز کانفیگی وجود ندارد","new_group":"گروه جدید","no_groups":"هنوز گروهی وجود ندارد","create_group":"یک گروه جدید بسازید تا کانفیگ‌ها را دسته‌بندی کنید","single_sub":"سابسکریپشن تکی (هر کانفیگ)","full_sub":"سابسکریپشن کامل (ادمین)","full_sub_desc":"شامل تمام کانفیگ‌های فعال.","group_sub_links":"لینک سابسکریپشن گروه‌ها","loading":"در حال بارگذاری...","traffic_analysis":"تحلیل و مانیتورینگ مصرف پهنای باند","total_traffic_used":"کل ترافیک مصرفی","hourly_average":"میانگین ساعتی","per_hour":"در ساعت","peak_usage":"پیک مصرف","peak_hour":"بالاترین ساعت","lowest_usage":"کمترین مصرف","live_connections":"اتصالات زنده","total_traffic_live":"مجموع ترافیک لحظه‌ای","avg_duration":"میانگین مدت اتصال","unique_ips":"آی‌پی‌های یکتا","connections_list":"لیست اتصالات","auto_update":"بروزرسانی خودکار هر ۵ ثانیه","no_active_connections":"هیچ اتصال فعالی نیست","will_appear":"به محض اتصال کلاینت‌ها، اینجا نمایش داده می‌شوند","encryption":"رمزنگاری","access_control":"کنترل دسترسی","hash":"هش رمز","session":"سشن","active_inactive":"فعال/غیرفعال","expiry_date":"تاریخ انقضا","public_page_pw":"رمز صفحه پابلیک","optional":"اختیاری","activity_logs_full":"تاریخچه‌ی کامل رخدادهای پنل","no_logs":"هنوز لاگی ثبت نشده","error_logs":"لاگ خطاها","websocket_test":"تست WebSocket","ws_note":"فقط UUID‌های ثبت‌شده و فعال اتصال برقرار می‌کنند.","connect":"اتصال","disconnect":"قطع","send":"ارسال","waiting_ws":"منتظر اتصال...","change_theme":"تغییر تم","server_link_settings":"تنظیمات سرور و نام لینک‌ها","save_settings":"ذخیره تنظیمات","saved":"ذخیره شد","online_status":"آنلاین","version":"نسخه","framework":"فریم‌ورک","platform":"پلتفرم","storage":"ذخیره‌سازی","change_password_title":"تغییر رمز عبور","change_password_sub":"رمز قوی انتخاب کنید و آن را جایی امن نگه دارید","current_pw":"رمز فعلی","new_pw":"رمز جدید","confirm_pw":"تکرار رمز جدید","save_new_pw":"ذخیره رمز جدید","min_4_chars":"حداقل ۴ کاراکتر","contains_num":"شامل عدد","contains_case_letters":"حروف بزرگ/کوچک","very_weak":"خیلی ضعیف","medium_strength":"متوسط","strong_strength":"قوی","logout_btn":"خروج","telegram_btn":"کانال تلگرام","load":"بار نسبی","connections_live":"اتصالات لحظه‌ای","traffic_chart":"نمودار ترافیک","protocol_distribution":"توزیع پروتکل","daily_usage":"مصرف روزانه","active_conns_table":"اتصالات فعال","configs_management":"مدیریت کانفیگ‌ها","sub_groups_management":"مدیریت گروه‌های ساب","subscription_links":"لینک‌های سابسکریپشن","traffic_monitor":"مانیتورینگ ترافیک","connections_monitor":"مانیتورینگ اتصالات","security_settings":"تنظیمات امنیتی","activity_logs_title":"لاگ فعالیت‌ها","error_logs_title":"لاگ خطاها","websocket_tester":"تست WebSocket","system_settings":"تنظیمات سیستم","language_settings":"تنظیمات زبان","theme_settings":"تنظیمات تم","server_info":"اطلاعات سرور","password_change":"تغییر رمز عبور","save_changes":"ذخیره تغییرات","cancel_changes":"انصراف","live":"لحظه‌ای","running_time":"مدت روشن بودن","manage_configs":"مدیریت کانفیگ‌های","select_configs":"کانفیگ‌هایی که می‌خواهید در این گروه باشند را انتخاب کنید","select_all":"انتخاب همه","deselect_all":"لغو همه","changes_apply":"تغییرات بلافاصله اعمال می‌شود","new_group_title":"ساخت گروه جدید","new_group_sub":"یک صفحه پابلیک مجزا برای مدیریت کانفیگ‌ها بسازید","group_name":"نام گروه","description_optional":"توضیحات (اختیاری)","public_page_password":"رمز صفحه پابلیک (اختیاری)","public_page_info":"صفحه پابلیک این گروه با یک لینک منحصر‌به‌فرد در اینترنت در دسترس خواهد بود.","edit_config":"ویرایش کانفیگ","quota_0_unlimited":"سهمیه (0 = نامحدود)","expiry_days":"انقضا (روز از الان، 0 = بدون تغییر/نامحدود)","expiry_note":"برای حفظ انقضای فعلی، فیلد انقضا را صفر بگذارید.","random_uuid":"UUID تصادفی · سهمیه، انقضا و پروتکل رو انتخاب کن","uuid_note":"UUID کاملاً رندوم تولید می‌شود · فقط UUID‌های ثبت‌شده اجازه اتصال دارند · پروتکل پس از ساخت قابل تغییر نیست.","each_group_public":"هر گروه یک صفحه پابلیک مجزا با کانفیگ‌های خودش دارد","single_sub_desc":"هر کانفیگ URL سابسکریپشن مخصوص دارد. از کارت کانفیگ روی آیکون","icon_on_card":"کلیک کنید.","full_sub_note":"این آدرس فقط در مرورگری که به پنل وارد شده کار می‌کند (نیاز به کوکی سشن).","based_on_mb":"بر اساس مگابایت در هر ساعت","lang_note":"زبان پیش‌فرض انگلیسی است. پس از تغییر، صفحه رفرش می‌شود.","groups":"گروه","usage":"مصرف","average":"میانگین","protocols_legend":"پروتکل‌ها","daily_legend":"روزانه","hourly_legend":"ساعتی","bandwidth_usage":"مصرف پهنای باند","smart_alerts":"هشدارهای هوشمند","alerts_sub":"رویدادها و اعلان‌های مهم","priority":"اولویت","critical":"بحرانی","warning":"هشدار","info":"اطلاعات","dismiss":"رد کردن","filter_all":"همه","filter_critical":"بحرانی","filter_warning":"هشدار","filter_info":"اطلاعات","alert_expiry":"انقضای نزدیک کانفیگ","alert_quota":"مصرف ترافیک بیش از ۸۰٪","alert_errors":"خطاهای مکرر اتصال","alert_new_ip":"آی‌پی جدید متصل شد","no_alerts":"هیچ هشداری وجود ندارد","mixed":"ترکیبی"
+    "dashboard":"داشبورد","dashboard_sub":"نمای کلی سیستم","active_connections":"اتصالات فعال","total_traffic":"کل ترافیک","total_links":"کانفیگ‌ها","uptime":"آپتایم","since_start":"از راه‌اندازی","active":"فعال","inactive":"غیرفعال","refresh":"رفرش","traffic_trend":"مصرف پهنای باند","service_status":"وضعیت سرویس","top_connections":"اتصال‌های لحظه‌ای","no_connections":"هیچ اتصالی","server":"سرور","settings":"تنظیمات","language":"زبان","farsi":"فارسی","english":"انگلیسی","save":"ذخیره","cancel":"انصراف","delete":"حذف","edit":"ویرایش","copy":"کپی","created":"ساخته شده","expires":"انقضا","unlimited":"نامحدود","used":"مصرف","of":"از","daily":"روزانه","hourly":"ساعتی","bandwidth":"پهنای باند","connections":"اتصالات","protocol":"پروتکل","ip_address":"آدرس آی‌پی","port":"پورت","upload":"آپلود","download":"دانلود","duration":"مدت","status":"وضعیت","online":"آنلاین","offline":"آفلاین","total":"کل","users":"کاربران","protocols":"پروتکل‌ها","traffic_usage":"مصرف ترافیک","links":"کانفیگ‌ها","sub_groups":"گروه‌های ساب","subscription":"سابسکریپشن","security":"امنیت","logs":"لاگ فعالیت‌ها","errors":"خطاها","test_websocket":"تست WebSocket","dark_theme":"تم تاریک","light_theme":"تم روشن","prestige_theme":"تم پرستیژ","blue":"آبی","red":"قرمز","yellow":"زرد","current_theme":"تم پیش‌فرض","background_style":"استایل پس‌زمینه","default_blue":"آبی پیش‌فرض","pure_black":"مشکی خالص","dark_grey":"خاکستری تیره","server_settings":"تنظیمات سرور و نام لینک‌ها","server_name":"نام سرور","server_prefix":"پیشوند لینک‌ها","link_template":"قالب نام کانفیگ‌ها","template_vars":"متغیرهای قابل استفاده","template_note":"اگر `{protocol}` در قالب نباشد، پروتکل در نام نمایش داده نمی‌شود.","change_password":"تغییر رمز عبور","current_password":"رمز فعلی","new_password":"رمز جدید","confirm_password":"تکرار رمز جدید","password_strength":"قدرت رمز","min_chars":"حداقل ۴ کاراکتر","contains_number":"شامل عدد","contains_case":"حروف بزرگ/کوچک","weak":"خیلی ضعیف","medium":"متوسط","strong":"قوی","save_password":"ذخیره رمز جدید","login":"ورود","logout":"خروج","login_title":"ورود به پنل","login_sub":"رمز عبور را برای دسترسی به داشبورد وارد کنید","password":"رمز عبور","login_button":"ورود به داشبورد","telegram_channel":"کانال تلگرام","panel":"پنل","system":"سیستم","configs":"کانفیگ‌ها","sub_groups_short":"گروه‌های ساب","activity_logs":"لاگ فعالیت‌ها","config_id":"شناسه کانفیگ","sub_group_expiry":"گروه ساب و انقضا","no_group":"بدون گروه","days":"روز","traffic_quota":"سهمیه ترافیک","transport_protocols":"پروتکل‌های انتقال","bulk_count":"تعداد ساخت هم‌زمان","create_config":"ساخت کانفیگ","no_configs":"هنوز کانفیگی وجود ندارد","new_group":"گروه جدید","no_groups":"هنوز گروهی وجود ندارد","create_group":"یک گروه جدید بسازید تا کانفیگ‌ها را دسته‌بندی کنید","single_sub":"سابسکریپشن تکی (هر کانفیگ)","full_sub":"سابسکریپشن کامل (ادمین)","full_sub_desc":"شامل تمام کانفیگ‌های فعال.","group_sub_links":"لینک سابسکریپشن گروه‌ها","loading":"در حال بارگذاری...","traffic_analysis":"تحلیل و مانیتورینگ مصرف پهنای باند","total_traffic_used":"کل ترافیک مصرفی","hourly_average":"میانگین ساعتی","per_hour":"در ساعت","peak_usage":"پیک مصرف","peak_hour":"بالاترین ساعت","lowest_usage":"کمترین مصرف","live_connections":"اتصالات زنده","total_traffic_live":"مجموع ترافیک لحظه‌ای","avg_duration":"میانگین مدت اتصال","unique_ips":"آی‌پی‌های یکتا","connections_list":"لیست اتصالات","auto_update":"بروزرسانی خودکار هر ۵ ثانیه","no_active_connections":"هیچ اتصال فعالی نیست","will_appear":"به محض اتصال کلاینت‌ها، اینجا نمایش داده می‌شوند","encryption":"رمزنگاری","access_control":"کنترل دسترسی","hash":"هش رمز","session":"سشن","active_inactive":"فعال/غیرفعال","expiry_date":"تاریخ انقضا","public_page_pw":"رمز صفحه پابلیک","optional":"اختیاری","activity_logs_full":"تاریخچه‌ی کامل رخدادهای پنل","no_logs":"هنوز لاگی ثبت نشده","error_logs":"لاگ خطاها","websocket_test":"تست WebSocket","ws_note":"فقط UUID‌های ثبت‌شده و فعال اتصال برقرار می‌کنند.","connect":"اتصال","disconnect":"قطع","send":"ارسال","waiting_ws":"منتظر اتصال...","change_theme":"تغییر تم","server_link_settings":"تنظیمات سرور و نام لینک‌ها","save_settings":"ذخیره تنظیمات","saved":"ذخیره شد","online_status":"آنلاین","version":"نسخه","framework":"فریم‌ورک","platform":"پلتفرم","storage":"ذخیره‌سازی","change_password_title":"تغییر رمز عبور","change_password_sub":"رمز قوی انتخاب کنید و آن را جایی امن نگه دارید","current_pw":"رمز فعلی","new_pw":"رمز جدید","confirm_pw":"تکرار رمز جدید","save_new_pw":"ذخیره رمز جدید","min_4_chars":"حداقل ۴ کاراکتر","contains_num":"شامل عدد","contains_case_letters":"حروف بزرگ/کوچک","very_weak":"خیلی ضعیف","medium_strength":"متوسط","strong_strength":"قوی","logout_btn":"خروج","telegram_btn":"کانال تلگرام","load":"بار نسبی","connections_live":"اتصالات لحظه‌ای","traffic_chart":"نمودار ترافیک","protocol_distribution":"توزیع پروتکل","daily_usage":"مصرف روزانه","active_conns_table":"اتصالات فعال","configs_management":"مدیریت کانفیگ‌ها","sub_groups_management":"مدیریت گروه‌های ساب","subscription_links":"لینک‌های سابسکریپشن","traffic_monitor":"مانیتورینگ ترافیک","connections_monitor":"مانیتورینگ اتصالات","security_settings":"تنظیمات امنیتی","activity_logs_title":"لاگ فعالیت‌ها","error_logs_title":"لاگ خطاها","websocket_tester":"تست WebSocket","system_settings":"تنظیمات سیستم","language_settings":"تنظیمات زبان","theme_settings":"تنظیمات تم","server_info":"اطلاعات سرور","password_change":"تغییر رمز عبور","save_changes":"ذخیره تغییرات","cancel_changes":"انصراف","live":"لحظه‌ای","running_time":"مدت روشن بودن","manage_configs":"مدیریت کانفیگ‌های","select_configs":"کانفیگ‌هایی که می‌خواهید در این گروه باشند را انتخاب کنید","select_all":"انتخاب همه","deselect_all":"لغو همه","changes_apply":"تغییرات بلافاصله اعمال می‌شود","new_group_title":"ساخت گروه جدید","new_group_sub":"یک صفحه پابلیک مجزا برای مدیریت کانفیگ‌ها بسازید","group_name":"نام گروه","description_optional":"توضیحات (اختیاری)","public_page_password":"رمز صفحه پابلیک (اختیاری)","public_page_info":"صفحه پابلیک این گروه با یک لینک منحصر‌به‌فرد در اینترنت در دسترس خواهد بود.","edit_config":"ویرایش کانفیگ","quota_0_unlimited":"سهمیه (0 = نامحدود)","expiry_days":"انقضا (روز از الان، 0 = بدون تغییر/نامحدود)","expiry_note":"برای حفظ انقضای فعلی، فیلد انقضا را صفر بگذارید.","random_uuid":"UUID تصادفی · سهمیه، انقضا و پروتکل رو انتخاب کن","uuid_note":"UUID کاملاً رندوم تولید می‌شود · فقط UUID‌های ثبت‌شده اجازه اتصال دارند · پروتکل پس از ساخت قابل تغییر نیست.","each_group_public":"هر گروه یک صفحه پابلیک مجزا با کانفیگ‌های خودش دارد","single_sub_desc":"هر کانفیگ URL سابسکریپشن مخصوص دارد. از کارت کانفیگ روی آیکون","icon_on_card":"کلیک کنید.","full_sub_note":"این آدرس فقط در مرورگری که به پنل وارد شده کار می‌کند (نیاز به کوکی سشن).","based_on_mb":"بر اساس مگابایت در هر ساعت","lang_note":"زبان پیش‌فرض انگلیسی است. پس از تغییر، صفحه رفرش می‌شود.","groups":"گروه","usage":"مصرف","average":"میانگین","protocols_legend":"پروتکل‌ها","daily_legend":"روزانه","hourly_legend":"ساعتی","bandwidth_usage":"مصرف پهنای باند","smart_alerts":"هشدارهای هوشمند","alerts_sub":"رویدادها و اعلان‌های مهم","priority":"اولویت","critical":"بحرانی","warning":"هشدار","info":"اطلاعات","dismiss":"رد کردن","filter_all":"همه","filter_critical":"بحرانی","filter_warning":"هشدار","filter_info":"اطلاعات","alert_expiry":"انقضای نزدیک کانفیگ","alert_quota":"مصرف ترافیک بیش از ۸۰٪","alert_errors":"خطاهای مکرر اتصال","alert_new_ip":"آی‌پی جدید متصل شد","no_alerts":"هیچ هشداری وجود ندارد"
   }
 };
 
 // ========== STATE ==========
 let currentLang = localStorage.getItem('CBeeNet-lang') || 'en';
-let currentTheme = localStorage.getItem('CBeeNet-theme') || 'dark-prestige';
+let currentTheme = localStorage.getItem('CBeeNet-theme') || 'dark-blue';
+let currentBgStyle = localStorage.getItem('CBeeNet-bg-style') || 'blue';
 let alertsData = [];
 let currentAlertFilter = 'all';
 let allLinksList = [];
@@ -1926,6 +1936,24 @@ function applyLanguage(){
     if(dict[key] !== undefined) el.placeholder = dict[key];
   });
 }
+
+function applyBackgroundStyle(style) {
+  let bg, bg2, bg3, card, cardB;
+  switch(style) {
+    case 'black':
+      bg = '#000000'; bg2 = '#0a0a0a'; bg3 = '#141414'; card = '#0a0a0a'; cardB = '#1f1f1f'; break;
+    case 'grey':
+      bg = '#1a1a1a'; bg2 = '#242424'; bg3 = '#2e2e2e'; card = '#242424'; cardB = '#333333'; break;
+    default: // blue
+      bg = '#0d1117'; bg2 = '#161b22'; bg3 = '#1c2333'; card = '#161b22'; cardB = '#30363d'; break;
+  }
+  document.documentElement.style.setProperty('--bg', bg);
+  document.documentElement.style.setProperty('--bg2', bg2);
+  document.documentElement.style.setProperty('--bg3', bg3);
+  document.documentElement.style.setProperty('--card', card);
+  document.documentElement.style.setProperty('--card-b', cardB);
+}
+
 function applyTheme(theme){
   document.documentElement.setAttribute('data-theme', theme);
   localStorage.setItem('CBeeNet-theme', theme);
@@ -1943,8 +1971,20 @@ function applyTheme(theme){
   document.getElementById('theme-icon').className = 'ti ' + icon;
   document.getElementById('theme-label').textContent = dict[labelKey] || (isLight ? 'Light Theme' : 'Dark Theme');
   document.getElementById('theme-mob-icon').className = 'ti ' + icon;
+  applyBackgroundStyle(currentBgStyle);
 }
+
 function setTheme(theme){ applyTheme(theme); toast('Theme changed to ' + theme, 'ok'); }
+function setBackgroundStyle(style){
+  currentBgStyle = style;
+  localStorage.setItem('CBeeNet-bg-style', style);
+  applyBackgroundStyle(style);
+  document.querySelectorAll('#bg-styles .btn').forEach(btn => {
+    btn.style.outline = btn.dataset.bg === style ? '2px solid var(--accent)' : 'none';
+    btn.style.outlineOffset = btn.dataset.bg === style ? '2px' : '0';
+  });
+  toast('Background style changed', 'ok');
+}
 function toggleTheme(){
   const isLight = currentTheme.startsWith('light');
   const color = currentTheme.split('-')[1] || 'prestige';
@@ -2099,10 +2139,8 @@ function getChartColors(type, isNav = false) {
 
 let chartData = { load: [], traffic: [], conns: [] };
 let chartTimes = { load: [], traffic: [], conns: [] };
-let chartRange = { load: { start: 0, end: 60 }, traffic: { start: 0, end: 60 }, conns: { start: 0, end: 60 } };
-const MAX_POINTS = 200;
+const MAX_POINTS = 60; // دقیقاً ۵ دقیقه (هر ۵ ثانیه یک نقطه = ۶۰ نقطه)
 let chartInstances = { load: null, traffic: null, conns: null };
-let navInstances = { load: null, traffic: null, conns: null };
 
 function getAccentColor() {
   return getComputedStyle(document.documentElement).getPropertyValue('--accent').trim() || '#1a7aff';
@@ -2114,16 +2152,16 @@ function getGridColor() {
   return getComputedStyle(document.documentElement).getPropertyValue('--card-b').trim() || '#1e2d45';
 }
 
-function buildChart(type, isNav = false) {
-  const colors = getChartColors(type, isNav);
+function buildChart(type) {
+  const colors = getChartColors(type);
   const accent = colors.line;
   const textColor = getTextColor();
   const gridColor = getGridColor();
-  const canvasId = isNav ? 'chart-' + type + '-nav' : 'chart-' + type;
+  const canvasId = 'chart-' + type;
   const ctx = document.getElementById(canvasId).getContext('2d');
 
-  const dataArr = isNav ? chartData[type] : chartData[type].slice(chartRange[type].start, chartRange[type].end);
-  const timeArr = isNav ? chartTimes[type] : chartTimes[type].slice(chartRange[type].start, chartRange[type].end);
+  const dataArr = chartData[type];
+  const timeArr = chartTimes[type];
   const labels = timeArr.map(d => d ? d.toLocaleTimeString('en-US', {hour:'2-digit', minute:'2-digit'}) : '');
 
   const maxVal = dataArr.length > 0 ? Math.max(...dataArr, 1) : 1;
@@ -2134,7 +2172,7 @@ function buildChart(type, isNav = false) {
     {
       data: dataArr,
       borderColor: accent + '33',
-      borderWidth: isNav ? 3 : 8,
+      borderWidth: 8,
       pointRadius: 0,
       fill: false,
       tension: 0.4,
@@ -2143,9 +2181,9 @@ function buildChart(type, isNav = false) {
     {
       data: dataArr,
       borderColor: accent,
-      borderWidth: isNav ? 1.5 : 2.5,
-      pointRadius: isNav ? 0 : 3,
-      pointHoverRadius: isNav ? 0 : 6,
+      borderWidth: 2.5,
+      pointRadius: 3,
+      pointHoverRadius: 6,
       pointHoverBorderWidth: 3,
       pointHoverBorderColor: '#fff',
       pointHoverBackgroundColor: accent,
@@ -2163,9 +2201,9 @@ function buildChart(type, isNav = false) {
         const grad = ctx.createLinearGradient(0, chartArea.top, 0, chartArea.bottom);
         if (currentTheme.startsWith('mixed')) {
           // گرادیان سه رنگ برای تم ترکیبی (قرمز، زرد، آبی)
-          grad.addColorStop(0, 'rgba(255, 0, 0, 0.25)');   // قرمز
-          grad.addColorStop(0.5, 'rgba(255, 255, 0, 0.25)'); // زرد
-          grad.addColorStop(1, 'rgba(0, 0, 255, 0.25)'); // آبی
+          grad.addColorStop(0, 'rgba(255, 0, 0, 0.25)');
+          grad.addColorStop(0.5, 'rgba(255, 255, 0, 0.25)');
+          grad.addColorStop(1, 'rgba(0, 0, 255, 0.25)');
         } else {
           grad.addColorStop(0, colors.fill);
           grad.addColorStop(1, 'rgba(0,0,0,0)');
@@ -2181,11 +2219,11 @@ function buildChart(type, isNav = false) {
   const options = {
     responsive: true,
     maintainAspectRatio: false,
-    animation: { duration: isNav ? 0 : 400, easing: 'easeOutQuart' },
-    interaction: isNav ? false : { intersect: false, mode: 'index', axis: 'x' },
+    animation: { duration: 400, easing: 'easeOutQuart' },
+    interaction: { intersect: false, mode: 'index', axis: 'x' },
     plugins: {
       legend: { display: false },
-      tooltip: isNav ? { enabled: false } : {
+      tooltip: {
         enabled: true,
         backgroundColor: 'rgba(11,17,29,0.92)',
         borderColor: accent,
@@ -2205,25 +2243,26 @@ function buildChart(type, isNav = false) {
     },
     scales: {
       x: {
-        display: !isNav,
+        display: true,
         grid: { display: false, drawBorder: false },
-        border: { display: false }, // حذف خط ریز زیر نمودار
+        border: { display: false }, // حذف خط ریز پایین محور X
         ticks: {
           color: textColor,
-          font: { size: isNav ? 7 : 9 },
-          maxTicksLimit: isNav ? 20 : 8,
+          font: { size: 9 },
+          maxTicksLimit: 8,
           autoSkip: true,
           maxRotation: 0,
           minRotation: 0
         }
       },
       y: {
-        display: !isNav,
-        grid: { color: gridColor, drawBorder: false, lineWidth: 0.5 },
+        display: true,
+        grid: { color: gridColor, drawBorder: false },
+        border: { display: false }, // حذف خط ریز کنار محور Y
         ticks: {
           color: textColor,
-          font: { size: isNav ? 7 : 9 },
-          maxTicksLimit: isNav ? 3 : 5,
+          font: { size: 9 },
+          maxTicksLimit: 5,
           callback: function(value) {
             if (type === 'load') return value + '%';
             if (type === 'traffic') return value.toFixed(0) + 'MB';
@@ -2241,7 +2280,7 @@ function buildChart(type, isNav = false) {
 
   // فعال‌سازی پلاگین سه‌بعدی (برای ظاهر شبکه‌ای)
   const plugin3d = window.Chart3D;
-  if (plugin3d && !isNav) {
+  if (plugin3d) {
     try { Chart.register(plugin3d); } catch(e) {}
     options.plugins['3d'] = {
       enabled: true,
@@ -2263,10 +2302,8 @@ function buildChart(type, isNav = false) {
 
 function initPremiumCharts() {
   ['load', 'traffic', 'conns'].forEach(type => {
-    chartInstances[type] = buildChart(type, false);
-    navInstances[type] = buildChart(type, true);
+    chartInstances[type] = buildChart(type);
     updateChartValue(type);
-    updateRangeLabel(type);
   });
 }
 
@@ -2286,47 +2323,16 @@ function addDataPoint(type, value, time) {
     chartData[type].shift();
     chartTimes[type].shift();
   }
-  const range = chartRange[type];
-  const len = chartData[type].length;
-  if (range.end >= len - 1 || range.end === len) {
-    range.start = Math.max(0, len - 60);
-    range.end = len;
-  }
-  if (range.end === len - 1) range.end = len;
-  updateChartView(type);
-  updateChartValue(type);
-  updateRangeLabel(type);
-}
-
-function updateChartView(type) {
+  // همیشه ۶۰ نقطه آخر رو نشون بده
   const chart = chartInstances[type];
-  const nav = navInstances[type];
-  if (!chart || !nav) return;
-  
-  const range = chartRange[type];
-  const start = Math.max(0, Math.min(range.start, chartData[type].length-1));
-  const end = Math.min(range.end, chartData[type].length);
-  const slicedData = chartData[type].slice(start, end);
-  const slicedTimes = chartTimes[type].slice(start, end);
-  const labels = slicedTimes.map(d => d ? d.toLocaleTimeString('en-US', {hour:'2-digit', minute:'2-digit'}) : '');
-  
+  if (!chart) return;
+  const labels = chartTimes[type].map(d => d ? d.toLocaleTimeString('en-US', {hour:'2-digit', minute:'2-digit'}) : '');
   chart.data.labels = labels;
-  chart.data.datasets[0].data = slicedData;
-  const maxVal = slicedData.length > 0 ? Math.max(...slicedData, 1) : 1;
-  chart.options.scales.y.max = chart.type === 'load' ? 100 : Math.ceil(maxVal * 1.25);
+  chart.data.datasets[0].data = chartData[type];
+  const maxVal = chartData[type].length > 0 ? Math.max(...chartData[type], 1) : 1;
+  chart.options.scales.y.max = type === 'load' ? 100 : Math.ceil(maxVal * 1.25);
   chart.update('none');
-  
-  const allLabels = chartTimes[type].map(d => d ? d.toLocaleTimeString('en-US', {hour:'2-digit', minute:'2-digit'}) : '');
-  nav.data.labels = allLabels;
-  nav.data.datasets[0].data = chartData[type];
-  const maxAll = chartData[type].length > 0 ? Math.max(...chartData[type], 1) : 1;
-  nav.options.scales.y.max = type === 'load' ? 100 : Math.ceil(maxAll * 1.25);
-  nav.update('none');
-}
-
-function updateRangeLabel(type) {
-  const range = chartRange[type];
-  const times = chartTimes[type];
+  updateChartValue(type);
 }
 
 // ========== fetchStats ==========
@@ -3021,6 +3027,12 @@ document.addEventListener('DOMContentLoaded', async () => {
   applyLanguage();
   document.querySelectorAll('.btn-lang').forEach(btn => btn.classList.toggle('active', btn.dataset.langCode === currentLang));
   applyTheme(currentTheme);
+  // اعمال استایل پس‌زمینه
+  applyBackgroundStyle(currentBgStyle);
+  document.querySelectorAll('#bg-styles .btn').forEach(btn => {
+    btn.style.outline = btn.dataset.bg === currentBgStyle ? '2px solid var(--accent)' : 'none';
+    btn.style.outlineOffset = btn.dataset.bg === currentBgStyle ? '2px' : '0';
+  });
   initPremiumCharts();
   initSecondaryCharts();
   document.getElementById('set-host').textContent = location.host;
@@ -3059,7 +3071,7 @@ def get_public_page_html(uuid_key: str) -> str:
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.19.0/dist/tabler-icons.min.css">
 <style>
 *{{margin:0;padding:0;box-sizing:border-box}}
-:root{{--bg:#000000;--card:#0a0a0a;--card-b:#1f1f1f;--accent:#1677ff;--accent2:#4096ff;--t1:#f0f6fc;--t2:#8b949e;--t3:#6e7681;--radius:16px}}
+:root{{--bg:#0d1117;--card:#161b22;--card-b:#30363d;--accent:#1677ff;--accent2:#4096ff;--t1:#f0f6fc;--t2:#8b949e;--t3:#6e7681;--radius:16px}}
 body{{font-family:'Vazirmatn','Segoe UI',sans-serif;background:var(--bg);color:var(--t1);min-height:100vh;display:flex;justify-content:center;align-items:center;padding:20px}}
 .wrap{{max-width:800px;width:100%}}
 .brand{{font-size:28px;font-weight:900;text-align:center;margin-bottom:20px;color:var(--accent2)}}
