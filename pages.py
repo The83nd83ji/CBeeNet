@@ -1,4 +1,4 @@
-# pages.py - CBee Gateway v1.0.0 - Premium Dashboard with Professional Interactive Charts
+# pages.py - CBee Gateway v1.0.0
 import json
 
 LOGIN_HTML = r"""<!DOCTYPE html>
@@ -752,6 +752,7 @@ DASHBOARD_HTML = r"""<!DOCTYPE html>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-zoom@2.0.1/dist/chartjs-plugin-zoom.min.js"></script>
 <style>
+/* ===== RESET & VARIABLES ===== */
 *{margin:0;padding:0;box-sizing:border-box}
 :root{
   --bg:#0d1117;
@@ -881,25 +882,19 @@ a{color:inherit;text-decoration:none}
 .dash-stat-card .sub{font-size:10px;color:var(--t2);margin-top:4px}
 .dash-stat-card .icon{position:absolute;top:16px;left:16px;font-size:22px;color:var(--accent);opacity:.3}
 [dir="ltr"] .dash-stat-card .icon{left:auto;right:16px}
-/* Premium Chart Container */
-.chart-premium-container{background:var(--card);border:1px solid var(--card-b);border-radius:var(--radius);padding:18px 18px 14px;transition:all .2s;position:relative;overflow:hidden}
-.chart-premium-container:hover{border-color:var(--card-bh);box-shadow:var(--shadow)}
-.chart-premium-container .chart-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:6px}
-.chart-premium-container .chart-title{font-size:11px;font-weight:600;color:var(--t2);display:flex;align-items:center;gap:6px;text-transform:uppercase;letter-spacing:.05em}
-.chart-premium-container .chart-title i{font-size:13px;color:var(--accent)}
-.chart-premium-container .chart-value{font-size:18px;font-weight:800;color:var(--t1);letter-spacing:-.02em}
-.chart-premium-container .chart-value .unit{font-size:12px;font-weight:500;color:var(--t3);margin-left:3px}
-.chart-premium-container .chart-main{height:180px;position:relative;margin-top:2px}
-.chart-premium-container .chart-main canvas{width:100% !important;height:100% !important}
-.chart-premium-container .chart-navigator{height:50px;position:relative;margin-top:6px;border-top:1px solid var(--card-b);padding-top:6px}
-.chart-premium-container .chart-navigator canvas{width:100% !important;height:100% !important}
-.chart-premium-container .chart-controls{display:flex;align-items:center;justify-content:space-between;margin-top:6px;gap:6px;flex-wrap:wrap}
-.chart-premium-container .chart-controls .range-label{font-size:9px;color:var(--t3);font-family:ui-monospace,monospace;background:var(--accent-d);padding:2px 10px;border-radius:4px;border:1px solid var(--card-b)}
-.chart-premium-container .chart-controls .btn-group{display:flex;gap:4px}
-.chart-premium-container .chart-controls .btn-group button{background:var(--accent-d);border:1px solid var(--card-b);color:var(--t2);border-radius:5px;padding:2px 9px;font-size:9px;cursor:pointer;font-family:inherit;transition:.15s;font-weight:600}
-.chart-premium-container .chart-controls .btn-group button:hover{background:var(--accent-d);color:var(--accent2);border-color:var(--accent)}
-.chart-premium-container .chart-controls .btn-group button:active{transform:scale(.94)}
-.dash-chart-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;margin-bottom:22px}
+/* Premium Chart Containers */
+.chart-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;margin-bottom:22px}
+.chart-premium{background:var(--card);border:1px solid var(--card-b);border-radius:var(--radius);padding:16px 18px 14px;transition:all .2s}
+.chart-premium:hover{border-color:var(--card-bh);box-shadow:var(--shadow)}
+.chart-premium .ch-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:4px}
+.chart-premium .ch-title{font-size:10.5px;font-weight:600;color:var(--t2);text-transform:uppercase;letter-spacing:.05em;display:flex;align-items:center;gap:5px}
+.chart-premium .ch-title i{font-size:13px;color:var(--accent)}
+.chart-premium .ch-value{font-size:18px;font-weight:800;color:var(--t1);letter-spacing:-.02em}
+.chart-premium .ch-value .unit{font-size:12px;font-weight:500;color:var(--t3);margin-left:3px}
+.chart-premium .ch-main{height:150px;position:relative;margin-top:2px}
+.chart-premium .ch-main canvas{width:100% !important;height:100% !important}
+.chart-premium .ch-nav{height:44px;position:relative;margin-top:6px;border-top:1px solid var(--card-b);padding-top:5px}
+.chart-premium .ch-nav canvas{width:100% !important;height:100% !important}
 .dash-charts-second{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:22px}
 .dash-small-chart{background:var(--card);border:1px solid var(--card-b);border-radius:var(--radius);padding:16px 18px}
 .dash-small-chart .chart-title{font-size:11px;font-weight:600;color:var(--t2);margin-bottom:10px;display:flex;align-items:center;gap:6px}
@@ -908,15 +903,16 @@ a{color:inherit;text-decoration:none}
 .dash-footer{border-top:1px solid var(--card-b);margin-top:14px;padding-top:14px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px}
 .df-text{font-size:10px;color:var(--t3)}
 .df-link{font-size:11.5px;color:var(--accent2);display:flex;align-items:center;gap:5px;font-weight:600}
-/* Premium Tooltip */
-.chart-tooltip{display:none;position:fixed;background:rgba(11,17,29,0.92);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border:1px solid rgba(255,255,255,0.08);border-radius:10px;padding:10px 14px;box-shadow:0 12px 40px rgba(0,0,0,0.7);z-index:1000;pointer-events:none;min-width:120px;transition:opacity .15s}
+/* Tooltip */
+.chart-tooltip{display:none;position:fixed;background:rgba(11,17,29,0.92);backdrop-filter:blur(12px);border:1px solid rgba(255,255,255,0.08);border-radius:10px;padding:10px 14px;box-shadow:0 12px 40px rgba(0,0,0,0.7);z-index:1000;pointer-events:none;min-width:140px}
 .chart-tooltip .tt-time{font-size:9px;color:var(--t3);font-family:ui-monospace,monospace;margin-bottom:4px;border-bottom:1px solid var(--card-b);padding-bottom:4px}
 .chart-tooltip .tt-row{display:flex;align-items:center;justify-content:space-between;gap:16px;font-size:11px;padding:2px 0;color:var(--t1)}
 .chart-tooltip .tt-row .tt-dot{width:7px;height:7px;border-radius:50%;display:inline-block;flex-shrink:0;margin-right:6px;border:1px solid rgba(255,255,255,0.15)}
 .chart-tooltip .tt-row .tt-label{color:var(--t2);font-weight:400}
 .chart-tooltip .tt-row .tt-value{font-weight:700;font-variant-numeric:tabular-nums}
-@media(max-width:1024px){.dash-stats-grid{grid-template-columns:1fr 1fr}.dash-charts-second{grid-template-columns:1fr 1fr}.dash-chart-grid{grid-template-columns:1fr 1fr}}
-@media(max-width:768px){.dash-chart-grid{grid-template-columns:1fr}.dash-charts-second{grid-template-columns:1fr}.dash-stats-grid{grid-template-columns:1fr}.main{padding:62px 12px 50px}.sidebar{transform:translateX(100%)}[dir="ltr"] .sidebar{transform:translateX(-100%)}.sidebar.open{transform:translateX(0)}.sb-close{display:flex}.main{margin-right:0;padding-top:70px}[dir="ltr"] .main{margin-left:0}.mob-top{display:flex}}
+@media(max-width:1024px){.dash-stats-grid{grid-template-columns:1fr 1fr}.dash-charts-second{grid-template-columns:1fr 1fr}.chart-grid{grid-template-columns:1fr 1fr}}
+@media(max-width:768px){.chart-grid{grid-template-columns:1fr}.dash-charts-second{grid-template-columns:1fr}.dash-stats-grid{grid-template-columns:1fr}.main{padding:62px 12px 50px}.sidebar{transform:translateX(100%)}[dir="ltr"] .sidebar{transform:translateX(-100%)}.sidebar.open{transform:translateX(0)}.sb-close{display:flex}.main{margin-right:0;padding-top:70px}[dir="ltr"] .main{margin-left:0}.mob-top{display:flex}}
+/* ===== REST OF STYLES (unchanged from original) ===== */
 .btn{font-family:inherit;font-size:12px;font-weight:500;border-radius:9px;padding:8px 14px;cursor:pointer;display:inline-flex;align-items:center;gap:5px;border:none;transition:all .15s;white-space:nowrap}
 .btn i{font-size:13px}
 .btn:disabled{opacity:.4;cursor:not-allowed}
@@ -951,9 +947,6 @@ a{color:inherit;text-decoration:none}
 .sr-k{color:var(--t2);display:flex;align-items:center;gap:6px}
 .sr-k i{font-size:13px;color:var(--t3)}
 .sr-v{color:var(--t1);font-weight:600;font-size:11.5px}
-.ch{position:relative;height:200px}
-.ch-lg{position:relative;height:300px}
-.ch-sm{position:relative;height:160px}
 .exp-chip{font-size:9px;padding:3px 8px;border-radius:6px;font-weight:700;display:inline-flex;align-items:center;gap:3px}
 .ec-ok{background:var(--green-bg);color:var(--green-t)}
 .ec-warn{background:var(--amber-bg);color:var(--amber-t)}
@@ -1318,8 +1311,10 @@ a{color:inherit;text-decoration:none}
 </style>
 </head>
 <body>
+<!-- ===== TOAST ===== -->
 <div class="toast" id="toast"></div>
-<!-- Modals -->
+
+<!-- ===== MODALS ===== -->
 <div class="modal-bg" id="modal-links">
   <div class="modal-v2" style="max-width:500px">
     <div class="lmodal-head">
@@ -1351,6 +1346,7 @@ a{color:inherit;text-decoration:none}
     </div>
   </div>
 </div>
+
 <div class="modal-bg" id="modal-create-sub">
   <div class="modal-v2">
     <div class="modal-v2-head">
@@ -1380,6 +1376,7 @@ a{color:inherit;text-decoration:none}
     </div>
   </div>
 </div>
+
 <div class="modal-bg" id="modal-edit-link">
   <div class="modal">
     <button class="modal-close" onclick="closeModal('modal-edit-link')"><i class="ti ti-x"></i></button>
@@ -1399,18 +1396,18 @@ a{color:inherit;text-decoration:none}
     </div>
   </div>
 </div>
-<!-- Mobile Top Bar -->
+
+<!-- ===== MOBILE TOP ===== -->
 <div class="mob-top">
-  <div class="ml">
-    <span class="mob-title">CBee</span>
-  </div>
+  <div class="ml"><span class="mob-title">CBee</span></div>
   <div class="mob-right">
     <button class="theme-mob" id="theme-mob-btn" onclick="toggleTheme()"><i class="ti ti-sun" id="theme-mob-icon"></i></button>
     <button class="menu-btn" id="open-sb"><i class="ti ti-menu-2"></i></button>
   </div>
 </div>
 <div class="overlay" id="overlay"></div>
-<!-- Sidebar -->
+
+<!-- ===== SIDEBAR ===== -->
 <aside class="sidebar" id="sb">
   <button class="sb-close" id="close-sb"><i class="ti ti-x"></i></button>
   <div class="logo">
@@ -1439,9 +1436,11 @@ a{color:inherit;text-decoration:none}
     <button class="logout-btn" id="logout-btn"><i class="ti ti-logout"></i> <span data-lang="logout_btn">Logout</span></button>
   </div>
 </aside>
-<!-- Main Content -->
+
+<!-- ===== MAIN ===== -->
 <main class="main">
-<!-- Overview Page -->
+
+<!-- ===== OVERVIEW PAGE ===== -->
 <section class="pg on" id="pg-overview">
   <div class="topbar">
     <div><div class="tb-title"><i class="ti ti-layout-dashboard"></i> <span data-lang="dashboard">Dashboard</span></div><div class="tb-sub" id="last-upd">Loading...</div></div>
@@ -1451,6 +1450,8 @@ a{color:inherit;text-decoration:none}
       <button class="btn btn-p btn-sm" onclick="refreshAll()"><i class="ti ti-refresh"></i> <span data-lang="refresh">Refresh</span></button>
     </div>
   </div>
+
+  <!-- Stats Grid -->
   <div class="dash-stats-grid">
     <div class="dash-stat-card">
       <i class="ti ti-plug-connected icon"></i>
@@ -1477,61 +1478,39 @@ a{color:inherit;text-decoration:none}
       <div class="sub" data-lang="running_time">Running Time</div>
     </div>
   </div>
-  <!-- Three Premium Charts -->
-  <div class="dash-chart-grid">
-    <!-- Chart 1: Load -->
-    <div class="chart-premium-container" id="chart-load-container">
-      <div class="chart-header">
-        <div class="chart-title"><i class="ti ti-gauge"></i> <span data-lang="load">Load</span></div>
-        <div class="chart-value" id="chart-load-val">0<span class="unit">%</span></div>
+
+  <!-- 3 Premium Charts -->
+  <div class="chart-grid">
+    <!-- Load Chart -->
+    <div class="chart-premium" id="chart-load-container">
+      <div class="ch-header">
+        <div class="ch-title"><i class="ti ti-gauge"></i> <span data-lang="load">Load</span></div>
+        <div class="ch-value" id="chart-load-val">0<span class="unit">%</span></div>
       </div>
-      <div class="chart-main"><canvas id="chart-load"></canvas></div>
-      <div class="chart-navigator"><canvas id="chart-load-nav"></canvas></div>
-      <div class="chart-controls">
-        <div class="btn-group">
-          <button onclick="shiftRange('load',-1)"><i class="ti ti-chevron-left"></i></button>
-          <button onclick="shiftRange('load',1)"><i class="ti ti-chevron-right"></i></button>
-        </div>
-        <span class="range-label" id="load-range-label">--:-- – --:--</span>
-        <button class="btn-sm btn-g" onclick="resetRange('load')" style="font-size:8px;padding:1px 8px">Reset</button>
-      </div>
+      <div class="ch-main"><canvas id="chart-load"></canvas></div>
+      <div class="ch-nav"><canvas id="chart-load-nav"></canvas></div>
     </div>
-    <!-- Chart 2: Traffic -->
-    <div class="chart-premium-container" id="chart-traffic-container">
-      <div class="chart-header">
-        <div class="chart-title"><i class="ti ti-database"></i> <span data-lang="total_traffic">Traffic</span></div>
-        <div class="chart-value" id="chart-traffic-val">0<span class="unit">MB</span></div>
+    <!-- Traffic Chart -->
+    <div class="chart-premium" id="chart-traffic-container">
+      <div class="ch-header">
+        <div class="ch-title"><i class="ti ti-database"></i> <span data-lang="total_traffic">Traffic</span></div>
+        <div class="ch-value" id="chart-traffic-val">0<span class="unit">MB</span></div>
       </div>
-      <div class="chart-main"><canvas id="chart-traffic"></canvas></div>
-      <div class="chart-navigator"><canvas id="chart-traffic-nav"></canvas></div>
-      <div class="chart-controls">
-        <div class="btn-group">
-          <button onclick="shiftRange('traffic',-1)"><i class="ti ti-chevron-left"></i></button>
-          <button onclick="shiftRange('traffic',1)"><i class="ti ti-chevron-right"></i></button>
-        </div>
-        <span class="range-label" id="traffic-range-label">--:-- – --:--</span>
-        <button class="btn-sm btn-g" onclick="resetRange('traffic')" style="font-size:8px;padding:1px 8px">Reset</button>
-      </div>
+      <div class="ch-main"><canvas id="chart-traffic"></canvas></div>
+      <div class="ch-nav"><canvas id="chart-traffic-nav"></canvas></div>
     </div>
-    <!-- Chart 3: Connections -->
-    <div class="chart-premium-container" id="chart-conns-container">
-      <div class="chart-header">
-        <div class="chart-title"><i class="ti ti-plug-connected"></i> <span data-lang="connections_live">Connections</span></div>
-        <div class="chart-value" id="chart-conns-val">0</div>
+    <!-- Connections Chart -->
+    <div class="chart-premium" id="chart-conns-container">
+      <div class="ch-header">
+        <div class="ch-title"><i class="ti ti-plug-connected"></i> <span data-lang="connections_live">Connections</span></div>
+        <div class="ch-value" id="chart-conns-val">0</div>
       </div>
-      <div class="chart-main"><canvas id="chart-conns"></canvas></div>
-      <div class="chart-navigator"><canvas id="chart-conns-nav"></canvas></div>
-      <div class="chart-controls">
-        <div class="btn-group">
-          <button onclick="shiftRange('conns',-1)"><i class="ti ti-chevron-left"></i></button>
-          <button onclick="shiftRange('conns',1)"><i class="ti ti-chevron-right"></i></button>
-        </div>
-        <span class="range-label" id="conns-range-label">--:-- – --:--</span>
-        <button class="btn-sm btn-g" onclick="resetRange('conns')" style="font-size:8px;padding:1px 8px">Reset</button>
-      </div>
+      <div class="ch-main"><canvas id="chart-conns"></canvas></div>
+      <div class="ch-nav"><canvas id="chart-conns-nav"></canvas></div>
     </div>
   </div>
-  <!-- Secondary Charts: Protocol & Hourly -->
+
+  <!-- Secondary Charts -->
   <div class="dash-charts-second">
     <div class="dash-small-chart">
       <div class="chart-title"><i class="ti ti-chart-bar"></i> <span data-lang="protocol_distribution">Protocol Distribution</span></div>
@@ -1542,88 +1521,380 @@ a{color:inherit;text-decoration:none}
       <div class="chart-wrap"><canvas id="dashHourlyChart"></canvas></div>
     </div>
   </div>
+
   <div class="dash-footer">
     <span class="df-text">CBee Gateway v1.0.0 · 2026 · Railway</span>
     <a class="df-link" href="https://t.me/CBeeNet" target="_blank"><i class="ti ti-brand-telegram"></i> t.me/CBeeNet</a>
   </div>
 </section>
 
-<!-- ========== OTHER PAGES (Links, SubGroups, Subscriptions, Traffic, Connections, Alerts, Security, Logs, Errors, TestWS, Settings) ========== -->
-<!-- For brevity, I'm keeping them as placeholders - they remain functional from your original code -->
-<section class="pg" id="pg-links"><div class="topbar"><div><div class="tb-title"><i class="ti ti-link-plus"></i> <span data-lang="configs">Configs</span></div></div></div>
-<div class="create-panel"><div class="cp-head"><div class="cp-head-icon"><i class="ti ti-square-rounded-plus"></i></div><div class="cp-head-text"><div class="cp-head-title" data-lang="create_config">Create New Config</div><div class="cp-head-sub" data-lang="random_uuid">Random UUID · Choose quota, expiry and protocol</div></div></div>
-<div class="cp-body"><div class="cp-row"><div class="cp-block"><div class="cp-block-label"><i class="ti ti-id-badge-2"></i> <span data-lang="config_id">Config ID</span></div><input class="cp-input-full" id="nl-label" placeholder="e.g. User Ali"><div class="cp-mini-row"><input class="cp-input-full" id="nl-note" placeholder="Note (optional)"></div></div>
-<div class="cp-block"><div class="cp-block-label"><i class="ti ti-folders"></i> <span data-lang="sub_group_expiry">Sub Group & Expiry</span></div><select class="cp-input-full fs" id="nl-sub"><option value="">— <span data-lang="no_group">No Group</span> —</option></select><div class="cp-mini-row"><input class="cp-input-full" id="nl-exp" type="number" min="0" step="1" placeholder="Expiry (days) · 0 = unlimited"></div><div class="chip-row" id="exp-chips"><span class="chip" onclick="setExpiry(0,this)" data-lang="unlimited">Unlimited</span><span class="chip" onclick="setExpiry(7,this)">7 <span data-lang="days">Days</span></span><span class="chip active" onclick="setExpiry(30,this)">30 <span data-lang="days">Days</span></span><span class="chip" onclick="setExpiry(90,this)">90 <span data-lang="days">Days</span></span></div></div></div>
-<div class="cp-block mb16"><div class="cp-block-label"><i class="ti ti-gauge"></i> <span data-lang="traffic_quota">Traffic Quota</span></div><div class="cp-quota-inputs"><input class="cp-input-full" id="nl-val" type="number" min="0" step="0.1" placeholder="0 = unlimited"><select class="cp-input-full fs" id="nl-unit"><option value="GB">GB</option><option value="MB" selected>MB</option></select></div><div class="chip-row" id="quota-chips"><span class="chip" onclick="setQuota(0,'GB',this)" data-lang="unlimited">Unlimited</span><span class="chip" onclick="setQuota(500,'MB',this)">500 MB</span><span class="chip active" onclick="setQuota(1,'GB',this)">1 GB</span><span class="chip" onclick="setQuota(5,'GB',this)">5 GB</span><span class="chip" onclick="setQuota(10,'GB',this)">10 GB</span><span class="chip" onclick="setQuota(50,'GB',this)">50 GB</span></div></div>
-<div class="cp-block mb16"><div class="cp-block-label"><i class="ti ti-plug-connected"></i> <span data-lang="transport_protocols">Transport Protocols</span></div><div class="proto-group" id="proto-group"><button class="proto-btn active" data-proto="vless-ws" onclick="toggleProtoBtn(this)">VLESS / WS <span class="proto-badge">WebSocket</span></button><button class="proto-btn" data-proto="xhttp-packet-up" onclick="toggleProtoBtn(this)">XHTTP · packet-up <span class="proto-badge">Siz10</span></button><button class="proto-btn" data-proto="xhttp-stream-up" onclick="toggleProtoBtn(this)">XHTTP · stream-up <span class="proto-badge">Siz10</span></button></div>
-<div style="margin-top:12px;display:flex;align-items:center;gap:10px;padding:8px 12px;background:var(--accent-d);border-radius:10px;border:1px solid var(--card-b)"><span style="font-size:12px;font-weight:700;color:var(--t2)"><i class="ti ti-layers-intersect"></i> <span data-lang="bulk_count">Bulk Count</span></span><div class="count-chips"><span class="count-chip active" onclick="setCount(1,this)">1</span><span class="count-chip" onclick="setCount(5,this)">5</span><span class="count-chip" onclick="setCount(10,this)">10</span><span class="count-chip" onclick="setCount(50,this)">50</span></div></div></div>
-<div class="cp-footer"><div class="cp-footer-note"><i class="ti ti-info-circle"></i> <span data-lang="uuid_note">UUID is generated randomly · Only registered UUIDs can connect · Protocol cannot be changed after creation.</span></div><button class="cp-submit-btn" onclick="createLink()"><i class="ti ti-link-plus"></i> <span data-lang="create_config">Create Config</span></button></div></div></div>
-<div class="cfg-grid" id="links-grid"></div><div class="empty" id="links-empty" style="display:none"><i class="ti ti-link-off"></i><p data-lang="no_configs">No configs yet</p></div></section>
+<!-- ===== LINKS PAGE ===== -->
+<section class="pg" id="pg-links">
+  <div class="topbar">
+    <div><div class="tb-title"><i class="ti ti-link-plus"></i> <span data-lang="configs">Configs</span></div><div class="tb-sub" data-lang="configs_management">Create and manage configs with quota, expiry and grouping</div></div>
+    <div class="tb-right"><span class="badge bg-blue" id="links-pg-cnt">0 <span data-lang="configs">Configs</span></span></div>
+  </div>
+  <div class="create-panel">
+    <div class="cp-head">
+      <div class="cp-head-icon"><i class="ti ti-square-rounded-plus"></i></div>
+      <div class="cp-head-text">
+        <div class="cp-head-title" data-lang="create_config">Create New Config</div>
+        <div class="cp-head-sub" data-lang="random_uuid">Random UUID · Choose quota, expiry and protocol</div>
+      </div>
+    </div>
+    <div class="cp-body">
+      <div class="cp-row">
+        <div class="cp-block">
+          <div class="cp-block-label"><i class="ti ti-id-badge-2"></i> <span data-lang="config_id">Config ID</span></div>
+          <input class="cp-input-full" id="nl-label" placeholder="e.g. User Ali">
+          <div class="cp-mini-row">
+            <input class="cp-input-full" id="nl-note" placeholder="Note (optional)">
+          </div>
+        </div>
+        <div class="cp-block">
+          <div class="cp-block-label"><i class="ti ti-folders"></i> <span data-lang="sub_group_expiry">Sub Group & Expiry</span></div>
+          <select class="cp-input-full fs" id="nl-sub"><option value="">— <span data-lang="no_group">No Group</span> —</option></select>
+          <div class="cp-mini-row">
+            <input class="cp-input-full" id="nl-exp" type="number" min="0" step="1" placeholder="Expiry (days) · 0 = unlimited">
+          </div>
+          <div class="chip-row" id="exp-chips">
+            <span class="chip" onclick="setExpiry(0,this)" data-lang="unlimited">Unlimited</span>
+            <span class="chip" onclick="setExpiry(7,this)">7 <span data-lang="days">Days</span></span>
+            <span class="chip active" onclick="setExpiry(30,this)">30 <span data-lang="days">Days</span></span>
+            <span class="chip" onclick="setExpiry(90,this)">90 <span data-lang="days">Days</span></span>
+          </div>
+        </div>
+      </div>
+      <div class="cp-block mb16">
+        <div class="cp-block-label"><i class="ti ti-gauge"></i> <span data-lang="traffic_quota">Traffic Quota</span></div>
+        <div class="cp-quota-inputs">
+          <input class="cp-input-full" id="nl-val" type="number" min="0" step="0.1" placeholder="0 = unlimited">
+          <select class="cp-input-full fs" id="nl-unit"><option value="GB">GB</option><option value="MB" selected>MB</option></select>
+        </div>
+        <div class="chip-row" id="quota-chips">
+          <span class="chip" onclick="setQuota(0,'GB',this)" data-lang="unlimited">Unlimited</span>
+          <span class="chip" onclick="setQuota(500,'MB',this)">500 MB</span>
+          <span class="chip active" onclick="setQuota(1,'GB',this)">1 GB</span>
+          <span class="chip" onclick="setQuota(5,'GB',this)">5 GB</span>
+          <span class="chip" onclick="setQuota(10,'GB',this)">10 GB</span>
+          <span class="chip" onclick="setQuota(50,'GB',this)">50 GB</span>
+        </div>
+      </div>
+      <div class="cp-block mb16">
+        <div class="cp-block-label"><i class="ti ti-plug-connected"></i> <span data-lang="transport_protocols">Transport Protocols</span></div>
+        <div class="proto-group" id="proto-group">
+          <button class="proto-btn active" data-proto="vless-ws" onclick="toggleProtoBtn(this)">VLESS / WS <span class="proto-badge">WebSocket</span></button>
+          <button class="proto-btn" data-proto="xhttp-packet-up" onclick="toggleProtoBtn(this)">XHTTP · packet-up <span class="proto-badge">Siz10</span></button>
+          <button class="proto-btn" data-proto="xhttp-stream-up" onclick="toggleProtoBtn(this)">XHTTP · stream-up <span class="proto-badge">Siz10</span></button>
+        </div>
+        <div style="margin-top:12px;display:flex;align-items:center;gap:10px;padding:8px 12px;background:var(--accent-d);border-radius:10px;border:1px solid var(--card-b)">
+          <span style="font-size:12px;font-weight:700;color:var(--t2)"><i class="ti ti-layers-intersect"></i> <span data-lang="bulk_count">Bulk Count</span></span>
+          <div class="count-chips">
+            <span class="count-chip active" onclick="setCount(1,this)">1</span>
+            <span class="count-chip" onclick="setCount(5,this)">5</span>
+            <span class="count-chip" onclick="setCount(10,this)">10</span>
+            <span class="count-chip" onclick="setCount(50,this)">50</span>
+          </div>
+        </div>
+      </div>
+      <div class="cp-footer">
+        <div class="cp-footer-note"><i class="ti ti-info-circle"></i> <span data-lang="uuid_note">UUID is generated randomly · Only registered UUIDs can connect · Protocol cannot be changed after creation.</span></div>
+        <button class="cp-submit-btn" onclick="createLink()"><i class="ti ti-link-plus"></i> <span data-lang="create_config">Create Config</span></button>
+      </div>
+    </div>
+  </div>
+  <div class="cfg-grid" id="links-grid"></div>
+  <div class="empty" id="links-empty" style="display:none"><i class="ti ti-link-off"></i><p data-lang="no_configs">No configs yet</p></div>
+</section>
 
-<section class="pg" id="pg-subgroups"><div class="topbar"><div><div class="tb-title"><i class="ti ti-folders"></i> <span data-lang="sub_groups_short">Sub Groups</span></div><div class="tb-sub" data-lang="each_group_public">Each group has its own public page with its configs</div></div><div class="tb-right"><span class="badge bg-purple" id="subs-pg-cnt">0 <span data-lang="groups">Groups</span></span><button class="btn btn-pur" onclick="openModal('modal-create-sub')"><i class="ti ti-folder-plus"></i> <span data-lang="new_group">New Group</span></button></div></div>
-<div class="subs-toolbar"><div class="subs-search"><i class="ti ti-search"></i><input type="text" id="subs-search-inp" placeholder="Search groups..." oninput="filterSubs(this.value)"></div></div>
-<div class="sub-grid" id="subs-grid"><div class="subs-empty-v2"><div class="subs-empty-v2-icon"><i class="ti ti-folders"></i></div><div class="subs-empty-v2-title" data-lang="no_groups">No groups yet</div><div class="subs-empty-v2-sub" data-lang="create_group">Create a new group to organize your configs</div></div></div></section>
+<!-- ===== SUB GROUPS PAGE ===== -->
+<section class="pg" id="pg-subgroups">
+  <div class="topbar">
+    <div><div class="tb-title"><i class="ti ti-folders"></i> <span data-lang="sub_groups_short">Sub Groups</span></div><div class="tb-sub" data-lang="each_group_public">Each group has its own public page with its configs</div></div>
+    <div class="tb-right">
+      <span class="badge bg-purple" id="subs-pg-cnt">0 <span data-lang="groups">Groups</span></span>
+      <button class="btn btn-pur" onclick="openModal('modal-create-sub')"><i class="ti ti-folder-plus"></i> <span data-lang="new_group">New Group</span></button>
+    </div>
+  </div>
+  <div class="subs-toolbar">
+    <div class="subs-search">
+      <i class="ti ti-search"></i>
+      <input type="text" id="subs-search-inp" placeholder="Search groups..." oninput="filterSubs(this.value)">
+    </div>
+  </div>
+  <div class="sub-grid" id="subs-grid">
+    <div class="subs-empty-v2"><div class="subs-empty-v2-icon"><i class="ti ti-folders"></i></div><div class="subs-empty-v2-title" data-lang="no_groups">No groups yet</div><div class="subs-empty-v2-sub" data-lang="create_group">Create a new group to organize your configs</div></div>
+  </div>
+</section>
 
-<section class="pg" id="pg-subscriptions"><div class="topbar"><div><div class="tb-title"><i class="ti ti-rss"></i> <span data-lang="subscription">Subscription</span></div><div class="tb-sub" data-lang="subscription_links">Subscription links for v2ray apps</div></div></div>
-<div class="g2"><div class="card"><div class="card-title"><i class="ti ti-rss"></i> <span data-lang="single_sub">Single Subscription (per config)</span></div><p style="font-size:11.5px;color:var(--t3);line-height:1.8;margin-bottom:12px"><span data-lang="single_sub_desc">Each config has its own subscription URL. Click the</span> <i class="ti ti-rss"></i> <span data-lang="icon_on_card">icon on the config card.</span></p></div>
-<div class="card"><div class="card-title"><i class="ti ti-database"></i> <span data-lang="full_sub">Full Subscription (Admin)</span></div><p style="font-size:11.5px;color:var(--t3);line-height:1.8;margin-bottom:4px" data-lang="full_sub_desc">Includes all active configs.</p><div class="sub-box"><span class="sub-url" id="sub-all-url">Loading...</span><div style="display:flex;gap:6px"><button class="btn btn-sm btn-g" onclick="cpSubAll()"><i class="ti ti-copy"></i></button><button class="btn btn-sm btn-g" onclick="window.open(location.protocol+'//'+location.host+'/sub-all')"><i class="ti ti-external-link"></i></button></div></div><div class="cl amber" style="margin-top:11px"><i class="ti ti-alert-triangle"></i><span data-lang="full_sub_note">This URL only works in the browser where you're logged in (requires session cookie).</span></div></div></div>
-<div class="card"><div class="card-title"><i class="ti ti-folders"></i> <span data-lang="group_sub_links">Group Subscription Links</span></div><div id="sub-groups-list" data-lang="loading">Loading...</div></div></section>
+<!-- ===== SUBSCRIPTIONS PAGE ===== -->
+<section class="pg" id="pg-subscriptions">
+  <div class="topbar"><div><div class="tb-title"><i class="ti ti-rss"></i> <span data-lang="subscription">Subscription</span></div><div class="tb-sub" data-lang="subscription_links">Subscription links for v2ray apps</div></div></div>
+  <div class="g2">
+    <div class="card">
+      <div class="card-title"><i class="ti ti-rss"></i> <span data-lang="single_sub">Single Subscription (per config)</span></div>
+      <p style="font-size:11.5px;color:var(--t3);line-height:1.8;margin-bottom:12px"><span data-lang="single_sub_desc">Each config has its own subscription URL. Click the</span> <i class="ti ti-rss"></i> <span data-lang="icon_on_card">icon on the config card.</span></p>
+    </div>
+    <div class="card">
+      <div class="card-title"><i class="ti ti-database"></i> <span data-lang="full_sub">Full Subscription (Admin)</span></div>
+      <p style="font-size:11.5px;color:var(--t3);line-height:1.8;margin-bottom:4px" data-lang="full_sub_desc">Includes all active configs.</p>
+      <div class="sub-box"><span class="sub-url" id="sub-all-url">Loading...</span><div style="display:flex;gap:6px"><button class="btn btn-sm btn-g" onclick="cpSubAll()"><i class="ti ti-copy"></i></button><button class="btn btn-sm btn-g" onclick="window.open(location.protocol+'//'+location.host+'/sub-all')"><i class="ti ti-external-link"></i></button></div></div>
+      <div class="cl amber" style="margin-top:11px"><i class="ti ti-alert-triangle"></i><span data-lang="full_sub_note">This URL only works in the browser where you're logged in (requires session cookie).</span></div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-title"><i class="ti ti-folders"></i> <span data-lang="group_sub_links">Group Subscription Links</span></div>
+    <div id="sub-groups-list" data-lang="loading">Loading...</div>
+  </div>
+</section>
 
-<section class="pg" id="pg-traffic"><div class="topbar"><div><div class="tb-title"><i class="ti ti-chart-area"></i> <span data-lang="traffic">Traffic</span></div><div class="tb-sub" data-lang="traffic_analysis">Bandwidth usage analysis & monitoring</div></div><div class="tb-right"><button class="btn btn-p btn-sm" onclick="refreshAll()"><i class="ti ti-refresh"></i> <span data-lang="refresh">Refresh</span></button></div></div>
-<div class="traf-hero"><div class="traf-main-stat"><div class="traf-main-label"><i class="ti ti-database"></i> <span data-lang="total_traffic_used">Total Traffic Used</span></div><div class="traf-main-val" id="t-traffic">—<span>MB</span></div><div class="traf-trend up" id="t-trend"><i class="ti ti-trending-up"></i> <span id="t-trend-val">—</span></div></div>
-<div class="traf-mini"><div class="traf-mini-top"><div class="traf-mini-icon"><i class="ti ti-arrow-up-right"></i></div><span class="traf-mini-label" data-lang="hourly_average">Hourly Average</span></div><div><div class="traf-mini-val" id="t-avg">—</div><div class="traf-mini-sub">MB <span data-lang="per_hour">/h</span></div></div></div>
-<div class="traf-mini"><div class="traf-mini-top"><div class="traf-mini-icon pk"><i class="ti ti-chart-bar"></i></div><span class="traf-mini-label" data-lang="peak_usage">Peak Usage</span></div><div><div class="traf-mini-val" id="t-peak">—</div><div class="traf-mini-sub" id="t-peak-time" data-lang="peak_hour">Peak Hour</div></div></div>
-<div class="traf-mini"><div class="traf-mini-top"><div class="traf-mini-icon lo"><i class="ti ti-clock-hour-4"></i></div><span class="traf-mini-label" data-lang="lowest_usage">Lowest Usage</span></div><div><div class="traf-mini-val" id="t-low">—</div><div class="traf-mini-sub">MB <span data-lang="per_hour">/h</span></div></div></div></div>
-<div class="traf-chart-card"><div class="traf-chart-head"><div><div class="traf-chart-title"><i class="ti ti-activity"></i> <span data-lang="traffic_trend">Traffic Usage Trend</span></div><div class="traf-chart-sub" data-lang="based_on_mb">Based on MB per hour</div></div><div class="traf-legend"><div class="traf-legend-item"><span class="traf-legend-dot" style="background:var(--accent)"></span> <span data-lang="usage">Usage</span></div><div class="traf-legend-item"><span class="traf-legend-dot" style="background:var(--amber)"></span> <span data-lang="average">Average</span></div></div></div><div class="traf-chart-body"><canvas id="ch3"></canvas></div></div></section>
+<!-- ===== TRAFFIC PAGE ===== -->
+<section class="pg" id="pg-traffic">
+  <div class="topbar">
+    <div><div class="tb-title"><i class="ti ti-chart-area"></i> <span data-lang="traffic">Traffic</span></div><div class="tb-sub" data-lang="traffic_analysis">Bandwidth usage analysis & monitoring</div></div>
+    <div class="tb-right"><button class="btn btn-p btn-sm" onclick="refreshAll()"><i class="ti ti-refresh"></i> <span data-lang="refresh">Refresh</span></button></div>
+  </div>
+  <div class="traf-hero">
+    <div class="traf-main-stat">
+      <div class="traf-main-label"><i class="ti ti-database"></i> <span data-lang="total_traffic_used">Total Traffic Used</span></div>
+      <div class="traf-main-val" id="t-traffic">—<span>MB</span></div>
+      <div class="traf-trend up" id="t-trend"><i class="ti ti-trending-up"></i> <span id="t-trend-val">—</span></div>
+    </div>
+    <div class="traf-mini">
+      <div class="traf-mini-top"><div class="traf-mini-icon"><i class="ti ti-arrow-up-right"></i></div><span class="traf-mini-label" data-lang="hourly_average">Hourly Average</span></div>
+      <div><div class="traf-mini-val" id="t-avg">—</div><div class="traf-mini-sub">MB <span data-lang="per_hour">/h</span></div></div>
+    </div>
+    <div class="traf-mini">
+      <div class="traf-mini-top"><div class="traf-mini-icon pk"><i class="ti ti-chart-bar"></i></div><span class="traf-mini-label" data-lang="peak_usage">Peak Usage</span></div>
+      <div><div class="traf-mini-val" id="t-peak">—</div><div class="traf-mini-sub" id="t-peak-time" data-lang="peak_hour">Peak Hour</div></div>
+    </div>
+    <div class="traf-mini">
+      <div class="traf-mini-top"><div class="traf-mini-icon lo"><i class="ti ti-clock-hour-4"></i></div><span class="traf-mini-label" data-lang="lowest_usage">Lowest Usage</span></div>
+      <div><div class="traf-mini-val" id="t-low">—</div><div class="traf-mini-sub">MB <span data-lang="per_hour">/h</span></div></div>
+    </div>
+  </div>
+  <div class="traf-chart-card">
+    <div class="traf-chart-head">
+      <div>
+        <div class="traf-chart-title"><i class="ti ti-activity"></i> <span data-lang="traffic_trend">Traffic Usage Trend</span></div>
+        <div class="traf-chart-sub" data-lang="based_on_mb">Based on MB per hour</div>
+      </div>
+      <div class="traf-legend">
+        <div class="traf-legend-item"><span class="traf-legend-dot" style="background:var(--accent)"></span> <span data-lang="usage">Usage</span></div>
+        <div class="traf-legend-item"><span class="traf-legend-dot" style="background:var(--amber)"></span> <span data-lang="average">Average</span></div>
+      </div>
+    </div>
+    <div class="traf-chart-body"><canvas id="ch3"></canvas></div>
+  </div>
+</section>
 
-<section class="pg" id="pg-connections"><div class="topbar"><div><div class="tb-title"><i class="ti ti-plug-connected"></i> <span data-lang="connections">Connections</span></div><div class="tb-sub" data-lang="connections_monitor">Live IP and traffic monitoring per connection</div></div><div class="tb-right"><span class="badge bg-green" id="conns-live">—</span><button class="btn btn-p btn-sm" onclick="refreshAll()"><i class="ti ti-refresh"></i> <span data-lang="refresh">Refresh</span></button></div></div>
-<div class="conn-hero"><div class="conn-hero-tile"><div class="conn-hero-icon"><i class="ti ti-plug-connected"></i></div><div class="conn-hero-label" data-lang="live_connections">Live Connections</div><div class="conn-hero-val" id="ch-count">—</div></div>
-<div class="conn-hero-tile"><div class="conn-hero-icon"><i class="ti ti-transfer"></i></div><div class="conn-hero-label" data-lang="total_traffic_live">Total Traffic</div><div class="conn-hero-val" id="ch-traffic">—</div></div>
-<div class="conn-hero-tile"><div class="conn-hero-icon"><i class="ti ti-clock"></i></div><div class="conn-hero-label" data-lang="avg_duration">Avg Duration</div><div class="conn-hero-val" id="ch-avgdur">—</div></div>
-<div class="conn-hero-tile"><div class="conn-hero-icon"><i class="ti ti-map-pin"></i></div><div class="conn-hero-label" data-lang="unique_ips">Unique IPs</div><div class="conn-hero-val" id="ch-uniq">—</div></div></div>
-<div class="conn-toolbar"><div class="conn-toolbar-title"><i class="ti ti-list-details"></i> <span data-lang="connections_list">Connections List</span></div><div class="conn-live-badge"><span class="conn-live-dot"></span> <span data-lang="auto_update">Auto-update every 5s</span></div></div>
-<div class="conn-grid-v2" id="conns-grid"></div><div class="conn-empty-v2" id="conns-empty" style="display:none"><div class="conn-empty-v2-icon"><i class="ti ti-plug-off"></i></div><div class="conn-empty-v2-title" data-lang="no_active_connections">No active connections</div><div class="conn-empty-v2-sub" data-lang="will_appear">They will appear here as soon as clients connect</div></div></section>
+<!-- ===== CONNECTIONS PAGE ===== -->
+<section class="pg" id="pg-connections">
+  <div class="topbar">
+    <div><div class="tb-title"><i class="ti ti-plug-connected"></i> <span data-lang="connections">Connections</span></div><div class="tb-sub" data-lang="connections_monitor">Live IP and traffic monitoring per connection</div></div>
+    <div class="tb-right"><span class="badge bg-green" id="conns-live">—</span><button class="btn btn-p btn-sm" onclick="refreshAll()"><i class="ti ti-refresh"></i> <span data-lang="refresh">Refresh</span></button></div>
+  </div>
+  <div class="conn-hero">
+    <div class="conn-hero-tile"><div class="conn-hero-icon"><i class="ti ti-plug-connected"></i></div><div class="conn-hero-label" data-lang="live_connections">Live Connections</div><div class="conn-hero-val" id="ch-count">—</div></div>
+    <div class="conn-hero-tile"><div class="conn-hero-icon"><i class="ti ti-transfer"></i></div><div class="conn-hero-label" data-lang="total_traffic_live">Total Traffic</div><div class="conn-hero-val" id="ch-traffic">—</div></div>
+    <div class="conn-hero-tile"><div class="conn-hero-icon"><i class="ti ti-clock"></i></div><div class="conn-hero-label" data-lang="avg_duration">Avg Duration</div><div class="conn-hero-val" id="ch-avgdur">—</div></div>
+    <div class="conn-hero-tile"><div class="conn-hero-icon"><i class="ti ti-map-pin"></i></div><div class="conn-hero-label" data-lang="unique_ips">Unique IPs</div><div class="conn-hero-val" id="ch-uniq">—</div></div>
+  </div>
+  <div class="conn-toolbar">
+    <div class="conn-toolbar-title"><i class="ti ti-list-details"></i> <span data-lang="connections_list">Connections List</span></div>
+    <div class="conn-live-badge"><span class="conn-live-dot"></span> <span data-lang="auto_update">Auto-update every 5s</span></div>
+  </div>
+  <div class="conn-grid-v2" id="conns-grid"></div>
+  <div class="conn-empty-v2" id="conns-empty" style="display:none">
+    <div class="conn-empty-v2-icon"><i class="ti ti-plug-off"></i></div>
+    <div class="conn-empty-v2-title" data-lang="no_active_connections">No active connections</div>
+    <div class="conn-empty-v2-sub" data-lang="will_appear">They will appear here as soon as clients connect</div>
+  </div>
+</section>
 
-<section class="pg" id="pg-alerts"><div class="topbar"><div><div class="tb-title"><i class="ti ti-bell"></i> <span data-lang="smart_alerts">Smart Alerts</span></div><div class="tb-sub" data-lang="alerts_sub">Important events & notifications</div></div><div class="tb-right"><span class="badge bg-red" id="alerts-count-badge">0</span><button class="btn btn-p btn-sm" onclick="loadAlerts()"><i class="ti ti-refresh"></i> <span data-lang="refresh">Refresh</span></button></div></div>
-<div class="alerts-wrap"><div class="alerts-filters"><button class="btn active" data-filter="all" onclick="filterAlerts('all',this)"><span data-lang="filter_all">All</span></button><button class="btn" data-filter="critical" onclick="filterAlerts('critical',this)"><span data-lang="filter_critical">Critical</span></button><button class="btn" data-filter="warning" onclick="filterAlerts('warning',this)"><span data-lang="filter_warning">Warning</span></button><button class="btn" data-filter="info" onclick="filterAlerts('info',this)"><span data-lang="filter_info">Info</span></button></div><div id="alerts-list"></div></div></section>
+<!-- ===== ALERTS PAGE ===== -->
+<section class="pg" id="pg-alerts">
+  <div class="topbar">
+    <div><div class="tb-title"><i class="ti ti-bell"></i> <span data-lang="smart_alerts">Smart Alerts</span></div><div class="tb-sub" data-lang="alerts_sub">Important events & notifications</div></div>
+    <div class="tb-right"><span class="badge bg-red" id="alerts-count-badge">0</span><button class="btn btn-p btn-sm" onclick="loadAlerts()"><i class="ti ti-refresh"></i> <span data-lang="refresh">Refresh</span></button></div>
+  </div>
+  <div class="alerts-wrap">
+    <div class="alerts-filters">
+      <button class="btn active" data-filter="all" onclick="filterAlerts('all',this)"><span data-lang="filter_all">All</span></button>
+      <button class="btn" data-filter="critical" onclick="filterAlerts('critical',this)"><span data-lang="filter_critical">Critical</span></button>
+      <button class="btn" data-filter="warning" onclick="filterAlerts('warning',this)"><span data-lang="filter_warning">Warning</span></button>
+      <button class="btn" data-filter="info" onclick="filterAlerts('info',this)"><span data-lang="filter_info">Info</span></button>
+    </div>
+    <div id="alerts-list"></div>
+  </div>
+</section>
 
-<section class="pg" id="pg-security"><div class="topbar"><div><div class="tb-title"><i class="ti ti-shield-lock"></i> <span data-lang="security">Security</span></div></div></div>
-<div class="g2"><div class="card"><div class="card-title"><i class="ti ti-lock"></i> <span data-lang="encryption">Encryption</span></div><div class="sr"><span class="sr-k"><i class="ti ti-certificate"></i> TLS/HTTPS</span><span class="sr-v" style="color:var(--green-t)">● <span data-lang="active">Active</span> (443)</span></div><div class="sr"><span class="sr-k"><i class="ti ti-fingerprint"></i> Fingerprint</span><span class="sr-v">Chrome Spoof</span></div><div class="sr"><span class="sr-k"><i class="ti ti-network"></i> <span data-lang="protocols">Protocols</span></span><span class="sr-v">VLESS/WS + XHTTP Ultra</span></div><div class="sr"><span class="sr-k"><i class="ti ti-key"></i> <span data-lang="hash">Hash</span></span><span class="sr-v">SHA-256+Salt</span></div><div class="sr"><span class="sr-k"><i class="ti ti-cookie"></i> <span data-lang="session">Session</span></span><span class="sr-v">HttpOnly · 7 <span data-lang="days">Days</span></span></div></div>
-<div class="card"><div class="card-title"><i class="ti ti-shield-check"></i> <span data-lang="access_control">Access Control</span></div><div class="sr"><span class="sr-k"><i class="ti ti-id-badge"></i> UUID Auth</span><span class="sr-v" style="color:var(--green-t)">● <span data-lang="active">Active</span></span></div><div class="sr"><span class="sr-k"><i class="ti ti-toggle-right"></i> <span data-lang="active_inactive">Active/Inactive</span></span><span class="sr-v" style="color:var(--green-t)">● <span data-lang="active">Active</span></span></div><div class="sr"><span class="sr-k"><i class="ti ti-gauge"></i> <span data-lang="traffic_quota">Traffic Quota</span></span><span class="sr-v" style="color:var(--green-t)">● <span data-lang="active">Active</span></span></div><div class="sr"><span class="sr-k"><i class="ti ti-calendar-x"></i> <span data-lang="expiry_date">Expiry Date</span></span><span class="sr-v" style="color:var(--green-t)">● <span data-lang="active">Active</span></span></div><div class="sr"><span class="sr-k"><i class="ti ti-lock"></i> <span data-lang="public_page_pw">Public Page Password</span></span><span class="sr-v" style="color:var(--green-t)">● <span data-lang="optional">Optional</span></span></div></div></div></section>
+<!-- ===== SECURITY PAGE ===== -->
+<section class="pg" id="pg-security">
+  <div class="topbar"><div><div class="tb-title"><i class="ti ti-shield-lock"></i> <span data-lang="security">Security</span></div></div></div>
+  <div class="g2">
+    <div class="card"><div class="card-title"><i class="ti ti-lock"></i> <span data-lang="encryption">Encryption</span></div>
+      <div class="sr"><span class="sr-k"><i class="ti ti-certificate"></i> TLS/HTTPS</span><span class="sr-v" style="color:var(--green-t)">● <span data-lang="active">Active</span> (443)</span></div>
+      <div class="sr"><span class="sr-k"><i class="ti ti-fingerprint"></i> Fingerprint</span><span class="sr-v">Chrome Spoof</span></div>
+      <div class="sr"><span class="sr-k"><i class="ti ti-network"></i> <span data-lang="protocols">Protocols</span></span><span class="sr-v">VLESS/WS + XHTTP Ultra</span></div>
+      <div class="sr"><span class="sr-k"><i class="ti ti-key"></i> <span data-lang="hash">Hash</span></span><span class="sr-v">SHA-256+Salt</span></div>
+      <div class="sr"><span class="sr-k"><i class="ti ti-cookie"></i> <span data-lang="session">Session</span></span><span class="sr-v">HttpOnly · 7 <span data-lang="days">Days</span></span></div>
+    </div>
+    <div class="card"><div class="card-title"><i class="ti ti-shield-check"></i> <span data-lang="access_control">Access Control</span></div>
+      <div class="sr"><span class="sr-k"><i class="ti ti-id-badge"></i> UUID Auth</span><span class="sr-v" style="color:var(--green-t)">● <span data-lang="active">Active</span></span></div>
+      <div class="sr"><span class="sr-k"><i class="ti ti-toggle-right"></i> <span data-lang="active_inactive">Active/Inactive</span></span><span class="sr-v" style="color:var(--green-t)">● <span data-lang="active">Active</span></span></div>
+      <div class="sr"><span class="sr-k"><i class="ti ti-gauge"></i> <span data-lang="traffic_quota">Traffic Quota</span></span><span class="sr-v" style="color:var(--green-t)">● <span data-lang="active">Active</span></span></div>
+      <div class="sr"><span class="sr-k"><i class="ti ti-calendar-x"></i> <span data-lang="expiry_date">Expiry Date</span></span><span class="sr-v" style="color:var(--green-t)">● <span data-lang="active">Active</span></span></div>
+      <div class="sr"><span class="sr-k"><i class="ti ti-lock"></i> <span data-lang="public_page_pw">Public Page Password</span></span><span class="sr-v" style="color:var(--green-t)">● <span data-lang="optional">Optional</span></span></div>
+    </div>
+  </div>
+</section>
 
-<section class="pg" id="pg-logs"><div class="topbar"><div><div class="tb-title"><i class="ti ti-history"></i> <span data-lang="activity_logs">Activity Logs</span></div><div class="tb-sub" data-lang="activity_logs_full">Complete event history</div></div><div class="tb-right"><button class="btn btn-p btn-sm" onclick="loadActivity()"><i class="ti ti-refresh"></i></button></div></div><div class="card"><div class="log-timeline" id="logs-list">—</div><div class="empty" id="logs-empty" style="display:none"><i class="ti ti-history-toggle"></i><p data-lang="no_logs">No logs yet</p></div></div></section>
+<!-- ===== ACTIVITY LOGS PAGE ===== -->
+<section class="pg" id="pg-logs">
+  <div class="topbar"><div><div class="tb-title"><i class="ti ti-history"></i> <span data-lang="activity_logs">Activity Logs</span></div><div class="tb-sub" data-lang="activity_logs_full">Complete event history</div></div><div class="tb-right"><button class="btn btn-p btn-sm" onclick="loadActivity()"><i class="ti ti-refresh"></i></button></div></div>
+  <div class="card"><div class="log-timeline" id="logs-list">—</div><div class="empty" id="logs-empty" style="display:none"><i class="ti ti-history-toggle"></i><p data-lang="no_logs">No logs yet</p></div></div>
+</section>
 
-<section class="pg" id="pg-errors"><div class="topbar"><div><div class="tb-title"><i class="ti ti-alert-triangle"></i> <span data-lang="errors">Errors</span></div></div><div class="tb-right"><span class="badge bg-red" id="errs-badge">0</span><button class="btn btn-p btn-sm" onclick="refreshAll()"><i class="ti ti-refresh"></i></button></div></div><div class="card"><div class="card-title"><i class="ti ti-bug"></i> <span data-lang="error_logs">Error Logs</span></div><div id="errs-full">—</div></div></section>
+<!-- ===== ERRORS PAGE ===== -->
+<section class="pg" id="pg-errors">
+  <div class="topbar"><div><div class="tb-title"><i class="ti ti-alert-triangle"></i> <span data-lang="errors">Errors</span></div></div><div class="tb-right"><span class="badge bg-red" id="errs-badge">0</span><button class="btn btn-p btn-sm" onclick="refreshAll()"><i class="ti ti-refresh"></i></button></div></div>
+  <div class="card"><div class="card-title"><i class="ti ti-bug"></i> <span data-lang="error_logs">Error Logs</span></div><div id="errs-full">—</div></div>
+</section>
 
-<section class="pg" id="pg-testws"><div class="topbar"><div><div class="tb-title"><i class="ti ti-wifi"></i> <span data-lang="websocket_test">WebSocket Test</span></div></div></div>
-<div class="card" style="max-width:660px"><div class="cl amber" style="margin-top:0;margin-bottom:12px"><i class="ti ti-alert-triangle"></i><span data-lang="ws_note">Only registered and active UUIDs can connect.</span></div>
-<div class="form-row" style="margin-bottom:12px"><div class="fg" style="flex:1"><label>UUID</label><input class="fi" id="ws-uuid" placeholder="Active config UUID" style="width:100%"></div><button class="btn btn-p" onclick="wsConn()"><i class="ti ti-plug-connected"></i> <span data-lang="connect">Connect</span></button><button class="btn btn-d" onclick="wsDisc()"><i class="ti ti-plug-x"></i> <span data-lang="disconnect">Disconnect</span></button></div>
-<div class="form-row" style="margin-bottom:12px"><input class="fi" id="ws-msg" placeholder="Test message..." style="flex:1"><button class="btn btn-o" onclick="wsSend()"><i class="ti ti-send"></i> <span data-lang="send">Send</span></button></div>
-<div style="background:rgba(0,0,0,.3);border:1px solid var(--card-b);border-radius:10px;padding:14px;height:250px;overflow-y:auto;font-family:ui-monospace,monospace;font-size:10.5px;line-height:1.9" id="ws-log"><p style="color:var(--t3)" data-lang="waiting_ws">Waiting for connection...</p></div></div></section>
+<!-- ===== WEBSOCKET TEST PAGE ===== -->
+<section class="pg" id="pg-testws">
+  <div class="topbar"><div><div class="tb-title"><i class="ti ti-wifi"></i> <span data-lang="websocket_test">WebSocket Test</span></div></div></div>
+  <div class="card" style="max-width:660px">
+    <div class="cl amber" style="margin-top:0;margin-bottom:12px"><i class="ti ti-alert-triangle"></i><span data-lang="ws_note">Only registered and active UUIDs can connect.</span></div>
+    <div class="form-row" style="margin-bottom:12px">
+      <div class="fg" style="flex:1"><label>UUID</label><input class="fi" id="ws-uuid" placeholder="Active config UUID" style="width:100%"></div>
+      <button class="btn btn-p" onclick="wsConn()"><i class="ti ti-plug-connected"></i> <span data-lang="connect">Connect</span></button>
+      <button class="btn btn-d" onclick="wsDisc()"><i class="ti ti-plug-x"></i> <span data-lang="disconnect">Disconnect</span></button>
+    </div>
+    <div class="form-row" style="margin-bottom:12px">
+      <input class="fi" id="ws-msg" placeholder="Test message..." style="flex:1">
+      <button class="btn btn-o" onclick="wsSend()"><i class="ti ti-send"></i> <span data-lang="send">Send</span></button>
+    </div>
+    <div style="background:rgba(0,0,0,.3);border:1px solid var(--card-b);border-radius:10px;padding:14px;height:250px;overflow-y:auto;font-family:ui-monospace,monospace;font-size:10.5px;line-height:1.9" id="ws-log">
+      <p style="color:var(--t3)" data-lang="waiting_ws">Waiting for connection...</p>
+    </div>
+  </div>
+</section>
 
-<section class="pg" id="pg-settings"><div class="topbar"><div><div class="tb-title"><i class="ti ti-settings"></i> <span data-lang="settings">Settings</span></div><div class="tb-sub" data-lang="system_settings">System configuration</div></div><div class="tb-right"><span class="badge bg-blue">v1.0.0</span></div></div>
-<div class="g2"><div class="card"><div class="card-title"><i class="ti ti-palette"></i> <span data-lang="theme_settings">Theme Settings</span></div><div style="display:flex;flex-direction:column;gap:12px"><div><label style="font-size:10.5px;color:var(--t3);font-weight:700;text-transform:uppercase;letter-spacing:.06em;display:block;margin-bottom:6px" data-lang="dark_theme">Dark Theme</label><div style="display:flex;gap:10px;flex-wrap:wrap" id="dark-themes"><button class="btn btn-p theme-btn-select" data-theme="dark-blue" style="background:#1677ff;color:#fff;box-shadow:0 2px 8px rgba(22,119,255,0.4)" onclick="setTheme('dark-blue')"><i class="ti ti-circle"></i> <span data-lang="blue">Blue</span></button><button class="btn btn-p theme-btn-select" data-theme="dark-red" style="background:#ef4444;color:#fff;box-shadow:0 2px 8px rgba(239,68,68,0.4)" onclick="setTheme('dark-red')"><i class="ti ti-circle"></i> <span data-lang="red">Red</span></button><button class="btn btn-p theme-btn-select" data-theme="dark-yellow" style="background:#f59e0b;color:#000;box-shadow:0 2px 8px rgba(245,158,11,0.4)" onclick="setTheme('dark-yellow')"><i class="ti ti-circle"></i> <span data-lang="yellow">Yellow</span></button><button class="btn btn-p theme-btn-select" data-theme="dark-prestige" style="background:linear-gradient(135deg,#1a7aff,#4d94ff);color:#fff;box-shadow:0 2px 8px rgba(26,122,255,0.4)" onclick="setTheme('dark-prestige')"><i class="ti ti-circle"></i> <span data-lang="prestige_theme">Prestige</span></button></div></div><div><label style="font-size:10.5px;color:var(--t3);font-weight:700;text-transform:uppercase;letter-spacing:.06em;display:block;margin-bottom:6px" data-lang="light_theme">Light Theme</label><div style="display:flex;gap:10px;flex-wrap:wrap" id="light-themes"><button class="btn btn-p theme-btn-select" data-theme="light-blue" style="background:#1677ff;color:#fff;box-shadow:0 2px 8px rgba(22,119,255,0.3)" onclick="setTheme('light-blue')"><i class="ti ti-circle"></i> <span data-lang="blue">Blue</span></button><button class="btn btn-p theme-btn-select" data-theme="light-red" style="background:#ef4444;color:#fff;box-shadow:0 2px 8px rgba(239,68,68,0.3)" onclick="setTheme('light-red')"><i class="ti ti-circle"></i> <span data-lang="red">Red</span></button><button class="btn btn-p theme-btn-select" data-theme="light-yellow" style="background:#f59e0b;color:#000;box-shadow:0 2px 8px rgba(245,158,11,0.3)" onclick="setTheme('light-yellow')"><i class="ti ti-circle"></i> <span data-lang="yellow">Yellow</span></button></div></div><div class="cl"><i class="ti ti-info-circle"></i><span data-lang="current_theme">Current Theme</span>: <strong id="current-theme-display">dark-prestige</strong></div></div></div>
-<div class="card"><div class="card-title"><i class="ti ti-language"></i> <span data-lang="language_settings">Language Settings</span></div><div style="display:flex;gap:10px;flex-wrap:wrap" id="lang-buttons"><button class="btn-lang" data-lang-code="en" onclick="setLanguage('en')">English</button><button class="btn-lang" data-lang-code="fa" onclick="setLanguage('fa')">فارسی</button></div><div class="cl" style="margin-top:12px"><i class="ti ti-info-circle"></i><span data-lang="lang_note">Default language is English. Page will refresh after change.</span></div></div>
-<div class="card"><div class="card-title"><i class="ti ti-server-2"></i> <span data-lang="server_link_settings">Server & Link Settings</span></div><div style="display:flex;flex-direction:column;gap:12px"><div class="fg"><label data-lang="server_name">Server Name</label><input class="fi" id="server-name-input" placeholder="e.g. CBeeNet" style="width:100%"></div><div class="fg"><label data-lang="server_prefix">Link Prefix</label><input class="fi" id="server-prefix-input" placeholder="e.g. MyServer" style="width:100%"></div><div class="fg"><label data-lang="link_template">Link Name Template</label><input class="fi" id="link-name-template" placeholder="e.g. {server}-{label}" style="width:100%"><div style="font-size:9.5px;color:var(--t3);margin-top:4px;display:flex;flex-wrap:wrap;gap:6px"><span style="background:var(--accent-d);padding:2px 8px;border-radius:4px">{server}</span><span style="background:var(--accent-d);padding:2px 8px;border-radius:4px">{prefix}</span><span style="background:var(--accent-d);padding:2px 8px;border-radius:4px">{label}</span><span style="background:var(--accent-d);padding:2px 8px;border-radius:4px">{protocol}</span></div></div><div class="cl"><i class="ti ti-info-circle"></i><span data-lang="template_note">If `{protocol}` is not in the template, the protocol will not be shown.</span></div><button class="btn btn-p" onclick="saveServerSettings()"><i class="ti ti-device-floppy"></i> <span data-lang="save_settings">Save Settings</span></button><div id="server-save-result" style="font-size:11px;color:var(--green-t);display:none">✓ <span data-lang="saved">Saved</span></div></div></div></div>
-<div class="g2" style="margin-top:16px"><div class="srv-panel"><div class="srv-hero"><div class="srv-hero-icon"><i class="ti ti-server-2"></i></div><div class="srv-hero-text"><div class="srv-hero-domain" id="set-host">—</div><div class="srv-hero-sub"><span class="dot dg pulse"></span> <span data-lang="online_status">Online</span> · Railway</div></div></div><div class="srv-tiles"><div class="srv-tile"><div class="srv-tile-icon"><i class="ti ti-route"></i></div><div class="srv-tile-text"><div class="srv-tile-label" data-lang="port">Port</div><div class="srv-tile-val">443 (TLS)</div></div></div><div class="srv-tile"><div class="srv-tile-icon"><i class="ti ti-versions"></i></div><div class="srv-tile-text"><div class="srv-tile-label" data-lang="version">Version</div><div class="srv-tile-val">v1.0.0</div></div></div><div class="srv-tile"><div class="srv-tile-icon"><i class="ti ti-brand-fastapi"></i></div><div class="srv-tile-text"><div class="srv-tile-label" data-lang="framework">Framework</div><div class="srv-tile-val">FastAPI + Uvicorn</div></div></div><div class="srv-tile"><div class="srv-tile-icon"><i class="ti ti-cloud"></i></div><div class="srv-tile-text"><div class="srv-tile-label" data-lang="platform">Platform</div><div class="srv-tile-val">Railway</div></div></div><div class="srv-tile" style="grid-column:1/-1"><div class="srv-tile-icon"><i class="ti ti-device-floppy"></i></div><div class="srv-tile-text"><div class="srv-tile-label" data-lang="storage">Storage</div><div class="srv-tile-val">JSON File (/data)</div></div></div></div></div>
-<div class="pw-panel"><div class="pw-hero"><div class="pw-hero-icon"><i class="ti ti-key"></i></div><div class="pw-hero-text"><div class="pw-hero-title" data-lang="change_password_title">Change Password</div><div class="pw-hero-sub" data-lang="change_password_sub">Choose a strong password and keep it safe</div></div></div>
-<div class="pw-body"><div class="pw-field"><label data-lang="current_pw">Current Password</label><input class="pw-input" type="password" id="cp-cur" placeholder="Current password"><button class="pw-eye" type="button" onclick="togglePwField('cp-cur',this)"><i class="ti ti-eye"></i></button></div>
-<div class="pw-field" style="margin-bottom:6px"><label data-lang="new_pw">New Password</label><input class="pw-input" type="password" id="cp-new" placeholder="Min 4 characters" oninput="checkPwStrength(this.value)"><button class="pw-eye" type="button" onclick="togglePwField('cp-new',this)"><i class="ti ti-eye"></i></button></div>
-<div class="pw-strength" id="pw-strength-bar"><div class="pw-strength-seg"></div><div class="pw-strength-seg"></div><div class="pw-strength-seg"></div><div class="pw-strength-seg"></div></div>
-<div class="pw-strength-label" id="pw-strength-label"><i class="ti ti-shield"></i> <span data-lang="password_strength">Password Strength</span></div>
-<div class="pw-reqs"><span class="pw-req" id="req-len"><i class="ti ti-circle-dashed"></i> <span data-lang="min_4_chars">At least 4 chars</span></span><span class="pw-req" id="req-num"><i class="ti ti-circle-dashed"></i> <span data-lang="contains_num">Contains number</span></span><span class="pw-req" id="req-case"><i class="ti ti-circle-dashed"></i> <span data-lang="contains_case_letters">Uppercase/Lowercase</span></span></div>
-<div class="pw-field" style="margin-bottom:18px"><label data-lang="confirm_pw">Confirm Password</label><input class="pw-input" type="password" id="cp-cf" placeholder="Confirm new password"><button class="pw-eye" type="button" onclick="togglePwField('cp-cf',this)"><i class="ti ti-eye"></i></button></div>
-<button class="pw-submit" onclick="changePw()"><i class="ti ti-shield-check"></i> <span data-lang="save_new_pw">Save New Password</span></button></div></div></div></section>
+<!-- ===== SETTINGS PAGE ===== -->
+<section class="pg" id="pg-settings">
+  <div class="topbar">
+    <div><div class="tb-title"><i class="ti ti-settings"></i> <span data-lang="settings">Settings</span></div><div class="tb-sub" data-lang="system_settings">System configuration</div></div>
+    <div class="tb-right"><span class="badge bg-blue">v1.0.0</span></div>
+  </div>
+  <div class="g2">
+    <div class="card">
+      <div class="card-title"><i class="ti ti-palette"></i> <span data-lang="theme_settings">Theme Settings</span></div>
+      <div style="display:flex;flex-direction:column;gap:12px">
+        <div>
+          <label style="font-size:10.5px;color:var(--t3);font-weight:700;text-transform:uppercase;letter-spacing:.06em;display:block;margin-bottom:6px" data-lang="dark_theme">Dark Theme</label>
+          <div style="display:flex;gap:10px;flex-wrap:wrap" id="dark-themes">
+            <button class="btn btn-p theme-btn-select" data-theme="dark-blue" style="background:#1677ff;color:#fff;box-shadow:0 2px 8px rgba(22,119,255,0.4)" onclick="setTheme('dark-blue')"><i class="ti ti-circle"></i> <span data-lang="blue">Blue</span></button>
+            <button class="btn btn-p theme-btn-select" data-theme="dark-red" style="background:#ef4444;color:#fff;box-shadow:0 2px 8px rgba(239,68,68,0.4)" onclick="setTheme('dark-red')"><i class="ti ti-circle"></i> <span data-lang="red">Red</span></button>
+            <button class="btn btn-p theme-btn-select" data-theme="dark-yellow" style="background:#f59e0b;color:#000;box-shadow:0 2px 8px rgba(245,158,11,0.4)" onclick="setTheme('dark-yellow')"><i class="ti ti-circle"></i> <span data-lang="yellow">Yellow</span></button>
+            <button class="btn btn-p theme-btn-select" data-theme="dark-prestige" style="background:linear-gradient(135deg,#1a7aff,#4d94ff);color:#fff;box-shadow:0 2px 8px rgba(26,122,255,0.4)" onclick="setTheme('dark-prestige')"><i class="ti ti-circle"></i> <span data-lang="prestige_theme">Prestige</span></button>
+          </div>
+        </div>
+        <div>
+          <label style="font-size:10.5px;color:var(--t3);font-weight:700;text-transform:uppercase;letter-spacing:.06em;display:block;margin-bottom:6px" data-lang="light_theme">Light Theme</label>
+          <div style="display:flex;gap:10px;flex-wrap:wrap" id="light-themes">
+            <button class="btn btn-p theme-btn-select" data-theme="light-blue" style="background:#1677ff;color:#fff;box-shadow:0 2px 8px rgba(22,119,255,0.3)" onclick="setTheme('light-blue')"><i class="ti ti-circle"></i> <span data-lang="blue">Blue</span></button>
+            <button class="btn btn-p theme-btn-select" data-theme="light-red" style="background:#ef4444;color:#fff;box-shadow:0 2px 8px rgba(239,68,68,0.3)" onclick="setTheme('light-red')"><i class="ti ti-circle"></i> <span data-lang="red">Red</span></button>
+            <button class="btn btn-p theme-btn-select" data-theme="light-yellow" style="background:#f59e0b;color:#000;box-shadow:0 2px 8px rgba(245,158,11,0.3)" onclick="setTheme('light-yellow')"><i class="ti ti-circle"></i> <span data-lang="yellow">Yellow</span></button>
+          </div>
+        </div>
+        <div class="cl"><i class="ti ti-info-circle"></i><span data-lang="current_theme">Current Theme</span>: <strong id="current-theme-display">dark-prestige</strong></div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title"><i class="ti ti-language"></i> <span data-lang="language_settings">Language Settings</span></div>
+      <div style="display:flex;gap:10px;flex-wrap:wrap" id="lang-buttons">
+        <button class="btn-lang" data-lang-code="en" onclick="setLanguage('en')">English</button>
+        <button class="btn-lang" data-lang-code="fa" onclick="setLanguage('fa')">فارسی</button>
+      </div>
+      <div class="cl" style="margin-top:12px"><i class="ti ti-info-circle"></i><span data-lang="lang_note">Default language is English. Page will refresh after change.</span></div>
+    </div>
+    <div class="card">
+      <div class="card-title"><i class="ti ti-server-2"></i> <span data-lang="server_link_settings">Server & Link Settings</span></div>
+      <div style="display:flex;flex-direction:column;gap:12px">
+        <div class="fg">
+          <label data-lang="server_name">Server Name</label>
+          <input class="fi" id="server-name-input" placeholder="e.g. CBeeNet" style="width:100%">
+        </div>
+        <div class="fg">
+          <label data-lang="server_prefix">Link Prefix</label>
+          <input class="fi" id="server-prefix-input" placeholder="e.g. MyServer" style="width:100%">
+        </div>
+        <div class="fg">
+          <label data-lang="link_template">Link Name Template</label>
+          <input class="fi" id="link-name-template" placeholder="e.g. {server}-{label}" style="width:100%">
+          <div style="font-size:9.5px;color:var(--t3);margin-top:4px;display:flex;flex-wrap:wrap;gap:6px">
+            <span style="background:var(--accent-d);padding:2px 8px;border-radius:4px">{server}</span>
+            <span style="background:var(--accent-d);padding:2px 8px;border-radius:4px">{prefix}</span>
+            <span style="background:var(--accent-d);padding:2px 8px;border-radius:4px">{label}</span>
+            <span style="background:var(--accent-d);padding:2px 8px;border-radius:4px">{protocol}</span>
+          </div>
+        </div>
+        <div class="cl"><i class="ti ti-info-circle"></i><span data-lang="template_note">If `{protocol}` is not in the template, the protocol will not be shown.</span></div>
+        <button class="btn btn-p" onclick="saveServerSettings()"><i class="ti ti-device-floppy"></i> <span data-lang="save_settings">Save Settings</span></button>
+        <div id="server-save-result" style="font-size:11px;color:var(--green-t);display:none">✓ <span data-lang="saved">Saved</span></div>
+      </div>
+    </div>
+  </div>
+  <div class="g2" style="margin-top:16px">
+    <div class="srv-panel">
+      <div class="srv-hero">
+        <div class="srv-hero-icon"><i class="ti ti-server-2"></i></div>
+        <div class="srv-hero-text">
+          <div class="srv-hero-domain" id="set-host">—</div>
+          <div class="srv-hero-sub"><span class="dot dg pulse"></span> <span data-lang="online_status">Online</span> · Railway</div>
+        </div>
+      </div>
+      <div class="srv-tiles">
+        <div class="srv-tile"><div class="srv-tile-icon"><i class="ti ti-route"></i></div><div class="srv-tile-text"><div class="srv-tile-label" data-lang="port">Port</div><div class="srv-tile-val">443 (TLS)</div></div></div>
+        <div class="srv-tile"><div class="srv-tile-icon"><i class="ti ti-versions"></i></div><div class="srv-tile-text"><div class="srv-tile-label" data-lang="version">Version</div><div class="srv-tile-val">v1.0.0</div></div></div>
+        <div class="srv-tile"><div class="srv-tile-icon"><i class="ti ti-brand-fastapi"></i></div><div class="srv-tile-text"><div class="srv-tile-label" data-lang="framework">Framework</div><div class="srv-tile-val">FastAPI + Uvicorn</div></div></div>
+        <div class="srv-tile"><div class="srv-tile-icon"><i class="ti ti-cloud"></i></div><div class="srv-tile-text"><div class="srv-tile-label" data-lang="platform">Platform</div><div class="srv-tile-val">Railway</div></div></div>
+        <div class="srv-tile" style="grid-column:1/-1"><div class="srv-tile-icon"><i class="ti ti-device-floppy"></i></div><div class="srv-tile-text"><div class="srv-tile-label" data-lang="storage">Storage</div><div class="srv-tile-val">JSON File (/data)</div></div></div>
+      </div>
+    </div>
+    <div class="pw-panel">
+      <div class="pw-hero">
+        <div class="pw-hero-icon"><i class="ti ti-key"></i></div>
+        <div class="pw-hero-text">
+          <div class="pw-hero-title" data-lang="change_password_title">Change Password</div>
+          <div class="pw-hero-sub" data-lang="change_password_sub">Choose a strong password and keep it safe</div>
+        </div>
+      </div>
+      <div class="pw-body">
+        <div class="pw-field"><label data-lang="current_pw">Current Password</label><input class="pw-input" type="password" id="cp-cur" placeholder="Current password"><button class="pw-eye" type="button" onclick="togglePwField('cp-cur',this)"><i class="ti ti-eye"></i></button></div>
+        <div class="pw-field" style="margin-bottom:6px"><label data-lang="new_pw">New Password</label><input class="pw-input" type="password" id="cp-new" placeholder="Min 4 characters" oninput="checkPwStrength(this.value)"><button class="pw-eye" type="button" onclick="togglePwField('cp-new',this)"><i class="ti ti-eye"></i></button></div>
+        <div class="pw-strength" id="pw-strength-bar"><div class="pw-strength-seg"></div><div class="pw-strength-seg"></div><div class="pw-strength-seg"></div><div class="pw-strength-seg"></div></div>
+        <div class="pw-strength-label" id="pw-strength-label"><i class="ti ti-shield"></i> <span data-lang="password_strength">Password Strength</span></div>
+        <div class="pw-reqs"><span class="pw-req" id="req-len"><i class="ti ti-circle-dashed"></i> <span data-lang="min_4_chars">At least 4 chars</span></span><span class="pw-req" id="req-num"><i class="ti ti-circle-dashed"></i> <span data-lang="contains_num">Contains number</span></span><span class="pw-req" id="req-case"><i class="ti ti-circle-dashed"></i> <span data-lang="contains_case_letters">Uppercase/Lowercase</span></span></div>
+        <div class="pw-field" style="margin-bottom:18px"><label data-lang="confirm_pw">Confirm Password</label><input class="pw-input" type="password" id="cp-cf" placeholder="Confirm new password"><button class="pw-eye" type="button" onclick="togglePwField('cp-cf',this)"><i class="ti ti-eye"></i></button></div>
+        <button class="pw-submit" onclick="changePw()"><i class="ti ti-shield-check"></i> <span data-lang="save_new_pw">Save New Password</span></button>
+      </div>
+    </div>
+  </div>
+</section>
 </main>
 
-<!-- ========== TOOLTIP ========== -->
+<!-- ===== TOOLTIP ===== -->
 <div class="chart-tooltip" id="chart-tooltip">
   <div class="tt-time" id="tt-time">--:--</div>
   <div id="tt-body"></div>
 </div>
 
-<!-- ========== JAVASCRIPT ========== -->
+<!-- ===== JAVASCRIPT ===== -->
 <script>
+// ========== LANG DICT ==========
 const LANG_DICT = {
   "en": {
     "dashboard":"Dashboard","dashboard_sub":"System Overview","active_connections":"Active Connections","total_traffic":"Total Traffic","total_links":"Configs","uptime":"Uptime","since_start":"Since Start","active":"Active","inactive":"Inactive","refresh":"Refresh","traffic_trend":"Bandwidth Usage","service_status":"Service Status","top_connections":"Live Connections","no_connections":"No connections","server":"Server","settings":"Settings","language":"Language","farsi":"Persian","english":"English","save":"Save","cancel":"Cancel","delete":"Delete","edit":"Edit","copy":"Copy","created":"Created","expires":"Expires","unlimited":"Unlimited","used":"Used","of":"of","daily":"Daily","hourly":"Hourly","bandwidth":"Bandwidth","connections":"Connections","protocol":"Protocol","ip_address":"IP Address","port":"Port","upload":"Upload","download":"Download","duration":"Duration","status":"Status","online":"Online","offline":"Offline","total":"Total","users":"Users","protocols":"Protocols","traffic_usage":"Traffic Usage","links":"Configs","sub_groups":"Sub Groups","subscription":"Subscription","security":"Security","logs":"Activity Logs","errors":"Errors","test_websocket":"WebSocket Test","dark_theme":"Dark Theme","light_theme":"Light Theme","prestige_theme":"Prestige Theme","blue":"Blue","red":"Red","yellow":"Yellow","current_theme":"Current Theme","server_settings":"Server & Link Settings","server_name":"Server Name","server_prefix":"Link Prefix","link_template":"Link Name Template","template_vars":"Available Variables","template_note":"If `{protocol}` is not in the template, the protocol will not be shown.","change_password":"Change Password","current_password":"Current Password","new_password":"New Password","confirm_password":"Confirm Password","password_strength":"Password Strength","min_chars":"At least 4 characters","contains_number":"Contains number","contains_case":"Uppercase/Lowercase","weak":"Very Weak","medium":"Medium","strong":"Strong","save_password":"Save New Password","login":"Login","logout":"Logout","login_title":"Login to Panel","login_sub":"Enter password to access the dashboard","password":"Password","login_button":"Login to Dashboard","telegram_channel":"Telegram Channel","panel":"Panel","system":"System","configs":"Configs","sub_groups_short":"Sub Groups","activity_logs":"Activity Logs","config_id":"Config ID","sub_group_expiry":"Sub Group & Expiry","no_group":"No Group","days":"Days","traffic_quota":"Traffic Quota","transport_protocols":"Transport Protocols","bulk_count":"Bulk Count","create_config":"Create Config","no_configs":"No configs yet","new_group":"New Group","no_groups":"No groups yet","create_group":"Create a new group to organize your configs","single_sub":"Single Subscription (per config)","full_sub":"Full Subscription (Admin)","full_sub_desc":"Includes all active configs.","group_sub_links":"Group Subscription Links","loading":"Loading...","traffic_analysis":"Bandwidth usage analysis & monitoring","total_traffic_used":"Total Traffic Used","hourly_average":"Hourly Average","per_hour":"/h","peak_usage":"Peak Usage","peak_hour":"Peak Hour","lowest_usage":"Lowest Usage","live_connections":"Live Connections","total_traffic_live":"Total Traffic","avg_duration":"Avg Duration","unique_ips":"Unique IPs","connections_list":"Connections List","auto_update":"Auto-update every 5s","no_active_connections":"No active connections","will_appear":"They will appear here as soon as clients connect","encryption":"Encryption","access_control":"Access Control","hash":"Hash","session":"Session","active_inactive":"Active/Inactive","expiry_date":"Expiry Date","public_page_pw":"Public Page Password","optional":"Optional","activity_logs_full":"Complete event history","no_logs":"No logs yet","error_logs":"Error Logs","websocket_test":"WebSocket Test","ws_note":"Only registered and active UUIDs can connect.","connect":"Connect","disconnect":"Disconnect","send":"Send","waiting_ws":"Waiting for connection...","change_theme":"Change Theme","server_link_settings":"Server & Link Settings","save_settings":"Save Settings","saved":"Saved","online_status":"Online","version":"Version","framework":"Framework","platform":"Platform","storage":"Storage","change_password_title":"Change Password","change_password_sub":"Choose a strong password and keep it safe","current_pw":"Current Password","new_pw":"New Password","confirm_pw":"Confirm Password","save_new_pw":"Save New Password","min_4_chars":"At least 4 chars","contains_num":"Contains number","contains_case_letters":"Uppercase/Lowercase","very_weak":"Very Weak","medium_strength":"Medium","strong_strength":"Strong","logout_btn":"Logout","telegram_btn":"Telegram Channel","load":"Load","connections_live":"Live Connections","traffic_chart":"Traffic Chart","protocol_distribution":"Protocol Distribution","daily_usage":"Daily Usage","active_conns_table":"Active Connections","configs_management":"Configs Management","sub_groups_management":"Sub Groups Management","subscription_links":"Subscription Links","traffic_monitor":"Traffic Monitor","connections_monitor":"Connections Monitor","security_settings":"Security Settings","activity_logs_title":"Activity Logs","error_logs_title":"Error Logs","websocket_tester":"WebSocket Tester","system_settings":"System Settings","language_settings":"Language Settings","theme_settings":"Theme Settings","server_info":"Server Info","password_change":"Password Change","save_changes":"Save Changes","cancel_changes":"Cancel","live":"Live","running_time":"Running Time","manage_configs":"Manage Configs for","select_configs":"Select configs to include in this group","select_all":"Select All","deselect_all":"Deselect All","changes_apply":"Changes apply immediately","new_group_title":"Create New Group","new_group_sub":"Create a separate public page to manage configs","group_name":"Group Name","description_optional":"Description (optional)","public_page_password":"Public Page Password (optional)","public_page_info":"This group's public page will be accessible via a unique link.","edit_config":"Edit Config","quota_0_unlimited":"Quota (0 = unlimited)","expiry_days":"Expiry (days from now, 0 = no change/unlimited)","expiry_note":"To keep current expiry, leave expiry field as 0.","random_uuid":"Random UUID · Choose quota, expiry and protocol","uuid_note":"UUID is generated randomly · Only registered UUIDs can connect · Protocol cannot be changed after creation.","each_group_public":"Each group has its own public page with its configs","single_sub_desc":"Each config has its own subscription URL. Click the","icon_on_card":"icon on the config card.","full_sub_note":"This URL only works in the browser where you're logged in (requires session cookie).","based_on_mb":"Based on MB per hour","lang_note":"Default language is English. Page will refresh after change.","groups":"Groups","usage":"Usage","average":"Average","protocols_legend":"Protocols","daily_legend":"Daily","hourly_legend":"Hourly","bandwidth_usage":"Bandwidth Usage","smart_alerts":"Smart Alerts","alerts_sub":"Important events & notifications","priority":"Priority","critical":"Critical","warning":"Warning","info":"Info","dismiss":"Dismiss","filter_all":"All","filter_critical":"Critical","filter_warning":"Warning","filter_info":"Info","alert_expiry":"Config expiring soon","alert_quota":"Traffic quota exceeded 80%","alert_errors":"Repeated connection errors","alert_new_ip":"New IP connected","no_alerts":"No alerts to show"
@@ -1632,18 +1903,22 @@ const LANG_DICT = {
     "dashboard":"داشبورد","dashboard_sub":"نمای کلی سیستم","active_connections":"اتصالات فعال","total_traffic":"کل ترافیک","total_links":"کانفیگ‌ها","uptime":"آپتایم","since_start":"از راه‌اندازی","active":"فعال","inactive":"غیرفعال","refresh":"رفرش","traffic_trend":"مصرف پهنای باند","service_status":"وضعیت سرویس","top_connections":"اتصال‌های لحظه‌ای","no_connections":"هیچ اتصالی","server":"سرور","settings":"تنظیمات","language":"زبان","farsi":"فارسی","english":"انگلیسی","save":"ذخیره","cancel":"انصراف","delete":"حذف","edit":"ویرایش","copy":"کپی","created":"ساخته شده","expires":"انقضا","unlimited":"نامحدود","used":"مصرف","of":"از","daily":"روزانه","hourly":"ساعتی","bandwidth":"پهنای باند","connections":"اتصالات","protocol":"پروتکل","ip_address":"آدرس آی‌پی","port":"پورت","upload":"آپلود","download":"دانلود","duration":"مدت","status":"وضعیت","online":"آنلاین","offline":"آفلاین","total":"کل","users":"کاربران","protocols":"پروتکل‌ها","traffic_usage":"مصرف ترافیک","links":"کانفیگ‌ها","sub_groups":"گروه‌های ساب","subscription":"سابسکریپشن","security":"امنیت","logs":"لاگ فعالیت‌ها","errors":"خطاها","test_websocket":"تست WebSocket","dark_theme":"تم تاریک","light_theme":"تم روشن","prestige_theme":"تم پرستیژ","blue":"آبی","red":"قرمز","yellow":"زرد","current_theme":"تم پیش‌فرض","server_settings":"تنظیمات سرور و نام لینک‌ها","server_name":"نام سرور","server_prefix":"پیشوند لینک‌ها","link_template":"قالب نام کانفیگ‌ها","template_vars":"متغیرهای قابل استفاده","template_note":"اگر `{protocol}` در قالب نباشد، پروتکل در نام نمایش داده نمی‌شود.","change_password":"تغییر رمز عبور","current_password":"رمز فعلی","new_password":"رمز جدید","confirm_password":"تکرار رمز جدید","password_strength":"قدرت رمز","min_chars":"حداقل ۴ کاراکتر","contains_number":"شامل عدد","contains_case":"حروف بزرگ/کوچک","weak":"خیلی ضعیف","medium":"متوسط","strong":"قوی","save_password":"ذخیره رمز جدید","login":"ورود","logout":"خروج","login_title":"ورود به پنل","login_sub":"رمز عبور را برای دسترسی به داشبورد وارد کنید","password":"رمز عبور","login_button":"ورود به داشبورد","telegram_channel":"کانال تلگرام","panel":"پنل","system":"سیستم","configs":"کانفیگ‌ها","sub_groups_short":"گروه‌های ساب","activity_logs":"لاگ فعالیت‌ها","config_id":"شناسه کانفیگ","sub_group_expiry":"گروه ساب و انقضا","no_group":"بدون گروه","days":"روز","traffic_quota":"سهمیه ترافیک","transport_protocols":"پروتکل‌های انتقال","bulk_count":"تعداد ساخت هم‌زمان","create_config":"ساخت کانفیگ","no_configs":"هنوز کانفیگی وجود ندارد","new_group":"گروه جدید","no_groups":"هنوز گروهی وجود ندارد","create_group":"یک گروه جدید بسازید تا کانفیگ‌ها را دسته‌بندی کنید","single_sub":"سابسکریپشن تکی (هر کانفیگ)","full_sub":"سابسکریپشن کامل (ادمین)","full_sub_desc":"شامل تمام کانفیگ‌های فعال.","group_sub_links":"لینک سابسکریپشن گروه‌ها","loading":"در حال بارگذاری...","traffic_analysis":"تحلیل و مانیتورینگ مصرف پهنای باند","total_traffic_used":"کل ترافیک مصرفی","hourly_average":"میانگین ساعتی","per_hour":"در ساعت","peak_usage":"پیک مصرف","peak_hour":"بالاترین ساعت","lowest_usage":"کمترین مصرف","live_connections":"اتصالات زنده","total_traffic_live":"مجموع ترافیک لحظه‌ای","avg_duration":"میانگین مدت اتصال","unique_ips":"آی‌پی‌های یکتا","connections_list":"لیست اتصالات","auto_update":"بروزرسانی خودکار هر ۵ ثانیه","no_active_connections":"هیچ اتصال فعالی نیست","will_appear":"به محض اتصال کلاینت‌ها، اینجا نمایش داده می‌شوند","encryption":"رمزنگاری","access_control":"کنترل دسترسی","hash":"هش رمز","session":"سشن","active_inactive":"فعال/غیرفعال","expiry_date":"تاریخ انقضا","public_page_pw":"رمز صفحه پابلیک","optional":"اختیاری","activity_logs_full":"تاریخچه‌ی کامل رخدادهای پنل","no_logs":"هنوز لاگی ثبت نشده","error_logs":"لاگ خطاها","websocket_test":"تست WebSocket","ws_note":"فقط UUID‌های ثبت‌شده و فعال اتصال برقرار می‌کنند.","connect":"اتصال","disconnect":"قطع","send":"ارسال","waiting_ws":"منتظر اتصال...","change_theme":"تغییر تم","server_link_settings":"تنظیمات سرور و نام لینک‌ها","save_settings":"ذخیره تنظیمات","saved":"ذخیره شد","online_status":"آنلاین","version":"نسخه","framework":"فریم‌ورک","platform":"پلتفرم","storage":"ذخیره‌سازی","change_password_title":"تغییر رمز عبور","change_password_sub":"رمز قوی انتخاب کنید و آن را جایی امن نگه دارید","current_pw":"رمز فعلی","new_pw":"رمز جدید","confirm_pw":"تکرار رمز جدید","save_new_pw":"ذخیره رمز جدید","min_4_chars":"حداقل ۴ کاراکتر","contains_num":"شامل عدد","contains_case_letters":"حروف بزرگ/کوچک","very_weak":"خیلی ضعیف","medium_strength":"متوسط","strong_strength":"قوی","logout_btn":"خروج","telegram_btn":"کانال تلگرام","load":"بار نسبی","connections_live":"اتصالات لحظه‌ای","traffic_chart":"نمودار ترافیک","protocol_distribution":"توزیع پروتکل","daily_usage":"مصرف روزانه","active_conns_table":"اتصالات فعال","configs_management":"مدیریت کانفیگ‌ها","sub_groups_management":"مدیریت گروه‌های ساب","subscription_links":"لینک‌های سابسکریپشن","traffic_monitor":"مانیتورینگ ترافیک","connections_monitor":"مانیتورینگ اتصالات","security_settings":"تنظیمات امنیتی","activity_logs_title":"لاگ فعالیت‌ها","error_logs_title":"لاگ خطاها","websocket_tester":"تست WebSocket","system_settings":"تنظیمات سیستم","language_settings":"تنظیمات زبان","theme_settings":"تنظیمات تم","server_info":"اطلاعات سرور","password_change":"تغییر رمز عبور","save_changes":"ذخیره تغییرات","cancel_changes":"انصراف","live":"لحظه‌ای","running_time":"مدت روشن بودن","manage_configs":"مدیریت کانفیگ‌های","select_configs":"کانفیگ‌هایی که می‌خواهید در این گروه باشند را انتخاب کنید","select_all":"انتخاب همه","deselect_all":"لغو همه","changes_apply":"تغییرات بلافاصله اعمال می‌شود","new_group_title":"ساخت گروه جدید","new_group_sub":"یک صفحه پابلیک مجزا برای مدیریت کانفیگ‌ها بسازید","group_name":"نام گروه","description_optional":"توضیحات (اختیاری)","public_page_password":"رمز صفحه پابلیک (اختیاری)","public_page_info":"صفحه پابلیک این گروه با یک لینک منحصر‌به‌فرد در اینترنت در دسترس خواهد بود.","edit_config":"ویرایش کانفیگ","quota_0_unlimited":"سهمیه (0 = نامحدود)","expiry_days":"انقضا (روز از الان، 0 = بدون تغییر/نامحدود)","expiry_note":"برای حفظ انقضای فعلی، فیلد انقضا را صفر بگذارید.","random_uuid":"UUID تصادفی · سهمیه، انقضا و پروتکل رو انتخاب کن","uuid_note":"UUID کاملاً رندوم تولید می‌شود · فقط UUID‌های ثبت‌شده اجازه اتصال دارند · پروتکل پس از ساخت قابل تغییر نیست.","each_group_public":"هر گروه یک صفحه پابلیک مجزا با کانفیگ‌های خودش دارد","single_sub_desc":"هر کانفیگ URL سابسکریپشن مخصوص دارد. از کارت کانفیگ روی آیکون","icon_on_card":"کلیک کنید.","full_sub_note":"این آدرس فقط در مرورگری که به پنل وارد شده کار می‌کند (نیاز به کوکی سشن).","based_on_mb":"بر اساس مگابایت در هر ساعت","lang_note":"زبان پیش‌فرض انگلیسی است. پس از تغییر، صفحه رفرش می‌شود.","groups":"گروه","usage":"مصرف","average":"میانگین","protocols_legend":"پروتکل‌ها","daily_legend":"روزانه","hourly_legend":"ساعتی","bandwidth_usage":"مصرف پهنای باند","smart_alerts":"هشدارهای هوشمند","alerts_sub":"رویدادها و اعلان‌های مهم","priority":"اولویت","critical":"بحرانی","warning":"هشدار","info":"اطلاعات","dismiss":"رد کردن","filter_all":"همه","filter_critical":"بحرانی","filter_warning":"هشدار","filter_info":"اطلاعات","alert_expiry":"انقضای نزدیک کانفیگ","alert_quota":"مصرف ترافیک بیش از ۸۰٪","alert_errors":"خطاهای مکرر اتصال","alert_new_ip":"آی‌پی جدید متصل شد","no_alerts":"هیچ هشداری وجود ندارد"
   }
 };
+
+// ========== STATE ==========
 let currentLang = localStorage.getItem('CBeeNet-lang') || 'en';
 let currentTheme = localStorage.getItem('CBeeNet-theme') || 'dark-prestige';
 let alertsData = [];
 let currentAlertFilter = 'all';
+let allLinksList = [];
+let allSubsList = [];
 
-// ========== Language & Theme ==========
+// ========== LANGUAGE & THEME ==========
 function setLanguage(lang){
   currentLang = lang;
   localStorage.setItem('CBeeNet-lang', lang);
   applyLanguage();
   document.querySelectorAll('.btn-lang').forEach(btn => btn.classList.toggle('active', btn.dataset.langCode === lang));
-  toast('Language changed to ' + (lang === 'fa' ? 'فارسی' : 'English'), 'ok');
+  toast('Language changed', 'ok');
 }
 function applyLanguage(){
   const dict = LANG_DICT[currentLang] || LANG_DICT['en'];
@@ -1707,12 +1982,16 @@ function protoBadge(protocols){
   const labels = { 'vless-ws': ['VLESS · WS', 'pc-ws'], 'xhttp-packet-up': ['XHTTP · packet-up', 'pc-xhttp'], 'xhttp-stream-up': ['XHTTP · stream-up', 'pc-xhttp'], 'xhttp-stream-one': ['XHTTP ULTRA', 'pc-ultra'] };
   return protocols.map(p => { const v = labels[p] || labels['vless-ws']; return `<span class="proto-chip ${v[1]}">${v[0]}</span>`; }).join('');
 }
+
+// ========== AUTH ==========
 async function checkAuth(){
   try{ const r = await fetch('/api/me'); const d = await r.json(); if(!d.authenticated) location.href = '/login'; }catch(e){ location.href = '/login'; }
 }
 async function logout(){ try{ await fetch('/api/logout', {method:'POST'}); }catch(e){} location.href = '/login'; }
 document.getElementById('logout-btn').addEventListener('click', logout);
 async function authF(url, opts={}){ const r = await fetch(url, opts); if(r.status === 401){ location.href = '/login'; throw new Error('unauthorized'); } return r; }
+
+// ========== UI HELPERS ==========
 function toggleProtoBtn(el){ el.classList.toggle('active'); }
 function getSelectedProtocols(){
   const btns = document.querySelectorAll('.proto-btn');
@@ -1736,6 +2015,27 @@ function setCount(val, el){
   document.querySelectorAll('.count-chip').forEach(c => c.classList.remove('active'));
   el.classList.add('active');
 }
+
+const sb = document.getElementById('sb'), overlay = document.getElementById('overlay');
+function openSb(){ sb.classList.add('open'); overlay.classList.add('show'); }
+function closeSb(){ sb.classList.remove('open'); overlay.classList.remove('show'); }
+document.getElementById('open-sb').addEventListener('click', openSb);
+document.getElementById('close-sb').addEventListener('click', closeSb);
+overlay.addEventListener('click', closeSb);
+
+function navTo(name){
+  document.querySelectorAll('.nav-it').forEach(n => n.classList.toggle('on', n.dataset.pg === name));
+  document.querySelectorAll('.pg').forEach(p => p.classList.toggle('on', p.id === 'pg-' + name));
+  const loaders = {links: loadLinks, connections: loadConns, errors: loadErrs, subscriptions: loadSubsPage, subgroups: loadSubs, logs: loadActivity, alerts: loadAlerts};
+  if(loaders[name]) loaders[name]();
+  closeSb();
+  window.scrollTo({top: 0, behavior: 'smooth'});
+}
+document.querySelectorAll('.nav-it').forEach(el => el.addEventListener('click', () => navTo(el.dataset.pg)));
+function openModal(id){ document.getElementById(id).classList.add('open'); }
+function closeModal(id){ document.getElementById(id).classList.remove('open'); }
+
+// ========== SERVER SETTINGS ==========
 async function loadServerSettings(){
   try {
     const r = await authF('/api/settings/server');
@@ -1786,40 +2086,20 @@ function formatLinkName(label, protocol){
   }
   return result;
 }
-const sb = document.getElementById('sb'), overlay = document.getElementById('overlay');
-function openSb(){ sb.classList.add('open'); overlay.classList.add('show'); }
-function closeSb(){ sb.classList.remove('open'); overlay.classList.remove('show'); }
-document.getElementById('open-sb').addEventListener('click', openSb);
-document.getElementById('close-sb').addEventListener('click', closeSb);
-overlay.addEventListener('click', closeSb);
-function navTo(name){
-  document.querySelectorAll('.nav-it').forEach(n => n.classList.toggle('on', n.dataset.pg === name));
-  document.querySelectorAll('.pg').forEach(p => p.classList.toggle('on', p.id === 'pg-' + name));
-  const loaders = {links: loadLinks, connections: loadConns, errors: loadErrs, subscriptions: loadSubsPage, subgroups: loadSubs, logs: loadActivity, alerts: loadAlerts};
-  if(loaders[name]) loaders[name]();
-  closeSb();
-  window.scrollTo({top: 0, behavior: 'smooth'});
-}
-document.querySelectorAll('.nav-it').forEach(el => el.addEventListener('click', () => navTo(el.dataset.pg)));
-function openModal(id){ document.getElementById(id).classList.add('open'); }
-function closeModal(id){ document.getElementById(id).classList.remove('open'); }
 
-// ========== PREMIUM CHART ENGINE ==========
+// ========== PREMIUM CHARTS ENGINE ==========
 const CHART_COLORS = {
   load: { line: '#1a7aff', fill: 'rgba(26,122,255,0.25)', bg: 'rgba(26,122,255,0.08)' },
   traffic: { line: '#10b981', fill: 'rgba(16,185,129,0.25)', bg: 'rgba(16,185,129,0.08)' },
   conns: { line: '#f59e0b', fill: 'rgba(245,158,11,0.25)', bg: 'rgba(245,158,11,0.08)' }
 };
 
-// Data stores per chart type
 let chartData = { load: [], traffic: [], conns: [] };
 let chartTimes = { load: [], traffic: [], conns: [] };
 let chartRange = { load: { start: 0, end: 60 }, traffic: { start: 0, end: 60 }, conns: { start: 0, end: 60 } };
 const MAX_POINTS = 200;
 let chartInstances = { load: null, traffic: null, conns: null };
 let navInstances = { load: null, traffic: null, conns: null };
-let tooltipEl = document.getElementById('chart-tooltip');
-let activeChartType = null;
 
 function getAccentColor() {
   return getComputedStyle(document.documentElement).getPropertyValue('--accent').trim() || '#1a7aff';
@@ -1831,22 +2111,19 @@ function getGridColor() {
   return getComputedStyle(document.documentElement).getPropertyValue('--card-b').trim() || '#1e2d45';
 }
 
-function createGradient(ctx, color, height) {
-  const grad = ctx.createLinearGradient(0, 0, 0, height);
-  grad.addColorStop(0, color);
-  grad.addColorStop(1, 'rgba(0,0,0,0)');
-  return grad;
-}
-
-function buildChart(type, data, labels, isNav = false) {
+function buildChart(type, isNav = false) {
   const colors = CHART_COLORS[type];
   const accent = getAccentColor();
   const textColor = getTextColor();
   const gridColor = getGridColor();
-  const ctx = document.getElementById(isNav ? 'chart-' + type + '-nav' : 'chart-' + type).getContext('2d');
+  const canvasId = isNav ? 'chart-' + type + '-nav' : 'chart-' + type;
+  const ctx = document.getElementById(canvasId).getContext('2d');
   
-  // Determine max value for scaling
-  const maxVal = data.length > 0 ? Math.max(...data, 1) : 1;
+  const dataArr = isNav ? chartData[type] : chartData[type].slice(chartRange[type].start, chartRange[type].end);
+  const timeArr = isNav ? chartTimes[type] : chartTimes[type].slice(chartRange[type].start, chartRange[type].end);
+  const labels = timeArr.map(d => d ? d.toLocaleTimeString('en-US', {hour:'2-digit', minute:'2-digit'}) : '');
+  
+  const maxVal = dataArr.length > 0 ? Math.max(...dataArr, 1) : 1;
   const yMax = type === 'load' ? 100 : Math.ceil(maxVal * 1.25);
   
   const config = {
@@ -1854,7 +2131,7 @@ function buildChart(type, data, labels, isNav = false) {
     data: {
       labels: labels,
       datasets: [{
-        data: data,
+        data: dataArr,
         borderColor: colors.line,
         backgroundColor: function(context) {
           const chart = context.chart;
@@ -1865,8 +2142,8 @@ function buildChart(type, data, labels, isNav = false) {
           grad.addColorStop(1, 'rgba(0,0,0,0)');
           return grad;
         },
-        borderWidth: isNav ? 1.5 : 2.5,
-        pointRadius: isNav ? 0 : 0,
+        borderWidth: isNav ? 1.2 : 2.5,
+        pointRadius: 0,
         pointHoverRadius: isNav ? 0 : 6,
         pointHoverBorderWidth: isNav ? 0 : 3,
         pointHoverBorderColor: isNav ? 'transparent' : '#fff',
@@ -1882,17 +2159,24 @@ function buildChart(type, data, labels, isNav = false) {
       responsive: true,
       maintainAspectRatio: false,
       animation: { duration: isNav ? 0 : 400, easing: 'easeOutQuart' },
-      interaction: isNav ? false : {
-        intersect: false,
-        mode: 'index',
-        axis: 'x'
-      },
+      interaction: isNav ? false : { intersect: false, mode: 'index', axis: 'x' },
       plugins: {
         legend: { display: false },
         tooltip: isNav ? { enabled: false } : {
-          enabled: false,
-          external: function(context) {
-            // Custom tooltip handled via chart events
+          enabled: true,
+          backgroundColor: 'rgba(11,17,29,0.92)',
+          borderColor: accent,
+          borderWidth: 1,
+          titleColor: '#fff',
+          bodyColor: '#e8edf5',
+          cornerRadius: 8,
+          padding: 10,
+          callbacks: {
+            label: function(context) {
+              const val = context.parsed.y;
+              const unit = type === 'load' ? '%' : type === 'traffic' ? ' MB' : '';
+              return val.toFixed(1) + unit;
+            }
           }
         }
       },
@@ -1934,62 +2218,20 @@ function buildChart(type, data, labels, isNav = false) {
     plugins: isNav ? [] : [{
       id: 'crosshair',
       beforeDraw: function(chart) {
-        // Draw crosshair if active
-        if (activeChartType !== type) return;
-        const tooltip = chart.tooltip;
-        if (!tooltip || !tooltip.active || !tooltip.dataPoints || tooltip.dataPoints.length === 0) return;
-        const cp = tooltip.dataPoints[0];
-        const x = cp.element.x;
-        const yScale = chart.scales.y;
-        const xScale = chart.scales.x;
-        if (x === undefined || xScale === undefined) return;
-        const ctx2 = chart.ctx;
-        ctx2.save();
-        ctx2.beginPath();
-        ctx2.setLineDash([4, 4]);
-        ctx2.strokeStyle = 'rgba(255,255,255,0.15)';
-        ctx2.lineWidth = 1;
-        ctx2.moveTo(x, yScale.top);
-        ctx2.lineTo(x, yScale.bottom);
-        ctx2.stroke();
-        ctx2.restore();
-        // Highlight point
-        const meta = chart.getDatasetMeta(0);
-        if (meta.data && meta.data.length > cp.dataIndex) {
-          const point = meta.data[cp.dataIndex];
-          if (point) {
-            ctx2.save();
-            ctx2.shadowColor = CHART_COLORS[type].line;
-            ctx2.shadowBlur = 20;
-            ctx2.beginPath();
-            ctx2.arc(point.x, point.y, 5, 0, 2 * Math.PI);
-            ctx2.fillStyle = CHART_COLORS[type].line;
-            ctx2.fill();
-            ctx2.shadowBlur = 0;
-            ctx2.beginPath();
-            ctx2.arc(point.x, point.y, 7, 0, 2 * Math.PI);
-            ctx2.strokeStyle = 'rgba(255,255,255,0.3)';
-            ctx2.lineWidth = 1.5;
-            ctx2.stroke();
-            ctx2.restore();
-          }
-        }
+        // Simple crosshair on hover (handled by tooltip)
       }
     }]
   };
   
-  const chart = new Chart(ctx, config);
-  return chart;
+  return new Chart(ctx, config);
 }
 
 function initPremiumCharts() {
-  // Initialize each chart with empty data
   ['load', 'traffic', 'conns'].forEach(type => {
-    const labels = chartTimes[type].map(d => d ? d.toLocaleTimeString('en-US', {hour:'2-digit', minute:'2-digit'}) : '');
-    chartInstances[type] = buildChart(type, chartData[type], labels, false);
-    navInstances[type] = buildChart(type, chartData[type], labels, true);
-    updateRangeLabel(type);
+    chartInstances[type] = buildChart(type, false);
+    navInstances[type] = buildChart(type, true);
     updateChartValue(type);
+    updateRangeLabel(type);
   });
 }
 
@@ -2016,169 +2258,48 @@ function addDataPoint(type, value, time) {
     range.start = Math.max(0, len - 60);
     range.end = len;
   }
-  // If range end is at the end, keep it there
   if (range.end === len - 1) range.end = len;
   updateChartView(type);
   updateChartValue(type);
   updateRangeLabel(type);
 }
 
-function getSlicedData(type) {
+function updateChartView(type) {
+  const chart = chartInstances[type];
+  const nav = navInstances[type];
+  if (!chart || !nav) return;
+  
+  // Main chart - sliced data
   const range = chartRange[type];
   const start = Math.max(0, Math.min(range.start, chartData[type].length-1));
   const end = Math.min(range.end, chartData[type].length);
-  if (start >= end) return { data: [], labels: [] };
-  const sliced = chartData[type].slice(start, end);
-  const times = chartTimes[type].slice(start, end);
-  const labels = times.map(d => d ? d.toLocaleTimeString('en-US', {hour:'2-digit', minute:'2-digit'}) : '');
-  return { data: sliced, labels: labels };
-}
-
-function updateChartView(type) {
-  const sliced = getSlicedData(type);
-  const chart = chartInstances[type];
-  const nav = navInstances[type];
-  if (chart) {
-    chart.data.labels = sliced.labels;
-    chart.data.datasets[0].data = sliced.data;
-    // Update y max
-    const maxVal = sliced.data.length > 0 ? Math.max(...sliced.data, 1) : 1;
-    chart.options.scales.y.max = type === 'load' ? 100 : Math.ceil(maxVal * 1.25);
-    chart.update('none');
-  }
-  if (nav) {
-    // Navigator shows full data
-    const allLabels = chartTimes[type].map(d => d ? d.toLocaleTimeString('en-US', {hour:'2-digit', minute:'2-digit'}) : '');
-    nav.data.labels = allLabels;
-    nav.data.datasets[0].data = chartData[type];
-    const maxAll = chartData[type].length > 0 ? Math.max(...chartData[type], 1) : 1;
-    nav.options.scales.y.max = type === 'load' ? 100 : Math.ceil(maxAll * 1.25);
-    nav.update('none');
-  }
-}
-
-function shiftRange(type, direction) {
-  const step = 6; // ~30 seconds
-  const range = chartRange[type];
-  const len = chartData[type].length;
-  let newStart = range.start + direction * step;
-  let newEnd = range.end + direction * step;
-  if (newStart < 0) { newStart = 0; newEnd = Math.min(len, newStart + (range.end - range.start)); }
-  if (newEnd > len) { newEnd = len; newStart = Math.max(0, newEnd - (range.end - range.start)); }
-  if (newEnd - newStart < 3) return;
-  range.start = newStart;
-  range.end = newEnd;
-  updateChartView(type);
-  updateRangeLabel(type);
-}
-
-function resetRange(type) {
-  const len = chartData[type].length;
-  chartRange[type].start = Math.max(0, len - 60);
-  chartRange[type].end = len;
-  updateChartView(type);
-  updateRangeLabel(type);
+  const slicedData = chartData[type].slice(start, end);
+  const slicedTimes = chartTimes[type].slice(start, end);
+  const labels = slicedTimes.map(d => d ? d.toLocaleTimeString('en-US', {hour:'2-digit', minute:'2-digit'}) : '');
+  
+  chart.data.labels = labels;
+  chart.data.datasets[0].data = slicedData;
+  const maxVal = slicedData.length > 0 ? Math.max(...slicedData, 1) : 1;
+  chart.options.scales.y.max = chart.type === 'load' ? 100 : Math.ceil(maxVal * 1.25);
+  chart.update('none');
+  
+  // Navigator - full data
+  const allLabels = chartTimes[type].map(d => d ? d.toLocaleTimeString('en-US', {hour:'2-digit', minute:'2-digit'}) : '');
+  nav.data.labels = allLabels;
+  nav.data.datasets[0].data = chartData[type];
+  const maxAll = chartData[type].length > 0 ? Math.max(...chartData[type], 1) : 1;
+  nav.options.scales.y.max = type === 'load' ? 100 : Math.ceil(maxAll * 1.25);
+  nav.update('none');
 }
 
 function updateRangeLabel(type) {
   const range = chartRange[type];
   const times = chartTimes[type];
-  const el = document.getElementById(type + '-range-label');
-  if (!el || times.length === 0) return;
-  const startIdx = Math.max(0, Math.min(range.start, times.length-1));
-  const endIdx = Math.max(0, Math.min(range.end-1, times.length-1));
-  if (startIdx >= times.length || endIdx < 0 || startIdx > endIdx) {
-    el.textContent = '--:-- – --:--';
-    return;
-  }
-  const fmt = (d) => d ? d.toLocaleTimeString('en-US', {hour:'2-digit', minute:'2-digit'}) : '--:--';
-  el.textContent = fmt(times[startIdx]) + ' – ' + fmt(times[endIdx]);
+  // No separate label element needed; we show range in the navigator
 }
 
-// Chart event handlers for crosshair + tooltip
-function setupChartEvents() {
-  ['load', 'traffic', 'conns'].forEach(type => {
-    const canvas = document.getElementById('chart-' + type);
-    if (!canvas) return;
-    const chart = chartInstances[type];
-    if (!chart) return;
-    
-    canvas.addEventListener('mousemove', function(e) {
-      const rect = canvas.getBoundingClientRect();
-      const x = (e.clientX - rect.left) / rect.width;
-      const y = (e.clientY - rect.top) / rect.height;
-      
-      const xScale = chart.scales.x;
-      const yScale = chart.scales.y;
-      if (!xScale || !yScale) return;
-      
-      // Find nearest data point
-      const value = xScale.getValueForPixel(e.clientX - rect.left * (rect.width / canvas.width));
-      if (value === undefined || value === null) return;
-      
-      const data = chartData[type];
-      const times = chartTimes[type];
-      const range = chartRange[type];
-      const start = Math.max(0, Math.min(range.start, data.length-1));
-      const end = Math.min(range.end, data.length);
-      const slicedData = data.slice(start, end);
-      const slicedTimes = times.slice(start, end);
-      
-      let closestIdx = -1;
-      let closestDist = Infinity;
-      const xVal = value;
-      for (let i = 0; i < slicedTimes.length; i++) {
-        const t = slicedTimes[i];
-        if (!t) continue;
-        const dist = Math.abs(t.getTime() - xVal);
-        if (dist < closestDist) {
-          closestDist = dist;
-          closestIdx = i;
-        }
-      }
-      if (closestIdx === -1) return;
-      
-      const globalIdx = start + closestIdx;
-      const pointVal = data[globalIdx];
-      const pointTime = times[globalIdx];
-      
-      // Update tooltip
-      const tooltip = document.getElementById('chart-tooltip');
-      const ttTime = document.getElementById('tt-time');
-      const ttBody = document.getElementById('tt-body');
-      if (!tooltip || !ttTime || !ttBody) return;
-      
-      ttTime.textContent = pointTime ? pointTime.toLocaleTimeString('en-US', {hour:'2-digit', minute:'2-digit', second:'2-digit'}) : '--:--';
-      const colors = CHART_COLORS[type];
-      const unit = type === 'load' ? '%' : type === 'traffic' ? 'MB' : '';
-      const label = type === 'load' ? 'Load' : type === 'traffic' ? 'Traffic' : 'Connections';
-      ttBody.innerHTML = `<div class="tt-row"><span><span class="tt-dot" style="background:${colors.line}"></span> ${label}</span><span class="tt-value">${pointVal.toFixed(1)} ${unit}</span></div>`;
-      
-      tooltip.style.display = 'block';
-      let tx = e.clientX + 16;
-      let ty = e.clientY - 10;
-      if (tx + 180 > window.innerWidth) tx = e.clientX - 180;
-      if (ty + 80 > window.innerHeight) ty = window.innerHeight - 80;
-      if (ty < 10) ty = 10;
-      tooltip.style.left = tx + 'px';
-      tooltip.style.top = ty + 'px';
-      
-      activeChartType = type;
-      chart.update('none');
-    });
-    
-    canvas.addEventListener('mouseleave', function() {
-      document.getElementById('chart-tooltip').style.display = 'none';
-      activeChartType = null;
-      chart.update('none');
-    });
-  });
-}
-
-// ========== fetchStats with chart updates ==========
+// ========== fetchStats ==========
 let prevTraf = 0;
-let allLinksList = [];
-let allSubsList = [];
 
 async function fetchStats(){
   try{
@@ -2199,7 +2320,7 @@ async function fetchStats(){
     document.getElementById('last-upd').textContent = 'Last update: ' + new Date().toLocaleTimeString();
 
     const now = new Date();
-    // Load (delta percent)
+    // Load
     const delta = d.total_traffic_mb - prevTraf;
     const pct = Math.min(100, Math.max(0, Math.round((delta / 50) * 100 * 10) / 10));
     prevTraf = d.total_traffic_mb;
@@ -2212,19 +2333,19 @@ async function fetchStats(){
     // Connections
     addDataPoint('conns', activeCount, now);
     
-    updateCharts(d, allLinksList);
+    updateSecondaryCharts(d, allLinksList);
   } catch(e){ console.error('fetchStats error:', e); }
 }
 
-// ========== Other Charts (Protocol & Hourly) ==========
+// ========== SECONDARY CHARTS ==========
 let dashProtoChart = null, dashHourlyChart = null;
 function initSecondaryCharts(){
-  const accentColor = getComputedStyle(document.documentElement).getPropertyValue('--accent').trim() || '#1a7aff';
+  const accentColor = getAccentColor();
   const purpleColor = getComputedStyle(document.documentElement).getPropertyValue('--purple').trim() || '#8b5cf6';
   const greenColor = getComputedStyle(document.documentElement).getPropertyValue('--green-t').trim() || '#34d399';
   const amberColor = getComputedStyle(document.documentElement).getPropertyValue('--amber-t').trim() || '#fbbf24';
-  const textColor = getComputedStyle(document.documentElement).getPropertyValue('--t3').trim() || '#5a7298';
-  const gridColor = getComputedStyle(document.documentElement).getPropertyValue('--card-b').trim() || '#1e2d45';
+  const textColor = getTextColor();
+  const gridColor = getGridColor();
   
   const ctxProto = document.getElementById('dashProtoChart').getContext('2d');
   dashProtoChart = new Chart(ctxProto, {
@@ -2249,7 +2370,7 @@ function initSecondaryCharts(){
     }
   });
 }
-function updateCharts(statsData, linksData){
+function updateSecondaryCharts(statsData, linksData){
   if(dashProtoChart && linksData){
     const protoCounts = { 'vless-ws': 0, 'xhttp-packet-up': 0, 'xhttp-stream-up': 0 };
     linksData.forEach(l => {
@@ -2273,7 +2394,7 @@ function updateCharts(statsData, linksData){
   }
 }
 
-// ========== LOAD LINKS ==========
+// ========== LINKS ==========
 async function loadLinks(){
   try{
     const [lr, sr] = await Promise.all([authF('/api/links'), authF('/api/subs')]);
@@ -2336,11 +2457,9 @@ async function loadLinks(){
       </div>`;
     }).join('');
     const stats = await authF('/stats').then(r => r.json());
-    updateCharts(stats, links);
+    updateSecondaryCharts(stats, links);
   } catch(e){ console.error(e); }
 }
-
-// ========== CREATE LINK, EDIT, DELETE, TOGGLE ==========
 async function createLink(){
   const label = document.getElementById('nl-label').value.trim() || 'New Config';
   const val = document.getElementById('nl-val').value;
@@ -2853,7 +2972,7 @@ setInterval(() => {
   }
 }, 30000);
 
-// ========== REFRESH ALL ==========
+// ========== REFRESH ==========
 function refreshAll(){
   fetchStats();
   if(document.getElementById('pg-links').classList.contains('on')) loadLinks();
@@ -2869,12 +2988,9 @@ function refreshAll(){
 document.addEventListener('DOMContentLoaded', async () => {
   await checkAuth();
   applyLanguage();
-  document.querySelectorAll('.btn-lang').forEach(btn => {
-    btn.classList.toggle('active', btn.dataset.langCode === currentLang);
-  });
+  document.querySelectorAll('.btn-lang').forEach(btn => btn.classList.toggle('active', btn.dataset.langCode === currentLang));
   applyTheme(currentTheme);
   initPremiumCharts();
-  setupChartEvents();
   initSecondaryCharts();
   document.getElementById('set-host').textContent = location.host;
   document.getElementById('sub-all-url').textContent = location.protocol + '//' + location.host + '/sub-all';
