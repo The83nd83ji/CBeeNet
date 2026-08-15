@@ -97,8 +97,8 @@ SUBS_LOCK = asyncio.Lock()
 RESELLERS: dict = {}
 RESELLERS_LOCK = asyncio.Lock()
 
-# لیست پروتکل‌های مجاز
-PROTOCOLS = ("vless-ws", "trojan-ws", "vmess-ws", "xhttp-packet-up", "xhttp-stream-up", "xhttp-stream-one")
+# لیست پروتکل‌های مجاز (VMess حذف شد)
+PROTOCOLS = ("vless-ws", "trojan-ws", "xhttp-packet-up", "xhttp-stream-up", "xhttp-stream-one")
 DEFAULT_PROTOCOL = "vless-ws"
 
 # تنظیمات سرور - شامل تنظیمات عمومی و تنظیمات اختصاصی هر پروتکل
@@ -112,7 +112,7 @@ GLOBAL_SETTINGS = {
     "protocol_configs": {
         "vless-ws": {"server_name": "", "link_prefix": "", "link_template": ""},
         "trojan-ws": {"server_name": "", "link_prefix": "", "link_template": ""},
-        "vmess-ws": {"server_name": "", "link_prefix": "", "link_template": ""},
+        # VMess حذف شد
         "xhttp-packet-up": {"server_name": "", "link_prefix": "", "link_template": ""},
         "xhttp-stream-up": {"server_name": "", "link_prefix": "", "link_template": ""},
         "xhttp-stream-one": {"server_name": "", "link_prefix": "", "link_template": ""},
@@ -222,7 +222,7 @@ def get_protocol_config(protocol: str) -> dict:
 
 def format_link_remark(label: str, protocol: str) -> str:
     """ساخت نام نمایشی لینک با استفاده از تنظیمات عمومی یا اختصاصی پروتکل."""
-    # تنظیمات عمومی
+    # تنظیمات عمومی (پیش‌فرض)
     default_template = GLOBAL_SETTINGS.get("link_template", "{server}-{label}")
     default_server = GLOBAL_SETTINGS.get("server_name", "CBeeNet")
     default_prefix = GLOBAL_SETTINGS.get("server_prefix", "")
@@ -239,11 +239,10 @@ def format_link_remark(label: str, protocol: str) -> str:
     result = result.replace("{label}", label)
     
     if "{protocol}" in template:
-        # نام‌های پیش‌فرض پروتکل‌ها (در صورت نیاز می‌توان سفارشی کرد)
+        # نام‌های پیش‌فرض پروتکل‌ها (VMess حذف شد)
         default_names = {
             "vless-ws": "VLESS-WS",
             "trojan-ws": "Trojan-WS",
-            "vmess-ws": "VMess-WS",
             "xhttp-packet-up": "XHTTP-packet",
             "xhttp-stream-up": "XHTTP-stream",
             "xhttp-stream-one": "XHTTP-ultra"
@@ -274,27 +273,7 @@ def _format_uri(uuid: str, ip: str, port: int, remark: str, protocol: str, origi
         query = "&".join(f"{k}={quote(str(v))}" for k, v in params.items())
         return f"trojan://{uuid}@{ip}:{port}?{query}#{quote(remark)}"
 
-    elif protocol == "vmess-ws":
-        path = f"/ws/{uuid}"
-        config = {
-            "v": "2",
-            "ps": remark,
-            "add": ip,
-            "port": port,
-            "id": uuid,
-            "aid": "0",
-            "net": "ws",
-            "type": "none",
-            "host": original_host,
-            "path": path,
-            "tls": "tls",
-            "sni": original_host,
-            "fp": "chrome",
-            "alpn": "http/1.1"
-        }
-        json_str = json.dumps(config, separators=(',', ':'))
-        b64 = base64.b64encode(json_str.encode()).decode()
-        return f"vmess://{b64}#{quote(remark)}"
+    # VMess حذف شد
 
     else:  # XHTTP
         mode = protocol.replace("xhttp-", "")
@@ -328,13 +307,9 @@ def generate_links(link_data: dict, uuid: str, host: str) -> list[str]:
     for ip in ips:
         for proto in protocols:
             remark = format_link_remark(label, proto)
-            # اگر بیش از یک IP یا پروتکل باشد، پسوند اضافه می‌کنیم
-            # این پسوند تنها زمانی اضافه می‌شود که قالب {protocol} را نداشته باشد
-            template = GLOBAL_SETTINGS.get("link_template", "{server}-{label}")
-            proto_cfg = get_protocol_config(proto)
-            if proto_cfg.get("link_template"):
-                template = proto_cfg["link_template"]
-            if (len(ips) > 1 or len(protocols) > 1) and "{protocol}" not in template:
+            # اگر بیش از یک IP یا بیش از یک پروتکل انتخاب شده باشد، پسوند اضافه می‌شود
+            # تا لینک‌ها قابل تشخیص باشند
+            if len(ips) > 1 or len(protocols) > 1:
                 suffix = f"-{proto}" if len(protocols) > 1 else ""
                 if len(ips) > 1:
                     suffix += f"-{ip.replace('.', '-')}"
@@ -652,7 +627,7 @@ async def update_server_settings(request: Request, _=Depends(require_auth)):
     log_activity("system", "Default server settings updated", "info")
     return {"ok": True, "settings": dict(GLOBAL_SETTINGS)}
 
-# ===== NEW: Protocol-specific settings (for pages.js) =====
+# ===== Protocol-specific settings (for pages.js) =====
 @app.get("/api/settings/protocol")
 async def get_protocol_settings(_=Depends(require_auth)):
     """بازگرداندن تنظیمات اختصاصی هر پروتکل (server_name, link_prefix, link_template)"""
