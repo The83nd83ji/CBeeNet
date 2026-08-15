@@ -238,8 +238,8 @@ def format_link_remark(label: str, protocol: str) -> str:
     result = result.replace("{prefix}", prefix)
     result = result.replace("{label}", label)
     
+    # اگر {protocol} در قالب باشد، آن را با نام پروتکل جایگزین کن
     if "{protocol}" in template:
-        # نام پیش‌فرض پروتکل‌ها
         default_names = {
             "vless-ws": "VLESS-WS",
             "trojan-ws": "Trojan-WS",
@@ -248,10 +248,6 @@ def format_link_remark(label: str, protocol: str) -> str:
             "xhttp-stream-up": "XHTTP-stream",
             "xhttp-stream-one": "XHTTP-ultra"
         }
-        # اجازه دهید کاربر در تنظیمات عمومی یا اختصاصی نام پروتکل را عوض کند
-        # برای این کار می‌توانیم یک کلید protocol_names به GLOBAL_SETTINGS اضافه کنیم،
-        # اما در حال حاضر فقط از نام‌های پیش‌فرض استفاده می‌کنیم.
-        # اگر خواستید می‌توانید این بخش را گسترش دهید.
         proto_name = default_names.get(protocol, protocol)
         result = result.replace("{protocol}", proto_name)
     
@@ -329,15 +325,20 @@ def generate_links(link_data: dict, uuid: str, host: str) -> list[str]:
         port = 443
 
     label = link_data['label']
+    template = GLOBAL_SETTINGS.get("link_template", "{server}-{label}")
+    
     for ip in ips:
         for proto in protocols:
             remark = format_link_remark(label, proto)
-            # اگر بیش از یک IP یا پروتکل باشد، پسوند اضافه می‌کنیم
-            if (len(ips) > 1 or len(protocols) > 1):
+            
+            # اگر {protocol} در قالب نباشد و تعداد پروتکل‌ها یا IPها بیشتر از یک باشد،
+            # پسوند پروتکل و IP را به انتهای نام اضافه کن تا تداخل ایجاد نشود
+            if "{protocol}" not in template and (len(ips) > 1 or len(protocols) > 1):
                 suffix = f"-{proto}" if len(protocols) > 1 else ""
                 if len(ips) > 1:
                     suffix += f"-{ip.replace('.', '-')}"
                 remark += suffix
+            
             links.append(_format_uri(uuid, ip, port, remark, proto, host))
     return links
 
@@ -651,7 +652,6 @@ async def update_server_settings(request: Request, _=Depends(require_auth)):
     log_activity("system", "Default server settings updated", "info")
     return {"ok": True, "settings": dict(GLOBAL_SETTINGS)}
 
-# ===== NEW: Protocol-specific settings (for pages.js) =====
 @app.get("/api/settings/protocol")
 async def get_protocol_settings(_=Depends(require_auth)):
     """بازگرداندن تنظیمات اختصاصی هر پروتکل (server_name, link_prefix, link_template)"""
@@ -662,7 +662,6 @@ async def update_protocol_settings(request: Request, _=Depends(require_auth)):
     """ذخیره تنظیمات اختصاصی هر پروتکل"""
     body = await request.json()
     new_configs = body.get("protocols", {})
-    # اعتبارسنجی ساده: فقط پروتکل‌های مجاز را قبول کن
     for proto, cfg in new_configs.items():
         if proto in PROTOCOLS:
             GLOBAL_SETTINGS["protocol_configs"][proto] = {
