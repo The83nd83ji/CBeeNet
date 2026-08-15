@@ -989,14 +989,13 @@ a{color:inherit;text-decoration:none}
 .chip{font-size:10.5px;font-weight:700;padding:5px 12px;border-radius:8px;background:var(--accent-d);color:var(--t2);border:1px solid var(--card-b);cursor:pointer;transition:.15s;white-space:nowrap}
 .chip:hover{background:var(--accent-d);color:var(--accent2)}
 .chip.active{background:var(--accent);color:#fff;border-color:var(--accent);box-shadow:0 3px 10px var(--accent-glow)}
-/* ===== PROTOCOL SELECTOR (VERTICAL) ===== */
+/* ===== PROTOCOL SELECTOR (VERTICAL) - بدون Trojan ===== */
 .proto-group-v{display:flex;flex-direction:column;gap:8px;margin-top:10px}
 .proto-btn-v{display:flex;align-items:center;gap:12px;padding:10px 14px;border-radius:12px;border:2px solid var(--card-b);background:rgba(0,0,0,0.2);color:var(--t2);font-family:inherit;font-size:12px;font-weight:500;cursor:pointer;transition:all 0.2s ease;user-select:none;outline:none;width:100%;text-align:left}
 .proto-btn-v:hover{border-color:var(--card-bh);background:var(--accent-d);color:var(--t1)}
 .proto-btn-v.active{border-color:var(--accent);background:var(--accent-d);color:var(--accent2);box-shadow:0 0 0 1px var(--accent),0 4px 12px var(--accent-glow);transform:translateY(-1px)}
 .proto-btn-v .proto-icon{width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0}
 .proto-btn-v .proto-icon.vless{background:rgba(22,119,255,0.2);color:#1677ff}
-.proto-btn-v .proto-icon.trojan{background:rgba(139,92,246,0.2);color:#8b5cf6}
 .proto-btn-v .proto-icon.xhttp{background:rgba(245,158,11,0.2);color:#f59e0b}
 .proto-btn-v .proto-info{flex:1;min-width:0}
 .proto-btn-v .proto-name{font-weight:700;font-size:12.5px;color:var(--t1)}
@@ -1483,9 +1482,8 @@ a{color:inherit;text-decoration:none}
     </div>
   </div>
 
-  <!-- 3 Premium Charts -->
+  <!-- 3 Premium Charts (only last 5 minutes) -->
   <div class="chart-grid">
-    <!-- Load Chart -->
     <div class="chart-premium" id="chart-load-container">
       <div class="ch-header">
         <div class="ch-title"><i class="ti ti-gauge"></i> <span data-lang="load">Load</span></div>
@@ -1493,7 +1491,6 @@ a{color:inherit;text-decoration:none}
       </div>
       <div class="ch-main"><canvas id="chart-load"></canvas></div>
     </div>
-    <!-- Traffic Chart -->
     <div class="chart-premium" id="chart-traffic-container">
       <div class="ch-header">
         <div class="ch-title"><i class="ti ti-database"></i> <span data-lang="total_traffic">Traffic</span></div>
@@ -1501,7 +1498,6 @@ a{color:inherit;text-decoration:none}
       </div>
       <div class="ch-main"><canvas id="chart-traffic"></canvas></div>
     </div>
-    <!-- Connections Chart -->
     <div class="chart-premium" id="chart-conns-container">
       <div class="ch-header">
         <div class="ch-title"><i class="ti ti-plug-connected"></i> <span data-lang="connections_live">Connections</span></div>
@@ -1583,7 +1579,7 @@ a{color:inherit;text-decoration:none}
       </div>
       <div class="cp-block mb16">
         <div class="cp-block-label"><i class="ti ti-plug-connected"></i> <span data-lang="transport_protocols">Transport Protocols</span></div>
-        <!-- پروتکل‌ها به صورت عمودی (بدون VMess) -->
+        <!-- پروتکل‌ها به صورت عمودی (بدون Trojan) -->
         <div class="proto-group-v" id="proto-group-v">
           <button class="proto-btn-v active" data-proto="vless-ws" onclick="toggleProtoBtnV(this)">
             <span class="proto-icon vless"><i class="ti ti-brand-vscode"></i></span>
@@ -1592,14 +1588,6 @@ a{color:inherit;text-decoration:none}
               <span class="proto-desc">WebSocket · TLS</span>
             </span>
             <span class="proto-badge">Recommended</span>
-          </button>
-          <button class="proto-btn-v" data-proto="trojan-ws" onclick="toggleProtoBtnV(this)">
-            <span class="proto-icon trojan"><i class="ti ti-shield"></i></span>
-            <span class="proto-info">
-              <span class="proto-name">Trojan / WS</span>
-              <span class="proto-desc">WebSocket · TLS</span>
-            </span>
-            <span class="proto-badge">Secure</span>
           </button>
           <button class="proto-btn-v" data-proto="xhttp-packet-up" onclick="toggleProtoBtnV(this)">
             <span class="proto-icon xhttp"><i class="ti ti-package"></i></span>
@@ -1864,7 +1852,7 @@ a{color:inherit;text-decoration:none}
       <div class="cl" style="margin-top:12px"><i class="ti ti-info-circle"></i><span data-lang="lang_note">Default language is English. Page will refresh after change.</span></div>
     </div>
 
-    <!-- ===== ONLY Protocol Custom Server Settings (removed Default section) ===== -->
+    <!-- ===== ONLY Protocol Custom Server Settings (بدون Trojan) ===== -->
     <div class="card" style="grid-column:1/-1">
       <div class="card-title"><i class="ti ti-server-2"></i> <span>Protocol Custom Names & Templates</span></div>
       <div style="display:flex;flex-direction:column;gap:8px">
@@ -1881,13 +1869,6 @@ a{color:inherit;text-decoration:none}
           <input class="fi" id="ps-vless-ws-name" placeholder="e.g. VLESS-Server" style="min-width:0;padding:6px 8px;font-size:11px">
           <input class="fi" id="ps-vless-ws-prefix" placeholder="e.g. vless" style="min-width:0;padding:6px 8px;font-size:11px">
           <input class="fi" id="ps-vless-ws-template" placeholder="{server}-{label}" style="min-width:0;padding:6px 8px;font-size:11px">
-        </div>
-        <!-- Trojan-WS -->
-        <div style="display:grid;grid-template-columns:1.2fr 1.2fr 1.2fr 2fr;gap:8px;align-items:center;background:rgba(0,0,0,0.04);border-radius:8px;padding:6px 4px">
-          <div style="font-size:11px;color:var(--purple)">Trojan-WS</div>
-          <input class="fi" id="ps-trojan-ws-name" placeholder="e.g. Trojan-Server" style="min-width:0;padding:6px 8px;font-size:11px">
-          <input class="fi" id="ps-trojan-ws-prefix" placeholder="e.g. trojan" style="min-width:0;padding:6px 8px;font-size:11px">
-          <input class="fi" id="ps-trojan-ws-template" placeholder="{server}-{label}" style="min-width:0;padding:6px 8px;font-size:11px">
         </div>
         <!-- XHTTP-packet -->
         <div style="display:grid;grid-template-columns:1.2fr 1.2fr 1.2fr 2fr;gap:8px;align-items:center;background:rgba(0,0,0,0.08);border-radius:8px;padding:6px 4px">
@@ -2075,7 +2056,6 @@ function protoBadge(protocols){
   if(!protocols || !protocols.length) protocols = ['vless-ws'];
   const labels = {
     'vless-ws': ['VLESS · WS', 'pc-ws'],
-    'trojan-ws': ['Trojan · WS', 'pc-ws'],
     'xhttp-packet-up': ['XHTTP · packet-up', 'pc-xhttp'],
     'xhttp-stream-up': ['XHTTP · stream-up', 'pc-xhttp'],
     'xhttp-stream-one': ['XHTTP ULTRA', 'pc-ultra']
@@ -2135,12 +2115,13 @@ document.querySelectorAll('.nav-it').forEach(el => el.addEventListener('click', 
 function openModal(id){ document.getElementById(id).classList.add('open'); }
 function closeModal(id){ document.getElementById(id).classList.remove('open'); }
 
-// ========== PROTOCOL CUSTOM SETTINGS (ONLY THIS) ==========
+// ========== PROTOCOL CUSTOM SETTINGS (بدون Trojan) ==========
 async function loadProtocolSettings(){
   try {
     const r = await authF('/api/settings/protocol');
     const data = await r.json();
-    for (const proto of ['vless-ws','trojan-ws','xhttp-packet-up','xhttp-stream-up','xhttp-stream-one']) {
+    const protos = ['vless-ws','xhttp-packet-up','xhttp-stream-up','xhttp-stream-one'];
+    for (const proto of protos) {
       const prefix = proto.replace('-','_');
       const nameEl = document.getElementById('ps-'+prefix+'-name');
       const prefEl = document.getElementById('ps-'+prefix+'-prefix');
@@ -2152,8 +2133,9 @@ async function loadProtocolSettings(){
   } catch(e){ console.warn('Could not load protocol settings:', e); }
 }
 async function saveProtocolSettings(){
+  const protos = ['vless-ws','xhttp-packet-up','xhttp-stream-up','xhttp-stream-one'];
   const payload = {};
-  for (const proto of ['vless-ws','trojan-ws','xhttp-packet-up','xhttp-stream-up','xhttp-stream-one']) {
+  for (const proto of protos) {
     const prefix = proto.replace('-','_');
     const nameEl = document.getElementById('ps-'+prefix+'-name');
     const prefEl = document.getElementById('ps-'+prefix+'-prefix');
@@ -2182,17 +2164,14 @@ async function saveProtocolSettings(){
   } catch(e){ toast('Server connection error', 'err'); }
 }
 
-// ========== FORMAT LINK NAME USING PROTOCOL SETTINGS ==========
+// ========== FORMAT LINK NAME (با رعایت دقیق template) ==========
 function formatLinkName(label, protocol, protoSettings){
-  // default values (will be overridden by protocol settings if set)
   const defaultNames = {
     'vless-ws': 'VLESS-WS',
-    'trojan-ws': 'Trojan-WS',
     'xhttp-packet-up': 'XHTTP-packet',
     'xhttp-stream-up': 'XHTTP-stream',
     'xhttp-stream-one': 'XHTTP-ultra'
   };
-  // default template, server, prefix (fallback)
   const defaultTemplate = '{server}-{label}';
   const defaultServer = 'CBeeNet';
   const defaultPrefix = '';
@@ -2206,6 +2185,7 @@ function formatLinkName(label, protocol, protoSettings){
   result = result.replace(/{server}/g, server);
   result = result.replace(/{prefix}/g, prefix);
   result = result.replace(/{label}/g, label);
+  // فقط اگر {protocol} در template وجود داشته باشد، جایگزین می‌شود
   if(template.includes('{protocol}')){
     let displayName = defaultNames[protocol] || protocol;
     result = result.replace(/{protocol}/g, displayName);
@@ -2213,12 +2193,13 @@ function formatLinkName(label, protocol, protoSettings){
   return result;
 }
 
-// ========== PREMIUM CHARTS ENGINE (با ذخیره‌سازی در localStorage) ==========
+// ========== PREMIUM CHARTS (فقط ۵ دقیقه آخر) ==========
 const CHART_STORAGE_KEY = 'CBeeNet_chartData';
 let chartData = { load: [], traffic: [], conns: [] };
 let chartTimes = { load: [], traffic: [], conns: [] };
-const MAX_POINTS = 60;
+const MAX_POINTS = 60; // 60 * 5s = 300s = 5 دقیقه
 let chartInstances = { load: null, traffic: null, conns: null };
+let lastTimestamp = { load: null, traffic: null, conns: null };
 
 function loadChartDataFromStorage(){
   try {
@@ -2230,6 +2211,17 @@ function loadChartDataFromStorage(){
         chartTimes = parsed.times;
         for(let key of ['load','traffic','conns']){
           chartTimes[key] = chartTimes[key].map(t => new Date(t));
+          // حذف داده‌های قدیمی‌تر از ۵ دقیقه
+          const cutoff = Date.now() - 300000;
+          const indices = chartTimes[key].map((d,i) => d.getTime() >= cutoff ? i : -1).filter(i => i >= 0);
+          if(indices.length > 0){
+            const start = indices[0];
+            chartData[key] = chartData[key].slice(start);
+            chartTimes[key] = chartTimes[key].slice(start);
+          } else {
+            chartData[key] = [];
+            chartTimes[key] = [];
+          }
         }
         return true;
       }
@@ -2405,9 +2397,23 @@ function updateChartValue(type) {
   el.innerHTML = last.toFixed(1) + (unit ? '<span class="unit">' + unit + '</span>' : '');
 }
 function addDataPoint(type, value, time) {
+  const now = time || new Date();
+  // حذف داده‌های قدیمی‌تر از ۵ دقیقه
+  const cutoff = now.getTime() - 300000;
+  let idx = chartTimes[type].findIndex(t => t.getTime() >= cutoff);
+  if(idx > 0) {
+    chartData[type] = chartData[type].slice(idx);
+    chartTimes[type] = chartTimes[type].slice(idx);
+  } else if(idx === -1) {
+    chartData[type] = [];
+    chartTimes[type] = [];
+  }
+  
   chartData[type].push(value);
-  chartTimes[type].push(time || new Date());
-  if (chartData[type].length > MAX_POINTS) {
+  chartTimes[type].push(now);
+  
+  // اگر تعداد نقاط از حد مجاز بیشتر شد، قدیمی‌ترین را حذف کن
+  if(chartData[type].length > MAX_POINTS) {
     chartData[type].shift();
     chartTimes[type].shift();
   }
@@ -2470,7 +2476,7 @@ function initSecondaryCharts(){
   const ctxProto = document.getElementById('dashProtoChart').getContext('2d');
   dashProtoChart = new Chart(ctxProto, {
     type: 'bar',
-    data: { labels: ['VLESS/WS', 'Trojan/WS', 'XHTTP-packet', 'XHTTP-stream'], datasets: [{ data: [0,0,0,0], backgroundColor: ['rgba(26, 122, 255, 0.8)', 'rgba(139, 92, 246, 0.8)', 'rgba(251, 191, 36, 0.8)', 'rgba(239, 68, 68, 0.8)'], borderColor: [accentColor, purpleColor, amberColor, '#ef4444'], borderWidth: 2, borderRadius: 6, barPercentage: 0.6 }] },
+    data: { labels: ['VLESS/WS', 'XHTTP-packet', 'XHTTP-stream', 'XHTTP-ultra'], datasets: [{ data: [0,0,0,0], backgroundColor: ['rgba(26, 122, 255, 0.8)', 'rgba(251, 191, 36, 0.8)', 'rgba(245, 158, 11, 0.8)', 'rgba(16, 185, 129, 0.8)'], borderColor: [accentColor, amberColor, '#f59e0b', greenColor], borderWidth: 2, borderRadius: 6, barPercentage: 0.6 }] },
     options: {
       responsive: true, maintainAspectRatio: false,
       plugins: { legend: { display: false }, tooltip: { backgroundColor: 'rgba(11, 17, 29, 0.9)', borderColor: accentColor, borderWidth: 1, titleColor: '#fff', bodyColor: '#fff', cornerRadius: 8, padding: 10, callbacks: { label: function(context){ return context.parsed.y + ' configs'; } } } },
@@ -2492,12 +2498,12 @@ function initSecondaryCharts(){
 }
 function updateSecondaryCharts(statsData, linksData){
   if(dashProtoChart && linksData){
-    const protoCounts = { 'vless-ws': 0, 'trojan-ws': 0, 'xhttp-packet-up': 0, 'xhttp-stream-up': 0 };
+    const protoCounts = { 'vless-ws': 0, 'xhttp-packet-up': 0, 'xhttp-stream-up': 0, 'xhttp-stream-one': 0 };
     linksData.forEach(l => {
       const protos = l.protocols || ['vless-ws'];
       protos.forEach(p => { if(protoCounts[p] !== undefined) protoCounts[p]++; });
     });
-    const counts = [protoCounts['vless-ws'], protoCounts['trojan-ws'], protoCounts['xhttp-packet-up'], protoCounts['xhttp-stream-up']];
+    const counts = [protoCounts['vless-ws'], protoCounts['xhttp-packet-up'], protoCounts['xhttp-stream-up'], protoCounts['xhttp-stream-one']];
     dashProtoChart.data.datasets[0].data = counts;
     dashProtoChart.update('none');
   }
@@ -3117,7 +3123,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     btn.style.outlineOffset = btn.dataset.bg === currentBgStyle ? '2px' : '0';
   });
 
-  // بارگذاری داده‌های نمودار از localStorage
   const hasStored = loadChartDataFromStorage();
   initPremiumCharts();
   initSecondaryCharts();
@@ -3133,7 +3138,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   document.getElementById('set-host').textContent = location.host;
   document.getElementById('sub-all-url').textContent = location.protocol + '//' + location.host + '/sub-all';
-  await loadProtocolSettings(); // Only protocol settings
+  await loadProtocolSettings();
   fetchStats();
   loadLinks();
   loadSubs();
