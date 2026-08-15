@@ -745,7 +745,6 @@ DASHBOARD_HTML = r"""<!DOCTYPE html>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.19.0/dist/tabler-icons.min.css">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-zoom@2.0.1/dist/chartjs-plugin-zoom.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-3d@1.0.0/dist/chartjs-plugin-3d.umd.min.js"></script>
 <style>
 /* ===== RESET & VARIABLES ===== */
 *{margin:0;padding:0;box-sizing:border-box}
@@ -878,7 +877,6 @@ a{color:inherit;text-decoration:none}
 .chart-premium .ch-value{font-size:18px;font-weight:800;color:var(--t1);letter-spacing:-.02em}
 .chart-premium .ch-value .unit{font-size:12px;font-weight:500;color:var(--t3);margin-left:3px}
 .chart-premium .ch-main{height:150px;position:relative;margin-top:2px}
-.chart-premium .ch-main canvas{width:100% !important;height:100% !important}
 .dash-charts-second{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:22px}
 .dash-small-chart{background:var(--card);border:1px solid var(--card-b);border-radius:var(--radius);padding:16px 18px}
 .dash-small-chart .chart-title{font-size:11px;font-weight:600;color:var(--t2);margin-bottom:10px;display:flex;align-items:center;gap:6px}
@@ -896,6 +894,44 @@ a{color:inherit;text-decoration:none}
 .chart-tooltip .tt-row .tt-value{font-weight:700;font-variant-numeric:tabular-nums}
 @media(max-width:1024px){.dash-stats-grid{grid-template-columns:1fr 1fr}.dash-charts-second{grid-template-columns:1fr 1fr}.chart-grid{grid-template-columns:1fr 1fr}}
 @media(max-width:768px){.chart-grid{grid-template-columns:1fr}.dash-charts-second{grid-template-columns:1fr}.dash-stats-grid{grid-template-columns:1fr}.main{padding:62px 12px 50px}.sidebar{transform:translateX(100%)}[dir="ltr"] .sidebar{transform:translateX(-100%)}.sidebar.open{transform:translateX(0)}.sb-close{display:flex}.main{margin-right:0;padding-top:70px}[dir="ltr"] .main{margin-left:0}.mob-top{display:flex}}
+
+/* ===== 3D Grid Floor Styles ===== */
+.chart-3d-wrap {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  perspective: 800px;
+  overflow: visible;
+}
+.chart-3d-wrap canvas {
+  position: relative;
+  z-index: 2;
+  width: 100% !important;
+  height: 100% !important;
+}
+.chart-3d-wrap .chart-grid-floor {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 70%; /* فقط زیر محور X را پوشش می‌دهد */
+  z-index: 1;
+  /* ایجاد شبکه 4x4 با استفاده از رنگ تم (accent) */
+  background-image:
+    linear-gradient(var(--accent) 1px, transparent 1px),
+    linear-gradient(90deg, var(--accent) 1px, transparent 1px);
+  background-size: 25% 25%; /* 4x4 Grid */
+  transform-origin: bottom center;
+  transform: perspective(600px) rotateX(45deg) scaleY(0.9);
+  opacity: 0.3;
+  pointer-events: none;
+  transition: opacity 0.3s, background-color 0.3s;
+}
+/* برای تم‌های روشن، شفافیت بیشتری بدهیم */
+[data-theme^="light"] .chart-3d-wrap .chart-grid-floor {
+  opacity: 0.4;
+}
+
 /* ===== REST OF STYLES ===== */
 .btn{font-family:inherit;font-size:12px;font-weight:500;border-radius:9px;padding:8px 14px;cursor:pointer;display:inline-flex;align-items:center;gap:5px;border:none;transition:all .15s;white-space:nowrap}
 .btn i{font-size:13px}
@@ -1470,28 +1506,37 @@ a{color:inherit;text-decoration:none}
     </div>
   </div>
 
-  <!-- 3 Premium Charts with 4-box grid under axis (Fixed 3D) -->
+  <!-- 3 Premium Charts with 3D Grid -->
   <div class="chart-grid">
     <div class="chart-premium" id="chart-load-container">
       <div class="ch-header">
         <div class="ch-title"><i class="ti ti-gauge"></i> <span data-lang="load">Load</span></div>
         <div class="ch-value" id="chart-load-val">0<span class="unit">%</span></div>
       </div>
-      <div class="ch-main"><canvas id="chart-load"></canvas></div>
+      <div class="ch-main chart-3d-wrap">
+        <canvas id="chart-load"></canvas>
+        <div class="chart-grid-floor"></div>
+      </div>
     </div>
     <div class="chart-premium" id="chart-traffic-container">
       <div class="ch-header">
         <div class="ch-title"><i class="ti ti-database"></i> <span data-lang="total_traffic">Traffic</span></div>
         <div class="ch-value" id="chart-traffic-val">0<span class="unit">MB</span></div>
       </div>
-      <div class="ch-main"><canvas id="chart-traffic"></canvas></div>
+      <div class="ch-main chart-3d-wrap">
+        <canvas id="chart-traffic"></canvas>
+        <div class="chart-grid-floor"></div>
+      </div>
     </div>
     <div class="chart-premium" id="chart-conns-container">
       <div class="ch-header">
         <div class="ch-title"><i class="ti ti-plug-connected"></i> <span data-lang="connections_live">Connections</span></div>
         <div class="ch-value" id="chart-conns-val">0</div>
       </div>
-      <div class="ch-main"><canvas id="chart-conns"></canvas></div>
+      <div class="ch-main chart-3d-wrap">
+        <canvas id="chart-conns"></canvas>
+        <div class="chart-grid-floor"></div>
+      </div>
     </div>
   </div>
 
@@ -1499,11 +1544,17 @@ a{color:inherit;text-decoration:none}
   <div class="dash-charts-second">
     <div class="dash-small-chart">
       <div class="chart-title"><i class="ti ti-chart-bar"></i> <span data-lang="protocol_distribution">Protocol Distribution</span></div>
-      <div class="chart-wrap"><canvas id="dashProtoChart"></canvas></div>
+      <div class="chart-wrap chart-3d-wrap">
+        <canvas id="dashProtoChart"></canvas>
+        <div class="chart-grid-floor"></div>
+      </div>
     </div>
     <div class="dash-small-chart">
       <div class="chart-title"><i class="ti ti-arrow-up-right"></i> <span data-lang="hourly_average">Hourly Avg</span></div>
-      <div class="chart-wrap"><canvas id="dashHourlyChart"></canvas></div>
+      <div class="chart-wrap chart-3d-wrap">
+        <canvas id="dashHourlyChart"></canvas>
+        <div class="chart-grid-floor"></div>
+      </div>
     </div>
   </div>
 
@@ -1691,7 +1742,10 @@ a{color:inherit;text-decoration:none}
         <div class="traf-legend-item"><span class="traf-legend-dot" style="background:var(--amber)"></span> <span data-lang="average">Average</span></div>
       </div>
     </div>
-    <div class="traf-chart-body"><canvas id="ch3"></canvas></div>
+    <div class="traf-chart-body chart-3d-wrap">
+      <canvas id="ch3"></canvas>
+      <div class="chart-grid-floor"></div>
+    </div>
   </div>
 </section>
 
@@ -1950,6 +2004,8 @@ let alertsData = [];
 let currentAlertFilter = 'all';
 let allLinksList = [];
 let allSubsList = [];
+let prevTraf = 0;
+let totalTrafficDisplay = 0;
 
 // ========== LANGUAGE & THEME ==========
 function setLanguage(lang){
@@ -2179,14 +2235,13 @@ function formatLinkName(label, protocol, protoSettings){
   return result;
 }
 
-// ========== PREMIUM CHARTS (فقط ۵ دقیقه آخر) - FIXED 3D PERSPECTIVE ==========
+// ========== PREMIUM CHARTS (فقط ۵ دقیقه آخر) - CSS 3D PERSPECTIVE ==========
 const CHART_STORAGE_KEY = 'CBeeNet_chartData';
 const PREV_TRAF_KEY = 'CBeeNet_prevTraf';
 let chartData = { load: [], traffic: [], conns: [] };
 let chartTimes = { load: [], traffic: [], conns: [] };
 const MAX_POINTS = 60; // 60 * 5s = 300s = 5 دقیقه
 let chartInstances = { load: null, traffic: null, conns: null };
-let prevTraf = 0;
 
 function loadChartDataFromStorage(){
   try {
@@ -2237,7 +2292,7 @@ function getChartColors(type) {
   const accentD = getComputedStyle(root).getPropertyValue('--accent-d').trim() || 'rgba(22,119,255,0.12)';
   return { line: accent, fill: accentD };
 }
-// ===== FIXED buildChart (SINGLE dataset, 4-box Grid under axis via chartjs-plugin-3d) =====
+// ===== FIXED buildChart (SINGLE dataset, 4-box Grid under axis via CSS) =====
 function buildChart(type) {
   const colors = getChartColors(type);
   const accent = colors.line;
@@ -2255,9 +2310,6 @@ function buildChart(type) {
   if(type === 'traffic' && yMax < 5) yMax = 5;
   if(type === 'conns' && yMax < 5) yMax = 5;
   if(maxVal === 0) yMax = 1;
-
-  // Check if there is any data to show the 3D grid
-  const hasNonZero = dataArr.some(v => v !== 0);
 
   // یک Dataset اصلی با گرادیان و خط
   const datasets = [
@@ -2308,15 +2360,6 @@ function buildChart(type) {
             return val.toFixed(1) + unit;
           }
         }
-      },
-      // 3D Plugin configuration (creates the 4-box grid under the chart) - Disabled when data is zero
-      '3d': {
-        enabled: hasNonZero,
-        perspective: 0.15,
-        depth: 0.4,
-        angle: 25,
-        wireframe: true,
-        color: accent + '80'
       }
     },
     scales: {
@@ -2356,12 +2399,6 @@ function buildChart(type) {
     }
   };
 
-  // Register 3D plugin if available
-  const plugin3d = window.Chart3D;
-  if (plugin3d) {
-    try { Chart.register(plugin3d); } catch(e) {}
-  }
-
   const config = {
     type: 'line',
     data: { labels: labels, datasets: datasets },
@@ -2378,9 +2415,15 @@ function initPremiumCharts() {
 function updateChartValue(type) {
   const el = document.getElementById('chart-' + type + '-val');
   if (!el) return;
+  
+  if (type === 'traffic') {
+    el.innerHTML = totalTrafficDisplay.toFixed(1) + '<span class="unit">MB</span>';
+    return;
+  }
+  
   const data = chartData[type];
   const last = data.length > 0 ? data[data.length-1] : 0;
-  const unit = type === 'load' ? '%' : type === 'traffic' ? 'MB' : '';
+  const unit = type === 'load' ? '%' : '';
   el.innerHTML = last.toFixed(1) + (unit ? '<span class="unit">' + unit + '</span>' : '');
 }
 function addDataPoint(type, value, time) {
@@ -2418,9 +2461,6 @@ function addDataPoint(type, value, time) {
   if(type === 'conns' && yMax < 5) yMax = 5;
   if(maxVal === 0) yMax = 1;
   chart.options.scales.y.max = yMax;
-  // به‌روزرسانی وضعیت 3D بر اساس وجود داده
-  const hasNonZero = chartData[type].some(v => v !== 0);
-  chart.options.plugins['3d'].enabled = hasNonZero;
   chart.update('none');
   updateChartValue(type);
 }
@@ -2437,7 +2477,11 @@ async function fetchStats(){
     
     const statsResp = await authF('/stats');
     const d = await statsResp.json();
-    document.getElementById('dash-traffic').innerHTML = (d.total_traffic_mb || 0).toFixed(1) + ' <small style="font-size:14px;font-weight:400;">MB</small>';
+    
+    totalTrafficDisplay = d.total_traffic_mb || 0;
+    document.getElementById('dash-traffic').innerHTML = totalTrafficDisplay.toFixed(1) + ' <small style="font-size:14px;font-weight:400;">MB</small>';
+    document.getElementById('chart-traffic-val').innerHTML = totalTrafficDisplay.toFixed(1) + '<span class="unit">MB</span>';
+    
     document.getElementById('dash-links').textContent = d.links_count || 0;
     document.getElementById('dash-links-sub').textContent = (d.active_links || 0) + ' / ' + (d.links_count || 0);
     document.getElementById('dash-uptime').textContent = d.uptime || '00:00:00';
@@ -2445,7 +2489,7 @@ async function fetchStats(){
     document.getElementById('last-upd').textContent = 'Last update: ' + new Date().toLocaleTimeString();
 
     const now = new Date();
-    const delta = d.total_traffic_mb - prevTraf;
+    const delta = totalTrafficDisplay - prevTraf;
     const pct = Math.min(100, Math.max(0, Math.round((delta / 50) * 100 * 10) / 10));
     
     // Traffic Delta fix - only show consumption of the last 5 seconds
@@ -2457,7 +2501,7 @@ async function fetchStats(){
     }
     
     // Update prevTraf and save to localStorage for persistence
-    prevTraf = d.total_traffic_mb;
+    prevTraf = totalTrafficDisplay;
     localStorage.setItem(PREV_TRAF_KEY, String(prevTraf));
     
     addDataPoint('load', pct, now);
