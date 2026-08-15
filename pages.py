@@ -1,4 +1,4 @@
-# pages.py - CBee Gateway v1.0.0 (Fully Fixed Charts & Login Grid)
+# pages.py - CBee Gateway v1.0.0 (Fixed Sidebar, Logo & Dynamic 3D Grid)
 import json
 
 LOGIN_HTML = r"""<!DOCTYPE html>
@@ -811,8 +811,8 @@ a{color:inherit;text-decoration:none}
 .sidebar{width:var(--sidebar-w);min-height:100vh;background:var(--bg2);border-left:1px solid var(--card-b);display:flex;flex-direction:column;flex-shrink:0;position:fixed;right:0;top:0;bottom:0;z-index:200;transition:transform .25s cubic-bezier(.4,0,.2,1),background .3s,border-color .3s}
 [dir="ltr"] .sidebar{right:auto;left:0;border-left:none;border-right:1px solid var(--card-b)}
 .logo{display:flex;align-items:center;gap:12px;padding:20px 16px 16px;border-bottom:1px solid var(--card-b)}
-.logo-text{font-size:20px;font-weight:900;color:var(--t1);font-family:var(--font-family);letter-spacing:-0.02em}
-.logo-sub{font-size:10px;color:var(--t3);margin-top:1px}
+.logo-text{font-size:32px;font-weight:900;font-family:var(--font-family);background:linear-gradient(135deg,#1677ff,#4096ff);-webkit-background-clip:text;background-clip:text;color:transparent;letter-spacing:-0.02em;text-shadow:0 0 30px rgba(22,119,255,0.1)}
+.logo-sub{font-size:10px;color:var(--t3);margin-top:1px;font-weight:600}
 .sb-close{display:none;position:absolute;left:12px;top:20px;background:var(--accent-d);border:1px solid var(--card-b);color:var(--t2);width:30px;height:30px;border-radius:8px;font-size:16px;align-items:center;justify-content:center;cursor:pointer}
 [dir="ltr"] .sb-close{left:auto;right:12px}
 .nav-wrap{flex:1;overflow-y:auto;padding:6px 0 8px}
@@ -834,7 +834,7 @@ a{color:inherit;text-decoration:none}
 .logout-btn:hover{background:rgba(239,68,68,0.2)}
 .mob-top{display:none;position:fixed;top:0;right:0;left:0;height:52px;background:var(--bg2);border-bottom:1px solid var(--card-b);z-index:150;align-items:center;justify-content:space-between;padding:0 14px;transition:background .3s}
 .mob-top .ml{display:flex;align-items:center;gap:9px}
-.mob-title{color:var(--t1);font-size:16px;font-weight:900;font-family:var(--font-family)}
+.mob-title{color:var(--t1);font-size:16px;font-weight:900;font-family:var(--font-family);background:linear-gradient(135deg,#1677ff,#4096ff);-webkit-background-clip:text;background-clip:text;color:transparent;letter-spacing:-0.02em}
 .mob-right{display:flex;gap:6px}
 .menu-btn,.theme-mob{background:var(--accent-d);border:1px solid var(--card-b);color:var(--t2);width:34px;height:34px;border-radius:8px;font-size:17px;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:.15s}
 .overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.65);z-index:190;backdrop-filter:blur(3px)}
@@ -901,7 +901,7 @@ a{color:inherit;text-decoration:none}
   width: 100%;
   height: 100%;
   perspective: 800px;
-  overflow: visible;
+  overflow: hidden; /* جلوگیری از نمایش گرید بیش از حد */
 }
 .chart-3d-wrap canvas {
   position: relative;
@@ -914,7 +914,7 @@ a{color:inherit;text-decoration:none}
   bottom: 0;
   left: 0;
   width: 100%;
-  height: 70%; /* فقط زیر محور X را پوشش می‌دهد */
+  height: 45%; /* دقیقاً بخش زیر محور X */
   z-index: 1;
   /* ایجاد شبکه 4x4 با استفاده از رنگ تم (accent) */
   background-image:
@@ -1439,7 +1439,7 @@ a{color:inherit;text-decoration:none}
   <button class="sb-close" id="close-sb"><i class="ti ti-x"></i></button>
   <div class="logo">
     <span class="logo-text">CBee</span>
-    <div style="font-size:10px;color:var(--t3);margin-top:1px">Gateway · v1.0.0</div>
+    <div class="logo-sub">Gateway · v1.0.0</div>
   </div>
   <div class="nav-wrap">
     <div class="nav-sec" data-lang="panel">Panel</div>
@@ -1447,7 +1447,6 @@ a{color:inherit;text-decoration:none}
     <div class="nav-it" data-pg="links"><i class="ti ti-link-plus"></i> <span data-lang="configs">Configs</span> <span class="nav-badge" id="links-nb">0</span></div>
     <div class="nav-it" data-pg="subgroups"><i class="ti ti-folders"></i> <span data-lang="sub_groups_short">Sub Groups</span> <span class="nav-badge" id="subs-nb">0</span></div>
     <div class="nav-it" data-pg="subscriptions"><i class="ti ti-rss"></i> <span data-lang="subscription">Subscription</span></div>
-    <div class="nav-it" data-pg="traffic"><i class="ti ti-chart-area"></i> <span data-lang="traffic">Traffic</span></div>
     <div class="nav-it" data-pg="connections"><i class="ti ti-plug-connected"></i> <span data-lang="connections">Connections</span> <span class="nav-badge" id="conns-nb">0</span></div>
     <div class="nav-it" data-pg="alerts"><i class="ti ti-bell"></i> <span data-lang="smart_alerts">Smart Alerts</span> <span class="nav-badge" id="alerts-badge">0</span></div>
     <div class="nav-sec" data-lang="system">System</div>
@@ -1544,10 +1543,7 @@ a{color:inherit;text-decoration:none}
   <div class="dash-charts-second">
     <div class="dash-small-chart">
       <div class="chart-title"><i class="ti ti-chart-bar"></i> <span data-lang="protocol_distribution">Protocol Distribution</span></div>
-      <div class="chart-wrap chart-3d-wrap">
-        <canvas id="dashProtoChart"></canvas>
-        <div class="chart-grid-floor"></div>
-      </div>
+      <div class="chart-wrap"><canvas id="dashProtoChart"></canvas></div>
     </div>
     <div class="dash-small-chart">
       <div class="chart-title"><i class="ti ti-arrow-up-right"></i> <span data-lang="hourly_average">Hourly Avg</span></div>
@@ -1703,49 +1699,6 @@ a{color:inherit;text-decoration:none}
   <div class="card">
     <div class="card-title"><i class="ti ti-folders"></i> <span data-lang="group_sub_links">Group Subscription Links</span></div>
     <div id="sub-groups-list" data-lang="loading">Loading...</div>
-  </div>
-</section>
-
-<!-- ===== TRAFFIC PAGE ===== -->
-<section class="pg" id="pg-traffic">
-  <div class="topbar">
-    <div><div class="tb-title"><i class="ti ti-chart-area"></i> <span data-lang="traffic">Traffic</span></div><div class="tb-sub" data-lang="traffic_analysis">Bandwidth usage analysis & monitoring</div></div>
-    <div class="tb-right"><button class="btn btn-p btn-sm" onclick="refreshAll()"><i class="ti ti-refresh"></i> <span data-lang="refresh">Refresh</span></button></div>
-  </div>
-  <div class="traf-hero">
-    <div class="traf-main-stat">
-      <div class="traf-main-label"><i class="ti ti-database"></i> <span data-lang="total_traffic_used">Total Traffic Used</span></div>
-      <div class="traf-main-val" id="t-traffic">—<span>MB</span></div>
-      <div class="traf-trend up" id="t-trend"><i class="ti ti-trending-up"></i> <span id="t-trend-val">—</span></div>
-    </div>
-    <div class="traf-mini">
-      <div class="traf-mini-top"><div class="traf-mini-icon"><i class="ti ti-arrow-up-right"></i></div><span class="traf-mini-label" data-lang="hourly_average">Hourly Average</span></div>
-      <div><div class="traf-mini-val" id="t-avg">—</div><div class="traf-mini-sub">MB <span data-lang="per_hour">/h</span></div></div>
-    </div>
-    <div class="traf-mini">
-      <div class="traf-mini-top"><div class="traf-mini-icon pk"><i class="ti ti-chart-bar"></i></div><span class="traf-mini-label" data-lang="peak_usage">Peak Usage</span></div>
-      <div><div class="traf-mini-val" id="t-peak">—</div><div class="traf-mini-sub" id="t-peak-time" data-lang="peak_hour">Peak Hour</div></div>
-    </div>
-    <div class="traf-mini">
-      <div class="traf-mini-top"><div class="traf-mini-icon lo"><i class="ti ti-clock-hour-4"></i></div><span class="traf-mini-label" data-lang="lowest_usage">Lowest Usage</span></div>
-      <div><div class="traf-mini-val" id="t-low">—</div><div class="traf-mini-sub">MB <span data-lang="per_hour">/h</span></div></div>
-    </div>
-  </div>
-  <div class="traf-chart-card">
-    <div class="traf-chart-head">
-      <div>
-        <div class="traf-chart-title"><i class="ti ti-activity"></i> <span data-lang="traffic_trend">Traffic Usage Trend</span></div>
-        <div class="traf-chart-sub" data-lang="based_on_mb">Based on MB per hour</div>
-      </div>
-      <div class="traf-legend">
-        <div class="traf-legend-item"><span class="traf-legend-dot" style="background:var(--accent)"></span> <span data-lang="usage">Usage</span></div>
-        <div class="traf-legend-item"><span class="traf-legend-dot" style="background:var(--amber)"></span> <span data-lang="average">Average</span></div>
-      </div>
-    </div>
-    <div class="traf-chart-body chart-3d-wrap">
-      <canvas id="ch3"></canvas>
-      <div class="chart-grid-floor"></div>
-    </div>
   </div>
 </section>
 
@@ -2292,6 +2245,16 @@ function getChartColors(type) {
   const accentD = getComputedStyle(root).getPropertyValue('--accent-d').trim() || 'rgba(22,119,255,0.12)';
   return { line: accent, fill: accentD };
 }
+function updateGridVisibility(type) {
+  const container = document.querySelector(`#chart-${type}-container .chart-3d-wrap`) ||
+                    document.querySelector(`#pg-overview .dash-small-chart .chart-3d-wrap`);
+  if(!container) return;
+  const floor = container.querySelector('.chart-grid-floor');
+  if(!floor) return;
+  const data = chartData[type] || [];
+  const hasValue = data.some(v => v > 0); // اگر حداقل یک مقدار > 0 باشد
+  floor.style.opacity = hasValue ? '' : '0';
+}
 // ===== FIXED buildChart (SINGLE dataset, 4-box Grid under axis via CSS) =====
 function buildChart(type) {
   const colors = getChartColors(type);
@@ -2410,6 +2373,7 @@ function initPremiumCharts() {
   ['load', 'traffic', 'conns'].forEach(type => {
     chartInstances[type] = buildChart(type);
     updateChartValue(type);
+    updateGridVisibility(type);
   });
 }
 function updateChartValue(type) {
@@ -2463,6 +2427,7 @@ function addDataPoint(type, value, time) {
   chart.options.scales.y.max = yMax;
   chart.update('none');
   updateChartValue(type);
+  updateGridVisibility(type);
 }
 
 // ========== fetchStats (Traffic Delta Fix + Persistence + Visibility) ==========
