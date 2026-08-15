@@ -882,19 +882,20 @@ a{color:inherit;text-decoration:none}
 .dash-stat-card .sub{font-size:10px;color:var(--t2);margin-top:4px}
 .dash-stat-card .icon{position:absolute;top:16px;left:16px;font-size:22px;color:var(--accent);opacity:.3}
 [dir="ltr"] .dash-stat-card .icon{left:auto;right:16px}
-/* Premium Chart Containers */
+/* ===== PREMIUM CHARTS ===== */
 .chart-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;margin-bottom:22px}
-.chart-premium{background:var(--card);border:1px solid var(--card-b);border-radius:var(--radius);padding:16px 18px 14px;transition:all .2s}
+.chart-premium{background:var(--card);border:1px solid var(--card-b);border-radius:var(--radius);padding:16px 18px 12px;transition:all .2s;position:relative;overflow:hidden}
 .chart-premium:hover{border-color:var(--card-bh);box-shadow:var(--shadow)}
-.chart-premium .ch-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:4px}
+.chart-premium .ch-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:6px}
 .chart-premium .ch-title{font-size:10.5px;font-weight:600;color:var(--t2);text-transform:uppercase;letter-spacing:.05em;display:flex;align-items:center;gap:5px}
 .chart-premium .ch-title i{font-size:13px;color:var(--accent)}
 .chart-premium .ch-value{font-size:18px;font-weight:800;color:var(--t1);letter-spacing:-.02em}
 .chart-premium .ch-value .unit{font-size:12px;font-weight:500;color:var(--t3);margin-left:3px}
 .chart-premium .ch-main{height:150px;position:relative;margin-top:2px}
 .chart-premium .ch-main canvas{width:100% !important;height:100% !important}
-.chart-premium .ch-nav{height:44px;position:relative;margin-top:6px;border-top:1px solid var(--card-b);padding-top:5px}
+.chart-premium .ch-nav{height:40px;position:relative;margin-top:4px;border-top:1px solid var(--card-b);padding-top:4px}
 .chart-premium .ch-nav canvas{width:100% !important;height:100% !important}
+/* ===== SECONDARY CHARTS ===== */
 .dash-charts-second{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:22px}
 .dash-small-chart{background:var(--card);border:1px solid var(--card-b);border-radius:var(--radius);padding:16px 18px}
 .dash-small-chart .chart-title{font-size:11px;font-weight:600;color:var(--t2);margin-bottom:10px;display:flex;align-items:center;gap:6px}
@@ -903,7 +904,7 @@ a{color:inherit;text-decoration:none}
 .dash-footer{border-top:1px solid var(--card-b);margin-top:14px;padding-top:14px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px}
 .df-text{font-size:10px;color:var(--t3)}
 .df-link{font-size:11.5px;color:var(--accent2);display:flex;align-items:center;gap:5px;font-weight:600}
-/* Tooltip */
+/* ===== TOOLTIP ===== */
 .chart-tooltip{display:none;position:fixed;background:rgba(11,17,29,0.92);backdrop-filter:blur(12px);border:1px solid rgba(255,255,255,0.08);border-radius:10px;padding:10px 14px;box-shadow:0 12px 40px rgba(0,0,0,0.7);z-index:1000;pointer-events:none;min-width:140px}
 .chart-tooltip .tt-time{font-size:9px;color:var(--t3);font-family:ui-monospace,monospace;margin-bottom:4px;border-bottom:1px solid var(--card-b);padding-bottom:4px}
 .chart-tooltip .tt-row{display:flex;align-items:center;justify-content:space-between;gap:16px;font-size:11px;padding:2px 0;color:var(--t1)}
@@ -912,7 +913,7 @@ a{color:inherit;text-decoration:none}
 .chart-tooltip .tt-row .tt-value{font-weight:700;font-variant-numeric:tabular-nums}
 @media(max-width:1024px){.dash-stats-grid{grid-template-columns:1fr 1fr}.dash-charts-second{grid-template-columns:1fr 1fr}.chart-grid{grid-template-columns:1fr 1fr}}
 @media(max-width:768px){.chart-grid{grid-template-columns:1fr}.dash-charts-second{grid-template-columns:1fr}.dash-stats-grid{grid-template-columns:1fr}.main{padding:62px 12px 50px}.sidebar{transform:translateX(100%)}[dir="ltr"] .sidebar{transform:translateX(-100%)}.sidebar.open{transform:translateX(0)}.sb-close{display:flex}.main{margin-right:0;padding-top:70px}[dir="ltr"] .main{margin-left:0}.mob-top{display:flex}}
-/* ===== REST OF STYLES (unchanged from original) ===== */
+/* ===== REST OF STYLES ===== */
 .btn{font-family:inherit;font-size:12px;font-weight:500;border-radius:9px;padding:8px 14px;cursor:pointer;display:inline-flex;align-items:center;gap:5px;border:none;transition:all .15s;white-space:nowrap}
 .btn i{font-size:13px}
 .btn:disabled{opacity:.4;cursor:not-allowed}
@@ -1481,7 +1482,6 @@ a{color:inherit;text-decoration:none}
 
   <!-- 3 Premium Charts -->
   <div class="chart-grid">
-    <!-- Load Chart -->
     <div class="chart-premium" id="chart-load-container">
       <div class="ch-header">
         <div class="ch-title"><i class="ti ti-gauge"></i> <span data-lang="load">Load</span></div>
@@ -1490,16 +1490,14 @@ a{color:inherit;text-decoration:none}
       <div class="ch-main"><canvas id="chart-load"></canvas></div>
       <div class="ch-nav"><canvas id="chart-load-nav"></canvas></div>
     </div>
-    <!-- Traffic Chart -->
     <div class="chart-premium" id="chart-traffic-container">
       <div class="ch-header">
-        <div class="ch-title"><i class="ti ti-database"></i> <span data-lang="total_traffic">Traffic</span></div>
-        <div class="ch-value" id="chart-traffic-val">0<span class="unit">MB</span></div>
+        <div class="ch-title"><i class="ti ti-database"></i> <span data-lang="total_traffic">Traffic Rate</span></div>
+        <div class="ch-value" id="chart-traffic-val">0<span class="unit">MB/s</span></div>
       </div>
       <div class="ch-main"><canvas id="chart-traffic"></canvas></div>
       <div class="ch-nav"><canvas id="chart-traffic-nav"></canvas></div>
     </div>
-    <!-- Connections Chart -->
     <div class="chart-premium" id="chart-conns-container">
       <div class="ch-header">
         <div class="ch-title"><i class="ti ti-plug-connected"></i> <span data-lang="connections_live">Connections</span></div>
@@ -2087,19 +2085,43 @@ function formatLinkName(label, protocol){
   return result;
 }
 
-// ========== PREMIUM CHARTS ENGINE ==========
-const CHART_COLORS = {
-  load: { line: '#1a7aff', fill: 'rgba(26,122,255,0.25)', bg: 'rgba(26,122,255,0.08)' },
-  traffic: { line: '#10b981', fill: 'rgba(16,185,129,0.25)', bg: 'rgba(16,185,129,0.08)' },
-  conns: { line: '#f59e0b', fill: 'rgba(245,158,11,0.25)', bg: 'rgba(245,158,11,0.08)' }
+// ========== PREMIUM CHARTS ENGINE (Improved) ==========
+const CHART_CONFIGS = {
+  load: {
+    maxPoints: 60,          // 5 minutes (5s interval)
+    defaultRange: 60,
+    label: 'Load',
+    unit: '%',
+    color: '#1a7aff',
+    fillColor: 'rgba(26,122,255,0.18)',
+    lineColor: '#1a7aff'
+  },
+  traffic: {
+    maxPoints: 720,         // 1 hour (5s interval)
+    defaultRange: 720,
+    label: 'Traffic Rate',
+    unit: 'MB/s',
+    color: '#10b981',
+    fillColor: 'rgba(16,185,129,0.18)',
+    lineColor: '#10b981'
+  },
+  conns: {
+    maxPoints: 60,
+    defaultRange: 60,
+    label: 'Connections',
+    unit: '',
+    color: '#f59e0b',
+    fillColor: 'rgba(245,158,11,0.18)',
+    lineColor: '#f59e0b'
+  }
 };
 
 let chartData = { load: [], traffic: [], conns: [] };
 let chartTimes = { load: [], traffic: [], conns: [] };
-let chartRange = { load: { start: 0, end: 60 }, traffic: { start: 0, end: 60 }, conns: { start: 0, end: 60 } };
-const MAX_POINTS = 200;
+let chartRange = { load: { start: 0, end: 0 }, traffic: { start: 0, end: 0 }, conns: { start: 0, end: 0 } };
 let chartInstances = { load: null, traffic: null, conns: null };
 let navInstances = { load: null, traffic: null, conns: null };
+let prevTrafficTotalMB = 0;
 
 function getAccentColor() {
   return getComputedStyle(document.documentElement).getPropertyValue('--accent').trim() || '#1a7aff';
@@ -2112,7 +2134,7 @@ function getGridColor() {
 }
 
 function buildChart(type, isNav = false) {
-  const colors = CHART_COLORS[type];
+  const cfg = CHART_CONFIGS[type];
   const accent = getAccentColor();
   const textColor = getTextColor();
   const gridColor = getGridColor();
@@ -2124,31 +2146,28 @@ function buildChart(type, isNav = false) {
   const labels = timeArr.map(d => d ? d.toLocaleTimeString('en-US', {hour:'2-digit', minute:'2-digit'}) : '');
   
   const maxVal = dataArr.length > 0 ? Math.max(...dataArr, 1) : 1;
-  const yMax = type === 'load' ? 100 : Math.ceil(maxVal * 1.25);
+  const yMax = type === 'load' ? 100 : Math.ceil(maxVal * 1.35);
   
+  // Gradient fill for main chart
+  const gradient = ctx.createLinearGradient(0, 0, 0, 150);
+  gradient.addColorStop(0, cfg.fillColor);
+  gradient.addColorStop(1, 'rgba(0,0,0,0)');
+
   const config = {
     type: 'line',
     data: {
       labels: labels,
       datasets: [{
         data: dataArr,
-        borderColor: colors.line,
-        backgroundColor: function(context) {
-          const chart = context.chart;
-          const {ctx, chartArea} = chart;
-          if (!chartArea) return colors.fill;
-          const grad = ctx.createLinearGradient(0, chartArea.top, 0, chartArea.bottom);
-          grad.addColorStop(0, colors.fill);
-          grad.addColorStop(1, 'rgba(0,0,0,0)');
-          return grad;
-        },
+        borderColor: cfg.lineColor,
+        backgroundColor: isNav ? cfg.fillColor : gradient,
         borderWidth: isNav ? 1.2 : 2.5,
         pointRadius: 0,
         pointHoverRadius: isNav ? 0 : 6,
         pointHoverBorderWidth: isNav ? 0 : 3,
         pointHoverBorderColor: isNav ? 'transparent' : '#fff',
-        pointHoverBackgroundColor: colors.line,
-        fill: true,
+        pointHoverBackgroundColor: cfg.lineColor,
+        fill: !isNav,
         tension: 0.4,
         spanGaps: false,
         borderCapStyle: 'round',
@@ -2174,8 +2193,8 @@ function buildChart(type, isNav = false) {
           callbacks: {
             label: function(context) {
               const val = context.parsed.y;
-              const unit = type === 'load' ? '%' : type === 'traffic' ? ' MB' : '';
-              return val.toFixed(1) + unit;
+              const unit = type === 'load' ? '%' : type === 'traffic' ? ' MB/s' : '';
+              return val.toFixed(2) + unit;
             }
           }
         }
@@ -2202,7 +2221,7 @@ function buildChart(type, isNav = false) {
             maxTicksLimit: isNav ? 3 : 5,
             callback: function(value) {
               if (type === 'load') return value + '%';
-              if (type === 'traffic') return value.toFixed(0) + 'MB';
+              if (type === 'traffic') return value.toFixed(1) + ' MB/s';
               return value.toFixed(0);
             }
           },
@@ -2215,12 +2234,7 @@ function buildChart(type, isNav = false) {
         line: { borderJoinStyle: 'round' }
       }
     },
-    plugins: isNav ? [] : [{
-      id: 'crosshair',
-      beforeDraw: function(chart) {
-        // Simple crosshair on hover (handled by tooltip)
-      }
-    }]
+    plugins: isNav ? [] : []
   };
   
   return new Chart(ctx, config);
@@ -2228,10 +2242,17 @@ function buildChart(type, isNav = false) {
 
 function initPremiumCharts() {
   ['load', 'traffic', 'conns'].forEach(type => {
+    const cfg = CHART_CONFIGS[type];
+    // Initialize data arrays with zeros
+    const points = cfg.defaultRange;
+    chartData[type] = new Array(points).fill(0);
+    const now = new Date();
+    chartTimes[type] = Array.from({length: points}, (_, i) => new Date(now.getTime() - (points - 1 - i) * 5000));
+    chartRange[type] = { start: 0, end: points };
+    // Build charts
     chartInstances[type] = buildChart(type, false);
     navInstances[type] = buildChart(type, true);
     updateChartValue(type);
-    updateRangeLabel(type);
   });
 }
 
@@ -2240,28 +2261,30 @@ function updateChartValue(type) {
   if (!el) return;
   const data = chartData[type];
   const last = data.length > 0 ? data[data.length-1] : 0;
-  const unit = type === 'load' ? '%' : type === 'traffic' ? 'MB' : '';
-  el.innerHTML = last.toFixed(1) + (unit ? '<span class="unit">' + unit + '</span>' : '');
+  const cfg = CHART_CONFIGS[type];
+  const unit = cfg.unit;
+  el.innerHTML = last.toFixed(2) + (unit ? '<span class="unit">' + unit + '</span>' : '');
 }
 
 function addDataPoint(type, value, time) {
+  const cfg = CHART_CONFIGS[type];
   chartData[type].push(value);
   chartTimes[type].push(time || new Date());
-  if (chartData[type].length > MAX_POINTS) {
+  if (chartData[type].length > cfg.maxPoints) {
     chartData[type].shift();
     chartTimes[type].shift();
   }
   // Auto-advance range if at end
   const range = chartRange[type];
   const len = chartData[type].length;
+  const defaultRange = cfg.defaultRange;
   if (range.end >= len - 1 || range.end === len) {
-    range.start = Math.max(0, len - 60);
+    range.start = Math.max(0, len - defaultRange);
     range.end = len;
   }
   if (range.end === len - 1) range.end = len;
   updateChartView(type);
   updateChartValue(type);
-  updateRangeLabel(type);
 }
 
 function updateChartView(type) {
@@ -2269,7 +2292,6 @@ function updateChartView(type) {
   const nav = navInstances[type];
   if (!chart || !nav) return;
   
-  // Main chart - sliced data
   const range = chartRange[type];
   const start = Math.max(0, Math.min(range.start, chartData[type].length-1));
   const end = Math.min(range.end, chartData[type].length);
@@ -2280,27 +2302,19 @@ function updateChartView(type) {
   chart.data.labels = labels;
   chart.data.datasets[0].data = slicedData;
   const maxVal = slicedData.length > 0 ? Math.max(...slicedData, 1) : 1;
-  chart.options.scales.y.max = chart.type === 'load' ? 100 : Math.ceil(maxVal * 1.25);
+  chart.options.scales.y.max = type === 'load' ? 100 : Math.ceil(maxVal * 1.35);
   chart.update('none');
   
-  // Navigator - full data
+  // Navigator (full data)
   const allLabels = chartTimes[type].map(d => d ? d.toLocaleTimeString('en-US', {hour:'2-digit', minute:'2-digit'}) : '');
   nav.data.labels = allLabels;
   nav.data.datasets[0].data = chartData[type];
   const maxAll = chartData[type].length > 0 ? Math.max(...chartData[type], 1) : 1;
-  nav.options.scales.y.max = type === 'load' ? 100 : Math.ceil(maxAll * 1.25);
+  nav.options.scales.y.max = type === 'load' ? 100 : Math.ceil(maxAll * 1.35);
   nav.update('none');
 }
 
-function updateRangeLabel(type) {
-  const range = chartRange[type];
-  const times = chartTimes[type];
-  // No separate label element needed; we show range in the navigator
-}
-
 // ========== fetchStats ==========
-let prevTraf = 0;
-
 async function fetchStats(){
   try{
     const connResp = await authF('/api/connections');
@@ -2320,15 +2334,15 @@ async function fetchStats(){
     document.getElementById('last-upd').textContent = 'Last update: ' + new Date().toLocaleTimeString();
 
     const now = new Date();
-    // Load
-    const delta = d.total_traffic_mb - prevTraf;
-    const pct = Math.min(100, Math.max(0, Math.round((delta / 50) * 100 * 10) / 10));
-    prevTraf = d.total_traffic_mb;
-    addDataPoint('load', pct, now);
+    // Load (pseudo load based on traffic delta)
+    const delta = d.total_traffic_mb - prevTrafficTotalMB;
+    const loadVal = Math.min(100, Math.max(0, (delta / 10) * 100)); // 10 MB/s = 100% load
+    prevTrafficTotalMB = d.total_traffic_mb;
+    addDataPoint('load', loadVal, now);
     
-    // Traffic
-    const trafficVal = parseFloat(d.total_traffic_mb.toFixed(2));
-    addDataPoint('traffic', trafficVal, now);
+    // Traffic rate (delta MB per 5s -> MB/s)
+    const rate = delta / 5; // MB/s (since interval is 5 seconds)
+    addDataPoint('traffic', rate, now);
     
     // Connections
     addDataPoint('conns', activeCount, now);
