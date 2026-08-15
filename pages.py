@@ -1,4 +1,4 @@
-# pages.py - CBee Gateway v1.0.0 (Fixed Sidebar, Logo & Dynamic 3D Grid)
+# pages.py - CBee Gateway v1.0.0 (Neon Glow & 3D Grid Under Curve)
 import json
 
 LOGIN_HTML = r"""<!DOCTYPE html>
@@ -867,7 +867,7 @@ a{color:inherit;text-decoration:none}
 .dash-stat-card .sub{font-size:10px;color:var(--t2);margin-top:4px}
 .dash-stat-card .icon{position:absolute;top:16px;left:16px;font-size:22px;color:var(--accent);opacity:.3}
 [dir="ltr"] .dash-stat-card .icon{left:auto;right:16px}
-/* Premium Chart Containers */
+/* ===== NEON 3D CHART CONTAINERS ===== */
 .chart-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;margin-bottom:22px}
 .chart-premium{background:var(--card);border:1px solid var(--card-b);border-radius:var(--radius);padding:16px 18px 14px;transition:all .2s}
 .chart-premium:hover{border-color:var(--card-bh);box-shadow:var(--shadow)}
@@ -877,31 +877,13 @@ a{color:inherit;text-decoration:none}
 .chart-premium .ch-value{font-size:18px;font-weight:800;color:var(--t1);letter-spacing:-.02em}
 .chart-premium .ch-value .unit{font-size:12px;font-weight:500;color:var(--t3);margin-left:3px}
 .chart-premium .ch-main{height:150px;position:relative;margin-top:2px}
-.dash-charts-second{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:22px}
-.dash-small-chart{background:var(--card);border:1px solid var(--card-b);border-radius:var(--radius);padding:16px 18px}
-.dash-small-chart .chart-title{font-size:11px;font-weight:600;color:var(--t2);margin-bottom:10px;display:flex;align-items:center;gap:6px}
-.dash-small-chart .chart-title i{color:var(--accent)}
-.dash-small-chart .chart-wrap{height:120px;position:relative}
-.dash-footer{border-top:1px solid var(--card-b);margin-top:14px;padding-top:14px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px}
-.df-text{font-size:10px;color:var(--t3)}
-.df-link{font-size:11.5px;color:var(--accent2);display:flex;align-items:center;gap:5px;font-weight:600}
-/* Tooltip */
-.chart-tooltip{display:none;position:fixed;background:rgba(11,17,29,0.92);backdrop-filter:blur(12px);border:1px solid rgba(255,255,255,0.08);border-radius:10px;padding:10px 14px;box-shadow:0 12px 40px rgba(0,0,0,0.7);z-index:1000;pointer-events:none;min-width:140px}
-.chart-tooltip .tt-time{font-size:9px;color:var(--t3);font-family:ui-monospace,monospace;margin-bottom:4px;border-bottom:1px solid var(--card-b);padding-bottom:4px}
-.chart-tooltip .tt-row{display:flex;align-items:center;justify-content:space-between;gap:16px;font-size:11px;padding:2px 0;color:var(--t1)}
-.chart-tooltip .tt-row .tt-dot{width:7px;height:7px;border-radius:50%;display:inline-block;flex-shrink:0;margin-right:6px;border:1px solid rgba(255,255,255,0.15)}
-.chart-tooltip .tt-row .tt-label{color:var(--t2);font-weight:400}
-.chart-tooltip .tt-row .tt-value{font-weight:700;font-variant-numeric:tabular-nums}
-@media(max-width:1024px){.dash-stats-grid{grid-template-columns:1fr 1fr}.dash-charts-second{grid-template-columns:1fr 1fr}.chart-grid{grid-template-columns:1fr 1fr}}
-@media(max-width:768px){.chart-grid{grid-template-columns:1fr}.dash-charts-second{grid-template-columns:1fr}.dash-stats-grid{grid-template-columns:1fr}.main{padding:62px 12px 50px}.sidebar{transform:translateX(100%)}[dir="ltr"] .sidebar{transform:translateX(-100%)}.sidebar.open{transform:translateX(0)}.sb-close{display:flex}.main{margin-right:0;padding-top:70px}[dir="ltr"] .main{margin-left:0}.mob-top{display:flex}}
-
-/* ===== 3D Grid Floor Styles ===== */
+/* 3D Grid Floor with Neon Blue */
 .chart-3d-wrap {
   position: relative;
   width: 100%;
   height: 100%;
+  overflow: hidden;
   perspective: 800px;
-  overflow: hidden; /* جلوگیری از نمایش گرید بیش از حد */
 }
 .chart-3d-wrap canvas {
   position: relative;
@@ -914,23 +896,40 @@ a{color:inherit;text-decoration:none}
   bottom: 0;
   left: 0;
   width: 100%;
-  height: 45%; /* دقیقاً بخش زیر محور X */
+  height: 60%;
   z-index: 1;
-  /* ایجاد شبکه 4x4 با استفاده از رنگ تم (accent) */
   background-image:
-    linear-gradient(var(--accent) 1px, transparent 1px),
-    linear-gradient(90deg, var(--accent) 1px, transparent 1px);
-  background-size: 25% 25%; /* 4x4 Grid */
+    linear-gradient(#00d4ff 1px, transparent 1px),
+    linear-gradient(90deg, #00d4ff 1px, transparent 1px);
+  background-size: 25% 25%;
   transform-origin: bottom center;
-  transform: perspective(600px) rotateX(45deg) scaleY(0.9);
-  opacity: 0.3;
-  pointer-events: none;
-  transition: opacity 0.3s, background-color 0.3s;
-}
-/* برای تم‌های روشن، شفافیت بیشتری بدهیم */
-[data-theme^="light"] .chart-3d-wrap .chart-grid-floor {
+  transform: rotateX(65deg) scaleY(0.85);
   opacity: 0.4;
+  pointer-events: none;
+  transition: opacity 0.3s;
 }
+/* Secondary Charts */
+.dash-charts-second{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:22px}
+.dash-small-chart{background:var(--card);border:1px solid var(--card-b);border-radius:var(--radius);padding:16px 18px}
+.dash-small-chart .chart-title{font-size:11px;font-weight:600;color:var(--t2);margin-bottom:10px;display:flex;align-items:center;gap:6px}
+.dash-small-chart .chart-title i{color:var(--accent)}
+.dash-small-chart .chart-wrap{height:120px;position:relative}
+.dash-small-chart .chart-wrap .chart-3d-wrap .chart-grid-floor {
+    height: 55%;
+    transform: rotateX(55deg) scaleY(0.9);
+}
+.dash-footer{border-top:1px solid var(--card-b);margin-top:14px;padding-top:14px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px}
+.df-text{font-size:10px;color:var(--t3)}
+.df-link{font-size:11.5px;color:var(--accent2);display:flex;align-items:center;gap:5px;font-weight:600}
+/* Tooltip */
+.chart-tooltip{display:none;position:fixed;background:rgba(11,17,29,0.92);backdrop-filter:blur(12px);border:1px solid rgba(255,255,255,0.08);border-radius:10px;padding:10px 14px;box-shadow:0 12px 40px rgba(0,0,0,0.7);z-index:1000;pointer-events:none;min-width:140px}
+.chart-tooltip .tt-time{font-size:9px;color:var(--t3);font-family:ui-monospace,monospace;margin-bottom:4px;border-bottom:1px solid var(--card-b);padding-bottom:4px}
+.chart-tooltip .tt-row{display:flex;align-items:center;justify-content:space-between;gap:16px;font-size:11px;padding:2px 0;color:var(--t1)}
+.chart-tooltip .tt-row .tt-dot{width:7px;height:7px;border-radius:50%;display:inline-block;flex-shrink:0;margin-right:6px;border:1px solid rgba(255,255,255,0.15)}
+.chart-tooltip .tt-row .tt-label{color:var(--t2);font-weight:400}
+.chart-tooltip .tt-row .tt-value{font-weight:700;font-variant-numeric:tabular-nums}
+@media(max-width:1024px){.dash-stats-grid{grid-template-columns:1fr 1fr}.dash-charts-second{grid-template-columns:1fr 1fr}.chart-grid{grid-template-columns:1fr 1fr}}
+@media(max-width:768px){.chart-grid{grid-template-columns:1fr}.dash-charts-second{grid-template-columns:1fr}.dash-stats-grid{grid-template-columns:1fr}.main{padding:62px 12px 50px}.sidebar{transform:translateX(100%)}[dir="ltr"] .sidebar{transform:translateX(-100%)}.sidebar.open{transform:translateX(0)}.sb-close{display:flex}.main{margin-right:0;padding-top:70px}[dir="ltr"] .main{margin-left:0}.mob-top{display:flex}}
 
 /* ===== REST OF STYLES ===== */
 .btn{font-family:inherit;font-size:12px;font-weight:500;border-radius:9px;padding:8px 14px;cursor:pointer;display:inline-flex;align-items:center;gap:5px;border:none;transition:all .15s;white-space:nowrap}
@@ -1013,7 +1012,6 @@ a{color:inherit;text-decoration:none}
 .chip{font-size:10.5px;font-weight:700;padding:5px 12px;border-radius:8px;background:var(--accent-d);color:var(--t2);border:1px solid var(--card-b);cursor:pointer;transition:.15s;white-space:nowrap}
 .chip:hover{background:var(--accent-d);color:var(--accent2)}
 .chip.active{background:var(--accent);color:#fff;border-color:var(--accent);box-shadow:0 3px 10px var(--accent-glow)}
-/* ===== PROTOCOL SELECTOR (VERTICAL) - بدون Trojan ===== */
 .proto-group-v{display:flex;flex-direction:column;gap:8px;margin-top:10px}
 .proto-btn-v{display:flex;align-items:center;gap:12px;padding:10px 14px;border-radius:12px;border:2px solid var(--card-b);background:rgba(0,0,0,0.2);color:var(--t2);font-family:inherit;font-size:12px;font-weight:500;cursor:pointer;transition:all 0.2s ease;user-select:none;outline:none;width:100%;text-align:left}
 .proto-btn-v:hover{border-color:var(--card-bh);background:var(--accent-d);color:var(--t1)}
@@ -1505,7 +1503,7 @@ a{color:inherit;text-decoration:none}
     </div>
   </div>
 
-  <!-- 3 Premium Charts with 3D Grid -->
+  <!-- 3 Premium Charts with Neon 3D Grid (Fill from 0 to curve) -->
   <div class="chart-grid">
     <div class="chart-premium" id="chart-load-container">
       <div class="ch-header">
@@ -1614,7 +1612,6 @@ a{color:inherit;text-decoration:none}
       </div>
       <div class="cp-block mb16">
         <div class="cp-block-label"><i class="ti ti-plug-connected"></i> <span data-lang="transport_protocols">Transport Protocols</span></div>
-        <!-- پروتکل‌ها به صورت عمودی (بدون Trojan) -->
         <div class="proto-group-v" id="proto-group-v">
           <button class="proto-btn-v active" data-proto="vless-ws" onclick="toggleProtoBtnV(this)">
             <span class="proto-icon vless"><i class="ti ti-brand-vscode"></i></span>
@@ -1952,7 +1949,7 @@ const LANG_DICT = {
 // ========== STATE ==========
 let currentLang = localStorage.getItem('CBeeNet-lang') || 'en';
 let currentTheme = localStorage.getItem('CBeeNet-theme') || 'dark-blue';
-let currentBgStyle = localStorage.getItem('CBeeNet-bg-style') || 'blue';
+let currentBgStyle = localStorage.getItem('CBeeNet-bg-style') || 'grey';
 let alertsData = [];
 let currentAlertFilter = 'all';
 let allLinksList = [];
@@ -2180,7 +2177,6 @@ function formatLinkName(label, protocol, protoSettings){
   result = result.replace(/{server}/g, server);
   result = result.replace(/{prefix}/g, prefix);
   result = result.replace(/{label}/g, label);
-  // فقط اگر {protocol} در template وجود داشته باشد، جایگزین می‌شود
   if(template.includes('{protocol}')){
     let displayName = defaultNames[protocol] || protocol;
     result = result.replace(/{protocol}/g, displayName);
@@ -2188,17 +2184,16 @@ function formatLinkName(label, protocol, protoSettings){
   return result;
 }
 
-// ========== PREMIUM CHARTS (فقط ۵ دقیقه آخر) - CSS 3D PERSPECTIVE ==========
+// ========== NEON PREMIUM CHARTS (Fill from 0 to Curve + 3D Grid) ==========
 const CHART_STORAGE_KEY = 'CBeeNet_chartData';
 const PREV_TRAF_KEY = 'CBeeNet_prevTraf';
 let chartData = { load: [], traffic: [], conns: [] };
 let chartTimes = { load: [], traffic: [], conns: [] };
-const MAX_POINTS = 60; // 60 * 5s = 300s = 5 دقیقه
+const MAX_POINTS = 60;
 let chartInstances = { load: null, traffic: null, conns: null };
 
 function loadChartDataFromStorage(){
   try {
-    // Load traffic data
     const stored = localStorage.getItem(CHART_STORAGE_KEY);
     if(stored){
       const parsed = JSON.parse(stored);
@@ -2207,7 +2202,6 @@ function loadChartDataFromStorage(){
         chartTimes = parsed.times;
         for(let key of ['load','traffic','conns']){
           chartTimes[key] = chartTimes[key].map(t => new Date(t));
-          // حذف داده‌های قدیمی‌تر از ۵ دقیقه
           const cutoff = Date.now() - 300000;
           const indices = chartTimes[key].map((d,i) => d.getTime() >= cutoff ? i : -1).filter(i => i >= 0);
           if(indices.length > 0){
@@ -2223,7 +2217,6 @@ function loadChartDataFromStorage(){
       }
     }
   } catch(e) {
-    console.warn('Error loading chart data from storage:', e);
     chartData = { load: [], traffic: [], conns: [] };
     chartTimes = { load: [], traffic: [], conns: [] };
     return false;
@@ -2239,26 +2232,17 @@ function saveChartDataToStorage(){
     localStorage.setItem(CHART_STORAGE_KEY, JSON.stringify({ data: chartData, times: times }));
   } catch(e) {}
 }
-function getChartColors(type) {
-  const root = document.documentElement;
-  const accent = getComputedStyle(root).getPropertyValue('--accent').trim() || '#1677ff';
-  const accentD = getComputedStyle(root).getPropertyValue('--accent-d').trim() || 'rgba(22,119,255,0.12)';
-  return { line: accent, fill: accentD };
-}
 function updateGridVisibility(type) {
+  // Network is always visible under the curve
   const container = document.querySelector(`#chart-${type}-container .chart-3d-wrap`) ||
                     document.querySelector(`#pg-overview .dash-small-chart .chart-3d-wrap`);
   if(!container) return;
   const floor = container.querySelector('.chart-grid-floor');
-  if(!floor) return;
-  const data = chartData[type] || [];
-  const hasValue = data.some(v => v > 0); // اگر حداقل یک مقدار > 0 باشد
-  floor.style.opacity = hasValue ? '' : '0';
+  if(floor) floor.style.opacity = '0.4';
 }
-// ===== FIXED buildChart (SINGLE dataset, 4-box Grid under axis via CSS) =====
+// ===== FIXED buildChart (SINGLE dataset + Glow dataset, fill from origin) =====
 function buildChart(type) {
-  const colors = getChartColors(type);
-  const accent = colors.line;
+  const neonBlue = '#00d4ff';
   const textColor = getComputedStyle(document.documentElement).getPropertyValue('--t3').trim() || '#5a7298';
   const gridColor = getComputedStyle(document.documentElement).getPropertyValue('--card-b').trim() || '#1e2d45';
   const canvasId = 'chart-' + type;
@@ -2274,26 +2258,36 @@ function buildChart(type) {
   if(type === 'conns' && yMax < 5) yMax = 5;
   if(maxVal === 0) yMax = 1;
 
-  // یک Dataset اصلی با گرادیان و خط
   const datasets = [
+    // Glow Layer (Behind)
     {
       data: dataArr,
-      borderColor: accent,
+      borderColor: 'rgba(0, 212, 255, 0.3)',
+      borderWidth: 8,
+      pointRadius: 0,
+      pointHoverRadius: 0,
+      fill: false,
+      tension: 0.4,
+    },
+    // Main Curve Layer
+    {
+      data: dataArr,
+      borderColor: neonBlue,
       borderWidth: 2.5,
-      pointRadius: 3,
-      pointHoverRadius: 6,
-      pointHoverBorderWidth: 3,
+      pointRadius: 0,
+      pointHoverRadius: 4,
+      pointHoverBorderWidth: 2,
       pointHoverBorderColor: '#fff',
-      pointHoverBackgroundColor: accent,
-      fill: true,
+      pointHoverBackgroundColor: neonBlue,
+      fill: 'origin',
       tension: 0.4,
       backgroundColor: function(context) {
         const chart = context.chart;
         const { ctx, chartArea } = chart;
-        if (!chartArea) return colors.fill;
+        if (!chartArea) return 'rgba(0, 212, 255, 0.1)';
         const grad = ctx.createLinearGradient(0, chartArea.top, 0, chartArea.bottom);
-        grad.addColorStop(0, colors.fill);
-        grad.addColorStop(1, 'rgba(0,0,0,0)');
+        grad.addColorStop(0, 'rgba(0, 212, 255, 0.05)');
+        grad.addColorStop(1, 'rgba(0, 212, 255, 0.6)');
         return grad;
       },
       borderJoinStyle: 'round'
@@ -2310,7 +2304,7 @@ function buildChart(type) {
       tooltip: {
         enabled: true,
         backgroundColor: 'rgba(11,17,29,0.92)',
-        borderColor: accent,
+        borderColor: neonBlue,
         borderWidth: 1,
         titleColor: '#fff',
         bodyColor: '#e8edf5',
@@ -2392,7 +2386,6 @@ function updateChartValue(type) {
 }
 function addDataPoint(type, value, time) {
   const now = time || new Date();
-  // حذف داده‌های قدیمی‌تر از ۵ دقیقه
   const cutoff = now.getTime() - 300000;
   let idx = chartTimes[type].findIndex(t => t.getTime() >= cutoff);
   if(idx > 0) {
@@ -2406,7 +2399,6 @@ function addDataPoint(type, value, time) {
   chartData[type].push(value);
   chartTimes[type].push(now);
   
-  // اگر تعداد نقاط از حد مجاز بیشتر شد، قدیمی‌ترین را حذف کن
   if(chartData[type].length > MAX_POINTS) {
     chartData[type].shift();
     chartTimes[type].shift();
@@ -2418,7 +2410,7 @@ function addDataPoint(type, value, time) {
   const labels = chartTimes[type].map(d => d ? d.toLocaleTimeString('en-US', {hour:'2-digit', minute:'2-digit'}) : '');
   chart.data.labels = labels;
   chart.data.datasets[0].data = chartData[type];
-  // تنظیم دوباره yMax با آستانه
+  chart.data.datasets[1].data = chartData[type];
   const maxVal = chartData[type].length > 0 ? Math.max(...chartData[type], 1) : 1;
   let yMax = type === 'load' ? 100 : Math.ceil(maxVal * 1.2);
   if(type === 'traffic' && yMax < 5) yMax = 5;
@@ -2457,15 +2449,12 @@ async function fetchStats(){
     const delta = totalTrafficDisplay - prevTraf;
     const pct = Math.min(100, Math.max(0, Math.round((delta / 50) * 100 * 10) / 10));
     
-    // Traffic Delta fix - only show consumption of the last 5 seconds
     if(delta >= 0) {
       addDataPoint('traffic', delta, now);
     } else {
-      // In case of server restart or overflow, just add a small value to keep chart alive
       addDataPoint('traffic', 0.01, now);
     }
     
-    // Update prevTraf and save to localStorage for persistence
     prevTraf = totalTrafficDisplay;
     localStorage.setItem(PREV_TRAF_KEY, String(prevTraf));
     
@@ -2479,7 +2468,6 @@ async function fetchStats(){
 // ========== Visibility Change Handler (Updates when tab becomes active) ==========
 document.addEventListener('visibilitychange', function() {
   if (!document.hidden) {
-    // Force an immediate update when the user returns to the tab
     fetchStats();
   }
 });
@@ -2487,9 +2475,7 @@ document.addEventListener('visibilitychange', function() {
 // ========== SECONDARY CHARTS ==========
 let dashProtoChart = null, dashHourlyChart = null;
 function initSecondaryCharts(){
-  const accentColor = getComputedStyle(document.documentElement).getPropertyValue('--accent').trim() || '#1677ff';
-  const purpleColor = getComputedStyle(document.documentElement).getPropertyValue('--purple').trim() || '#8b5cf6';
-  const greenColor = getComputedStyle(document.documentElement).getPropertyValue('--green-t').trim() || '#34d399';
+  const neonBlue = '#00d4ff';
   const amberColor = getComputedStyle(document.documentElement).getPropertyValue('--amber-t').trim() || '#fbbf24';
   const textColor = getComputedStyle(document.documentElement).getPropertyValue('--t3').trim() || '#5a7298';
   const gridColor = getComputedStyle(document.documentElement).getPropertyValue('--card-b').trim() || '#1e2d45';
@@ -2497,10 +2483,10 @@ function initSecondaryCharts(){
   const ctxProto = document.getElementById('dashProtoChart').getContext('2d');
   dashProtoChart = new Chart(ctxProto, {
     type: 'bar',
-    data: { labels: ['VLESS/WS', 'XHTTP-packet', 'XHTTP-stream', 'XHTTP-ultra'], datasets: [{ data: [0,0,0,0], backgroundColor: ['rgba(26, 122, 255, 0.8)', 'rgba(251, 191, 36, 0.8)', 'rgba(245, 158, 11, 0.8)', 'rgba(16, 185, 129, 0.8)'], borderColor: [accentColor, amberColor, '#f59e0b', greenColor], borderWidth: 2, borderRadius: 6, barPercentage: 0.6 }] },
+    data: { labels: ['VLESS/WS', 'XHTTP-packet', 'XHTTP-stream', 'XHTTP-ultra'], datasets: [{ data: [0,0,0,0], backgroundColor: [neonBlue, 'rgba(251, 191, 36, 0.8)', 'rgba(245, 158, 11, 0.8)', 'rgba(16, 185, 129, 0.8)'], borderColor: [neonBlue, amberColor, '#f59e0b', '#10b981'], borderWidth: 2, borderRadius: 6, barPercentage: 0.6 }] },
     options: {
       responsive: true, maintainAspectRatio: false,
-      plugins: { legend: { display: false }, tooltip: { backgroundColor: 'rgba(11, 17, 29, 0.9)', borderColor: accentColor, borderWidth: 1, titleColor: '#fff', bodyColor: '#fff', cornerRadius: 8, padding: 10, callbacks: { label: function(context){ return context.parsed.y + ' configs'; } } } },
+      plugins: { legend: { display: false }, tooltip: { backgroundColor: 'rgba(11, 17, 29, 0.9)', borderColor: neonBlue, borderWidth: 1, titleColor: '#fff', bodyColor: '#fff', cornerRadius: 8, padding: 10, callbacks: { label: function(context){ return context.parsed.y + ' configs'; } } } },
       scales: { x: { grid: { display: false }, ticks: { color: textColor, font: { size: 9, family: 'Vazirmatn, sans-serif' } } }, y: { grid: { color: gridColor, drawBorder: false }, ticks: { color: textColor, font: { size: 9, family: 'Vazirmatn, sans-serif' }, stepSize: 1 } } },
       animation: { duration: 400, easing: 'easeOutQuart' }
     }
@@ -2508,10 +2494,10 @@ function initSecondaryCharts(){
   const ctxHourly = document.getElementById('dashHourlyChart').getContext('2d');
   dashHourlyChart = new Chart(ctxHourly, {
     type: 'line',
-    data: { labels: ['00', '04', '08', '12', '16', '20'], datasets: [{ data: [0, 0, 0, 0, 0, 0], borderColor: amberColor, backgroundColor: 'rgba(251, 191, 36, 0.1)', borderWidth: 2, pointRadius: 0, pointHoverRadius: 5, pointHoverBorderWidth: 2, pointHoverBorderColor: '#fff', fill: true, tension: 0.3 }] },
+    data: { labels: ['00', '04', '08', '12', '16', '20'], datasets: [{ data: [0, 0, 0, 0, 0, 0], borderColor: neonBlue, backgroundColor: 'rgba(0, 212, 255, 0.2)', borderWidth: 2, pointRadius: 0, pointHoverRadius: 5, pointHoverBorderWidth: 2, pointHoverBorderColor: '#fff', fill: 'origin', tension: 0.3 }] },
     options: {
       responsive: true, maintainAspectRatio: false,
-      plugins: { legend: { display: false }, tooltip: { backgroundColor: 'rgba(11, 17, 29, 0.9)', borderColor: amberColor, borderWidth: 1, titleColor: '#fff', bodyColor: '#fff', cornerRadius: 8, padding: 10, callbacks: { label: function(context){ return context.parsed.y + ' MB'; } } } },
+      plugins: { legend: { display: false }, tooltip: { backgroundColor: 'rgba(11, 17, 29, 0.9)', borderColor: neonBlue, borderWidth: 1, titleColor: '#fff', bodyColor: '#fff', cornerRadius: 8, padding: 10, callbacks: { label: function(context){ return context.parsed.y + ' MB'; } } } },
       scales: { x: { grid: { display: false }, ticks: { color: textColor, font: { size: 8, family: 'Vazirmatn, sans-serif' } } }, y: { grid: { color: gridColor, drawBorder: false }, ticks: { color: textColor, font: { size: 8, family: 'Vazirmatn, sans-serif' }, callback: function(value) { return value + ' MB'; } } } },
       animation: { duration: 400, easing: 'easeOutQuart' }
     }
@@ -3144,7 +3130,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     btn.style.outlineOffset = btn.dataset.bg === currentBgStyle ? '2px' : '0';
   });
 
-  // Restore prevTraf from localStorage for traffic continuity
   prevTraf = parseFloat(localStorage.getItem(PREV_TRAF_KEY)) || 0;
 
   const hasStored = loadChartDataFromStorage();
@@ -3174,7 +3159,6 @@ document.addEventListener('DOMContentLoaded', async () => {
   }, 10000);
 });
 document.addEventListener('DOMContentLoaded', function() {
-  // Ensure nl-count exists
   if(!document.getElementById('nl-count')) {
     const hidden = document.createElement('input');
     hidden.type = 'hidden';
@@ -3184,8 +3168,7 @@ document.addEventListener('DOMContentLoaded', function() {
   }
 });
 </script>
-</body>
-</html>"""
+</body></html>"""
 
 def get_public_page_html(uuid_key: str) -> str:
     return f"""<!DOCTYPE html>
