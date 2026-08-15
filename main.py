@@ -97,22 +97,19 @@ SUBS_LOCK = asyncio.Lock()
 RESELLERS: dict = {}
 RESELLERS_LOCK = asyncio.Lock()
 
-# لیست پروتکل‌های مجاز (VMess حذف شد)
-PROTOCOLS = ("vless-ws", "trojan-ws", "xhttp-packet-up", "xhttp-stream-up", "xhttp-stream-one")
+# لیست پروتکل‌های مجاز (trojan-ws حذف شد)
+PROTOCOLS = ("vless-ws", "xhttp-packet-up", "xhttp-stream-up", "xhttp-stream-one")
 DEFAULT_PROTOCOL = "vless-ws"
 
-# تنظیمات سرور - شامل تنظیمات عمومی و تنظیمات اختصاصی هر پروتکل
+# تنظیمات سرور
 GLOBAL_SETTINGS = {
     "ips": [],
     "port": None,
     "server_name": "CBeeNet",
     "server_prefix": "",
     "link_template": "{server}-{label}",
-    # تنظیمات اختصاصی هر پروتکل: server_name, link_prefix, link_template
     "protocol_configs": {
         "vless-ws": {"server_name": "", "link_prefix": "", "link_template": ""},
-        "trojan-ws": {"server_name": "", "link_prefix": "", "link_template": ""},
-        # VMess حذف شد
         "xhttp-packet-up": {"server_name": "", "link_prefix": "", "link_template": ""},
         "xhttp-stream-up": {"server_name": "", "link_prefix": "", "link_template": ""},
         "xhttp-stream-one": {"server_name": "", "link_prefix": "", "link_template": ""},
@@ -217,17 +214,13 @@ async def fetch_ip_flag(ip: str) -> str:
     return ""
 
 def get_protocol_config(protocol: str) -> dict:
-    """دریافت تنظیمات اختصاصی پروتکل، اگر تنظیماتی وجود نداشت خالی برمی‌گرداند."""
     return GLOBAL_SETTINGS.get("protocol_configs", {}).get(protocol, {})
 
 def format_link_remark(label: str, protocol: str) -> str:
-    """ساخت نام نمایشی لینک با استفاده از تنظیمات عمومی یا اختصاصی پروتکل."""
-    # تنظیمات عمومی (پیش‌فرض)
     default_template = GLOBAL_SETTINGS.get("link_template", "{server}-{label}")
     default_server = GLOBAL_SETTINGS.get("server_name", "CBeeNet")
     default_prefix = GLOBAL_SETTINGS.get("server_prefix", "")
     
-    # تنظیمات اختصاصی پروتکل
     proto_cfg = get_protocol_config(protocol)
     template = proto_cfg.get("link_template") or default_template
     server = proto_cfg.get("server_name") or default_server
@@ -238,11 +231,10 @@ def format_link_remark(label: str, protocol: str) -> str:
     result = result.replace("{prefix}", prefix)
     result = result.replace("{label}", label)
     
+    # فقط اگر {protocol} در قالب وجود داشت، جایگزین می‌شود
     if "{protocol}" in template:
-        # نام‌های پیش‌فرض پروتکل‌ها (VMess حذف شد)
         default_names = {
             "vless-ws": "VLESS-WS",
-            "trojan-ws": "Trojan-WS",
             "xhttp-packet-up": "XHTTP-packet",
             "xhttp-stream-up": "XHTTP-stream",
             "xhttp-stream-one": "XHTTP-ultra"
@@ -263,28 +255,16 @@ def _format_uri(uuid: str, ip: str, port: int, remark: str, protocol: str, origi
         query = "&".join(f"{k}={quote(str(v))}" for k, v in params.items())
         return f"vless://{uuid}@{ip}:{port}?{query}#{quote(remark)}"
 
-    elif protocol == "trojan-ws":
-        path = f"/ws/{uuid}"
-        params = {
-            "security": "tls", "type": "ws", "host": original_host,
-            "path": path, "sni": original_host, "fp": "chrome",
-            "alpn": "http/1.1"
-        }
-        query = "&".join(f"{k}={quote(str(v))}" for k, v in params.items())
-        return f"trojan://{uuid}@{ip}:{port}?{query}#{quote(remark)}"
-
-    # VMess حذف شد
-
-    else:  # XHTTP
-        mode = protocol.replace("xhttp-", "")
-        path = f"/xhttp-siz10/{mode}/{uuid}"
-        params = {
-            "encryption": "none", "security": "tls", "type": "xhttp",
-            "mode": mode, "host": original_host, "path": path,
-            "sni": original_host, "fp": "chrome", "alpn": "h2,http/1.1"
-        }
-        query = "&".join(f"{k}={quote(str(v))}" for k, v in params.items())
-        return f"vless://{uuid}@{ip}:{port}?{query}#{quote(remark)}"
+    # XHTTP protocols
+    mode = protocol.replace("xhttp-", "")
+    path = f"/xhttp-siz10/{mode}/{uuid}"
+    params = {
+        "encryption": "none", "security": "tls", "type": "xhttp",
+        "mode": mode, "host": original_host, "path": path,
+        "sni": original_host, "fp": "chrome", "alpn": "h2,http/1.1"
+    }
+    query = "&".join(f"{k}={quote(str(v))}" for k, v in params.items())
+    return f"vless://{uuid}@{ip}:{port}?{query}#{quote(remark)}"
 
 def generate_links(link_data: dict, uuid: str, host: str) -> list[str]:
     links = []
@@ -307,8 +287,6 @@ def generate_links(link_data: dict, uuid: str, host: str) -> list[str]:
     for ip in ips:
         for proto in protocols:
             remark = format_link_remark(label, proto)
-            # اگر بیش از یک IP یا بیش از یک پروتکل انتخاب شده باشد، پسوند اضافه می‌شود
-            # تا لینک‌ها قابل تشخیص باشند
             if len(ips) > 1 or len(protocols) > 1:
                 suffix = f"-{proto}" if len(protocols) > 1 else ""
                 if len(ips) > 1:
@@ -627,18 +605,14 @@ async def update_server_settings(request: Request, _=Depends(require_auth)):
     log_activity("system", "Default server settings updated", "info")
     return {"ok": True, "settings": dict(GLOBAL_SETTINGS)}
 
-# ===== Protocol-specific settings (for pages.js) =====
 @app.get("/api/settings/protocol")
 async def get_protocol_settings(_=Depends(require_auth)):
-    """بازگرداندن تنظیمات اختصاصی هر پروتکل (server_name, link_prefix, link_template)"""
     return GLOBAL_SETTINGS.get("protocol_configs", {})
 
 @app.post("/api/settings/protocol")
 async def update_protocol_settings(request: Request, _=Depends(require_auth)):
-    """ذخیره تنظیمات اختصاصی هر پروتکل"""
     body = await request.json()
     new_configs = body.get("protocols", {})
-    # اعتبارسنجی ساده: فقط پروتکل‌های مجاز را قبول کن
     for proto, cfg in new_configs.items():
         if proto in PROTOCOLS:
             GLOBAL_SETTINGS["protocol_configs"][proto] = {
