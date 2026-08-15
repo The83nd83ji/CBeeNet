@@ -888,10 +888,16 @@ a{color:inherit;text-decoration:none}
 .dash-spark-card .spark-label i{font-size:14px;color:var(--accent)}
 .dash-spark-card .spark-value{font-size:20px;font-weight:800;color:var(--t1);letter-spacing:-.02em;line-height:1.2}
 .dash-spark-card .spark-value .unit{font-size:13px;font-weight:500;color:var(--t3);margin-right:3px}
-.dash-spark-card .spark-chart{height:150px;position:relative;margin-top:2px}
+.dash-spark-card .spark-chart{height:160px;position:relative;margin-top:2px}
 .dash-spark-card .spark-chart canvas{width:100% !important;height:100% !important}
 .dash-spark-card .spark-sub{font-size:9.5px;color:var(--t3);margin-top:4px;display:flex;align-items:center;gap:4px}
 .dash-spark-card .spark-sub .dot{width:5px;height:5px;border-radius:50%;display:inline-block;background:var(--accent)}
+.chart-controls{display:flex;align-items:center;justify-content:space-between;margin-top:8px;gap:8px;flex-wrap:wrap}
+.chart-controls .time-range{font-size:10.5px;color:var(--t2);font-weight:600;font-family:ui-monospace,monospace;background:var(--accent-d);padding:3px 10px;border-radius:6px;border:1px solid var(--card-b)}
+.chart-controls .btn-group{display:flex;gap:4px}
+.chart-controls .btn-group button{background:var(--accent-d);border:1px solid var(--card-b);color:var(--t2);border-radius:6px;padding:3px 10px;font-size:10px;cursor:pointer;font-family:inherit;transition:.15s;font-weight:600}
+.chart-controls .btn-group button:hover{background:var(--accent-d);color:var(--accent2);border-color:var(--accent)}
+.chart-controls .btn-group button:active{transform:scale(.96)}
 .dash-charts-second{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:22px}
 .dash-small-chart{background:var(--card);border:1px solid var(--card-b);border-radius:var(--radius);padding:16px 18px}
 .dash-small-chart .chart-title{font-size:11px;font-weight:600;color:var(--t2);margin-bottom:10px;display:flex;align-items:center;gap:6px}
@@ -1423,6 +1429,7 @@ a{color:inherit;text-decoration:none}
   </div>
 </aside>
 <main class="main">
+<!-- صفحه داشبورد (Overview) -->
 <section class="pg on" id="pg-overview">
   <div class="topbar">
     <div><div class="tb-title"><i class="ti ti-layout-dashboard"></i> <span data-lang="dashboard">Dashboard</span></div><div class="tb-sub" id="last-upd">Loading...</div></div>
@@ -1458,6 +1465,7 @@ a{color:inherit;text-decoration:none}
       <div class="sub" data-lang="running_time">Running Time</div>
     </div>
   </div>
+  <!-- سه نمودار حرفه‌ای با کنترل بازه زمانی -->
   <div class="dash-sparkline-row">
     <div class="dash-spark-card">
       <div class="spark-top">
@@ -1465,7 +1473,14 @@ a{color:inherit;text-decoration:none}
         <span class="spark-value" id="spark-load">0<span class="unit">%</span></span>
       </div>
       <div class="spark-chart"><canvas id="sparkLoad"></canvas></div>
-      <div class="spark-sub"><span class="dot"></span> <span data-lang="live">Live</span></div>
+      <div class="chart-controls">
+        <div class="btn-group">
+          <button onclick="shiftTime('load', -1)" title="1 min back"><i class="ti ti-chevron-left"></i></button>
+          <button onclick="shiftTime('load', 1)" title="1 min forward"><i class="ti ti-chevron-right"></i></button>
+        </div>
+        <span class="time-range" id="load-range">--:-- – --:--</span>
+        <button class="btn-sm btn-g" onclick="resetTime('load')" style="font-size:9px;padding:2px 8px">Reset</button>
+      </div>
     </div>
     <div class="dash-spark-card">
       <div class="spark-top">
@@ -1473,7 +1488,14 @@ a{color:inherit;text-decoration:none}
         <span class="spark-value" id="spark-traffic">0<span class="unit">MB</span></span>
       </div>
       <div class="spark-chart"><canvas id="sparkTraffic"></canvas></div>
-      <div class="spark-sub"><span class="dot"></span> <span data-lang="since_start">Since Start</span></div>
+      <div class="chart-controls">
+        <div class="btn-group">
+          <button onclick="shiftTime('traffic', -1)"><i class="ti ti-chevron-left"></i></button>
+          <button onclick="shiftTime('traffic', 1)"><i class="ti ti-chevron-right"></i></button>
+        </div>
+        <span class="time-range" id="traffic-range">--:-- – --:--</span>
+        <button class="btn-sm btn-g" onclick="resetTime('traffic')" style="font-size:9px;padding:2px 8px">Reset</button>
+      </div>
     </div>
     <div class="dash-spark-card">
       <div class="spark-top">
@@ -1481,10 +1503,17 @@ a{color:inherit;text-decoration:none}
         <span class="spark-value" id="spark-conns">0</span>
       </div>
       <div class="spark-chart"><canvas id="sparkConns"></canvas></div>
-      <div class="spark-sub"><span class="dot"></span> <span data-lang="live">Live</span></div>
+      <div class="chart-controls">
+        <div class="btn-group">
+          <button onclick="shiftTime('conns', -1)"><i class="ti ti-chevron-left"></i></button>
+          <button onclick="shiftTime('conns', 1)"><i class="ti ti-chevron-right"></i></button>
+        </div>
+        <span class="time-range" id="conns-range">--:-- – --:--</span>
+        <button class="btn-sm btn-g" onclick="resetTime('conns')" style="font-size:9px;padding:2px 8px">Reset</button>
+      </div>
     </div>
   </div>
-  <!-- Removed the big Bandwidth Usage chart (dash-chart-row) -->
+  <!-- دو نمودار کوچک اضافی (پروتکل‌ها و میانگین ساعتی) -->
   <div class="dash-charts-second">
     <div class="dash-small-chart">
       <div class="chart-title"><i class="ti ti-chart-bar"></i> <span data-lang="protocol_distribution">Protocol Distribution</span></div>
@@ -1500,6 +1529,8 @@ a{color:inherit;text-decoration:none}
     <a class="df-link" href="https://t.me/CBeeNet" target="_blank"><i class="ti ti-brand-telegram"></i> t.me/CBeeNet</a>
   </div>
 </section>
+
+<!-- صفحه Configs -->
 <section class="pg" id="pg-links">
   <div class="topbar">
     <div><div class="tb-title"><i class="ti ti-link-plus"></i> <span data-lang="configs">Configs</span></div><div class="tb-sub" data-lang="configs_management">Create and manage configs with quota, expiry and grouping</div></div>
@@ -1577,6 +1608,8 @@ a{color:inherit;text-decoration:none}
   <div class="cfg-grid" id="links-grid"></div>
   <div class="empty" id="links-empty" style="display:none"><i class="ti ti-link-off"></i><p data-lang="no_configs">No configs yet</p></div>
 </section>
+
+<!-- صفحه Sub Groups -->
 <section class="pg" id="pg-subgroups">
   <div class="topbar">
     <div><div class="tb-title"><i class="ti ti-folders"></i> <span data-lang="sub_groups_short">Sub Groups</span></div><div class="tb-sub" data-lang="each_group_public">Each group has its own public page with its configs</div></div>
@@ -1595,6 +1628,8 @@ a{color:inherit;text-decoration:none}
     <div class="subs-empty-v2"><div class="subs-empty-v2-icon"><i class="ti ti-folders"></i></div><div class="subs-empty-v2-title" data-lang="no_groups">No groups yet</div><div class="subs-empty-v2-sub" data-lang="create_group">Create a new group to organize your configs</div></div>
   </div>
 </section>
+
+<!-- صفحه Subscription -->
 <section class="pg" id="pg-subscriptions">
   <div class="topbar"><div><div class="tb-title"><i class="ti ti-rss"></i> <span data-lang="subscription">Subscription</span></div><div class="tb-sub" data-lang="subscription_links">Subscription links for v2ray apps</div></div></div>
   <div class="g2">
@@ -1614,6 +1649,8 @@ a{color:inherit;text-decoration:none}
     <div id="sub-groups-list" data-lang="loading">Loading...</div>
   </div>
 </section>
+
+<!-- صفحه Traffic (بخش ترافیک با نمودار بزرگ) -->
 <section class="pg" id="pg-traffic">
   <div class="topbar">
     <div><div class="tb-title"><i class="ti ti-chart-area"></i> <span data-lang="traffic">Traffic</span></div><div class="tb-sub" data-lang="traffic_analysis">Bandwidth usage analysis & monitoring</div></div>
@@ -1652,6 +1689,8 @@ a{color:inherit;text-decoration:none}
     <div class="traf-chart-body"><canvas id="ch3"></canvas></div>
   </div>
 </section>
+
+<!-- صفحه Connections -->
 <section class="pg" id="pg-connections">
   <div class="topbar">
     <div><div class="tb-title"><i class="ti ti-plug-connected"></i> <span data-lang="connections">Connections</span></div><div class="tb-sub" data-lang="connections_monitor">Live IP and traffic monitoring per connection</div></div>
@@ -1674,6 +1713,8 @@ a{color:inherit;text-decoration:none}
     <div class="conn-empty-v2-sub" data-lang="will_appear">They will appear here as soon as clients connect</div>
   </div>
 </section>
+
+<!-- صفحه Alerts -->
 <section class="pg" id="pg-alerts">
   <div class="topbar">
     <div><div class="tb-title"><i class="ti ti-bell"></i> <span data-lang="smart_alerts">Smart Alerts</span></div><div class="tb-sub" data-lang="alerts_sub">Important events & notifications</div></div>
@@ -1689,6 +1730,8 @@ a{color:inherit;text-decoration:none}
     <div id="alerts-list"></div>
   </div>
 </section>
+
+<!-- صفحه Security -->
 <section class="pg" id="pg-security">
   <div class="topbar"><div><div class="tb-title"><i class="ti ti-shield-lock"></i> <span data-lang="security">Security</span></div></div></div>
   <div class="g2">
@@ -1708,14 +1751,20 @@ a{color:inherit;text-decoration:none}
     </div>
   </div>
 </section>
+
+<!-- صفحه Activity Logs -->
 <section class="pg" id="pg-logs">
   <div class="topbar"><div><div class="tb-title"><i class="ti ti-history"></i> <span data-lang="activity_logs">Activity Logs</span></div><div class="tb-sub" data-lang="activity_logs_full">Complete event history</div></div><div class="tb-right"><button class="btn btn-p btn-sm" onclick="loadActivity()"><i class="ti ti-refresh"></i></button></div></div>
   <div class="card"><div class="log-timeline" id="logs-list">—</div><div class="empty" id="logs-empty" style="display:none"><i class="ti ti-history-toggle"></i><p data-lang="no_logs">No logs yet</p></div></div>
 </section>
+
+<!-- صفحه Errors -->
 <section class="pg" id="pg-errors">
   <div class="topbar"><div><div class="tb-title"><i class="ti ti-alert-triangle"></i> <span data-lang="errors">Errors</span></div></div><div class="tb-right"><span class="badge bg-red" id="errs-badge">0</span><button class="btn btn-p btn-sm" onclick="refreshAll()"><i class="ti ti-refresh"></i></button></div></div>
   <div class="card"><div class="card-title"><i class="ti ti-bug"></i> <span data-lang="error_logs">Error Logs</span></div><div id="errs-full">—</div></div>
 </section>
+
+<!-- صفحه WebSocket Test -->
 <section class="pg" id="pg-testws">
   <div class="topbar"><div><div class="tb-title"><i class="ti ti-wifi"></i> <span data-lang="websocket_test">WebSocket Test</span></div></div></div>
   <div class="card" style="max-width:660px">
@@ -1734,6 +1783,8 @@ a{color:inherit;text-decoration:none}
     </div>
   </div>
 </section>
+
+<!-- صفحه Settings -->
 <section class="pg" id="pg-settings">
   <div class="topbar">
     <div><div class="tb-title"><i class="ti ti-settings"></i> <span data-lang="settings">Settings</span></div><div class="tb-sub" data-lang="system_settings">System configuration</div></div>
@@ -2018,78 +2069,175 @@ function navTo(name){
 document.querySelectorAll('.nav-it').forEach(el => el.addEventListener('click', () => navTo(el.dataset.pg)));
 function openModal(id){ document.getElementById(id).classList.add('open'); }
 function closeModal(id){ document.getElementById(id).classList.remove('open'); }
+
+// ========== Sparkline Charts with Time Control ==========
 let sparkLoadChart, sparkTrafficChart, sparkConnsChart;
-const sparkData = { load: [], traffic: [], conns: [] };
-const MAX_SPARK = 60;
+const MAX_POINTS = 200; // ~ 16 minutes (5s interval)
+let sparkData = { load: [], traffic: [], conns: [] };
+let sparkTime = { load: [], traffic: [], conns: [] }; // store timestamps (Date objects)
+let sparkWindow = { load: { start: 0, end: MAX_POINTS }, traffic: { start: 0, end: MAX_POINTS }, conns: { start: 0, end: MAX_POINTS } };
+
 function initSparklineCharts(){
   const accentColor = getComputedStyle(document.documentElement).getPropertyValue('--accent').trim() || '#1a7aff';
   const accentBg = getComputedStyle(document.documentElement).getPropertyValue('--accent-d').trim() || 'rgba(26,122,255,0.12)';
   const textColor = getComputedStyle(document.documentElement).getPropertyValue('--t3').trim() || '#5a7298';
   const gridColor = getComputedStyle(document.documentElement).getPropertyValue('--card-b').trim() || '#1e2d45';
   
-  // Load Chart
+  const commonOpts = (label, unit='') => ({
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: {
+      legend: { display: false },
+      tooltip: {
+        backgroundColor: 'rgba(0,0,0,0.8)',
+        borderColor: accentColor,
+        borderWidth: 1,
+        titleColor: '#fff',
+        bodyColor: '#fff',
+        cornerRadius: 6,
+        callbacks: {
+          label: function(context) {
+            const val = context.parsed.y;
+            return val.toFixed(1) + (unit ? ' ' + unit : '');
+          }
+        }
+      }
+    },
+    scales: {
+      x: { display: true, grid: { color: gridColor, drawBorder: false }, ticks: { color: textColor, font: { size: 8, family: 'Vazirmatn, sans-serif' }, maxTicksLimit: 6, callback: function(value, index, ticks) { if(this.getLabelForValue) { const label = this.getLabelForValue(value); if(label) return label; } return ''; } } },
+      y: { display: true, grid: { color: gridColor, drawBorder: false }, ticks: { color: textColor, font: { size: 8, family: 'Vazirmatn, sans-serif' } }, beginAtZero: true }
+    },
+    animation: { duration: 300 }
+  });
+
   const ctxLoad = document.getElementById('sparkLoad').getContext('2d');
   sparkLoadChart = new Chart(ctxLoad, {
     type: 'line',
     data: { labels: [], datasets: [{ data: [], borderColor: accentColor, backgroundColor: accentBg, borderWidth: 2, pointRadius: 0, fill: true, tension: 0.4 }] },
-    options: {
-      responsive: true, maintainAspectRatio: false,
-      plugins: { legend: { display: false }, tooltip: { enabled: true, backgroundColor: 'rgba(0,0,0,0.8)', borderColor: accentColor, borderWidth: 1, titleColor: '#fff', bodyColor: '#fff', cornerRadius: 6, callbacks: { label: function(context) { return context.parsed.y.toFixed(1) + '%'; } } } },
-      scales: {
-        x: { display: true, grid: { color: gridColor, drawBorder: false }, ticks: { color: textColor, font: { size: 8, family: 'Vazirmatn, sans-serif' }, maxTicksLimit: 6 } },
-        y: { display: true, grid: { color: gridColor, drawBorder: false }, ticks: { color: textColor, font: { size: 8, family: 'Vazirmatn, sans-serif' }, callback: function(value) { return value + '%'; } }, min: 0, max: 100 }
-      },
-      animation: { duration: 300 }
-    }
+    options: { ...commonOpts('Load', '%'), scales: { ...commonOpts('Load', '%').scales, y: { ...commonOpts('Load', '%').scales.y, max: 100 } } }
   });
-  // Traffic Chart
   const ctxTraffic = document.getElementById('sparkTraffic').getContext('2d');
   sparkTrafficChart = new Chart(ctxTraffic, {
     type: 'line',
     data: { labels: [], datasets: [{ data: [], borderColor: accentColor, backgroundColor: accentBg, borderWidth: 2, pointRadius: 0, fill: true, tension: 0.4 }] },
-    options: {
-      responsive: true, maintainAspectRatio: false,
-      plugins: { legend: { display: false }, tooltip: { enabled: true, backgroundColor: 'rgba(0,0,0,0.8)', borderColor: accentColor, borderWidth: 1, titleColor: '#fff', bodyColor: '#fff', cornerRadius: 6, callbacks: { label: function(context) { return context.parsed.y.toFixed(1) + ' MB'; } } } },
-      scales: {
-        x: { display: true, grid: { color: gridColor, drawBorder: false }, ticks: { color: textColor, font: { size: 8, family: 'Vazirmatn, sans-serif' }, maxTicksLimit: 6 } },
-        y: { display: true, grid: { color: gridColor, drawBorder: false }, ticks: { color: textColor, font: { size: 8, family: 'Vazirmatn, sans-serif' }, callback: function(value) { return value.toFixed(0) + ' MB'; } }, beginAtZero: true }
-      },
-      animation: { duration: 300 }
-    }
+    options: { ...commonOpts('Traffic', 'MB'), scales: { ...commonOpts('Traffic', 'MB').scales, y: { ...commonOpts('Traffic', 'MB').scales.y, beginAtZero: true } } }
   });
-  // Connections Chart
   const ctxConns = document.getElementById('sparkConns').getContext('2d');
   sparkConnsChart = new Chart(ctxConns, {
     type: 'line',
     data: { labels: [], datasets: [{ data: [], borderColor: accentColor, backgroundColor: accentBg, borderWidth: 2, pointRadius: 0, fill: true, tension: 0.4 }] },
-    options: {
-      responsive: true, maintainAspectRatio: false,
-      plugins: { legend: { display: false }, tooltip: { enabled: true, backgroundColor: 'rgba(0,0,0,0.8)', borderColor: accentColor, borderWidth: 1, titleColor: '#fff', bodyColor: '#fff', cornerRadius: 6, callbacks: { label: function(context) { return context.parsed.y + ' connections'; } } } },
-      scales: {
-        x: { display: true, grid: { color: gridColor, drawBorder: false }, ticks: { color: textColor, font: { size: 8, family: 'Vazirmatn, sans-serif' }, maxTicksLimit: 6 } },
-        y: { display: true, grid: { color: gridColor, drawBorder: false }, ticks: { color: textColor, font: { size: 8, family: 'Vazirmatn, sans-serif' }, stepSize: 1, beginAtZero: true } }
-      },
-      animation: { duration: 300 }
-    }
+    options: { ...commonOpts('Connections', ''), scales: { ...commonOpts('Connections', '').scales, y: { ...commonOpts('Connections', '').scales.y, stepSize: 1, beginAtZero: true } } }
   });
+
+  // Set initial window to last 5 minutes worth of points (approx 60 points)
+  sparkWindow.load.start = Math.max(0, sparkData.load.length - 60);
+  sparkWindow.load.end = sparkData.load.length;
+  sparkWindow.traffic.start = Math.max(0, sparkData.traffic.length - 60);
+  sparkWindow.traffic.end = sparkData.traffic.length;
+  sparkWindow.conns.start = Math.max(0, sparkData.conns.length - 60);
+  sparkWindow.conns.end = sparkData.conns.length;
+  updateSparklineAll();
 }
-function updateSparkline(chart, data, maxVal){
-  if(!chart) return;
-  if(data.length > MAX_SPARK) data.shift();
-  const labels = data.map((_, i) => i);
-  chart.data.labels = labels;
-  chart.data.datasets[0].data = data;
-  if(maxVal !== undefined && maxVal !== null){
-    chart.options.scales.y.max = maxVal;
+
+function shiftTime(type, direction) {
+  const step = 12; // ~1 minute (5s * 12 = 60s)
+  const w = sparkWindow[type];
+  const dataLen = sparkData[type].length;
+  let newStart = w.start + direction * step;
+  let newEnd = w.end + direction * step;
+  if (newStart < 0) { newStart = 0; newEnd = Math.min(dataLen, newStart + (w.end - w.start)); }
+  if (newEnd > dataLen) { newEnd = dataLen; newStart = Math.max(0, newEnd - (w.end - w.start)); }
+  if (newEnd - newStart < 2) return; // keep at least 2 points
+  w.start = newStart;
+  w.end = newEnd;
+  updateSparklineChart(type);
+  updateRangeLabel(type);
+}
+
+function resetTime(type) {
+  const w = sparkWindow[type];
+  const dataLen = sparkData[type].length;
+  w.start = Math.max(0, dataLen - 60);
+  w.end = dataLen;
+  updateSparklineChart(type);
+  updateRangeLabel(type);
+}
+
+function updateRangeLabel(type) {
+  const w = sparkWindow[type];
+  const times = sparkTime[type];
+  const el = document.getElementById(type + '-range');
+  if (!el || times.length === 0) return;
+  const startIdx = Math.max(0, Math.min(w.start, times.length-1));
+  const endIdx = Math.max(0, Math.min(w.end-1, times.length-1));
+  if (startIdx >= times.length || endIdx < 0) { el.textContent = '--:-- – --:--'; return; }
+  const startTime = times[startIdx];
+  const endTime = times[endIdx];
+  const fmt = (d) => d ? d.toLocaleTimeString('en-US', {hour:'2-digit', minute:'2-digit'}) : '--:--';
+  el.textContent = fmt(startTime) + ' – ' + fmt(endTime);
+}
+
+function updateSparklineChart(type) {
+  const w = sparkWindow[type];
+  const dataArr = sparkData[type];
+  const timeArr = sparkTime[type];
+  const sliced = dataArr.slice(w.start, w.end);
+  const times = timeArr.slice(w.start, w.end);
+  let chart;
+  if (type === 'load') chart = sparkLoadChart;
+  else if (type === 'traffic') chart = sparkTrafficChart;
+  else if (type === 'conns') chart = sparkConnsChart;
+  if (!chart) return;
+  chart.data.labels = times.map(d => d ? d.toLocaleTimeString('en-US', {hour:'2-digit', minute:'2-digit'}) : '');
+  chart.data.datasets[0].data = sliced;
+  // Auto-scale y for traffic/conns
+  if (type === 'traffic') {
+    const max = Math.max(10, ...sliced, 1) * 1.2;
+    chart.options.scales.y.max = Math.ceil(max);
+  } else if (type === 'conns') {
+    const max = Math.max(5, ...sliced, 1) * 1.2;
+    chart.options.scales.y.max = Math.ceil(max);
   } else {
-    // Auto-scale if maxVal not given (only for traffic and connections)
-    if(data.length > 1) {
-      const max = Math.max(...data, 1) * 1.2;
-      chart.options.scales.y.max = Math.ceil(max);
-    }
+    chart.options.scales.y.max = 100;
   }
   chart.update('none');
 }
+
+function updateSparklineAll() {
+  updateSparklineChart('load');
+  updateSparklineChart('traffic');
+  updateSparklineChart('conns');
+  updateRangeLabel('load');
+  updateRangeLabel('traffic');
+  updateRangeLabel('conns');
+}
+
+// Add new data point to a specific metric
+function addSparkDataPoint(type, value, time) {
+  sparkData[type].push(value);
+  sparkTime[type].push(time || new Date());
+  if (sparkData[type].length > MAX_POINTS) {
+    sparkData[type].shift();
+    sparkTime[type].shift();
+  }
+  // Auto-advance window if at end (default behavior)
+  const w = sparkWindow[type];
+  if (w.end === sparkData[type].length - 1) {
+    w.start = Math.max(0, w.start + 1);
+    w.end = sparkData[type].length;
+  } else {
+    // if user scrolled back, keep window fixed
+  }
+  // If window end is at the end, we keep it at end
+  if (w.end === sparkData[type].length - 1 && w.start < w.end) {
+    // keep it
+  }
+  // Update chart only if this type is visible
+  updateSparklineChart(type);
+  updateRangeLabel(type);
+}
+
+// ========== Other Charts (Protocol & Hourly) ==========
 let dashProtoChart = null, dashHourlyChart = null;
 function initCharts(){
   const accentColor = getComputedStyle(document.documentElement).getPropertyValue('--accent').trim() || '#1a7aff';
@@ -2099,7 +2247,6 @@ function initCharts(){
   const textColor = getComputedStyle(document.documentElement).getPropertyValue('--t3').trim() || '#5a7298';
   const gridColor = getComputedStyle(document.documentElement).getPropertyValue('--card-b').trim() || '#1e2d45';
   
-  // Protocol Distribution
   const ctxProto = document.getElementById('dashProtoChart').getContext('2d');
   dashProtoChart = new Chart(ctxProto, {
     type: 'bar',
@@ -2111,7 +2258,6 @@ function initCharts(){
       animation: { duration: 400, easing: 'easeOutQuart' }
     }
   });
-  // Hourly Average
   const ctxHourly = document.getElementById('dashHourlyChart').getContext('2d');
   dashHourlyChart = new Chart(ctxHourly, {
     type: 'line',
@@ -2147,18 +2293,19 @@ function updateCharts(statsData, linksData){
     dashHourlyChart.update('none');
   }
 }
+
+// ========== fetchStats with sparkline updates ==========
 let prevTraf = 0;
 let allLinksList = [];
 async function fetchStats(){
   try{
-    // Get connections list from /api/connections
     const connResp = await authF('/api/connections');
     const connData = await connResp.json();
     const conns = connData.connections || [];
     const uniqueIps = new Set(conns.map(c => c.ip));
     const activeCount = uniqueIps.size;
     document.getElementById('dash-conns').textContent = activeCount;
-    // Get stats from /stats
+    
     const statsResp = await authF('/stats');
     const d = await statsResp.json();
     document.getElementById('dash-traffic').innerHTML = (d.total_traffic_mb || 0).toFixed(1) + ' <small style="font-size:14px;font-weight:400;">MB</small>';
@@ -2167,33 +2314,38 @@ async function fetchStats(){
     document.getElementById('dash-uptime').textContent = d.uptime || '00:00:00';
     document.getElementById('uptime-badge').textContent = 'Railway · ' + (d.uptime || '00:00:00');
     document.getElementById('last-upd').textContent = 'Last update: ' + new Date().toLocaleTimeString();
-    // Sparklines
+
+    // Update sparklines
+    const now = new Date();
+    // Load (delta percent)
     const delta = d.total_traffic_mb - prevTraf;
     const pct = Math.min(100, Math.max(0, Math.round((delta / 50) * 100 * 10) / 10));
     prevTraf = d.total_traffic_mb;
-    sparkData.load.push(pct);
+    addSparkDataPoint('load', pct, now);
     document.getElementById('spark-load').innerHTML = pct + '<span class="unit">%</span>';
-    updateSparkline(sparkLoadChart, sparkData.load, 100);
+
+    // Traffic (total MB)
     const trafficVal = parseFloat(d.total_traffic_mb.toFixed(2));
-    sparkData.traffic.push(trafficVal);
+    addSparkDataPoint('traffic', trafficVal, now);
     document.getElementById('spark-traffic').innerHTML = trafficVal + '<span class="unit">MB</span>';
-    const maxTraffic = Math.max(10, ...sparkData.traffic);
-    updateSparkline(sparkTrafficChart, sparkData.traffic, maxTraffic * 1.2);
-    const connsVal = activeCount;
-    sparkData.conns.push(connsVal);
-    document.getElementById('spark-conns').textContent = connsVal;
-    const maxConns = Math.max(5, ...sparkData.conns);
-    updateSparkline(sparkConnsChart, sparkData.conns, maxConns * 1.2);
-    // Update charts with stats data and links
+
+    // Connections
+    addSparkDataPoint('conns', activeCount, now);
+    document.getElementById('spark-conns').textContent = activeCount;
+
+    // Update other charts
     updateCharts(d, allLinksList);
   } catch(e){ console.error('fetchStats error:', e); }
 }
+
+// ========== loadLinks (with allSubsList) ==========
 async function loadLinks(){
   try{
     const [lr, sr] = await Promise.all([authF('/api/links'), authF('/api/subs')]);
     const {links = []} = await lr.json();
     const {subs = []} = await sr.json();
     allLinksList = links;
+    allSubsList = subs;
     const nlSub = document.getElementById('nl-sub');
     const curSub = nlSub.value;
     nlSub.innerHTML = '<option value="">— No Group —</option>' + subs.map(s => `<option value="${esc(s.sub_id)}">${esc(s.name)}</option>`).join('');
@@ -2204,9 +2356,6 @@ async function loadLinks(){
     const empty = document.getElementById('links-empty');
     if(!links.length){ grid.innerHTML = ''; empty.style.display = 'block'; return; }
     empty.style.display = 'none';
-    const serverName = localStorage.getItem('CBeeNet-server-name') || 'CBeeNet';
-    const serverPrefix = localStorage.getItem('CBeeNet-server-prefix') || '';
-    const linkTemplate = localStorage.getItem('CBeeNet-link-template') || '{server}-{label}';
     grid.innerHTML = links.map(l => {
       const lim = l.limit_bytes === 0 ? '∞' : fmtB(l.limit_bytes);
       const pct = l.limit_bytes === 0 ? 0 : Math.min(100, l.used_bytes / l.limit_bytes * 100);
@@ -2255,7 +2404,8 @@ async function loadLinks(){
     updateCharts(stats, links);
   } catch(e){ console.error(e); }
 }
-let allSubsList = [];
+
+// ========== createLink, openEditLink, saveEditLink, toggleActive, resetUsage, deleteLink, showQR ==========
 async function createLink(){
   const label = document.getElementById('nl-label').value.trim() || 'New Config';
   const val = document.getElementById('nl-val').value;
@@ -2329,7 +2479,9 @@ async function deleteLink(uuid){
   try{ const r = await authF('/api/links/' + uuid, { method: 'DELETE' }); if(!r.ok) throw new Error(); toast('Deleted ✓', 'ok'); loadLinks(); } catch(e){ toast('Error', 'err'); }
 }
 function showQR(link){ window.open('https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=' + encodeURIComponent(link), '_blank'); }
-let allSubsRaw = [];
+
+// ========== Sub Groups (loadSubs, filterSubs, createSub, deleteSub, openSubLinks, etc.) ==========
+let allSubsList = [];
 async function loadSubs(){
   try{
     const r = await authF('/api/subs');
@@ -2472,6 +2624,19 @@ async function loadSubsPage(){
   } catch(e){}
 }
 function cpSubAll(){ navigator.clipboard.writeText(location.protocol + '//' + location.host + '/sub-all').then(() => toast('Copied ✓', 'ok')); }
+async function copyAllSubLinks(subId){
+  const r = await authF('/api/links');
+  const d = await r.json();
+  const links = d.links || [];
+  const sub = allSubsRaw.find(s => s.sub_id === subId);
+  if(!sub){ toast('Group not found', 'err'); return; }
+  const subLinkIds = sub.link_ids || [];
+  const urls = links.filter(l => subLinkIds.includes(l.uuid) && l.active && !l.expired).map(l => l.sub_url);
+  if(!urls.length){ toast('No active configs', 'err'); return; }
+  navigator.clipboard.writeText(urls.join('\n')).then(() => toast(urls.length + ' links copied ✓', 'ok'));
+}
+
+// ========== Connections, Activity, Errors, WebSocket ==========
 async function loadConns(){
   try{
     const r = await authF('/api/connections');
@@ -2576,6 +2741,8 @@ function wsSend(){
   document.getElementById('ws-msg').value = '';
 }
 function wsDisc(){ if(ws) ws.close(); }
+
+// ========== Change Password ==========
 async function changePw(){
   const cur = document.getElementById('cp-cur').value;
   const nw = document.getElementById('cp-new').value;
@@ -2620,33 +2787,10 @@ function checkPwStrength(val){
   if(val.length === 0){ label.innerHTML = '<i class="ti ti-shield"></i> Password Strength'; return; }
   label.innerHTML = `<i class="ti ti-shield-check" style="color:${colors[Math.max(0, score-1)]}"></i> ${labels[Math.max(0, score-1)]}`;
 }
-function refreshAll(){
-  fetchStats();
-  if(document.getElementById('pg-links').classList.contains('on')) loadLinks();
-  if(document.getElementById('pg-subgroups').classList.contains('on')) loadSubs();
-  if(document.getElementById('pg-subscriptions').classList.contains('on')) loadSubsPage();
-  if(document.getElementById('pg-connections').classList.contains('on')) loadConns();
-  if(document.getElementById('pg-logs').classList.contains('on')) loadActivity();
-  if(document.getElementById('pg-alerts').classList.contains('on')) loadAlerts();
-  toast('Refreshed ✓', 'ok');
-}
-async function copyAllSubLinks(subId){
-  const r = await authF('/api/links');
-  const d = await r.json();
-  const links = d.links || [];
-  const sub = allSubsRaw.find(s => s.sub_id === subId);
-  if(!sub){ toast('Group not found', 'err'); return; }
-  const subLinkIds = sub.link_ids || [];
-  const urls = links.filter(l => subLinkIds.includes(l.uuid) && l.active && !l.expired).map(l => l.sub_url);
-  if(!urls.length){ toast('No active configs', 'err'); return; }
-  navigator.clipboard.writeText(urls.join('\n')).then(() => toast(urls.length + ' links copied ✓', 'ok'));
-}
 
-// ========== Smart Alerts Module ==========
+// ========== Smart Alerts ==========
 function generateAlertsFromData(stats, links){
   const alerts = [];
-  const now = new Date();
-  // Configs expiring in <=3 days
   links.forEach(l => {
     if(l.expires_at && !l.expired){
       const d = daysLeft(l.expires_at);
@@ -2664,7 +2808,6 @@ function generateAlertsFromData(stats, links){
         });
       }
     }
-    // Quota usage > 80%
     if(l.limit_bytes > 0){
       const pct = l.used_bytes / l.limit_bytes * 100;
       if(pct > 80){
@@ -2682,7 +2825,6 @@ function generateAlertsFromData(stats, links){
       }
     }
   });
-  // Recent errors > 3 in last 5 minutes
   const recentErrors = stats.recent_errors || [];
   const fiveMinAgo = Date.now() - 300000;
   const recent = recentErrors.filter(e => new Date(e.time).getTime() > fiveMinAgo);
@@ -2699,7 +2841,6 @@ function generateAlertsFromData(stats, links){
       dismissable: true
     });
   }
-  // New IP connected (simple simulation)
   const connCount = stats.active_connections || 0;
   if(connCount > 0){
     const lastAlert = alertsData.find(a => a.id && a.id.startsWith('newip-'));
@@ -2778,6 +2919,19 @@ setInterval(() => {
   }
 }, 30000);
 
+// ========== Refresh All ==========
+function refreshAll(){
+  fetchStats();
+  if(document.getElementById('pg-links').classList.contains('on')) loadLinks();
+  if(document.getElementById('pg-subgroups').classList.contains('on')) loadSubs();
+  if(document.getElementById('pg-subscriptions').classList.contains('on')) loadSubsPage();
+  if(document.getElementById('pg-connections').classList.contains('on')) loadConns();
+  if(document.getElementById('pg-logs').classList.contains('on')) loadActivity();
+  if(document.getElementById('pg-alerts').classList.contains('on')) loadAlerts();
+  toast('Refreshed ✓', 'ok');
+}
+
+// ========== DOM Ready ==========
 document.addEventListener('DOMContentLoaded', async () => {
   await checkAuth();
   applyLanguage();
