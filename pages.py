@@ -1,4 +1,4 @@
-# pages.py - CBee Gateway v1.0.0
+# pages.py - CBee Gateway v1.0.0 (Fixed & Enhanced)
 import json
 
 LOGIN_HTML = r"""<!DOCTYPE html>
@@ -802,18 +802,22 @@ DASHBOARD_HTML = r"""<!DOCTYPE html>
   --accent:#1a7aff;--accent2:#4d94ff;--accent-d:rgba(26,122,255,0.15);--accent-glow:rgba(26,122,255,0.35);
   --green:#10b981;--green-bg:rgba(16,185,129,0.10);--green-t:#34d399;--red:#ef4444;--red-bg:rgba(239,68,68,0.10);--red-t:#f87171;--amber:#f59e0b;--amber-bg:rgba(245,158,11,0.10);--amber-t:#fbbf24;--purple:#8b5cf6;--purple-bg:rgba(139,92,246,0.10);
 }
+/* ===== MIXED THEME (Red, Sky Blue, Yellow) ===== */
 [data-theme="dark-mixed"]{
   --bg:#0d1117; --bg2:#161b22; --bg3:#1c2333; --card:#161b22; --card-b:#30363d;
-  --accent:#00ffcc; --accent2:#00f0ff; --accent-d:rgba(0,255,204,0.15); --accent-glow:rgba(0,255,204,0.4);
-  --green:#10b981; --green-t:#34d399; --red:#ef4444; --red-t:#f87171; --amber:#f59e0b; --amber-t:#fbbf24; --purple:#8b5cf6;
+  --accent:#ff4d4d; --accent2:#00bfff; --accent-d:rgba(255,77,77,0.15); --accent-glow:rgba(255,77,77,0.4);
+  --green:#ffcc00; --green-bg:rgba(255,204,0,0.10); --green-t:#ffdd44;
+  --red:#ef4444; --red-bg:rgba(239,68,68,0.10); --red-t:#f87171;
+  --amber:#ffcc00; --amber-bg:rgba(255,204,0,0.10); --amber-t:#ffdd44;
+  --purple:#00bfff; --purple-bg:rgba(0,191,255,0.10);
 }
 [data-theme="light-blue"]{--bg:#f6f8fa;--bg2:#ffffff;--bg3:#eaeef2;--card:#ffffff;--card-b:#d0d7de;--card-bh:rgba(22,119,255,0.25);--accent:#1677ff;--accent2:#4096ff;--accent-d:rgba(22,119,255,0.08);--accent-glow:rgba(22,119,255,0.25);--t1:#24292f;--t2:#57606a;--t3:#8b949e;--shadow:0 8px 28px rgba(0,0,0,0.08);}
 [data-theme="light-red"]{--bg:#f6f8fa;--bg2:#ffffff;--bg3:#eaeef2;--card:#ffffff;--card-b:#d0d7de;--card-bh:rgba(239,68,68,0.25);--accent:#ef4444;--accent2:#f87171;--accent-d:rgba(239,68,68,0.08);--accent-glow:rgba(239,68,68,0.25);--t1:#24292f;--t2:#57606a;--t3:#8b949e;--shadow:0 8px 28px rgba(0,0,0,0.08);}
 [data-theme="light-yellow"]{--bg:#f6f8fa;--bg2:#ffffff;--bg3:#eaeef2;--card:#ffffff;--card-b:#d0d7de;--card-bh:rgba(245,158,11,0.25);--accent:#f59e0b;--accent2:#fbbf24;--accent-d:rgba(245,158,11,0.08);--accent-glow:rgba(245,158,11,0.25);--t1:#24292f;--t2:#57606a;--t3:#8b949e;--shadow:0 8px 28px rgba(0,0,0,0.08);}
 [data-theme="light-mixed"]{
   --bg:#f6f8fa; --bg2:#ffffff; --bg3:#eaeef2; --card:#ffffff; --card-b:#d0d7de;
-  --accent:#00ffcc; --accent2:#00e5ff; --accent-d:rgba(0,255,204,0.2); --accent-glow:rgba(0,255,204,0.3);
-  --green:#10b981; --green-t:#059669; --red:#ef4444; --red-t:#dc2626; --amber:#f59e0b; --amber-t:#d97706; --purple:#8b5cf6;
+  --accent:#ff3333; --accent2:#0099ff; --accent-d:rgba(255,51,51,0.1); --accent-glow:rgba(255,51,51,0.3);
+  --green:#ffcc00; --green-t:#cc9900; --red:#ef4444; --red-t:#dc2626; --amber:#f59e0b; --amber-t:#d97706; --purple:#0099ff;
 }
 html,body{height:100%}
 body{font-family:var(--font-family);background:var(--bg);color:var(--t1);min-height:100vh;display:flex;font-size:14px;transition:background .3s,color .3s,border-color .3s}
@@ -1482,7 +1486,7 @@ a{color:inherit;text-decoration:none}
     </div>
   </div>
 
-  <!-- 3 Premium Charts (only last 5 minutes) -->
+  <!-- 3 Premium Charts (only last 5 minutes) with 3D Grid -->
   <div class="chart-grid">
     <div class="chart-premium" id="chart-load-container">
       <div class="ch-header">
@@ -1819,7 +1823,7 @@ a{color:inherit;text-decoration:none}
             <button class="btn btn-p theme-btn-select" data-theme="dark-red" style="background:#ef4444;color:#fff;box-shadow:0 2px 8px rgba(239,68,68,0.4)" onclick="setTheme('dark-red')"><i class="ti ti-circle"></i> <span data-lang="red">Red</span></button>
             <button class="btn btn-p theme-btn-select" data-theme="dark-yellow" style="background:#f59e0b;color:#000;box-shadow:0 2px 8px rgba(245,158,11,0.4)" onclick="setTheme('dark-yellow')"><i class="ti ti-circle"></i> <span data-lang="yellow">Yellow</span></button>
             <button class="btn btn-p theme-btn-select" data-theme="dark-prestige" style="background:linear-gradient(135deg,#1a7aff,#4d94ff);color:#fff;box-shadow:0 2px 8px rgba(26,122,255,0.4)" onclick="setTheme('dark-prestige')"><i class="ti ti-circle"></i> <span data-lang="prestige_theme">Prestige</span></button>
-            <button class="btn btn-p theme-btn-select" data-theme="dark-mixed" style="background:linear-gradient(135deg,#00ffcc,#00b3a1);color:#fff;box-shadow:0 2px 8px rgba(0,255,204,0.4)" onclick="setTheme('dark-mixed')"><i class="ti ti-circle"></i> <span data-lang="mixed">Mixed</span></button>
+            <button class="btn btn-p theme-btn-select" data-theme="dark-mixed" style="background:linear-gradient(135deg,#ff4d4d,#00bfff,#ffcc00);color:#fff;box-shadow:0 2px 8px rgba(255,77,77,0.4)" onclick="setTheme('dark-mixed')"><i class="ti ti-circle"></i> <span data-lang="mixed">Mixed</span></button>
           </div>
         </div>
         <div>
@@ -1828,7 +1832,7 @@ a{color:inherit;text-decoration:none}
             <button class="btn btn-p theme-btn-select" data-theme="light-blue" style="background:#1677ff;color:#fff;box-shadow:0 2px 8px rgba(22,119,255,0.3)" onclick="setTheme('light-blue')"><i class="ti ti-circle"></i> <span data-lang="blue">Blue</span></button>
             <button class="btn btn-p theme-btn-select" data-theme="light-red" style="background:#ef4444;color:#fff;box-shadow:0 2px 8px rgba(239,68,68,0.3)" onclick="setTheme('light-red')"><i class="ti ti-circle"></i> <span data-lang="red">Red</span></button>
             <button class="btn btn-p theme-btn-select" data-theme="light-yellow" style="background:#f59e0b;color:#000;box-shadow:0 2px 8px rgba(245,158,11,0.3)" onclick="setTheme('light-yellow')"><i class="ti ti-circle"></i> <span data-lang="yellow">Yellow</span></button>
-            <button class="btn btn-p theme-btn-select" data-theme="light-mixed" style="background:linear-gradient(135deg,#00ffcc,#00b3a1);color:#fff;box-shadow:0 2px 8px rgba(0,255,204,0.3)" onclick="setTheme('light-mixed')"><i class="ti ti-circle"></i> <span data-lang="mixed">Mixed</span></button>
+            <button class="btn btn-p theme-btn-select" data-theme="light-mixed" style="background:linear-gradient(135deg,#ff3333,#0099ff,#ffcc00);color:#fff;box-shadow:0 2px 8px rgba(255,51,51,0.3)" onclick="setTheme('light-mixed')"><i class="ti ti-circle"></i> <span data-lang="mixed">Mixed</span></button>
           </div>
         </div>
         <div class="cl"><i class="ti ti-info-circle"></i><span data-lang="current_theme">Current Theme</span>: <strong id="current-theme-display">dark-blue</strong></div>
@@ -2248,6 +2252,7 @@ function getChartColors(type) {
   const accentD = getComputedStyle(root).getPropertyValue('--accent-d').trim() || 'rgba(22,119,255,0.12)';
   return { line: accent, fill: accentD };
 }
+// ===== FIXED buildChart (SINGLE dataset, 3D grid) =====
 function buildChart(type) {
   const colors = getChartColors(type);
   const accent = colors.line;
@@ -2261,18 +2266,13 @@ function buildChart(type) {
   const labels = timeArr.map(d => d ? d.toLocaleTimeString('en-US', {hour:'2-digit', minute:'2-digit'}) : '');
 
   const maxVal = dataArr.length > 0 ? Math.max(...dataArr, 1) : 1;
-  const yMax = type === 'load' ? 100 : Math.ceil(maxVal * 1.25);
+  // تنظیم ی-محور با حداقل آستانه برای جلوگیری از کوچک شدن
+  let yMax = type === 'load' ? 100 : Math.ceil(maxVal * 1.2);
+  if(type === 'traffic' && yMax < 5) yMax = 5;
+  if(type === 'conns' && yMax < 5) yMax = 5;
 
+  // یک Dataset اصلی با گرادیان و خط
   const datasets = [
-    {
-      data: dataArr,
-      borderColor: accent + '33',
-      borderWidth: 8,
-      pointRadius: 0,
-      fill: false,
-      tension: 0.4,
-      borderJoinStyle: 'round'
-    },
     {
       data: dataArr,
       borderColor: accent,
@@ -2282,13 +2282,8 @@ function buildChart(type) {
       pointHoverBorderWidth: 3,
       pointHoverBorderColor: '#fff',
       pointHoverBackgroundColor: accent,
-      fill: false,
+      fill: true,
       tension: 0.4,
-      borderJoinStyle: 'round'
-    },
-    {
-      data: dataArr,
-      borderColor: 'transparent',
       backgroundColor: function(context) {
         const chart = context.chart;
         const { ctx, chartArea } = chart;
@@ -2298,9 +2293,7 @@ function buildChart(type) {
         grad.addColorStop(1, 'rgba(0,0,0,0)');
         return grad;
       },
-      pointRadius: 0,
-      fill: true,
-      tension: 0.4
+      borderJoinStyle: 'round'
     }
   ];
 
@@ -2327,6 +2320,15 @@ function buildChart(type) {
             return val.toFixed(1) + unit;
           }
         }
+      },
+      // 3D Plugin activation (creates the 4-box grid under the chart)
+      '3d': {
+        enabled: true,
+        perspective: 0.3,
+        depth: 0.5,
+        angle: 25,
+        wireframe: true,
+        color: accent + '80'
       }
     },
     scales: {
@@ -2366,17 +2368,10 @@ function buildChart(type) {
     }
   };
 
+  // Register 3D plugin if available
   const plugin3d = window.Chart3D;
   if (plugin3d) {
     try { Chart.register(plugin3d); } catch(e) {}
-    options.plugins['3d'] = {
-      enabled: true,
-      perspective: 0.2,
-      depth: 0.4,
-      angle: 30,
-      wireframe: true,
-      color: accent + '80'
-    };
   }
 
   const config = {
@@ -2428,8 +2423,12 @@ function addDataPoint(type, value, time) {
   const labels = chartTimes[type].map(d => d ? d.toLocaleTimeString('en-US', {hour:'2-digit', minute:'2-digit'}) : '');
   chart.data.labels = labels;
   chart.data.datasets[0].data = chartData[type];
+  // تنظیم دوباره yMax با آستانه
   const maxVal = chartData[type].length > 0 ? Math.max(...chartData[type], 1) : 1;
-  chart.options.scales.y.max = type === 'load' ? 100 : Math.ceil(maxVal * 1.25);
+  let yMax = type === 'load' ? 100 : Math.ceil(maxVal * 1.2);
+  if(type === 'traffic' && yMax < 5) yMax = 5;
+  if(type === 'conns' && yMax < 5) yMax = 5;
+  chart.options.scales.y.max = yMax;
   chart.update('none');
   updateChartValue(type);
 }
@@ -3154,6 +3153,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   }, 10000);
 });
 document.addEventListener('DOMContentLoaded', function() {
+  // Ensure nl-count exists
   if(!document.getElementById('nl-count')) {
     const hidden = document.createElement('input');
     hidden.type = 'hidden';
