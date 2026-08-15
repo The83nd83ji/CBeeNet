@@ -16,6 +16,7 @@ from fastapi.middleware.cors import CORSMiddleware
 import uvicorn
 import httpx
 import logging
+import base64
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(message)s")
 logger = logging.getLogger("CBeeNet-Gateway")
@@ -25,7 +26,7 @@ app = FastAPI(title="CBeeNet Gateway", docs_url=None, redoc_url=None)
 
 CONFIG = {
     "port": int(os.environ.get("PORT", 8000)),
-    "secret": os.environ.get("SECRET_KEY", secrets.token_urlsafe(32)),  # will be overwritten by state if present
+    "secret": os.environ.get("SECRET_KEY", secrets.token_urlsafe(32)),
     "host": os.environ.get("RAILWAY_PUBLIC_DOMAIN", "localhost"),
 }
 
@@ -39,12 +40,11 @@ app.add_middleware(
 
 # ── Persistence ───────────────────────────────────────────────────────────────
 DATA_DIR = Path(os.environ.get("DATA_DIR", "/app/data"))
-DATA_FILE = DATA_DIR / "rvg_state.json"
+DATA_FILE = DATA_DIR / "cbee_state.json"
 SAVE_LOCK = asyncio.Lock()
 
 async def load_state():
-    global LINKS, AUTH, SUBS, GLOBAL_SETTINGS, RESELLERS, CONFIG
-    secret_updated = False
+    global LINKS, AUTH, SUBS, GLOBAL_SETTINGS, RESELLERS
     try:
         DATA_DIR.mkdir(parents=True, exist_ok=True)
         if DATA_FILE.exists():
@@ -60,33 +60,11 @@ async def load_state():
                 GLOBAL_SETTINGS.update(data["global_settings"])
             if "password_hash" in data:
                 AUTH["password_hash"] = data["password_hash"]
-
-            # ---- FIX: persist secret for consistent password hashing ----
-            if "secret" in data:
-                CONFIG["secret"] = data["secret"]
-                logger.info("Loaded secret from state")
-            else:
-                # State file exists but lacks secret → generate new secret and reset password from env
-                logger.warning("State file has no secret; generating new secret and resetting admin password from ADMIN_PASSWORD env")
-                CONFIG["secret"] = secrets.token_urlsafe(32)
-                # Overwrite stored password hash with one using new secret
-                default_pw = os.environ.get("ADMIN_PASSWORD", "admin")
-                AUTH["password_hash"] = hash_password(default_pw)
-                data["password_hash"] = AUTH["password_hash"]
-                secret_updated = True
-
             logger.info(f"Loaded state from {DATA_FILE}: {len(LINKS)} links")
         else:
             logger.info("No existing state file found, starting fresh")
-            # Ensure secret is stored on first save
-            secret_updated = True  # will cause save on shutdown anyway, but we can save now
     except Exception as e:
         logger.error(f"Error loading state: {e}")
-
-    # If we generated a new secret or modified state, save immediately
-    if secret_updated:
-        await save_state()
-        logger.info("State saved after secret update")
 
 async def save_state():
     try:
@@ -95,8 +73,7 @@ async def save_state():
             "subs": dict(SUBS),
             "resellers": dict(RESELLERS),
             "global_settings": dict(GLOBAL_SETTINGS),
-            "password_hash": AUTH["password_hash"],
-            "secret": CONFIG["secret"]   # store secret for consistency
+            "password_hash": AUTH["password_hash"]
         }
         DATA_DIR.mkdir(parents=True, exist_ok=True)
         async with aiofiles.open(DATA_FILE, "w", encoding="utf-8") as f:
@@ -120,16 +97,27 @@ SUBS_LOCK = asyncio.Lock()
 RESELLERS: dict = {}
 RESELLERS_LOCK = asyncio.Lock()
 
+# لیست پروتکل‌های مجاز
+PROTOCOLS = ("vless-ws", "trojan-ws", "vmess-ws", "xhttp-packet-up", "xhttp-stream-up", "xhttp-stream-one")
+DEFAULT_PROTOCOL = "vless-ws"
+
+# تنظیمات سرور - شامل تنظیمات عمومی و تنظیمات اختصاصی هر پروتکل
 GLOBAL_SETTINGS = {
     "ips": [],
     "port": None,
     "server_name": "CBeeNet",
     "server_prefix": "",
-    "link_template": "{server}-{label}"
+    "link_template": "{server}-{label}",
+    # تنظیمات اختصاصی هر پروتکل: server_name, link_prefix, link_template
+    "protocol_configs": {
+        "vless-ws": {"server_name": "", "link_prefix": "", "link_template": ""},
+        "trojan-ws": {"server_name": "", "link_prefix": "", "link_template": ""},
+        "vmess-ws": {"server_name": "", "link_prefix": "", "link_template": ""},
+        "xhttp-packet-up": {"server_name": "", "link_prefix": "", "link_template": ""},
+        "xhttp-stream-up": {"server_name": "", "link_prefix": "", "link_template": ""},
+        "xhttp-stream-one": {"server_name": "", "link_prefix": "", "link_template": ""},
+    }
 }
-
-PROTOCOLS = ("vless-ws", "xhttp-packet-up", "xhttp-stream-up", "xhttp-stream-one")
-DEFAULT_PROTOCOL = "vless-ws"
 
 def log_activity(kind: str, message: str, level: str = "info"):
     activity_logs.append({
@@ -140,10 +128,9 @@ def log_activity(kind: str, message: str, level: str = "info"):
     })
 
 # ── Auth ──────────────────────────────────────────────────────────────────────
-SESSION_COOKIE = "rvg_session"
+SESSION_COOKIE = "cbee_session"
 SESSION_TTL = 60 * 60 * 24 * 7
 
-# Fix: hash_password now uses CONFIG["secret"] (persistent) 
 def hash_password(pw: str) -> str:
     return hashlib.sha256(f"{pw}{CONFIG['secret']}".encode()).hexdigest()
 
@@ -229,36 +216,102 @@ async def fetch_ip_flag(ip: str) -> str:
         pass
     return ""
 
+def get_protocol_config(protocol: str) -> dict:
+    """دریافت تنظیمات اختصاصی پروتکل، اگر تنظیماتی وجود نداشت خالی برمی‌گرداند."""
+    return GLOBAL_SETTINGS.get("protocol_configs", {}).get(protocol, {})
+
 def format_link_remark(label: str, protocol: str) -> str:
-    template = GLOBAL_SETTINGS.get("link_template", "{server}-{label}")
-    server_name = GLOBAL_SETTINGS.get("server_name", "CBeeNet")
-    server_prefix = GLOBAL_SETTINGS.get("server_prefix", "")
+    """ساخت نام نمایشی لینک با استفاده از تنظیمات عمومی یا اختصاصی پروتکل."""
+    # تنظیمات عمومی
+    default_template = GLOBAL_SETTINGS.get("link_template", "{server}-{label}")
+    default_server = GLOBAL_SETTINGS.get("server_name", "CBeeNet")
+    default_prefix = GLOBAL_SETTINGS.get("server_prefix", "")
+    
+    # تنظیمات اختصاصی پروتکل
+    proto_cfg = get_protocol_config(protocol)
+    template = proto_cfg.get("link_template") or default_template
+    server = proto_cfg.get("server_name") or default_server
+    prefix = proto_cfg.get("link_prefix") or default_prefix
+    
     result = template
-    result = result.replace("{server}", server_name)
-    result = result.replace("{prefix}", server_prefix)
+    result = result.replace("{server}", server)
+    result = result.replace("{prefix}", prefix)
     result = result.replace("{label}", label)
+    
     if "{protocol}" in template:
-        proto_map = {
+        # نام پیش‌فرض پروتکل‌ها
+        default_names = {
             "vless-ws": "VLESS-WS",
+            "trojan-ws": "Trojan-WS",
+            "vmess-ws": "VMess-WS",
             "xhttp-packet-up": "XHTTP-packet",
             "xhttp-stream-up": "XHTTP-stream",
             "xhttp-stream-one": "XHTTP-ultra"
         }
-        result = result.replace("{protocol}", proto_map.get(protocol, protocol))
+        # اجازه دهید کاربر در تنظیمات عمومی یا اختصاصی نام پروتکل را عوض کند
+        # برای این کار می‌توانیم یک کلید protocol_names به GLOBAL_SETTINGS اضافه کنیم،
+        # اما در حال حاضر فقط از نام‌های پیش‌فرض استفاده می‌کنیم.
+        # اگر خواستید می‌توانید این بخش را گسترش دهید.
+        proto_name = default_names.get(protocol, protocol)
+        result = result.replace("{protocol}", proto_name)
+    
     return result
 
-def _format_vless_uri(uuid: str, ip: str, port: int, remark: str, protocol: str, original_host: str) -> str:
+def _format_uri(uuid: str, ip: str, port: int, remark: str, protocol: str, original_host: str) -> str:
     if protocol == "vless-ws":
         path = f"/ws/{uuid}"
-        params = {"encryption": "none", "security": "tls", "type": "ws", "host": original_host, "path": path, "sni": original_host, "fp": "chrome", "alpn": "http/1.1"}
-    else:
+        params = {
+            "encryption": "none", "security": "tls", "type": "ws",
+            "host": original_host, "path": path, "sni": original_host,
+            "fp": "chrome", "alpn": "http/1.1"
+        }
+        query = "&".join(f"{k}={quote(str(v))}" for k, v in params.items())
+        return f"vless://{uuid}@{ip}:{port}?{query}#{quote(remark)}"
+
+    elif protocol == "trojan-ws":
+        path = f"/ws/{uuid}"
+        params = {
+            "security": "tls", "type": "ws", "host": original_host,
+            "path": path, "sni": original_host, "fp": "chrome",
+            "alpn": "http/1.1"
+        }
+        query = "&".join(f"{k}={quote(str(v))}" for k, v in params.items())
+        return f"trojan://{uuid}@{ip}:{port}?{query}#{quote(remark)}"
+
+    elif protocol == "vmess-ws":
+        path = f"/ws/{uuid}"
+        config = {
+            "v": "2",
+            "ps": remark,
+            "add": ip,
+            "port": port,
+            "id": uuid,
+            "aid": "0",
+            "net": "ws",
+            "type": "none",
+            "host": original_host,
+            "path": path,
+            "tls": "tls",
+            "sni": original_host,
+            "fp": "chrome",
+            "alpn": "http/1.1"
+        }
+        json_str = json.dumps(config, separators=(',', ':'))
+        b64 = base64.b64encode(json_str.encode()).decode()
+        return f"vmess://{b64}#{quote(remark)}"
+
+    else:  # XHTTP
         mode = protocol.replace("xhttp-", "")
         path = f"/xhttp-siz10/{mode}/{uuid}"
-        params = {"encryption": "none", "security": "tls", "type": "xhttp", "mode": mode, "host": original_host, "path": path, "sni": original_host, "fp": "chrome", "alpn": "h2,http/1.1"}
-    query = "&".join(f"{k}={quote(str(v))}" for k, v in params.items())
-    return f"vless://{uuid}@{ip}:{port}?{query}#{quote(remark)}"
+        params = {
+            "encryption": "none", "security": "tls", "type": "xhttp",
+            "mode": mode, "host": original_host, "path": path,
+            "sni": original_host, "fp": "chrome", "alpn": "h2,http/1.1"
+        }
+        query = "&".join(f"{k}={quote(str(v))}" for k, v in params.items())
+        return f"vless://{uuid}@{ip}:{port}?{query}#{quote(remark)}"
 
-def generate_vless_links(link_data: dict, uuid: str, host: str) -> list[str]:
+def generate_links(link_data: dict, uuid: str, host: str) -> list[str]:
     links = []
     protocols = link_data.get("protocols", [DEFAULT_PROTOCOL])
     is_personal = link_data.get("is_personal", False)
@@ -276,16 +329,16 @@ def generate_vless_links(link_data: dict, uuid: str, host: str) -> list[str]:
         port = 443
 
     label = link_data['label']
-    template = GLOBAL_SETTINGS.get("link_template", "{server}-{label}")
     for ip in ips:
         for proto in protocols:
             remark = format_link_remark(label, proto)
-            if (len(ips) > 1 or len(protocols) > 1) and "{protocol}" not in template:
+            # اگر بیش از یک IP یا پروتکل باشد، پسوند اضافه می‌کنیم
+            if (len(ips) > 1 or len(protocols) > 1):
                 suffix = f"-{proto}" if len(protocols) > 1 else ""
                 if len(ips) > 1:
                     suffix += f"-{ip.replace('.', '-')}"
                 remark += suffix
-            links.append(_format_vless_uri(uuid, ip, port, remark, proto, host))
+            links.append(_format_uri(uuid, ip, port, remark, proto, host))
     return links
 
 def uptime() -> str:
@@ -334,9 +387,7 @@ async def ensure_default_link():
     if _default_link_created: return
     async with LINKS_LOCK:
         if not any(l.get("is_default") for l in LINKS.values()):
-            # Use a fixed salt for default link so it's consistent across restarts
-            default_uuid_salt = "DEFAULT_LINK_SALT_FIXED"
-            uid = hashlib.sha256(f"default{default_uuid_salt}".encode()).hexdigest()
+            uid = hashlib.sha256(f"default{CONFIG['secret']}".encode()).hexdigest()
             uid = f"{uid[:8]}-{uid[8:12]}-{uid[12:16]}-{uid[16:20]}-{uid[20:32]}"
             if uid not in LINKS:
                 LINKS[uid] = {
@@ -367,7 +418,7 @@ async def check_reseller_capacity(reseller_id: str, new_limit_bytes: int):
 # ── Basic endpoints ───────────────────────────────────────────────────────────
 @app.get("/")
 async def root():
-    return {"service": "CBeeNet Gateway", "version": "9.2", "status": "active", "channel": "https://t.me/CBeeNet"}
+    return {"service": "CBeeNet Gateway", "version": "1.0.0", "status": "active", "channel": "https://t.me/CBeeNet"}
 
 @app.get("/health")
 async def health():
@@ -376,7 +427,6 @@ async def health():
 # ── Subscriptions ─────────────────────────────────────────────────────────────
 @app.get("/sub/{uuid}")
 async def subscription_single(uuid: str, request: Request):
-    import base64
     async with LINKS_LOCK:
         link = LINKS.get(uuid)
         if not link or not is_link_allowed(link):
@@ -388,26 +438,24 @@ async def subscription_single(uuid: str, request: Request):
         return HTMLResponse(content=get_single_sub_page_html(uuid))
 
     host = get_host()
-    lines = generate_vless_links(link, uuid, host)
+    lines = generate_links(link, uuid, host)
     content = base64.b64encode("\n".join(lines).encode()).decode()
     return Response(content=content, media_type="text/plain",
         headers={"profile-title": quote(link["label"]), "support-url": "https://t.me/CBeeNet"})
 
 @app.get("/sub-all")
 async def subscription_all(_=Depends(require_auth)):
-    import base64
     host = get_host()
     lines = []
     async with LINKS_LOCK:
         for uid, d in LINKS.items():
             if is_link_allowed(d):
-                lines.extend(generate_vless_links(d, uid, host))
+                lines.extend(generate_links(d, uid, host))
     content = base64.b64encode("\n".join(lines).encode()).decode()
     return Response(content=content, media_type="text/plain")
 
 @app.get("/sub-group/{uuid_key}")
 async def sub_group_subscription(uuid_key: str, request: Request):
-    import base64
     async with SUBS_LOCK:
         sub = next((s for s in SUBS.values() if s.get("uuid_key") == uuid_key), None)
         if not sub: raise HTTPException(status_code=404, detail="not found")
@@ -427,7 +475,7 @@ async def sub_group_subscription(uuid_key: str, request: Request):
         for lid in link_ids:
             link = LINKS.get(lid)
             if link and is_link_allowed(link):
-                lines.extend(generate_vless_links(link, lid, host))
+                lines.extend(generate_links(link, lid, host))
     content = base64.b64encode("\n".join(lines).encode()).decode()
     return Response(content=content, media_type="text/plain",
         headers={"profile-title": quote(sub["name"]), "support-url": "https://t.me/CBeeNet", "profile-update-interval": "12"})
@@ -583,13 +631,14 @@ async def update_global_ips(request: Request, _=Depends(require_auth)):
     log_activity("system", "Global IP/port settings updated", "info")
     return {"ok": True, "settings": dict(GLOBAL_SETTINGS)}
 
-# ── Server Settings (server name, prefix, template) ────────────────────────
+# ── Server Settings (default + protocol configs) ────────────────────────────
 @app.get("/api/settings/server")
 async def get_server_settings(_=Depends(require_auth)):
     return {
         "server_name": GLOBAL_SETTINGS.get("server_name", "CBeeNet"),
         "server_prefix": GLOBAL_SETTINGS.get("server_prefix", ""),
-        "link_template": GLOBAL_SETTINGS.get("link_template", "{server}-{label}")
+        "link_template": GLOBAL_SETTINGS.get("link_template", "{server}-{label}"),
+        "protocol_configs": GLOBAL_SETTINGS.get("protocol_configs", {})
     }
 
 @app.post("/api/settings/server")
@@ -599,8 +648,31 @@ async def update_server_settings(request: Request, _=Depends(require_auth)):
     GLOBAL_SETTINGS["server_prefix"] = str(body.get("server_prefix", "")).strip()
     GLOBAL_SETTINGS["link_template"] = str(body.get("link_template", "{server}-{label}")).strip() or "{server}-{label}"
     asyncio.create_task(save_state())
-    log_activity("system", "Server settings updated", "info")
+    log_activity("system", "Default server settings updated", "info")
     return {"ok": True, "settings": dict(GLOBAL_SETTINGS)}
+
+# ===== NEW: Protocol-specific settings (for pages.js) =====
+@app.get("/api/settings/protocol")
+async def get_protocol_settings(_=Depends(require_auth)):
+    """بازگرداندن تنظیمات اختصاصی هر پروتکل (server_name, link_prefix, link_template)"""
+    return GLOBAL_SETTINGS.get("protocol_configs", {})
+
+@app.post("/api/settings/protocol")
+async def update_protocol_settings(request: Request, _=Depends(require_auth)):
+    """ذخیره تنظیمات اختصاصی هر پروتکل"""
+    body = await request.json()
+    new_configs = body.get("protocols", {})
+    # اعتبارسنجی ساده: فقط پروتکل‌های مجاز را قبول کن
+    for proto, cfg in new_configs.items():
+        if proto in PROTOCOLS:
+            GLOBAL_SETTINGS["protocol_configs"][proto] = {
+                "server_name": cfg.get("server_name", "").strip(),
+                "link_prefix": cfg.get("link_prefix", "").strip(),
+                "link_template": cfg.get("link_template", "").strip()
+            }
+    asyncio.create_task(save_state())
+    log_activity("system", "Protocol settings updated", "info")
+    return {"ok": True, "settings": GLOBAL_SETTINGS["protocol_configs"]}
 
 # ── Stats ─────────────────────────────────────────────────────────────────────
 @app.get("/stats")
@@ -698,7 +770,7 @@ async def create_link(request: Request):
     asyncio.create_task(save_state())
     log_activity("link", f"Link '{label}' created by {s['user_id']}", "ok")
     host = get_host()
-    vless_list = generate_vless_links(LINKS[uid], uid, host)
+    vless_list = generate_links(LINKS[uid], uid, host)
     return {"uuid": uid, **LINKS[uid], "vless_link": "\n".join(vless_list),
             "sub_url": f"https://{host}/sub/{uid}"}
 
@@ -778,7 +850,7 @@ async def create_links_bulk(request: Request):
     host = get_host()
     all_vless = []
     for uid in created_uids:
-        all_vless.extend(generate_vless_links(LINKS[uid], uid, host))
+        all_vless.extend(generate_links(LINKS[uid], uid, host))
     
     sub_url = ""
     if sub_id:
@@ -799,7 +871,7 @@ async def list_links(request: Request):
         result = []
         for uid, d in LINKS.items():
             if s["role"] == "reseller" and d.get("creator_id") != s["user_id"]: continue
-            vless_list = generate_vless_links(d, uid, host)
+            vless_list = generate_links(d, uid, host)
             result.append({"uuid": uid, **d, "expired": is_link_expired(d),
                 "vless_link": "\n".join(vless_list), "sub_url": f"https://{host}/sub/{uid}"})
     result.sort(key=lambda x: x["created_at"], reverse=True)
@@ -1013,7 +1085,7 @@ async def public_sub_data(uuid_key: str, request: Request):
                 "limit_bytes": link.get("limit_bytes", 0),
                 "limit_fmt": "∞" if link.get("limit_bytes", 0) == 0 else fmt_bytes(link["limit_bytes"]),
                 "expires_at": link.get("expires_at"),
-                "vless_link": "\n".join(generate_vless_links(link, lid, host)),
+                "vless_link": "\n".join(generate_links(link, lid, host)),
                 "sub_url": f"https://{host}/sub/{lid}", "connections": active_conns})
         total_used = sum(l["used_bytes"] for l in links_out)
         return {
@@ -1034,7 +1106,7 @@ async def public_single_sub_data(uuid: str):
             raise HTTPException(status_code=404, detail="not found")
         host = get_host()
         active_conns = sum(1 for c in connections.values() if c.get("uuid") == uuid)
-        vless_list = generate_vless_links(link, uuid, host)
+        vless_list = generate_links(link, uuid, host)
         return {
             "name": link["label"],
             "desc": link.get("note", ""),
