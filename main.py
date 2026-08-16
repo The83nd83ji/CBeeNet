@@ -1,3 +1,10 @@
+# ============================================================
+# main.py - CBee Gateway v1.0.0 (با تاریخچه‌ی نمودار سرور)
+# ============================================================
+# توجه: برای جلوگیری از خطای رمز عبور پس از ری‌استارت، متغیر محیطی
+# SECRET_KEY را به یک مقدار ثابت (مثلاً ۳۲ کاراکتر تصادفی) تنظیم کنید.
+# ============================================================
+
 import asyncio
 import json
 import os
@@ -675,10 +682,8 @@ async def get_stats(_=Depends(require_auth)):
 @app.get("/api/history")
 async def get_history(_=Depends(require_auth)):
     async with HISTORY_LOCK:
-        # Return last 5 minutes (60 points)
-        cutoff = time.time() - 300
+        cutoff = time.time() - 300  # last 5 minutes
         points = [p for p in HISTORY if p["timestamp"] >= cutoff]
-        # Convert timestamps to ISO for JSON
         result = [{
             "timestamp": p["timestamp"],
             "traffic_mb": p["traffic_mb"],
