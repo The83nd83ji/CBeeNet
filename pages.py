@@ -1,4 +1,4 @@
-# pages.py - CBee Gateway v1.0.0 (Neon Glow & 3D Grid Under Curve) - با نمودارهای uPlot
+# pages.py - CBee Gateway v1.0.0 (Neon Glow & 3D Grid Under Curve)
 import json
 
 LOGIN_HTML = r"""<!DOCTYPE html>
@@ -21,7 +21,6 @@ body {
   padding: 20px;
   position: relative;
 }
-/* Fine Premium Grid Background */
 .bg-grid {
   position: fixed;
   inset: 0;
@@ -743,9 +742,8 @@ DASHBOARD_HTML = r"""<!DOCTYPE html>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.19.0/dist/tabler-icons.min.css">
-<!-- uPlot CSS & JS -->
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/uplot@1.6.30/dist/uPlot.min.css">
-<script src="https://cdn.jsdelivr.net/npm/uplot@1.6.30/dist/uPlot.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-zoom@2.0.1/dist/chartjs-plugin-zoom.min.js"></script>
 <style>
 /* ===== RESET & VARIABLES ===== */
 *{margin:0;padding:0;box-sizing:border-box}
@@ -868,9 +866,9 @@ a{color:inherit;text-decoration:none}
 .dash-stat-card .sub{font-size:10px;color:var(--t2);margin-top:4px}
 .dash-stat-card .icon{position:absolute;top:16px;left:16px;font-size:22px;color:var(--accent);opacity:.3}
 [dir="ltr"] .dash-stat-card .icon{left:auto;right:16px}
-/* ===== NEON 3D CHART CONTAINERS با uPlot ===== */
+/* ===== NEON 3D CHART CONTAINERS ===== */
 .chart-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;margin-bottom:22px}
-.chart-premium{background:var(--card);border:1px solid var(--card-b);border-radius:var(--radius);padding:16px 18px 14px;transition:all .2s;position:relative}
+.chart-premium{background:var(--card);border:1px solid var(--card-b);border-radius:var(--radius);padding:16px 18px 14px;transition:all .2s}
 .chart-premium:hover{border-color:var(--card-bh);box-shadow:var(--shadow)}
 .chart-premium .ch-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:4px}
 .chart-premium .ch-title{font-size:10.5px;font-weight:600;color:var(--t2);text-transform:uppercase;letter-spacing:.05em;display:flex;align-items:center;gap:5px}
@@ -878,41 +876,61 @@ a{color:inherit;text-decoration:none}
 .chart-premium .ch-value{font-size:18px;font-weight:800;color:var(--t1);letter-spacing:-.02em}
 .chart-premium .ch-value .unit{font-size:12px;font-weight:500;color:var(--t3);margin-left:3px}
 .chart-premium .ch-main{height:150px;position:relative;margin-top:2px}
-.chart-3d-wrap{position:relative;width:100%;height:100%;overflow:hidden;perspective:800px}
-.chart-3d-wrap .uplot{position:relative;z-index:2;width:100% !important;height:100% !important}
-.chart-3d-wrap .chart-grid-floor{
-  position:absolute;bottom:0;left:0;width:100%;height:60%;z-index:1;
-  background-image:linear-gradient(#00d4ff 1px, transparent 1px), linear-gradient(90deg, #00d4ff 1px, transparent 1px);
-  background-size:25% 25%;transform-origin:bottom center;transform:rotateX(65deg) scaleY(0.85);opacity:0.4;pointer-events:none;transition:opacity .3s
+/* 3D Grid Floor with Neon Blue */
+.chart-3d-wrap {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  perspective: 800px;
 }
-/* Sparkline uPlot styling override */
-.sparkline-tooltip{
-  position:absolute;background:rgba(11,17,29,0.92);backdrop-filter:blur(12px);border:1px solid rgba(255,255,255,0.08);border-radius:10px;padding:8px 12px;box-shadow:0 12px 40px rgba(0,0,0,0.7);z-index:1000;pointer-events:none;min-width:120px;color:var(--t1);font-size:11px;font-family:var(--font-family)
+.chart-3d-wrap canvas {
+  position: relative;
+  z-index: 2;
+  width: 100% !important;
+  height: 100% !important;
 }
-.sparkline-tooltip .tt-label{font-size:9px;color:var(--t3);border-bottom:1px solid var(--card-b);padding-bottom:4px;margin-bottom:4px}
-.sparkline-tooltip .tt-row{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:2px 0}
-.sparkline-tooltip .tt-dot{width:7px;height:7px;border-radius:50%;display:inline-block;margin-right:4px;border:1px solid rgba(255,255,255,0.15)}
-.sparkline-tooltip .tt-name{color:var(--t2);font-weight:400}
-.sparkline-tooltip .tt-val{font-weight:700;font-variant-numeric:tabular-nums}
-.uplot .u-axis .u-label{font-family:var(--font-family) !important}
-.uplot .u-axis .u-ticks .u-tick .u-tick-label{font-family:var(--font-family) !important}
-.uplot .u-select{display:none !important}
-/* Extrema labels on chart */
-.chart-extrema{display:flex;gap:12px;font-size:9px;font-weight:700;position:absolute;top:8px;right:8px;z-index:5;pointer-events:none}
-.chart-extrema .extrema-item{display:flex;align-items:center;gap:3px;opacity:0.8}
+.chart-3d-wrap .chart-grid-floor {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 60%;
+  z-index: 1;
+  background-image:
+    linear-gradient(#00d4ff 1px, transparent 1px),
+    linear-gradient(90deg, #00d4ff 1px, transparent 1px);
+  background-size: 25% 25%;
+  transform-origin: bottom center;
+  transform: rotateX(65deg) scaleY(0.85);
+  opacity: 0.4;
+  pointer-events: none;
+  transition: opacity 0.3s;
+}
 /* Secondary Charts */
 .dash-charts-second{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:22px}
 .dash-small-chart{background:var(--card);border:1px solid var(--card-b);border-radius:var(--radius);padding:16px 18px}
 .dash-small-chart .chart-title{font-size:11px;font-weight:600;color:var(--t2);margin-bottom:10px;display:flex;align-items:center;gap:6px}
 .dash-small-chart .chart-title i{color:var(--accent)}
 .dash-small-chart .chart-wrap{height:120px;position:relative}
+.dash-small-chart .chart-wrap .chart-3d-wrap .chart-grid-floor {
+    height: 55%;
+    transform: rotateX(55deg) scaleY(0.9);
+}
 .dash-footer{border-top:1px solid var(--card-b);margin-top:14px;padding-top:14px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px}
 .df-text{font-size:10px;color:var(--t3)}
 .df-link{font-size:11.5px;color:var(--accent2);display:flex;align-items:center;gap:5px;font-weight:600}
+/* Tooltip */
+.chart-tooltip{display:none;position:fixed;background:rgba(11,17,29,0.92);backdrop-filter:blur(12px);border:1px solid rgba(255,255,255,0.08);border-radius:10px;padding:10px 14px;box-shadow:0 12px 40px rgba(0,0,0,0.7);z-index:1000;pointer-events:none;min-width:140px}
+.chart-tooltip .tt-time{font-size:9px;color:var(--t3);font-family:ui-monospace,monospace;margin-bottom:4px;border-bottom:1px solid var(--card-b);padding-bottom:4px}
+.chart-tooltip .tt-row{display:flex;align-items:center;justify-content:space-between;gap:16px;font-size:11px;padding:2px 0;color:var(--t1)}
+.chart-tooltip .tt-row .tt-dot{width:7px;height:7px;border-radius:50%;display:inline-block;flex-shrink:0;margin-right:6px;border:1px solid rgba(255,255,255,0.15)}
+.chart-tooltip .tt-row .tt-label{color:var(--t2);font-weight:400}
+.chart-tooltip .tt-row .tt-value{font-weight:700;font-variant-numeric:tabular-nums}
 @media(max-width:1024px){.dash-stats-grid{grid-template-columns:1fr 1fr}.dash-charts-second{grid-template-columns:1fr 1fr}.chart-grid{grid-template-columns:1fr 1fr}}
 @media(max-width:768px){.chart-grid{grid-template-columns:1fr}.dash-charts-second{grid-template-columns:1fr}.dash-stats-grid{grid-template-columns:1fr}.main{padding:62px 12px 50px}.sidebar{transform:translateX(100%)}[dir="ltr"] .sidebar{transform:translateX(-100%)}.sidebar.open{transform:translateX(0)}.sb-close{display:flex}.main{margin-right:0;padding-top:70px}[dir="ltr"] .main{margin-left:0}.mob-top{display:flex}}
 
-/* ===== REST OF STYLES (بدون تغییر) ===== */
+/* ===== REST OF STYLES ===== */
 .btn{font-family:inherit;font-size:12px;font-weight:500;border-radius:9px;padding:8px 14px;cursor:pointer;display:inline-flex;align-items:center;gap:5px;border:none;transition:all .15s;white-space:nowrap}
 .btn i{font-size:13px}
 .btn:disabled{opacity:.4;cursor:not-allowed}
@@ -1484,7 +1502,7 @@ a{color:inherit;text-decoration:none}
     </div>
   </div>
 
-  <!-- 3 Premium Charts with uPlot -->
+  <!-- 3 Premium Charts with Neon 3D Grid (Fill from 0 to curve) -->
   <div class="chart-grid">
     <div class="chart-premium" id="chart-load-container">
       <div class="ch-header">
@@ -1492,7 +1510,7 @@ a{color:inherit;text-decoration:none}
         <div class="ch-value" id="chart-load-val">0<span class="unit">%</span></div>
       </div>
       <div class="ch-main chart-3d-wrap">
-        <div id="chart-load-uplot" style="width:100%;height:100%;position:relative;z-index:2;"></div>
+        <canvas id="chart-load"></canvas>
         <div class="chart-grid-floor"></div>
       </div>
     </div>
@@ -1502,7 +1520,7 @@ a{color:inherit;text-decoration:none}
         <div class="ch-value" id="chart-traffic-val">0<span class="unit">MB</span></div>
       </div>
       <div class="ch-main chart-3d-wrap">
-        <div id="chart-traffic-uplot" style="width:100%;height:100%;position:relative;z-index:2;"></div>
+        <canvas id="chart-traffic"></canvas>
         <div class="chart-grid-floor"></div>
       </div>
     </div>
@@ -1512,7 +1530,7 @@ a{color:inherit;text-decoration:none}
         <div class="ch-value" id="chart-conns-val">0</div>
       </div>
       <div class="ch-main chart-3d-wrap">
-        <div id="chart-conns-uplot" style="width:100%;height:100%;position:relative;z-index:2;"></div>
+        <canvas id="chart-conns"></canvas>
         <div class="chart-grid-floor"></div>
       </div>
     </div>
@@ -1527,7 +1545,7 @@ a{color:inherit;text-decoration:none}
     <div class="dash-small-chart">
       <div class="chart-title"><i class="ti ti-arrow-up-right"></i> <span data-lang="hourly_average">Hourly Avg</span></div>
       <div class="chart-wrap chart-3d-wrap">
-        <div id="dashHourly-uplot" style="width:100%;height:100%;position:relative;z-index:2;"></div>
+        <canvas id="dashHourlyChart"></canvas>
         <div class="chart-grid-floor"></div>
       </div>
     </div>
@@ -1825,7 +1843,7 @@ a{color:inherit;text-decoration:none}
       <div class="cl" style="margin-top:12px"><i class="ti ti-info-circle"></i><span data-lang="lang_note">Default language is English. Page will refresh after change.</span></div>
     </div>
 
-    <!-- ===== Protocol Custom Server Settings (بدون Trojan) ===== -->
+    <!-- ===== ONLY Protocol Custom Server Settings (بدون Trojan) ===== -->
     <div class="card" style="grid-column:1/-1">
       <div class="card-title"><i class="ti ti-server-2"></i> <span>Protocol Custom Names & Templates</span></div>
       <div style="display:flex;flex-direction:column;gap:8px">
@@ -1910,10 +1928,14 @@ a{color:inherit;text-decoration:none}
 </section>
 </main>
 
-<!-- ===== TOOLTIP (uPlot dynamic) ===== -->
+<!-- ===== TOOLTIP ===== -->
+<div class="chart-tooltip" id="chart-tooltip">
+  <div class="tt-time" id="tt-time">--:--</div>
+  <div id="tt-body"></div>
+</div>
 
 <script>
-// ========== LANG DICT (همان قبل) ==========
+// ========== LANG DICT ==========
 const LANG_DICT = {
   "en": {
     "dashboard":"Dashboard","dashboard_sub":"System Overview","active_connections":"Active Connections","total_traffic":"Total Traffic","total_links":"Configs","uptime":"Uptime","since_start":"Since Start","active":"Active","inactive":"Inactive","refresh":"Refresh","traffic_trend":"Bandwidth Usage","service_status":"Service Status","top_connections":"Live Connections","no_connections":"No connections","server":"Server","settings":"Settings","language":"Language","farsi":"Persian","english":"English","save":"Save","cancel":"Cancel","delete":"Delete","edit":"Edit","copy":"Copy","created":"Created","expires":"Expires","unlimited":"Unlimited","used":"Used","of":"of","daily":"Daily","hourly":"Hourly","bandwidth":"Bandwidth","connections":"Connections","protocol":"Protocol","ip_address":"IP Address","port":"Port","upload":"Upload","download":"Download","duration":"Duration","status":"Status","online":"Online","offline":"Offline","total":"Total","users":"Users","protocols":"Protocols","traffic_usage":"Traffic Usage","links":"Configs","sub_groups":"Sub Groups","subscription":"Subscription","security":"Security","logs":"Activity Logs","errors":"Errors","test_websocket":"WebSocket Test","dark_theme":"Dark Theme","light_theme":"Light Theme","prestige_theme":"Prestige Theme","blue":"Blue","red":"Red","yellow":"Yellow","current_theme":"Current Theme","background_style":"Background Style","default_blue":"Default Blue","pure_black":"Pure Black","dark_grey":"Dark Grey","server_settings":"Server & Link Settings","server_name":"Server Name","server_prefix":"Link Prefix","link_template":"Link Name Template","template_vars":"Available Variables","template_note":"If `{protocol}` is not in the template, the protocol will not be shown.","change_password":"Change Password","current_password":"Current Password","new_password":"New Password","confirm_password":"Confirm Password","password_strength":"Password Strength","min_chars":"At least 4 characters","contains_number":"Contains number","contains_case":"Uppercase/Lowercase","weak":"Very Weak","medium":"Medium","strong":"Strong","save_password":"Save New Password","login":"Login","logout":"Logout","login_title":"Login to Panel","login_sub":"Enter password to access the dashboard","password":"Password","login_button":"Login to Dashboard","telegram_channel":"Telegram Channel","panel":"Panel","system":"System","configs":"Configs","sub_groups_short":"Sub Groups","activity_logs":"Activity Logs","config_id":"Config ID","sub_group_expiry":"Sub Group & Expiry","no_group":"No Group","days":"Days","traffic_quota":"Traffic Quota","transport_protocols":"Transport Protocols","bulk_count":"Bulk Count","create_config":"Create Config","no_configs":"No configs yet","new_group":"New Group","no_groups":"No groups yet","create_group":"Create a new group to organize your configs","single_sub":"Single Subscription (per config)","full_sub":"Full Subscription (Admin)","full_sub_desc":"Includes all active configs.","group_sub_links":"Group Subscription Links","loading":"Loading...","traffic_analysis":"Bandwidth usage analysis & monitoring","total_traffic_used":"Total Traffic Used","hourly_average":"Hourly Average","per_hour":"/h","peak_usage":"Peak Usage","peak_hour":"Peak Hour","lowest_usage":"Lowest Usage","live_connections":"Live Connections","total_traffic_live":"Total Traffic","avg_duration":"Avg Duration","unique_ips":"Unique IPs","connections_list":"Connections List","auto_update":"Auto-update every 5s","no_active_connections":"No active connections","will_appear":"They will appear here as soon as clients connect","encryption":"Encryption","access_control":"Access Control","hash":"Hash","session":"Session","active_inactive":"Active/Inactive","expiry_date":"Expiry Date","public_page_pw":"Public Page Password","optional":"Optional","activity_logs_full":"Complete event history","no_logs":"No logs yet","error_logs":"Error Logs","websocket_test":"WebSocket Test","ws_note":"Only registered and active UUIDs can connect.","connect":"Connect","disconnect":"Disconnect","send":"Send","waiting_ws":"Waiting for connection...","change_theme":"Change Theme","server_link_settings":"Server & Link Settings","save_settings":"Save Settings","saved":"Saved","online_status":"Online","version":"Version","framework":"Framework","platform":"Platform","storage":"Storage","change_password_title":"Change Password","change_password_sub":"Choose a strong password and keep it safe","current_pw":"Current Password","new_pw":"New Password","confirm_pw":"Confirm Password","save_new_pw":"Save New Password","min_4_chars":"At least 4 chars","contains_num":"Contains number","contains_case_letters":"Uppercase/Lowercase","very_weak":"Very Weak","medium_strength":"Medium","strong_strength":"Strong","logout_btn":"Logout","telegram_btn":"Telegram Channel","load":"Load","connections_live":"Live Connections","traffic_chart":"Traffic Chart","protocol_distribution":"Protocol Distribution","daily_usage":"Daily Usage","active_conns_table":"Active Connections","configs_management":"Configs Management","sub_groups_management":"Sub Groups Management","subscription_links":"Subscription Links","traffic_monitor":"Traffic Monitor","connections_monitor":"Connections Monitor","security_settings":"Security Settings","activity_logs_title":"Activity Logs","error_logs_title":"Error Logs","websocket_tester":"WebSocket Tester","system_settings":"System Settings","language_settings":"Language Settings","theme_settings":"Theme Settings","server_info":"Server Info","password_change":"Password Change","save_changes":"Save Changes","cancel_changes":"Cancel","live":"Live","running_time":"Running Time","manage_configs":"Manage Configs for","select_configs":"Select configs to include in this group","select_all":"Select All","deselect_all":"Deselect All","changes_apply":"Changes apply immediately","new_group_title":"Create New Group","new_group_sub":"Create a separate public page to manage configs","group_name":"Group Name","description_optional":"Description (optional)","public_page_password":"Public Page Password (optional)","public_page_info":"This group's public page will be accessible via a unique link.","edit_config":"Edit Config","quota_0_unlimited":"Quota (0 = unlimited)","expiry_days":"Expiry (days from now, 0 = no change/unlimited)","expiry_note":"To keep current expiry, leave expiry field as 0.","random_uuid":"Random UUID · Choose quota, expiry and protocol","uuid_note":"UUID is generated randomly · Only registered UUIDs can connect · Protocol cannot be changed after creation.","each_group_public":"Each group has its own public page with its configs","single_sub_desc":"Each config has its own subscription URL. Click the","icon_on_card":"icon on the config card.","full_sub_note":"This URL only works in the browser where you're logged in (requires session cookie).","based_on_mb":"Based on MB per hour","lang_note":"Default language is English. Page will refresh after change.","groups":"Groups","usage":"Usage","average":"Average","protocols_legend":"Protocols","daily_legend":"Daily","hourly_legend":"Hourly","bandwidth_usage":"Bandwidth Usage","smart_alerts":"Smart Alerts","alerts_sub":"Important events & notifications","priority":"Priority","critical":"Critical","warning":"Warning","info":"Info","dismiss":"Dismiss","filter_all":"All","filter_critical":"Critical","filter_warning":"Warning","filter_info":"Info","alert_expiry":"Config expiring soon","alert_quota":"Traffic quota exceeded 80%","alert_errors":"Repeated connection errors","alert_new_ip":"New IP connected","no_alerts":"No alerts to show"
@@ -1986,10 +2008,6 @@ function applyTheme(theme){
   document.getElementById('theme-label').textContent = dict[labelKey] || (isLight ? 'Light Theme' : 'Dark Theme');
   document.getElementById('theme-mob-icon').className = 'ti ' + icon;
   applyBackgroundStyle(currentBgStyle);
-  // Redraw charts on theme change
-  if(window.uplotInstances) {
-    window.uplotInstances.forEach(u => u.redraw(false));
-  }
 }
 function setTheme(theme){ applyTheme(theme); toast('Theme changed to ' + theme, 'ok'); }
 function setBackgroundStyle(style){
@@ -2090,7 +2108,7 @@ document.querySelectorAll('.nav-it').forEach(el => el.addEventListener('click', 
 function openModal(id){ document.getElementById(id).classList.add('open'); }
 function closeModal(id){ document.getElementById(id).classList.remove('open'); }
 
-// ========== PROTOCOL CUSTOM SETTINGS ==========
+// ========== PROTOCOL CUSTOM SETTINGS (بدون Trojan) ==========
 async function loadProtocolSettings(){
   try {
     const r = await authF('/api/settings/protocol');
@@ -2137,7 +2155,7 @@ async function saveProtocolSettings(){
   } catch(e){ toast('Server connection error', 'err'); }
 }
 
-// ========== FORMAT LINK NAME ==========
+// ========== FORMAT LINK NAME (با رعایت دقیق template) ==========
 function formatLinkName(label, protocol, protoSettings){
   const defaultNames = {
     'vless-ws': 'VLESS-WS',
@@ -2165,331 +2183,17 @@ function formatLinkName(label, protocol, protoSettings){
   return result;
 }
 
-// ========== UPUOT SPARKLINE IMPLEMENTATION ==========
-// نگهداری از نمونه‌های uPlot
-window.uplotInstances = [];
-
-function createSparkline(containerId, getData, options = {}) {
-  const container = document.getElementById(containerId);
-  if (!container) return null;
-  const {
-    height = 150,
-    strokeColor = 'var(--accent)',
-    fillColor = 'var(--accent-d)',
-    gridColor = 'var(--card-b)',
-    textColor = 'var(--t3)',
-    showExtrema = true,
-    yMin = 0,
-    yMax = null,
-    yFormatter = v => v.toFixed(1),
-    xTickFormatter = (idx, label) => label || '',
-    tooltipFormatter = null,
-    valueSuffix = ''
-  } = options;
-
-  let dataArr = getData();
-  const dpr = window.devicePixelRatio || 1;
-
-  const buildData = () => {
-    const arr = getData();
-    const xs = arr.map((_, i) => i);
-    return [xs, arr];
-  };
-
-  const seriesColor = () => strokeColor;
-
-  const yDomain = () => {
-    const arr = getData();
-    if (arr.length === 0) return [0, 1];
-    const max = Math.max(...arr);
-    let upper = yMax !== null ? yMax : Math.max(max * 1.2, 1);
-    if (upper === 0) upper = 1;
-    return [yMin, upper];
-  };
-
-  const tooltipEl = document.createElement('div');
-  tooltipEl.className = 'sparkline-tooltip';
-  tooltipEl.style.display = 'none';
-  container.appendChild(tooltipEl);
-
-  const opts = {
-    width: container.clientWidth || 300,
-    height: height,
-    padding: [4, 4, 2, 2],
-    legend: { show: false },
-    cursor: {
-      show: true,
-      x: true,
-      y: false,
-      drag: { x: false, y: false, setScale: false },
-      points: {
-        show: true,
-        size: 6,
-        width: 0,
-        stroke: seriesColor,
-        fill: seriesColor
-      }
-    },
-    scales: {
-      x: {
-        time: false,
-        range: (u, dmin, dmax) => (dmin === dmax ? [dmin - 0.5, dmax + 0.5] : [dmin, dmax])
-      },
-      y: {
-        range: yDomain
-      }
-    },
-    series: [
-      {},
-      {
-        stroke: seriesColor,
-        width: 2,
-        fill: (u, sidx) => {
-          const { ctx, bbox } = u;
-          const grad = ctx.createLinearGradient(0, bbox.top, 0, bbox.top + bbox.height);
-          grad.addColorStop(0, 'rgba(0, 212, 255, 0.0)');
-          grad.addColorStop(0.3, 'rgba(0, 212, 255, 0.15)');
-          grad.addColorStop(1, 'rgba(0, 212, 255, 0.3)');
-          return grad;
-        },
-        paths: uPlot.paths.spline?.(),
-        points: { show: false },
-        spanGaps: true
-      }
-    ],
-    axes: [
-      {
-        show: true,
-        stroke: textColor,
-        grid: { show: false },
-        ticks: { show: false },
-        font: '10px ' + getComputedStyle(document.documentElement).getPropertyValue('--font-family'),
-        gap: 6,
-        size: 28,
-        splits: () => {
-          const arr = getData();
-          const n = arr.length;
-          if (n <= 1) return [0];
-          const count = Math.min(6, n);
-          const step = Math.max(1, Math.floor((n - 1) / (count - 1)));
-          const indices = [];
-          for (let i = 0; i < n; i += step) indices.push(i);
-          if (indices[indices.length - 1] !== n - 1) indices.push(n - 1);
-          return indices;
-        },
-        values: (u, splits) => {
-          const arr = getData();
-          return splits.map(i => xTickFormatter(i, String(arr[i]?.label || i + 1)));
-        }
-      },
-      {
-        show: true,
-        scale: 'y',
-        side: 3,
-        stroke: textColor,
-        grid: { show: false },
-        ticks: { show: false },
-        font: '10px ' + getComputedStyle(document.documentElement).getPropertyValue('--font-family'),
-        gap: 4,
-        size: 40,
-        splits: () => {
-          const [min, max] = yDomain();
-          const n = 4;
-          return Array.from({ length: n + 1 }, (_, i) => min + ((max - min) * i) / n);
-        },
-        values: (u, splits) => splits.map(v => yFormatter(v) + valueSuffix)
-      }
-    ],
-    hooks: {
-      drawClear: [
-        (u) => {
-          // رسم خطوط افقی grid با رنگ متناسب
-          if (options.showGrid !== false) {
-            const { ctx, bbox } = u;
-            const dpr2 = u.width > 0 ? u.ctx.canvas.width / u.width : 1;
-            ctx.save();
-            ctx.strokeStyle = getComputedStyle(document.documentElement).getPropertyValue('--card-b') || '#30363d';
-            ctx.lineWidth = dpr2;
-            ctx.setLineDash([3 * dpr2, 4 * dpr2]);
-            const [min, max] = yDomain();
-            const n = 4;
-            for (let i = 0; i <= n; i++) {
-              const y = min + ((max - min) * i) / n;
-              const py = Math.round(u.valToPos(y, 'y', true)) + 0.5;
-              ctx.beginPath();
-              ctx.moveTo(bbox.left, py);
-              ctx.lineTo(bbox.left + bbox.width, py);
-              ctx.stroke();
-            }
-            ctx.restore();
-          }
-        }
-      ],
-      draw: [
-        (u) => {
-          // رسم نقاط افراطی (min/max)
-          if (!showExtrema) return;
-          const arr = getData();
-          if (arr.length < 2) return;
-          let minIdx = 0, maxIdx = 0;
-          for (let i = 1; i < arr.length; i++) {
-            if (arr[i] < arr[minIdx]) minIdx = i;
-            if (arr[i] > arr[maxIdx]) maxIdx = i;
-          }
-          if (minIdx === maxIdx) return;
-          const { ctx, bbox } = u;
-          const dpr2 = u.width > 0 ? u.ctx.canvas.width / u.width : 1;
-          const dot = (idx, color) => {
-            const px = u.valToPos(idx, 'x', true);
-            const py = u.valToPos(arr[idx], 'y', true);
-            ctx.beginPath();
-            ctx.arc(px, py, 5 * dpr2, 0, 2 * Math.PI);
-            ctx.fillStyle = color;
-            ctx.fill();
-            ctx.strokeStyle = '#fff';
-            ctx.lineWidth = 1.5 * dpr2;
-            ctx.stroke();
-          };
-          dot(maxIdx, '#fa541c');
-          dot(minIdx, '#52c41a');
-        }
-      ],
-      setCursor: [
-        (u) => {
-          const idx = u.cursor.idx;
-          if (idx == null || idx < 0 || idx >= getData().length) {
-            tooltipEl.style.display = 'none';
-            return;
-          }
-          const arr = getData();
-          const val = arr[idx];
-          const label = xTickFormatter(idx, String(arr[idx]?.label || idx + 1));
-          const fmt = tooltipFormatter || yFormatter;
-          tooltipEl.innerHTML = '';
-          const labelDiv = document.createElement('div');
-          labelDiv.className = 'tt-label';
-          labelDiv.textContent = label;
-          tooltipEl.appendChild(labelDiv);
-          const row = document.createElement('div');
-          row.className = 'tt-row';
-          const dotSpan = document.createElement('span');
-          dotSpan.className = 'tt-dot';
-          dotSpan.style.background = getComputedStyle(document.documentElement).getPropertyValue('--accent') || '#1677ff';
-          row.appendChild(dotSpan);
-          const nameSpan = document.createElement('span');
-          nameSpan.className = 'tt-name';
-          nameSpan.textContent = options.seriesName || '';
-          row.appendChild(nameSpan);
-          const valSpan = document.createElement('span');
-          valSpan.className = 'tt-val';
-          valSpan.textContent = fmt(val) + (valueSuffix ? ' ' + valueSuffix : '');
-          row.appendChild(valSpan);
-          tooltipEl.appendChild(row);
-          tooltipEl.style.display = '';
-          const overW = u.over.clientWidth;
-          const overH = u.over.clientHeight;
-          const cx = u.cursor.left || 0;
-          const cy = u.cursor.top || 0;
-          const tw = tooltipEl.offsetWidth;
-          const th = tooltipEl.offsetHeight;
-          let left = cx + 12;
-          if (left + tw + 8 > overW) left = cx - tw - 12;
-          if (left < 0) left = 4;
-          let top = cy - th - 12;
-          if (top < 0) top = Math.min(cy + 12, overH - th - 4);
-          tooltipEl.style.transform = `translate(${Math.round(left)}px, ${Math.round(top)}px)`;
-        }
-      ]
-    }
-  };
-
-  const u = new uPlot(opts, buildData(), container);
-  window.uplotInstances.push(u);
-
-  // Resize observer
-  const ro = new ResizeObserver(() => {
-    const w = container.clientWidth;
-    if (w > 0) u.setSize({ width: w, height });
-  });
-  ro.observe(container);
-
-  // Update function
-  function update() {
-    const newData = buildData();
-    u.setData(newData);
-    // به‌روزرسانی domain
-    const [min, max] = yDomain();
-    u.setScale('y', { range: () => [min, max] });
-    u.redraw(false);
-  }
-
-  // ذخیره reference برای استفاده در addDataPoint
-  const instance = { u, update, container, ro };
-  return instance;
-}
-
-// ========== INIT CHARTS با uPlot ==========
-let chartInstances = {};
-
-function initPremiumCharts() {
-  // Load Chart
-  const loadData = () => chartData.load || [];
-  const loadInstance = createSparkline('chart-load-uplot', loadData, {
-    height: 150,
-    seriesName: 'Load',
-    yFormatter: v => v.toFixed(0),
-    valueSuffix: '%',
-    showExtrema: true,
-    yMax: 100
-  });
-  chartInstances.load = loadInstance;
-
-  // Traffic Chart
-  const trafficData = () => chartData.traffic || [];
-  const trafficInstance = createSparkline('chart-traffic-uplot', trafficData, {
-    height: 150,
-    seriesName: 'Traffic',
-    yFormatter: v => v.toFixed(1),
-    valueSuffix: 'MB',
-    showExtrema: true,
-    yMax: null
-  });
-  chartInstances.traffic = trafficInstance;
-
-  // Connections Chart
-  const connsData = () => chartData.conns || [];
-  const connsInstance = createSparkline('chart-conns-uplot', connsData, {
-    height: 150,
-    seriesName: 'Connections',
-    yFormatter: v => v.toFixed(0),
-    valueSuffix: '',
-    showExtrema: true,
-    yMax: null
-  });
-  chartInstances.conns = connsInstance;
-
-  // Hourly Chart (secondary)
-  const hourlyData = () => hourlyChartData || [];
-  const hourlyInstance = createSparkline('dashHourly-uplot', hourlyData, {
-    height: 120,
-    seriesName: 'Hourly Avg',
-    yFormatter: v => v.toFixed(1),
-    valueSuffix: 'MB',
-    showExtrema: true,
-    yMax: null
-  });
-  chartInstances.hourly = hourlyInstance;
-}
-
-// ========== DATA ARRAYS ==========
+// ========== NEON PREMIUM CHARTS (Fill from 0 to Curve + 3D Grid) ==========
+const CHART_STORAGE_KEY = 'CBeeNet_chartData';
+const PREV_TRAF_KEY = 'CBeeNet_prevTraf';
 let chartData = { load: [], traffic: [], conns: [] };
 let chartTimes = { load: [], traffic: [], conns: [] };
-let hourlyChartData = [];
 const MAX_POINTS = 60;
+let chartInstances = { load: null, traffic: null, conns: null };
 
 function loadChartDataFromStorage(){
   try {
-    const stored = localStorage.getItem('CBeeNet_chartData');
+    const stored = localStorage.getItem(CHART_STORAGE_KEY);
     if(stored){
       const parsed = JSON.parse(stored);
       if(parsed.data && parsed.times){
@@ -2524,8 +2228,274 @@ function saveChartDataToStorage(){
     for(let key of ['load','traffic','conns']){
       times[key] = chartTimes[key].map(d => d.toISOString());
     }
-    localStorage.setItem('CBeeNet_chartData', JSON.stringify({ data: chartData, times: times }));
+    localStorage.setItem(CHART_STORAGE_KEY, JSON.stringify({ data: chartData, times: times }));
   } catch(e) {}
+}
+function updateGridVisibility(type) {
+  const container = document.querySelector(`#chart-${type}-container .chart-3d-wrap`) ||
+                    document.querySelector(`#pg-overview .dash-small-chart .chart-3d-wrap`);
+  if(!container) return;
+  const floor = container.querySelector('.chart-grid-floor');
+  if(floor) floor.style.opacity = '0.4';
+}
+
+// ---- Helper: Get accent color from CSS ----
+function getAccentColor() {
+  const el = document.documentElement;
+  const color = getComputedStyle(el).getPropertyValue('--accent').trim();
+  return color || '#1677ff';
+}
+function hexToRgb(hex) {
+  const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+  if (!result) return { r: 22, g: 119, b: 255 };
+  return {
+    r: parseInt(result[1], 16),
+    g: parseInt(result[2], 16),
+    b: parseInt(result[3], 16)
+  };
+}
+function rgba(color, alpha) {
+  const { r, g, b } = hexToRgb(color);
+  return `rgba(${r},${g},${b},${alpha})`;
+}
+
+// ---- External Tooltip ----
+function getTooltip(container) {
+  let tooltip = container.querySelector('.chart-tooltip');
+  if (!tooltip) {
+    tooltip = document.createElement('div');
+    tooltip.className = 'chart-tooltip';
+    tooltip.innerHTML = `<div class="tt-time" id="tt-time">--:--</div><div id="tt-body"></div>`;
+    container.appendChild(tooltip);
+  }
+  return tooltip;
+}
+
+// ---- Build Chart (with min/max markers, reference lines, external tooltip) ----
+function buildChart(type) {
+  const accentColor = getAccentColor();
+  const textColor = getComputedStyle(document.documentElement).getPropertyValue('--t3').trim() || '#6e7681';
+  const gridColor = getComputedStyle(document.documentElement).getPropertyValue('--card-b').trim() || '#30363d';
+  const canvasId = 'chart-' + type;
+  const ctx = document.getElementById(canvasId).getContext('2d');
+
+  const dataArr = chartData[type] || [];
+  const timeArr = chartTimes[type] || [];
+  const labels = timeArr.map(d => d ? d.toLocaleTimeString('en-US', {hour:'2-digit', minute:'2-digit'}) : '');
+
+  const maxVal = dataArr.length > 0 ? Math.max(...dataArr, 1) : 1;
+  let yMax = type === 'load' ? 100 : Math.ceil(maxVal * 1.2);
+  if(type === 'traffic' && yMax < 5) yMax = 5;
+  if(type === 'conns' && yMax < 5) yMax = 5;
+  if(maxVal === 0) yMax = 1;
+
+  // Datasets: Glow + Main
+  const datasets = [
+    // Glow Layer (Behind)
+    {
+      data: dataArr,
+      borderColor: rgba(accentColor, 0.3),
+      borderWidth: 8,
+      pointRadius: 0,
+      pointHoverRadius: 0,
+      fill: false,
+      tension: 0.4,
+    },
+    // Main Curve Layer
+    {
+      data: dataArr,
+      borderColor: accentColor,
+      borderWidth: 2.5,
+      pointRadius: 0,
+      pointHoverRadius: 4,
+      pointHoverBorderWidth: 2,
+      pointHoverBorderColor: '#fff',
+      pointHoverBackgroundColor: accentColor,
+      fill: 'origin',
+      tension: 0.4,
+      backgroundColor: function(context) {
+        const chart = context.chart;
+        const { ctx, chartArea } = chart;
+        if (!chartArea) return rgba(accentColor, 0.1);
+        const grad = ctx.createLinearGradient(0, chartArea.top, 0, chartArea.bottom);
+        grad.addColorStop(0, rgba(accentColor, 0.05));
+        grad.addColorStop(1, rgba(accentColor, 0.6));
+        return grad;
+      },
+      borderJoinStyle: 'round'
+    }
+  ];
+
+  const options = {
+    responsive: true,
+    maintainAspectRatio: false,
+    animation: { duration: 400, easing: 'easeOutQuart' },
+    interaction: { intersect: false, mode: 'index', axis: 'x' },
+    plugins: {
+      legend: { display: false },
+      tooltip: {
+        enabled: false, // external tooltip
+      }
+    },
+    scales: {
+      x: {
+        display: true,
+        grid: { display: false, drawBorder: false },
+        border: { display: false },
+        ticks: {
+          color: textColor,
+          font: { size: 9 },
+          maxTicksLimit: 8,
+          autoSkip: true,
+          maxRotation: 0,
+          minRotation: 0
+        }
+      },
+      y: {
+        display: true,
+        grid: { color: gridColor, drawBorder: false, borderDash: [4, 4] },
+        border: { display: false },
+        ticks: {
+          color: textColor,
+          font: { size: 9 },
+          maxTicksLimit: 5,
+          callback: function(value) {
+            if (type === 'load') return value + '%';
+            if (type === 'traffic') return value.toFixed(0) + 'MB';
+            return value.toFixed(0);
+          }
+        },
+        min: 0,
+        max: yMax
+      }
+    },
+    elements: {
+      line: { borderJoinStyle: 'round' }
+    }
+  };
+
+  const chart = new Chart(ctx, {
+    type: 'line',
+    data: { labels: labels, datasets: datasets },
+    options: options
+  });
+
+  // ---- Custom afterDraw: min/max markers, reference lines, external tooltip ----
+  chart.afterDraw = function(instance) {
+    const { ctx, chartArea: { left, top, right, bottom }, data } = instance;
+    const dpr = window.devicePixelRatio || 1;
+    const accent = getAccentColor();
+    const ringColor = getComputedStyle(document.documentElement).getPropertyValue('--card').trim() || '#161b22';
+
+    // ---- Reference lines (only for Load chart) ----
+    if (type === 'load') {
+      const refs = [80, 90];
+      ctx.save();
+      for (const ref of refs) {
+        const yPos = instance.scales.y.getPixelForValue(ref);
+        if (yPos < top || yPos > bottom) continue;
+        ctx.beginPath();
+        ctx.moveTo(left, yPos);
+        ctx.lineTo(right, yPos);
+        ctx.strokeStyle = ref === 80 ? 'rgba(245,158,11,0.6)' : 'rgba(239,68,68,0.6)';
+        ctx.lineWidth = 1.2 * dpr;
+        ctx.setLineDash([5 * dpr, 4 * dpr]);
+        ctx.stroke();
+        ctx.restore();
+        // Label
+        ctx.save();
+        ctx.fillStyle = ref === 80 ? '#fbbf24' : '#f87171';
+        ctx.font = `600 ${10 * dpr}px system-ui, sans-serif`;
+        ctx.textAlign = 'right';
+        ctx.textBaseline = 'bottom';
+        ctx.fillText(ref + '%', right - 6 * dpr, yPos - 3 * dpr);
+        ctx.restore();
+        ctx.save();
+      }
+    }
+
+    // ---- Min / Max markers ----
+    const arr = data.datasets[1].data;
+    if (arr.length >= 2) {
+      let minIdx = 0, maxIdx = 0;
+      for (let i = 1; i < arr.length; i++) {
+        if (arr[i] < arr[minIdx]) minIdx = i;
+        if (arr[i] > arr[maxIdx]) maxIdx = i;
+      }
+      if (minIdx !== maxIdx) {
+        const drawDot = (idx, color) => {
+          const x = instance.scales.x.getPixelForValue(idx);
+          const y = instance.scales.y.getPixelForValue(arr[idx]);
+          if (x < left || x > right || y < top || y > bottom) return;
+          ctx.save();
+          ctx.beginPath();
+          ctx.arc(x, y, 5 * dpr, 0, Math.PI * 2);
+          ctx.fillStyle = color;
+          ctx.fill();
+          ctx.lineWidth = 2 * dpr;
+          ctx.strokeStyle = ringColor;
+          ctx.stroke();
+          ctx.restore();
+        };
+        drawDot(minIdx, '#52c41a');
+        drawDot(maxIdx, '#fa541c');
+      }
+    }
+
+    // ---- External Tooltip ----
+    const tooltip = getTooltip(instance.canvas.closest('.chart-3d-wrap') || instance.canvas.closest('.chart-premium'));
+    const active = instance.getActiveElements();
+    if (active.length && active[0].datasetIndex === 1) {
+      const idx = active[0].index;
+      const val = data.datasets[1].data[idx];
+      const label = data.labels[idx] || '';
+      const time = chartTimes[type]?.[idx] || new Date();
+      const timeStr = time.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+      const unit = type === 'load' ? '%' : type === 'traffic' ? ' MB' : '';
+      const valueStr = (typeof val === 'number' ? val.toFixed(1) : '0') + unit;
+
+      const tt = tooltip;
+      tt.style.display = 'block';
+      tt.querySelector('.tt-time').textContent = timeStr;
+      const body = tt.querySelector('#tt-body');
+      body.innerHTML = `<div class="tt-row"><span class="tt-dot" style="background:${accentColor}"></span><span class="tt-label">${type === 'load' ? 'Load' : type === 'traffic' ? 'Traffic' : 'Connections'}</span><span class="tt-value">${valueStr}</span></div>`;
+
+      const canvasRect = instance.canvas.getBoundingClientRect();
+      const x = instance.scales.x.getPixelForValue(idx);
+      const y = instance.scales.y.getPixelForValue(val);
+      const px = canvasRect.left + x;
+      const py = canvasRect.top + y;
+      tt.style.left = (px + 12) + 'px';
+      tt.style.top = (py - 10) + 'px';
+    } else {
+      const tt = getTooltip(instance.canvas.closest('.chart-3d-wrap') || instance.canvas.closest('.chart-premium'));
+      tt.style.display = 'none';
+    }
+  };
+
+  chartInstances[type] = chart;
+  updateChartValue(type);
+  updateGridVisibility(type);
+  return chart;
+}
+
+function updateChartValue(type) {
+  const el = document.getElementById('chart-' + type + '-val');
+  if (!el) return;
+  if (type === 'traffic') {
+    el.innerHTML = totalTrafficDisplay.toFixed(1) + '<span class="unit">MB</span>';
+    return;
+  }
+  const data = chartData[type];
+  const last = data.length > 0 ? data[data.length-1] : 0;
+  const unit = type === 'load' ? '%' : '';
+  el.innerHTML = last.toFixed(1) + (unit ? '<span class="unit">' + unit + '</span>' : '');
+}
+
+function initPremiumCharts() {
+  ['load', 'traffic', 'conns'].forEach(type => {
+    buildChart(type);
+  });
 }
 
 function addDataPoint(type, value, time) {
@@ -2547,27 +2517,24 @@ function addDataPoint(type, value, time) {
   }
   saveChartDataToStorage();
 
-  // به‌روزرسانی نمودار
-  if (chartInstances[type]) {
-    chartInstances[type].update();
-  }
+  const chart = chartInstances[type];
+  if (!chart) return;
+  const labels = chartTimes[type].map(d => d ? d.toLocaleTimeString('en-US', {hour:'2-digit', minute:'2-digit'}) : '');
+  chart.data.labels = labels;
+  chart.data.datasets[0].data = chartData[type];
+  chart.data.datasets[1].data = chartData[type];
+  const maxVal = chartData[type].length > 0 ? Math.max(...chartData[type], 1) : 1;
+  let yMax = type === 'load' ? 100 : Math.ceil(maxVal * 1.2);
+  if(type === 'traffic' && yMax < 5) yMax = 5;
+  if(type === 'conns' && yMax < 5) yMax = 5;
+  if(maxVal === 0) yMax = 1;
+  chart.options.scales.y.max = yMax;
+  chart.update('none');
   updateChartValue(type);
+  updateGridVisibility(type);
 }
 
-function updateChartValue(type) {
-  const el = document.getElementById('chart-' + type + '-val');
-  if (!el) return;
-  if (type === 'traffic') {
-    el.innerHTML = totalTrafficDisplay.toFixed(1) + '<span class="unit">MB</span>';
-    return;
-  }
-  const data = chartData[type];
-  const last = data.length > 0 ? data[data.length-1] : 0;
-  const unit = type === 'load' ? '%' : '';
-  el.innerHTML = last.toFixed(1) + (unit ? '<span class="unit">' + unit + '</span>' : '');
-}
-
-// ========== FETCH STATS ==========
+// ========== fetchStats (Traffic Delta Fix + Persistence + Visibility) ==========
 async function fetchStats(){
   try{
     const connResp = await authF('/api/connections');
@@ -2593,42 +2560,57 @@ async function fetchStats(){
     const now = new Date();
     const delta = totalTrafficDisplay - prevTraf;
     const pct = Math.min(100, Math.max(0, Math.round((delta / 50) * 100 * 10) / 10));
-    if(delta >= 0) addDataPoint('traffic', delta, now);
-    else addDataPoint('traffic', 0.01, now);
+    
+    if(delta >= 0) {
+      addDataPoint('traffic', delta, now);
+    } else {
+      addDataPoint('traffic', 0.01, now);
+    }
+    
     prevTraf = totalTrafficDisplay;
-    localStorage.setItem('CBeeNet_prevTraf', String(prevTraf));
+    localStorage.setItem(PREV_TRAF_KEY, String(prevTraf));
+    
     addDataPoint('load', pct, now);
     addDataPoint('conns', activeCount, now);
     
-    // به‌روزرسانی Hourly Chart
-    const hourly = d.hourly || {};
-    const labels = Object.keys(hourly).sort();
-    const data = labels.map(h => (hourly[h] || 0) / (1024 * 1024)); // MB
-    hourlyChartData = data.slice(-12); // آخرین ۱۲ ساعت
-    if (chartInstances.hourly) {
-      chartInstances.hourly.update();
-    }
-
     updateSecondaryCharts(d, allLinksList);
   } catch(e){ console.error('fetchStats error:', e); }
 }
 
-// ========== SECONDARY CHARTS (Protocol Distribution با Chart.js) ==========
-let dashProtoChart = null;
-function initSecondaryCharts() {
-  // Protocol distribution chart (با Chart.js)
-  const ctx = document.getElementById('dashProtoChart').getContext('2d');
-  const neonBlue = '#00d4ff';
+// ========== Visibility Change Handler (Updates when tab becomes active) ==========
+document.addEventListener('visibilitychange', function() {
+  if (!document.hidden) {
+    fetchStats();
+  }
+});
+
+// ========== SECONDARY CHARTS ==========
+let dashProtoChart = null, dashHourlyChart = null;
+function initSecondaryCharts(){
+  const accentColor = getAccentColor();
   const amberColor = getComputedStyle(document.documentElement).getPropertyValue('--amber-t').trim() || '#fbbf24';
-  const textColor = getComputedStyle(document.documentElement).getPropertyValue('--t3').trim() || '#5a7298';
-  const gridColor = getComputedStyle(document.documentElement).getPropertyValue('--card-b').trim() || '#1e2d45';
-  dashProtoChart = new Chart(ctx, {
+  const textColor = getComputedStyle(document.documentElement).getPropertyValue('--t3').trim() || '#6e7681';
+  const gridColor = getComputedStyle(document.documentElement).getPropertyValue('--card-b').trim() || '#30363d';
+  
+  const ctxProto = document.getElementById('dashProtoChart').getContext('2d');
+  dashProtoChart = new Chart(ctxProto, {
     type: 'bar',
-    data: { labels: ['VLESS/WS', 'XHTTP-packet', 'XHTTP-stream', 'XHTTP-ultra'], datasets: [{ data: [0,0,0,0], backgroundColor: [neonBlue, 'rgba(251, 191, 36, 0.8)', 'rgba(245, 158, 11, 0.8)', 'rgba(16, 185, 129, 0.8)'], borderColor: [neonBlue, amberColor, '#f59e0b', '#10b981'], borderWidth: 2, borderRadius: 6, barPercentage: 0.6 }] },
+    data: { labels: ['VLESS/WS', 'XHTTP-packet', 'XHTTP-stream', 'XHTTP-ultra'], datasets: [{ data: [0,0,0,0], backgroundColor: [accentColor, 'rgba(251, 191, 36, 0.8)', 'rgba(245, 158, 11, 0.8)', 'rgba(16, 185, 129, 0.8)'], borderColor: [accentColor, amberColor, '#f59e0b', '#10b981'], borderWidth: 2, borderRadius: 6, barPercentage: 0.6 }] },
     options: {
       responsive: true, maintainAspectRatio: false,
-      plugins: { legend: { display: false }, tooltip: { backgroundColor: 'rgba(11, 17, 29, 0.9)', borderColor: neonBlue, borderWidth: 1, titleColor: '#fff', bodyColor: '#fff', cornerRadius: 8, padding: 10, callbacks: { label: function(context){ return context.parsed.y + ' configs'; } } } },
-      scales: { x: { grid: { display: false }, ticks: { color: textColor, font: { size: 9, family: 'Vazirmatn, sans-serif' } } }, y: { grid: { color: gridColor, drawBorder: false }, ticks: { color: textColor, font: { size: 9, family: 'Vazirmatn, sans-serif' }, stepSize: 1 } } },
+      plugins: { legend: { display: false }, tooltip: { backgroundColor: 'rgba(11, 17, 29, 0.9)', borderColor: accentColor, borderWidth: 1, titleColor: '#fff', bodyColor: '#fff', cornerRadius: 8, padding: 10, callbacks: { label: function(context){ return context.parsed.y + ' configs'; } } } },
+      scales: { x: { grid: { display: false }, ticks: { color: textColor, font: { size: 9, family: 'Vazirmatn, sans-serif' } } }, y: { grid: { color: gridColor, drawBorder: false, borderDash: [3,3] }, ticks: { color: textColor, font: { size: 9, family: 'Vazirmatn, sans-serif' }, stepSize: 1 } } },
+      animation: { duration: 400, easing: 'easeOutQuart' }
+    }
+  });
+  const ctxHourly = document.getElementById('dashHourlyChart').getContext('2d');
+  dashHourlyChart = new Chart(ctxHourly, {
+    type: 'line',
+    data: { labels: ['00', '04', '08', '12', '16', '20'], datasets: [{ data: [0, 0, 0, 0, 0, 0], borderColor: accentColor, backgroundColor: rgba(accentColor, 0.2), borderWidth: 2, pointRadius: 0, pointHoverRadius: 5, pointHoverBorderWidth: 2, pointHoverBorderColor: '#fff', fill: 'origin', tension: 0.3 }] },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: { legend: { display: false }, tooltip: { backgroundColor: 'rgba(11, 17, 29, 0.9)', borderColor: accentColor, borderWidth: 1, titleColor: '#fff', bodyColor: '#fff', cornerRadius: 8, padding: 10, callbacks: { label: function(context){ return context.parsed.y + ' MB'; } } } },
+      scales: { x: { grid: { display: false }, ticks: { color: textColor, font: { size: 8, family: 'Vazirmatn, sans-serif' } } }, y: { grid: { color: gridColor, drawBorder: false, borderDash: [3,3] }, ticks: { color: textColor, font: { size: 8, family: 'Vazirmatn, sans-serif' }, callback: function(value) { return value + ' MB'; } } } },
       animation: { duration: 400, easing: 'easeOutQuart' }
     }
   });
@@ -2644,9 +2626,20 @@ function updateSecondaryCharts(statsData, linksData){
     dashProtoChart.data.datasets[0].data = counts;
     dashProtoChart.update('none');
   }
+  if(dashHourlyChart && statsData){
+    const hourly = statsData.hourly || {};
+    const labels = Object.keys(hourly).sort();
+    const data = labels.map(h => (hourly[h] || 0) / (1024 * 1024));
+    let slicedLabels = labels.slice(0, 6);
+    let slicedData = data.slice(0, 6);
+    while(slicedLabels.length < 6){ slicedLabels.push('—'); slicedData.push(0); }
+    dashHourlyChart.data.labels = slicedLabels;
+    dashHourlyChart.data.datasets[0].data = slicedData;
+    dashHourlyChart.update('none');
+  }
 }
 
-// ========== LINKS (بدون تغییر) ==========
+// ========== LINKS ==========
 async function loadLinks(){
   try{
     const [lr, sr] = await Promise.all([authF('/api/links'), authF('/api/subs')]);
@@ -2664,6 +2657,7 @@ async function loadLinks(){
     const empty = document.getElementById('links-empty');
     if(!links.length){ grid.innerHTML = ''; empty.style.display = 'block'; return; }
     empty.style.display = 'none';
+    // load protocol settings for formatting
     const protoSettings = await authF('/api/settings/protocol').then(r => r.json()).catch(() => ({}));
     grid.innerHTML = links.map(l => {
       const lim = l.limit_bytes === 0 ? '∞' : fmtB(l.limit_bytes);
@@ -2786,7 +2780,7 @@ async function deleteLink(uuid){
 }
 function showQR(link){ window.open('https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=' + encodeURIComponent(link), '_blank'); }
 
-// ========== SUB GROUPS (بدون تغییر) ==========
+// ========== SUB GROUPS ==========
 async function loadSubs(){
   try{
     const r = await authF('/api/subs');
@@ -2941,7 +2935,7 @@ async function copyAllSubLinks(subId){
   navigator.clipboard.writeText(urls.join('\n')).then(() => toast(urls.length + ' links copied ✓', 'ok'));
 }
 
-// ========== CONNECTIONS, ACTIVITY, ERRORS, WEBSOCKET (بدون تغییر) ==========
+// ========== CONNECTIONS, ACTIVITY, ERRORS, WEBSOCKET ==========
 async function loadConns(){
   try{
     const r = await authF('/api/connections');
@@ -3248,7 +3242,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     btn.style.outlineOffset = btn.dataset.bg === currentBgStyle ? '2px' : '0';
   });
 
-  prevTraf = parseFloat(localStorage.getItem('CBeeNet_prevTraf')) || 0;
+  prevTraf = parseFloat(localStorage.getItem(PREV_TRAF_KEY)) || 0;
 
   const hasStored = loadChartDataFromStorage();
   initPremiumCharts();
