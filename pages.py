@@ -2490,7 +2490,7 @@ function addDataPoint(type, value, time) {
   updateChartValue(type);
 }
 
-// ========== fetchStats (Fixed: proper interpolation for missing time) ==========
+// ========== fetchStats ==========
 async function fetchStats(){
   try{
     const connResp = await authF('/api/connections');
@@ -2519,12 +2519,11 @@ async function fetchStats(){
     let gapSeconds = lastTime ? (Date.now() - parseInt(lastTime)) / 1000 : 5;
     gapSeconds = Math.max(1, gapSeconds);
 
-    // If gap is larger than 5 seconds, interpolate missing points
     if (delta > 0 && gapSeconds > 5) {
       const pointsToAdd = Math.min(Math.floor(gapSeconds / 5), 60);
       if (pointsToAdd > 0) {
         const perPoint = delta / (pointsToAdd || 1);
-        for (let i = 0; i < pointsToAdd; i++) {
+        for (let i = pointsToAdd - 1; i >= 0; i--) {
           const offset = (pointsToAdd - i) * (gapSeconds / pointsToAdd) * 1000;
           const t = new Date(now.getTime() - offset);
           addDataPoint('traffic', Math.max(0, perPoint), t);
@@ -2539,7 +2538,6 @@ async function fetchStats(){
       }
     }
 
-    // Normal case: add a single point for the current interval
     if (delta >= 0) {
       addDataPoint('traffic', delta, now);
     } else {
