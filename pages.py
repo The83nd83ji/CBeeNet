@@ -2228,7 +2228,7 @@ function getGridColor() {
   return getComputedStyle(document.documentElement).getPropertyValue('--card-b').trim() || '#30363d';
 }
 
-// ===== BUILD AREA CHART (Neon Glow, Themed Grid, Full Fill) =====
+// ===== BUILD AREA CHART (Neon Glow, Themed Grid, Full Fill, Fixed Scales) =====
 function buildChart(type) {
   const accent = getAccentColor();
   const textColor = getTextColor();
@@ -2237,23 +2237,46 @@ function buildChart(type) {
 
   const dataArr = chartData[type] || [];
   const timeArr = chartTimes[type] || [];
-  const labels = timeArr.map(d => d ? d.toLocaleTimeString('en-US', {hour:'2-digit', minute:'2-digit', hour12:false}) : '');
+
+  // Fix duplicate labels on X-axis by hiding duplicates within the same minute
+  const labels = timeArr.map((d, i) => {
+    if (!d) return '';
+    if (i > 0 && timeArr[i-1] && Math.abs(d.getTime() - timeArr[i-1].getTime()) < 60000) {
+      return ''; // skip label if within same minute
+    }
+    return d.toLocaleTimeString('en-US', {hour:'2-digit', minute:'2-digit', hour12:false});
+  });
 
   const maxVal = dataArr.length > 0 ? Math.max(...dataArr, 1) : 1;
+  
+  // Function to round Y max to a beautiful number (avoid decimals like 33.333)
+  const roundToNice = (num) => {
+    if (num <= 10) return 10;
+    if (num <= 20) return 20;
+    if (num <= 50) return 50;
+    if (num <= 100) return 100;
+    if (num <= 200) return 200;
+    if (num <= 500) return 500;
+    return Math.ceil(num / 100) * 100;
+  };
+
   let yMax = type === 'load' ? 100 : Math.ceil(maxVal * 1.2);
   if (type === 'traffic' && yMax < 5) yMax = 5;
   if (type === 'conns' && yMax < 5) yMax = 5;
   if (maxVal === 0) yMax = 1;
+  yMax = roundToNice(yMax);
+  let stepSize = Math.round(yMax / 5);
+  if (stepSize === 0) stepSize = 1;
 
-  // Gradient fill for the area (very light, to let grid lines show through)
+  // Gradient fill (very faint, to let grid show through)
   const grad = ctx.createLinearGradient(0, 0, 0, 150);
-  grad.addColorStop(0, hexToRgba(accent, 0.12));
-  grad.addColorStop(1, hexToRgba(accent, 0.02));
+  grad.addColorStop(0, hexToRgba(accent, 0.10));
+  grad.addColorStop(1, hexToRgba(accent, 0.01));
 
-  // Glow layer (thick line behind main line)
+  // Glow layer (neon effect)
   const glowDataset = {
     data: dataArr,
-    borderColor: hexToRgba(accent, 0.25),
+    borderColor: hexToRgba(accent, 0.30),
     borderWidth: 8,
     pointRadius: 0,
     fill: false,
@@ -2313,19 +2336,18 @@ function buildChart(type) {
       scales: {
         x: {
           display: true,
-          grid: { 
-            display: true, 
-            color: hexToRgba(accent, 0.2),  // Theme-colored grid, lighter
-            drawBorder: true,
+          grid: {
+            display: true,
+            color: 'rgba(255,255,255, 0.15)', // Faint white grid like reference image
+            drawBorder: false,
             tickLength: 0,
             drawTicks: false,
             lineWidth: 0.8
           },
-          border: { display: true, color: hexToRgba(accent, 0.3) },
           ticks: {
             color: textColor,
             font: { size: 9 },
-            maxTicksLimit: 8,
+            maxTicksLimit: 6,
             autoSkip: true,
             maxRotation: 0,
             minRotation: 0
@@ -2333,20 +2355,19 @@ function buildChart(type) {
         },
         y: {
           display: true,
-          grid: { 
-            display: true, 
-            color: hexToRgba(accent, 0.2),  // Theme-colored grid
-            drawBorder: true,
+          grid: {
+            display: true,
+            color: 'rgba(255,255,255, 0.15)', // Faint white grid
+            drawBorder: false,
             tickLength: 0,
             drawTicks: false,
             lineWidth: 0.8
           },
-          border: { display: true, color: hexToRgba(accent, 0.3) },
           ticks: {
             color: textColor,
             font: { size: 9 },
-            maxTicksLimit: 5,
-            stepSize: type === 'load' ? 20 : (type === 'traffic' ? Math.ceil(yMax / 5) : Math.ceil(yMax / 5)),
+            maxTicksLimit: 6,
+            stepSize: stepSize, // Clean, non-decimal steps
             callback: function(value) {
               if (type === 'load') return value + '%';
               if (type === 'traffic') return value.toFixed(0) + 'MB';
@@ -2365,7 +2386,6 @@ function buildChart(type) {
         const chart = this;
         const elements = chart.getElementsAtEventForMode(e, 'index', { intersect: true });
         if (elements.length > 0) {
-          // If tooltip is already showing, hide it
           if (chart.tooltip._active && chart.tooltip._active.length > 0) {
             chart.tooltip.setActiveElements([], {x:0,y:0});
             chart.draw();
@@ -2374,7 +2394,6 @@ function buildChart(type) {
             chart.draw();
           }
         } else {
-          // Click on empty space => hide tooltip
           chart.tooltip.setActiveElements([], {x:0,y:0});
           chart.draw();
         }
@@ -2419,6 +2438,20 @@ function addDataPoint(type, value, time) {
     chartTimes[type] = [];
   }
   
+  // Prevent adding duplicate timestamps (within 500ms)
+  if (chartTimes[type].length > 0 && Math.abs(now.getTime() - chartTimes[type][chartTimes[type].length-1].getTime()) < 500) {
+    // Update the last point instead of adding new one
+    chartData[type][chartData[type].length-1] = value;
+    saveChartDataToStorage();
+    const chart = chartInstances[type];
+    if (chart) {
+      chart.data.datasets[0].data = chartData[type];
+      chart.data.datasets[1].data = chartData[type];
+      chart.update('none');
+    }
+    return;
+  }
+
   chartData[type].push(value);
   chartTimes[type].push(now);
   
@@ -2439,7 +2472,22 @@ function addDataPoint(type, value, time) {
   if (type === 'traffic' && yMax < 5) yMax = 5;
   if (type === 'conns' && yMax < 5) yMax = 5;
   if (maxVal === 0) yMax = 1;
+  
+  const roundToNice = (num) => {
+    if (num <= 10) return 10;
+    if (num <= 20) return 20;
+    if (num <= 50) return 50;
+    if (num <= 100) return 100;
+    if (num <= 200) return 200;
+    if (num <= 500) return 500;
+    return Math.ceil(num / 100) * 100;
+  };
+  yMax = roundToNice(yMax);
+  let stepSize = Math.round(yMax / 5);
+  if (stepSize === 0) stepSize = 1;
+  
   chart.options.scales.y.max = yMax;
+  chart.options.scales.y.ticks.stepSize = stepSize;
   chart.update('none');
   updateChartValue(type);
 }
@@ -2527,12 +2575,11 @@ document.addEventListener('visibilitychange', function() {
   }
 });
 
-// ========== SECONDARY CHARTS (با استایل مشابه) ==========
+// ========== SECONDARY CHARTS (با استایل مشابه، گرید سفید و ی محور تمیز) ==========
 let dashProtoChart = null, dashHourlyChart = null;
 function initSecondaryCharts(){
   const accent = getAccentColor();
   const textColor = getTextColor();
-  const gridColor = getGridColor();
   
   const ctxProto = document.getElementById('dashProtoChart').getContext('2d');
   dashProtoChart = new Chart(ctxProto, {
@@ -2541,27 +2588,27 @@ function initSecondaryCharts(){
     options: {
       responsive: true, maintainAspectRatio: false,
       plugins: { legend: { display: false }, tooltip: { backgroundColor: 'rgba(11, 17, 29, 0.9)', borderColor: accent, borderWidth: 1, titleColor: '#fff', bodyColor: '#fff', cornerRadius: 8, padding: 10, callbacks: { label: function(context){ return context.parsed.y + ' configs'; } } } },
-      scales: { x: { grid: { display: false }, ticks: { color: textColor, font: { size: 9, family: 'Vazirmatn, sans-serif' } } }, y: { grid: { color: gridColor, drawBorder: false }, ticks: { color: textColor, font: { size: 9, family: 'Vazirmatn, sans-serif' }, stepSize: 1 } } },
+      scales: { x: { grid: { display: false }, ticks: { color: textColor, font: { size: 9, family: 'Vazirmatn, sans-serif' } } }, y: { grid: { color: 'rgba(255,255,255, 0.15)', drawBorder: false }, ticks: { color: textColor, font: { size: 9, family: 'Vazirmatn, sans-serif' }, stepSize: 1 } } },
       animation: { duration: 400, easing: 'easeOutQuart' }
     }
   });
 
-  // Hourly chart with same neon style
+  // Hourly chart with same neon style, white grid, fixed steps
   const ctxHourly = document.getElementById('dashHourlyChart').getContext('2d');
   const grad = ctxHourly.createLinearGradient(0, 0, 0, 120);
-  grad.addColorStop(0, hexToRgba(accent, 0.15));
-  grad.addColorStop(1, hexToRgba(accent, 0.02));
+  grad.addColorStop(0, hexToRgba(accent, 0.10));
+  grad.addColorStop(1, hexToRgba(accent, 0.01));
   dashHourlyChart = new Chart(ctxHourly, {
     type: 'line',
-    data: { labels: ['00', '04', '08', '12', '16', '20'], datasets: [{ data: [0, 0, 0, 0, 0, 0], borderColor: accent, backgroundColor: grad, borderWidth: 2, pointRadius: 0, pointHoverRadius: 5, pointHoverBorderWidth: 2, pointHoverBorderColor: '#fff', fill: 'origin', tension: 0.3, borderJoinStyle: 'round' }] },
+    data: { labels: ['00', '04', '08', '12', '16', '20'], datasets: [{ data: [0, 0, 0, 0, 0, 0], borderColor: accent, backgroundColor: grad, borderWidth: 2.5, pointRadius: 0, pointHoverRadius: 5, pointHoverBorderWidth: 2, pointHoverBorderColor: '#fff', fill: 'origin', tension: 0.3, borderJoinStyle: 'round' }] },
     options: {
       responsive: true, maintainAspectRatio: false,
       plugins: { legend: { display: false }, tooltip: { backgroundColor: 'rgba(11, 17, 29, 0.9)', borderColor: accent, borderWidth: 1, titleColor: '#fff', bodyColor: '#fff', cornerRadius: 8, padding: 10, callbacks: { label: function(context){ return context.parsed.y + ' MB'; } } } },
       scales: { 
         x: { grid: { display: false }, ticks: { color: textColor, font: { size: 8, family: 'Vazirmatn, sans-serif' } } }, 
         y: { 
-          grid: { color: hexToRgba(accent, 0.2), drawBorder: true }, 
-          ticks: { color: textColor, font: { size: 8, family: 'Vazirmatn, sans-serif' }, callback: function(value) { return value + ' MB'; } } 
+          grid: { color: 'rgba(255,255,255, 0.15)', drawBorder: false }, 
+          ticks: { color: textColor, font: { size: 8, family: 'Vazirmatn, sans-serif' }, callback: function(value) { return value + ' MB'; }, stepSize: 2 } 
         } 
       },
       animation: { duration: 400, easing: 'easeOutQuart' },
@@ -2604,6 +2651,22 @@ function updateSecondaryCharts(statsData, linksData){
     let slicedLabels = labels.slice(0, 6);
     let slicedData = data.slice(0, 6);
     while(slicedLabels.length < 6){ slicedLabels.push('—'); slicedData.push(0); }
+    // Update y-axis step size based on max value
+    const maxVal = Math.max(...slicedData, 1);
+    let yMax = Math.ceil(maxVal * 1.2);
+    if (yMax < 5) yMax = 5;
+    const roundToNice = (num) => {
+      if (num <= 10) return 10;
+      if (num <= 20) return 20;
+      if (num <= 50) return 50;
+      if (num <= 100) return 100;
+      return Math.ceil(num / 100) * 100;
+    };
+    yMax = roundToNice(yMax);
+    let stepSize = Math.round(yMax / 5);
+    if (stepSize === 0) stepSize = 1;
+    dashHourlyChart.options.scales.y.max = yMax;
+    dashHourlyChart.options.scales.y.ticks.stepSize = stepSize;
     dashHourlyChart.data.labels = slicedLabels;
     dashHourlyChart.data.datasets[0].data = slicedData;
     dashHourlyChart.update('none');
