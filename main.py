@@ -82,30 +82,6 @@ async def save_state():
     except Exception as e:
         logger.error(f"Error saving state: {e}")
 
-# ── Traffic History (for real‑time chart continuity) ─────────────────────────
-# Store up to 180 points = 15 minutes at 5s intervals
-traffic_history = deque(maxlen=180)  # each entry: (timestamp_unix, traffic_mb, load_pct, conns)
-
-async def update_traffic_history():
-    """Append current traffic, load and connection count to history."""
-    # compute current values
-    total_mb = stats["total_bytes"] / (1024 * 1024)
-    # load is not directly stored; we approximate using recent error rate?
-    # Instead, we just store the raw traffic; load and connections are derived elsewhere.
-    # For simplicity we store traffic only.
-    now = time.time()
-    # We'll store only traffic; the client can compute load from traffic delta if needed.
-    traffic_history.append((now, total_mb))
-
-async def background_traffic_recorder():
-    """Background task that records traffic every 5 seconds."""
-    while True:
-        try:
-            await update_traffic_history()
-        except Exception as e:
-            logger.error(f"Traffic history update error: {e}")
-        await asyncio.sleep(5)
-
 # ── In-memory state ───────────────────────────────────────────────────────────
 connections: dict = {}
 stats = {"total_bytes": 0, "total_requests": 0, "total_errors": 0, "start_time": time.time()}
@@ -121,11 +97,9 @@ SUBS_LOCK = asyncio.Lock()
 RESELLERS: dict = {}
 RESELLERS_LOCK = asyncio.Lock()
 
-# لیست پروتکل‌های مجاز (trojan-ws حذف شد)
 PROTOCOLS = ("vless-ws", "xhttp-packet-up", "xhttp-stream-up", "xhttp-stream-one")
 DEFAULT_PROTOCOL = "vless-ws"
 
-# تنظیمات سرور
 GLOBAL_SETTINGS = {
     "ips": [],
     "port": None,
@@ -140,6 +114,46 @@ GLOBAL_SETTINGS = {
     }
 }
 
+# ===== NEW: History for charts =====
+HISTORY = deque(maxlen=120)  # 10 minutes at 5s interval
+HISTORY_LOCK = asyncio.Lock()
+PREV_TRAFFIC = 0
+PREV_TIME = 0
+
+async def update_history():
+    global PREV_TRAFFIC, PREV_TIME
+    now = time.time()
+    async with HISTORY_LOCK:
+        # current values
+        traffic_mb = stats["total_bytes"] / (1024 ** 2)
+        conn_count = len(connections)
+        
+        # compute load as MB/s over last interval
+        if PREV_TIME > 0 and now > PREV_TIME:
+            delta_time = now - PREV_TIME
+            delta_traffic = traffic_mb - PREV_TRAFFIC
+            load = (delta_traffic / delta_time) if delta_time > 0 else 0
+            load = max(0, min(100, load * 2))  # scale to 0-100 roughly
+        else:
+            load = 0
+        
+        HISTORY.append({
+            "timestamp": now,
+            "traffic_mb": traffic_mb,
+            "load": load,
+            "connections": conn_count
+        })
+        
+        PREV_TRAFFIC = traffic_mb
+        PREV_TIME = now
+
+# ── Background task ──────────────────────────────────────────────────────────
+async def history_updater():
+    while True:
+        await update_history()
+        await asyncio.sleep(5)
+
+# ── Logging helpers ──────────────────────────────────────────────────────────
 def log_activity(kind: str, message: str, level: str = "info"):
     activity_logs.append({
         "kind": kind,
@@ -205,8 +219,8 @@ async def startup():
     timeout = httpx.Timeout(30.0, connect=10.0)
     http_client = httpx.AsyncClient(limits=limits, timeout=timeout, follow_redirects=True)
     await load_state()
-    # Start background traffic recorder
-    asyncio.create_task(background_traffic_recorder())
+    # Start history updater
+    asyncio.create_task(history_updater())
     log_activity("system", "Server started", "ok")
     logger.info(f"CBeeNet Gateway started on port {CONFIG['port']}")
 
@@ -257,7 +271,6 @@ def format_link_remark(label: str, protocol: str) -> str:
     result = result.replace("{prefix}", prefix)
     result = result.replace("{label}", label)
     
-    # فقط اگر {protocol} در قالب وجود داشت، جایگزین می‌شود
     if "{protocol}" in template:
         default_names = {
             "vless-ws": "VLESS-WS",
@@ -281,7 +294,6 @@ def _format_uri(uuid: str, ip: str, port: int, remark: str, protocol: str, origi
         query = "&".join(f"{k}={quote(str(v))}" for k, v in params.items())
         return f"vless://{uuid}@{ip}:{port}?{query}#{quote(remark)}"
 
-    # XHTTP protocols
     mode = protocol.replace("xhttp-", "")
     path = f"/xhttp-siz10/{mode}/{uuid}"
     params = {
@@ -313,7 +325,6 @@ def generate_links(link_data: dict, uuid: str, host: str) -> list[str]:
     for ip in ips:
         for proto in protocols:
             remark = format_link_remark(label, proto)
-            # دیگر هیچ پسوندی اضافه نمی‌شود - فقط قالب کاربر اعمال می‌شود
             links.append(_format_uri(uuid, ip, port, remark, proto, host))
     return links
 
@@ -399,14 +410,6 @@ async def root():
 @app.get("/health")
 async def health():
     return {"status": "ok", "connections": len(connections), "uptime": uptime()}
-
-# ── Traffic History API ──────────────────────────────────────────────────────
-@app.get("/api/traffic-history")
-async def get_traffic_history(_=Depends(require_auth)):
-    """Return the stored traffic history (timestamp, traffic_mb) for the last 15 minutes."""
-    times = [entry[0] for entry in traffic_history]
-    values = [entry[1] for entry in traffic_history]
-    return {"times": times, "values": values}
 
 # ── Subscriptions ─────────────────────────────────────────────────────────────
 @app.get("/sub/{uuid}")
@@ -668,10 +671,28 @@ async def get_stats(_=Depends(require_auth)):
         "resellers_count": len(RESELLERS),
     }
 
+# ===== NEW: History endpoint =====
+@app.get("/api/history")
+async def get_history(_=Depends(require_auth)):
+    async with HISTORY_LOCK:
+        # Return last 5 minutes (60 points)
+        cutoff = time.time() - 300
+        points = [p for p in HISTORY if p["timestamp"] >= cutoff]
+        # Convert timestamps to ISO for JSON
+        result = [{
+            "timestamp": p["timestamp"],
+            "traffic_mb": p["traffic_mb"],
+            "load": p["load"],
+            "connections": p["connections"]
+        } for p in points]
+    return {"history": result}
+
+# ── Activity logs ─────────────────────────────────────────────────────────────
 @app.get("/api/activity")
 async def get_activity(_=Depends(require_auth)):
     return {"logs": list(activity_logs)[-150:]}
 
+# ── Connections ──────────────────────────────────────────────────────────────
 @app.get("/api/connections")
 async def get_connections(_=Depends(require_auth)):
     async with LINKS_LOCK: snap = dict(LINKS)
