@@ -778,8 +778,8 @@ DASHBOARD_HTML = r"""<!DOCTYPE html>
   --font-family:'Vazirmatn','Segoe UI',sans-serif;
 }
 [data-theme="dark-blue"]{--bg:#0d1117;--bg2:#161b22;--bg3:#1c2333;--card:#161b22;--card-b:#30363d;--card-bh:rgba(22,119,255,0.20);--accent:#1677ff;--accent2:#4096ff;--accent-d:rgba(22,119,255,0.12);--accent-glow:rgba(22,119,255,0.35);}
-[data-theme="dark-red"]{--bg:#0d1117;--bg2:#161b22;--bg3:#1c2333;--card:#161b22;--card-b:#30363d;--card-bh:rgba(239,68,68,0.20);--accent:#ef4444;--accent2:#f87171;--accent-d:rgba(239,68,68,0.12);--accent-glow:rgba(239,68,68,0.35);}
-[data-theme="dark-yellow"]{--bg:#0d1117;--bg2:#161b22;--bg3:#1c2333;--card:#161b22;--card-b:#30363d;--card-bh:rgba(245,158,11,0.20);--accent:#f59e0b;--accent2:#fbbf24;--accent-d:rgba(245,158,11,0.12);--accent-glow:rgba(245,158,11,0.35);}
+[data-theme="dark-red"]{--bg:#0d1117;--bg2:#161b22;--bg3:#1c2333;--card:#161b22;--card-b:#30363d;--card-bh:rgba(255,26,26,0.20);--accent:#ff1a1a;--accent2:#ff6666;--accent-d:rgba(255,26,26,0.12);--accent-glow:rgba(255,26,26,0.35);}
+[data-theme="dark-yellow"]{--bg:#0d1117;--bg2:#161b22;--bg3:#1c2333;--card:#161b22;--card-b:#30363d;--card-bh:rgba(255,204,0,0.20);--accent:#ffcc00;--accent2:#ffe680;--accent-d:rgba(255,204,0,0.12);--accent-glow:rgba(255,204,0,0.35);}
 [data-theme="dark-prestige"]{
   --bg:#0d1117;--bg2:#161b22;--bg3:#1c2333;--card:#161b22;--card-b:#30363d;--card-bh:rgba(26,122,255,0.25);
   --accent:#1a7aff;--accent2:#4d94ff;--accent-d:rgba(26,122,255,0.15);--accent-glow:rgba(26,122,255,0.35);
@@ -794,8 +794,8 @@ DASHBOARD_HTML = r"""<!DOCTYPE html>
   --purple:#00bfff; --purple-bg:rgba(0,191,255,0.10);
 }
 [data-theme="light-blue"]{--bg:#f6f8fa;--bg2:#ffffff;--bg3:#eaeef2;--card:#ffffff;--card-b:#d0d7de;--card-bh:rgba(22,119,255,0.25);--accent:#1677ff;--accent2:#4096ff;--accent-d:rgba(22,119,255,0.08);--accent-glow:rgba(22,119,255,0.25);--t1:#24292f;--t2:#57606a;--t3:#8b949e;--shadow:0 8px 28px rgba(0,0,0,0.08);}
-[data-theme="light-red"]{--bg:#f6f8fa;--bg2:#ffffff;--bg3:#eaeef2;--card:#ffffff;--card-b:#d0d7de;--card-bh:rgba(239,68,68,0.25);--accent:#ef4444;--accent2:#f87171;--accent-d:rgba(239,68,68,0.08);--accent-glow:rgba(239,68,68,0.25);--t1:#24292f;--t2:#57606a;--t3:#8b949e;--shadow:0 8px 28px rgba(0,0,0,0.08);}
-[data-theme="light-yellow"]{--bg:#f6f8fa;--bg2:#ffffff;--bg3:#eaeef2;--card:#ffffff;--card-b:#d0d7de;--card-bh:rgba(245,158,11,0.25);--accent:#f59e0b;--accent2:#fbbf24;--accent-d:rgba(245,158,11,0.08);--accent-glow:rgba(245,158,11,0.25);--t1:#24292f;--t2:#57606a;--t3:#8b949e;--shadow:0 8px 28px rgba(0,0,0,0.08);}
+[data-theme="light-red"]{--bg:#f6f8fa;--bg2:#ffffff;--bg3:#eaeef2;--card:#ffffff;--card-b:#d0d7de;--card-bh:rgba(255,26,26,0.25);--accent:#ff1a1a;--accent2:#ff6666;--accent-d:rgba(255,26,26,0.08);--accent-glow:rgba(255,26,26,0.25);--t1:#24292f;--t2:#57606a;--t3:#8b949e;--shadow:0 8px 28px rgba(0,0,0,0.08);}
+[data-theme="light-yellow"]{--bg:#f6f8fa;--bg2:#ffffff;--bg3:#eaeef2;--card:#ffffff;--card-b:#d0d7de;--card-bh:rgba(255,204,0,0.25);--accent:#ffcc00;--accent2:#ffe680;--accent-d:rgba(255,204,0,0.08);--accent-glow:rgba(255,204,0,0.25);--t1:#24292f;--t2:#57606a;--t3:#8b949e;--shadow:0 8px 28px rgba(0,0,0,0.08);}
 [data-theme="light-mixed"]{
   --bg:#f6f8fa; --bg2:#ffffff; --bg3:#eaeef2; --card:#ffffff; --card-b:#d0d7de;
   --accent:#ff3333; --accent2:#0099ff; --accent-d:rgba(255,51,51,0.1); --accent-glow:rgba(255,51,51,0.3);
@@ -887,19 +887,13 @@ a{color:inherit;text-decoration:none}
 .dash-small-chart .chart-wrap{height:120px;position:relative}
 .dash-small-chart .chart-wrap canvas{width:100% !important;height:100% !important}
 
-/* Tooltip (custom click-based) */
+/* Tooltip (minimal, same as before) */
 .chart-tooltip{display:none;position:fixed;background:rgba(11,17,29,0.92);backdrop-filter:blur(12px);border:1px solid rgba(255,255,255,0.08);border-radius:10px;padding:10px 14px;box-shadow:0 12px 40px rgba(0,0,0,0.7);z-index:1000;pointer-events:none;min-width:140px}
 .chart-tooltip .tt-time{font-size:9px;color:var(--t3);font-family:ui-monospace,monospace;margin-bottom:4px;border-bottom:1px solid var(--card-b);padding-bottom:4px}
 .chart-tooltip .tt-row{display:flex;align-items:center;justify-content:space-between;gap:16px;font-size:11px;padding:2px 0;color:var(--t1)}
 .chart-tooltip .tt-row .tt-dot{width:7px;height:7px;border-radius:50%;display:inline-block;flex-shrink:0;margin-right:6px;border:1px solid rgba(255,255,255,0.15)}
 .chart-tooltip .tt-row .tt-label{color:var(--t2);font-weight:400}
 .chart-tooltip .tt-row .tt-value{font-weight:700;font-variant-numeric:tabular-nums}
-
-/* ... rest of existing styles (unchanged) ... */
-/* ===== ALL OTHER STYLES KEPT AS IS ===== */
-/* (تمام استایل‌های دیگر مانند قبل می‌مانند، فقط به خاطر طولانی بودن فایل، در اینجا حذف شده‌اند اما در فایل اصلی کامل خواهند بود) */
-
-/* ... (برای اختصار، ادامه استایل‌ها در فایل کامل قرار داده شده) ... */
 
 @media(max-width:1024px){.dash-stats-grid{grid-template-columns:1fr 1fr}.dash-charts-second{grid-template-columns:1fr 1fr}.chart-grid{grid-template-columns:1fr 1fr}}
 @media(max-width:768px){.chart-grid{grid-template-columns:1fr}.dash-charts-second{grid-template-columns:1fr}.dash-stats-grid{grid-template-columns:1fr}.main{padding:62px 12px 50px}.sidebar{transform:translateX(100%)}[dir="ltr"] .sidebar{transform:translateX(-100%)}.sidebar.open{transform:translateX(0)}.sb-close{display:flex}.main{margin-right:0;padding-top:70px}[dir="ltr"] .main{margin-left:0}.mob-top{display:flex}}
@@ -1775,8 +1769,8 @@ a{color:inherit;text-decoration:none}
           <label style="font-size:10.5px;color:var(--t3);font-weight:700;text-transform:uppercase;letter-spacing:.06em;display:block;margin-bottom:6px" data-lang="dark_theme">Dark Theme</label>
           <div style="display:flex;gap:10px;flex-wrap:wrap" id="dark-themes">
             <button class="btn btn-p theme-btn-select" data-theme="dark-blue" style="background:#1677ff;color:#fff;box-shadow:0 2px 8px rgba(22,119,255,0.4)" onclick="setTheme('dark-blue')"><i class="ti ti-circle"></i> <span data-lang="blue">Blue</span></button>
-            <button class="btn btn-p theme-btn-select" data-theme="dark-red" style="background:#ef4444;color:#fff;box-shadow:0 2px 8px rgba(239,68,68,0.4)" onclick="setTheme('dark-red')"><i class="ti ti-circle"></i> <span data-lang="red">Red</span></button>
-            <button class="btn btn-p theme-btn-select" data-theme="dark-yellow" style="background:#f59e0b;color:#000;box-shadow:0 2px 8px rgba(245,158,11,0.4)" onclick="setTheme('dark-yellow')"><i class="ti ti-circle"></i> <span data-lang="yellow">Yellow</span></button>
+            <button class="btn btn-p theme-btn-select" data-theme="dark-red" style="background:#ff1a1a;color:#fff;box-shadow:0 2px 8px rgba(255,26,26,0.4)" onclick="setTheme('dark-red')"><i class="ti ti-circle"></i> <span data-lang="red">Red</span></button>
+            <button class="btn btn-p theme-btn-select" data-theme="dark-yellow" style="background:#ffcc00;color:#000;box-shadow:0 2px 8px rgba(255,204,0,0.4)" onclick="setTheme('dark-yellow')"><i class="ti ti-circle"></i> <span data-lang="yellow">Yellow</span></button>
             <button class="btn btn-p theme-btn-select" data-theme="dark-prestige" style="background:linear-gradient(135deg,#1a7aff,#4d94ff);color:#fff;box-shadow:0 2px 8px rgba(26,122,255,0.4)" onclick="setTheme('dark-prestige')"><i class="ti ti-circle"></i> <span data-lang="prestige_theme">Prestige</span></button>
             <button class="btn btn-p theme-btn-select" data-theme="dark-mixed" style="background:linear-gradient(135deg,#ff4d4d,#00bfff,#ffcc00);color:#fff;box-shadow:0 2px 8px rgba(255,77,77,0.4)" onclick="setTheme('dark-mixed')"><i class="ti ti-circle"></i> <span data-lang="mixed">Mixed</span></button>
           </div>
@@ -1785,8 +1779,8 @@ a{color:inherit;text-decoration:none}
           <label style="font-size:10.5px;color:var(--t3);font-weight:700;text-transform:uppercase;letter-spacing:.06em;display:block;margin-bottom:6px" data-lang="light_theme">Light Theme</label>
           <div style="display:flex;gap:10px;flex-wrap:wrap" id="light-themes">
             <button class="btn btn-p theme-btn-select" data-theme="light-blue" style="background:#1677ff;color:#fff;box-shadow:0 2px 8px rgba(22,119,255,0.3)" onclick="setTheme('light-blue')"><i class="ti ti-circle"></i> <span data-lang="blue">Blue</span></button>
-            <button class="btn btn-p theme-btn-select" data-theme="light-red" style="background:#ef4444;color:#fff;box-shadow:0 2px 8px rgba(239,68,68,0.3)" onclick="setTheme('light-red')"><i class="ti ti-circle"></i> <span data-lang="red">Red</span></button>
-            <button class="btn btn-p theme-btn-select" data-theme="light-yellow" style="background:#f59e0b;color:#000;box-shadow:0 2px 8px rgba(245,158,11,0.3)" onclick="setTheme('light-yellow')"><i class="ti ti-circle"></i> <span data-lang="yellow">Yellow</span></button>
+            <button class="btn btn-p theme-btn-select" data-theme="light-red" style="background:#ff1a1a;color:#fff;box-shadow:0 2px 8px rgba(255,26,26,0.3)" onclick="setTheme('light-red')"><i class="ti ti-circle"></i> <span data-lang="red">Red</span></button>
+            <button class="btn btn-p theme-btn-select" data-theme="light-yellow" style="background:#ffcc00;color:#000;box-shadow:0 2px 8px rgba(255,204,0,0.3)" onclick="setTheme('light-yellow')"><i class="ti ti-circle"></i> <span data-lang="yellow">Yellow</span></button>
             <button class="btn btn-p theme-btn-select" data-theme="light-mixed" style="background:linear-gradient(135deg,#ff3333,#0099ff,#ffcc00);color:#fff;box-shadow:0 2px 8px rgba(255,51,51,0.3)" onclick="setTheme('light-mixed')"><i class="ti ti-circle"></i> <span data-lang="mixed">Mixed</span></button>
           </div>
         </div>
@@ -2234,11 +2228,10 @@ function getGridColor() {
   return getComputedStyle(document.documentElement).getPropertyValue('--card-b').trim() || '#30363d';
 }
 
-// ===== BUILD AREA CHART (With Fine Grid, Click Tooltip) =====
+// ===== BUILD AREA CHART (Neon Glow, Themed Grid, Full Fill) =====
 function buildChart(type) {
   const accent = getAccentColor();
   const textColor = getTextColor();
-  const gridColor = getGridColor();
   const canvasId = 'chart-' + type;
   const ctx = document.getElementById(canvasId).getContext('2d');
 
@@ -2252,32 +2245,16 @@ function buildChart(type) {
   if (type === 'conns' && yMax < 5) yMax = 5;
   if (maxVal === 0) yMax = 1;
 
-  // Determine stepSize for grid lines
-  let stepSize = 10; // for load
-  let precision = 0;
-  if (type === 'traffic') {
-    if (maxVal < 1) { stepSize = 0.1; precision = 1; }
-    else if (maxVal < 5) { stepSize = 0.5; precision = 1; }
-    else if (maxVal < 20) { stepSize = 2; precision = 0; }
-    else { stepSize = Math.ceil(maxVal / 10); precision = 0; }
-  } else if (type === 'conns') {
-    stepSize = Math.max(1, Math.ceil(maxVal / 8));
-    precision = 0;
-  } else { // load
-    stepSize = 10;
-    precision = 0;
-  }
-
-  // Gradient fill (from accent to transparent)
+  // Gradient fill for the area (very light, to let grid lines show through)
   const grad = ctx.createLinearGradient(0, 0, 0, 150);
-  grad.addColorStop(0, hexToRgba(accent, 0.25));
+  grad.addColorStop(0, hexToRgba(accent, 0.12));
   grad.addColorStop(1, hexToRgba(accent, 0.02));
 
-  // Glow layer (behind main line)
+  // Glow layer (thick line behind main line)
   const glowDataset = {
     data: dataArr,
-    borderColor: hexToRgba(accent, 0.15),
-    borderWidth: 6,
+    borderColor: hexToRgba(accent, 0.25),
+    borderWidth: 8,
     pointRadius: 0,
     fill: false,
     tension: 0.4,
@@ -2287,9 +2264,9 @@ function buildChart(type) {
   const mainDataset = {
     data: dataArr,
     borderColor: accent,
-    borderWidth: 2,
+    borderWidth: 2.5,
     pointRadius: 0,
-    pointHoverRadius: 4,
+    pointHoverRadius: 5,
     pointHoverBorderWidth: 2,
     pointHoverBorderColor: '#fff',
     pointHoverBackgroundColor: accent,
@@ -2309,32 +2286,46 @@ function buildChart(type) {
       responsive: true,
       maintainAspectRatio: false,
       animation: { duration: 400, easing: 'easeOutQuart' },
-      interaction: {
-        intersect: false,
-        mode: 'index',
-        axis: 'x'
-      },
+      interaction: { intersect: false, mode: 'index', axis: 'x' },
       plugins: {
         legend: { display: false },
-        // Tooltip disabled, we use custom click handler
-        tooltip: { enabled: false }
+        tooltip: {
+          enabled: true,
+          backgroundColor: 'rgba(11,17,29,0.92)',
+          borderColor: accent,
+          borderWidth: 1,
+          titleColor: '#fff',
+          bodyColor: '#e8edf5',
+          cornerRadius: 8,
+          padding: 10,
+          callbacks: {
+            title: function(context) {
+              return context[0]?.label || '';
+            },
+            label: function(context) {
+              const val = context.parsed.y;
+              const unit = type === 'load' ? '%' : type === 'traffic' ? ' MB' : '';
+              return val.toFixed(1) + unit;
+            }
+          }
+        }
       },
       scales: {
         x: {
           display: true,
-          grid: {
-            display: true,
-            color: hexToRgba(gridColor, 0.4), // more visible
-            drawBorder: false,
+          grid: { 
+            display: true, 
+            color: hexToRgba(accent, 0.2),  // Theme-colored grid, lighter
+            drawBorder: true,
             tickLength: 0,
             drawTicks: false,
             lineWidth: 0.8
           },
-          border: { display: false },
+          border: { display: true, color: hexToRgba(accent, 0.3) },
           ticks: {
             color: textColor,
             font: { size: 9 },
-            maxTicksLimit: 12,
+            maxTicksLimit: 8,
             autoSkip: true,
             maxRotation: 0,
             minRotation: 0
@@ -2342,25 +2333,23 @@ function buildChart(type) {
         },
         y: {
           display: true,
-          grid: {
-            display: true,
-            color: hexToRgba(gridColor, 0.4),
-            drawBorder: false,
+          grid: { 
+            display: true, 
+            color: hexToRgba(accent, 0.2),  // Theme-colored grid
+            drawBorder: true,
             tickLength: 0,
             drawTicks: false,
             lineWidth: 0.8
           },
-          border: { display: false },
+          border: { display: true, color: hexToRgba(accent, 0.3) },
           ticks: {
             color: textColor,
             font: { size: 9 },
-            maxTicksLimit: 10,
-            autoSkip: false,
-            stepSize: stepSize,
-            precision: precision,
+            maxTicksLimit: 5,
+            stepSize: type === 'load' ? 20 : (type === 'traffic' ? Math.ceil(yMax / 5) : Math.ceil(yMax / 5)),
             callback: function(value) {
               if (type === 'load') return value + '%';
-              if (type === 'traffic') return value.toFixed(precision) + ' MB';
+              if (type === 'traffic') return value.toFixed(0) + 'MB';
               return value.toFixed(0);
             }
           },
@@ -2371,15 +2360,23 @@ function buildChart(type) {
       elements: {
         line: { borderJoinStyle: 'round' }
       },
-      // Click handler for custom tooltip (toggle)
-      onClick: function(e, elements) {
-        if (elements && elements.length > 0) {
-          const idx = elements[0].index;
-          const value = this.data.datasets[1].data[idx];
-          const label = this.data.labels[idx];
-          showChartTooltip(e, label, value, type);
+      // Click to toggle tooltip (single click on point, click away to close)
+      onClick: function(e) {
+        const chart = this;
+        const elements = chart.getElementsAtEventForMode(e, 'index', { intersect: true });
+        if (elements.length > 0) {
+          // If tooltip is already showing, hide it
+          if (chart.tooltip._active && chart.tooltip._active.length > 0) {
+            chart.tooltip.setActiveElements([], {x:0,y:0});
+            chart.draw();
+          } else {
+            chart.tooltip.setActiveElements(elements, e);
+            chart.draw();
+          }
         } else {
-          hideChartTooltip();
+          // Click on empty space => hide tooltip
+          chart.tooltip.setActiveElements([], {x:0,y:0});
+          chart.draw();
         }
       }
     }
@@ -2387,38 +2384,6 @@ function buildChart(type) {
 
   return chart;
 }
-
-// ===== CUSTOM TOOLTIP (Click to toggle) =====
-let tooltipShown = false;
-function showChartTooltip(event, label, value, type) {
-  const tooltip = document.getElementById('chart-tooltip');
-  const timeEl = document.getElementById('tt-time');
-  const bodyEl = document.getElementById('tt-body');
-  timeEl.textContent = label || '';
-  let unit = '';
-  if (type === 'load') unit = '%';
-  else if (type === 'traffic') unit = ' MB';
-  bodyEl.innerHTML = `<div class="tt-row"><span class="tt-label">Value</span><span class="tt-value">${value.toFixed(1)}${unit}</span></div>`;
-  tooltip.style.display = 'block';
-  // Position near cursor (fixed)
-  const rect = event.chart.canvas.getBoundingClientRect();
-  const x = event.native.clientX - rect.left + 12;
-  const y = event.native.clientY - rect.top - 20;
-  tooltip.style.left = (rect.left + x) + 'px';
-  tooltip.style.top = (rect.top + y) + 'px';
-  tooltipShown = true;
-}
-function hideChartTooltip() {
-  document.getElementById('chart-tooltip').style.display = 'none';
-  tooltipShown = false;
-}
-// Hide tooltip on click outside chart
-document.addEventListener('click', function(e) {
-  const tooltip = document.getElementById('chart-tooltip');
-  if (tooltipShown && !e.target.closest('.chart-premium') && !e.target.closest('#chart-tooltip')) {
-    hideChartTooltip();
-  }
-});
 
 function initPremiumCharts() {
   ['load', 'traffic', 'conns'].forEach(type => {
@@ -2475,41 +2440,17 @@ function addDataPoint(type, value, time) {
   if (type === 'conns' && yMax < 5) yMax = 5;
   if (maxVal === 0) yMax = 1;
   chart.options.scales.y.max = yMax;
-  // Update stepSize dynamically
-  let stepSize = 10;
-  let precision = 0;
-  if (type === 'traffic') {
-    if (maxVal < 1) { stepSize = 0.1; precision = 1; }
-    else if (maxVal < 5) { stepSize = 0.5; precision = 1; }
-    else if (maxVal < 20) { stepSize = 2; precision = 0; }
-    else { stepSize = Math.ceil(maxVal / 10); precision = 0; }
-  } else if (type === 'conns') {
-    stepSize = Math.max(1, Math.ceil(maxVal / 8));
-    precision = 0;
-  } else { // load
-    stepSize = 10;
-    precision = 0;
-  }
-  chart.options.scales.y.ticks.stepSize = stepSize;
-  chart.options.scales.y.ticks.precision = precision;
   chart.update('none');
   updateChartValue(type);
 }
 
-// ===== INTERPOLATE MISSING POINTS WHEN PANEL CLOSED =====
+// ===== INTERPOLATE MISSING POINTS =====
 function interpolateMissingPoints() {
   const lastTime = localStorage.getItem(CHART_LAST_TIME_KEY);
   if (!lastTime) return;
   const elapsed = Date.now() - parseInt(lastTime);
-  if (elapsed < 60000) return; // less than 1 min, no need
-
-  // We'll interpolate traffic points based on total traffic change
-  // This is handled in fetchStats by computing delta and spreading over time
-  // Just ensure we have at least one point for each 5s interval
-  const gap = Math.floor(elapsed / 5000);
-  if (gap <= 1) return;
-  
-  // We'll let fetchStats handle it with delta interpolation
+  if (elapsed < 60000) return;
+  // Handled in fetchStats
 }
 
 // ========== fetchStats (Traffic Delta Fix + Interpolation) ==========
@@ -2538,7 +2479,6 @@ async function fetchStats(){
     const now = new Date();
     const delta = totalTrafficDisplay - prevTraf;
     
-    // If delta is large and we were away, spread it over time
     const lastTime = localStorage.getItem(CHART_LAST_TIME_KEY);
     let gapSeconds = 0;
     if (lastTime) {
@@ -2546,7 +2486,6 @@ async function fetchStats(){
     }
     
     if (delta > 0 && gapSeconds > 5) {
-      // Spread delta over the elapsed time, at most one point per 5s
       const pointsToAdd = Math.min(Math.floor(gapSeconds / 5), 20);
       if (pointsToAdd > 1) {
         const perPoint = delta / pointsToAdd;
@@ -2555,7 +2494,6 @@ async function fetchStats(){
           const val = prevTraf + perPoint * i;
           addDataPoint('traffic', Math.max(0, val - prevTraf), t);
         }
-        // Update prevTraf to current total
         prevTraf = totalTrafficDisplay;
         localStorage.setItem(PREV_TRAF_KEY, String(prevTraf));
         saveChartDataToStorage();
@@ -2563,7 +2501,6 @@ async function fetchStats(){
       }
     }
     
-    // Normal: add one point
     if (delta >= 0) {
       addDataPoint('traffic', delta, now);
     } else {
@@ -2573,7 +2510,6 @@ async function fetchStats(){
     prevTraf = totalTrafficDisplay;
     localStorage.setItem(PREV_TRAF_KEY, String(prevTraf));
     
-    // Load and Connections
     const pct = Math.min(100, Math.max(0, Math.round((delta / 50) * 100 * 10) / 10));
     addDataPoint('load', pct, now);
     addDataPoint('conns', activeCount, now);
@@ -2586,13 +2522,12 @@ async function fetchStats(){
 // ========== Visibility Change Handler ==========
 document.addEventListener('visibilitychange', function() {
   if (!document.hidden) {
-    // When user returns, reload chart data and fetch latest
     loadChartDataFromStorage();
     fetchStats();
   }
 });
 
-// ========== SECONDARY CHARTS (unchanged) ==========
+// ========== SECONDARY CHARTS (با استایل مشابه) ==========
 let dashProtoChart = null, dashHourlyChart = null;
 function initSecondaryCharts(){
   const accent = getAccentColor();
@@ -2610,18 +2545,46 @@ function initSecondaryCharts(){
       animation: { duration: 400, easing: 'easeOutQuart' }
     }
   });
+
+  // Hourly chart with same neon style
   const ctxHourly = document.getElementById('dashHourlyChart').getContext('2d');
+  const grad = ctxHourly.createLinearGradient(0, 0, 0, 120);
+  grad.addColorStop(0, hexToRgba(accent, 0.15));
+  grad.addColorStop(1, hexToRgba(accent, 0.02));
   dashHourlyChart = new Chart(ctxHourly, {
     type: 'line',
-    data: { labels: ['00', '04', '08', '12', '16', '20'], datasets: [{ data: [0, 0, 0, 0, 0, 0], borderColor: accent, backgroundColor: hexToRgba(accent, 0.2), borderWidth: 2, pointRadius: 0, pointHoverRadius: 5, pointHoverBorderWidth: 2, pointHoverBorderColor: '#fff', fill: 'origin', tension: 0.3 }] },
+    data: { labels: ['00', '04', '08', '12', '16', '20'], datasets: [{ data: [0, 0, 0, 0, 0, 0], borderColor: accent, backgroundColor: grad, borderWidth: 2, pointRadius: 0, pointHoverRadius: 5, pointHoverBorderWidth: 2, pointHoverBorderColor: '#fff', fill: 'origin', tension: 0.3, borderJoinStyle: 'round' }] },
     options: {
       responsive: true, maintainAspectRatio: false,
       plugins: { legend: { display: false }, tooltip: { backgroundColor: 'rgba(11, 17, 29, 0.9)', borderColor: accent, borderWidth: 1, titleColor: '#fff', bodyColor: '#fff', cornerRadius: 8, padding: 10, callbacks: { label: function(context){ return context.parsed.y + ' MB'; } } } },
-      scales: { x: { grid: { display: true, color: hexToRgba(gridColor, 0.3), drawBorder: false }, ticks: { color: textColor, font: { size: 8, family: 'Vazirmatn, sans-serif' } } }, y: { grid: { display: true, color: hexToRgba(gridColor, 0.3), drawBorder: false }, ticks: { color: textColor, font: { size: 8, family: 'Vazirmatn, sans-serif' }, stepSize: 1, callback: function(value) { return value + ' MB'; } } } },
-      animation: { duration: 400, easing: 'easeOutQuart' }
+      scales: { 
+        x: { grid: { display: false }, ticks: { color: textColor, font: { size: 8, family: 'Vazirmatn, sans-serif' } } }, 
+        y: { 
+          grid: { color: hexToRgba(accent, 0.2), drawBorder: true }, 
+          ticks: { color: textColor, font: { size: 8, family: 'Vazirmatn, sans-serif' }, callback: function(value) { return value + ' MB'; } } 
+        } 
+      },
+      animation: { duration: 400, easing: 'easeOutQuart' },
+      onClick: function(e) {
+        const chart = this;
+        const elements = chart.getElementsAtEventForMode(e, 'index', { intersect: true });
+        if (elements.length > 0) {
+          if (chart.tooltip._active && chart.tooltip._active.length > 0) {
+            chart.tooltip.setActiveElements([], {x:0,y:0});
+            chart.draw();
+          } else {
+            chart.tooltip.setActiveElements(elements, e);
+            chart.draw();
+          }
+        } else {
+          chart.tooltip.setActiveElements([], {x:0,y:0});
+          chart.draw();
+        }
+      }
     }
   });
 }
+
 function updateSecondaryCharts(statsData, linksData){
   const accent = getAccentColor();
   if(dashProtoChart && linksData){
