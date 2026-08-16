@@ -2117,7 +2117,7 @@ async function saveProtocolSettings(){
   } catch(e){ toast('Server connection error', 'err'); }
 }
 
-// ========== FORMAT LINK NAME (با رعایت دقیق template) ==========
+// ========== FORMAT LINK NAME ==========
 function formatLinkName(label, protocol, protoSettings){
   const defaultNames = {
     'vless-ws': 'VLESS-WS',
@@ -2145,7 +2145,7 @@ function formatLinkName(label, protocol, protoSettings){
   return result;
 }
 
-// ========== CHART DATA (PERSISTENT 5 MIN) ==========
+// ========== CHART DATA (PERSISTENT) ==========
 const CHART_STORAGE_KEY = 'CBeeNet_chartData';
 const PREV_TRAF_KEY = 'CBeeNet_prevTraf';
 const CHART_LAST_TIME_KEY = 'CBeeNet_lastChartTime';
@@ -2228,7 +2228,7 @@ function getGridColor() {
   return getComputedStyle(document.documentElement).getPropertyValue('--card-b').trim() || '#30363d';
 }
 
-// ===== BUILD AREA CHART (Custom Grid clipped under the curve, fine lines) =====
+// ===== BUILD AREA CHART (Premium style with glow, fine grid under curve) =====
 function buildChart(type) {
   const accent = getAccentColor();
   const textColor = getTextColor();
@@ -2261,12 +2261,12 @@ function buildChart(type) {
   let stepSize = Math.round(yMax / 5);
   if (stepSize === 0) stepSize = 1;
 
-  // Gradient fill
+  // Gradient fill (soft blue to transparent)
   const grad = ctx.createLinearGradient(0, 0, 0, 150);
-  grad.addColorStop(0, hexToRgba(accent, 0.20));
+  grad.addColorStop(0, hexToRgba(accent, 0.25));
   grad.addColorStop(1, hexToRgba(accent, 0.01));
 
-  // Custom Plugin: Clip grid under the curve (BOLDER and BIGGER)
+  // Custom Plugin: Fine square grid under the curve (both vertical and horizontal)
   const underCurveGridPlugin = {
     id: 'underCurveGrid',
     beforeDraw: function(chart) {
@@ -2275,12 +2275,13 @@ function buildChart(type) {
       const { top, bottom, left, right } = chartArea;
       const yScale = chart.scales.y;
       const xScale = chart.scales.x;
-      const meta = chart.getDatasetMeta(1);
+      const meta = chart.getDatasetMeta(1); // main dataset (index 1)
       if (!meta || !meta.data || meta.data.length === 0) return;
 
       const points = meta.data;
       const yZero = yScale.getPixelForValue(0);
 
+      // Clip to area under the curve
       ctx.save();
       ctx.beginPath();
       ctx.moveTo(points[0].x, yZero);
@@ -2291,14 +2292,16 @@ function buildChart(type) {
       ctx.closePath();
       ctx.clip();
 
+      // Draw fine vertical and horizontal grid lines
+      const gridLinesCount = 30;
       const yMin = yScale.min;
       const yMax = yScale.max;
-      const gridLinesCount = 30;
       const stepY = (yMax - yMin) / gridLinesCount;
-      ctx.strokeStyle = hexToRgba(accent, 0.45);
+      ctx.strokeStyle = hexToRgba(accent, 0.20);
       ctx.lineWidth = 1.2;
       ctx.setLineDash([]);
 
+      // Horizontal lines
       for (let i = 0; i <= gridLinesCount; i++) {
         const val = yMin + i * stepY;
         const y = yScale.getPixelForValue(val);
@@ -2310,6 +2313,7 @@ function buildChart(type) {
         }
       }
 
+      // Vertical lines
       const xMin = xScale.min;
       const xMax = xScale.max;
       const stepX = (xMax - xMin) / gridLinesCount;
@@ -2328,6 +2332,7 @@ function buildChart(type) {
     }
   };
 
+  // Glow dataset (thick semi-transparent line behind main)
   const glowDataset = {
     data: dataArr,
     borderColor: hexToRgba(accent, 0.25),
@@ -2338,6 +2343,7 @@ function buildChart(type) {
     borderJoinStyle: 'round'
   };
 
+  // Main dataset with gradient fill
   const mainDataset = {
     data: dataArr,
     borderColor: accent,
@@ -2530,14 +2536,6 @@ function addDataPoint(type, value, time) {
   updateChartValue(type);
 }
 
-// ===== INTERPOLATE MISSING POINTS =====
-function interpolateMissingPoints() {
-  const lastTime = localStorage.getItem(CHART_LAST_TIME_KEY);
-  if (!lastTime) return;
-  const elapsed = Date.now() - parseInt(lastTime);
-  if (elapsed < 60000) return;
-}
-
 // ========== fetchStats (Traffic Delta Fix + Interpolation) ==========
 async function fetchStats(){
   try{
@@ -2567,7 +2565,7 @@ async function fetchStats(){
     let gapSeconds = lastTime ? (Date.now() - parseInt(lastTime)) / 1000 : 5;
     gapSeconds = Math.max(1, gapSeconds);
 
-    // درج نقاط گم‌شده با interpolation خطی
+    // Interpolate missing points if gap > 5 seconds
     if (delta > 0 && gapSeconds > 5) {
       const pointsToAdd = Math.min(Math.floor(gapSeconds / 5), 60);
       if (pointsToAdd > 1) {
@@ -2575,8 +2573,7 @@ async function fetchStats(){
         for (let i = 1; i <= pointsToAdd; i++) {
           const t = new Date(now.getTime() - (pointsToAdd - i) * 5000);
           addDataPoint('traffic', Math.max(0, perPoint), t);
-          // برای لود نیز نرخ لحظه‌ای را در هر نقطه محاسبه می‌کنیم
-          const ratePerPoint = perPoint / 5; // MB/s
+          const ratePerPoint = perPoint / 5;
           const loadPct = Math.min(100, Math.max(0, (ratePerPoint / 60) * 10));
           addDataPoint('load', loadPct, t);
           addDataPoint('conns', activeCount, t);
@@ -2588,7 +2585,7 @@ async function fetchStats(){
       }
     }
 
-    // نقطه جدید برای بازه فعلی
+    // Add current point
     if (delta >= 0) {
       addDataPoint('traffic', delta, now);
     } else {
@@ -2597,9 +2594,8 @@ async function fetchStats(){
     prevTraf = totalTrafficDisplay;
     localStorage.setItem(PREV_TRAF_KEY, String(prevTraf));
 
-    // محاسبه لود بر اساس نرخ مصرف در ثانیه
-    const rate = delta / gapSeconds; // MB/s
-    const loadPct = Math.min(100, Math.max(0, (rate / 60) * 10)); // 60 MB/s = 10%
+    const rate = delta / gapSeconds;
+    const loadPct = Math.min(100, Math.max(0, (rate / 60) * 10));
     addDataPoint('load', loadPct, now);
     addDataPoint('conns', activeCount, now);
     
@@ -2616,7 +2612,7 @@ document.addEventListener('visibilitychange', function() {
   }
 });
 
-// ========== SECONDARY CHARTS (با استایل مشابه برای چارت ساعتی) ==========
+// ========== SECONDARY CHARTS (Hourly chart with under-curve grid) ==========
 let dashProtoChart = null, dashHourlyChart = null;
 function initSecondaryCharts(){
   const accent = getAccentColor();
@@ -2634,10 +2630,10 @@ function initSecondaryCharts(){
     }
   });
 
-  // Hourly chart with under-curve grid (BOLDER and BIGGER)
+  // Hourly chart with under-curve grid (same premium style)
   const ctxHourly = document.getElementById('dashHourlyChart').getContext('2d');
   const grad = ctxHourly.createLinearGradient(0, 0, 0, 120);
-  grad.addColorStop(0, hexToRgba(accent, 0.20));
+  grad.addColorStop(0, hexToRgba(accent, 0.25));
   grad.addColorStop(1, hexToRgba(accent, 0.01));
   
   const underCurveGridPluginHourly = {
@@ -2664,11 +2660,11 @@ function initSecondaryCharts(){
       ctx.closePath();
       ctx.clip();
 
+      const gridLinesCount = 20;
       const yMin = yScale.min;
       const yMax = yScale.max;
-      const gridLinesCount = 16;
       const stepY = (yMax - yMin) / gridLinesCount;
-      ctx.strokeStyle = hexToRgba(accent, 0.45);
+      ctx.strokeStyle = hexToRgba(accent, 0.20);
       ctx.lineWidth = 1.2;
       ctx.setLineDash([]);
 
