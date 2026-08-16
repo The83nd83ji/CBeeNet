@@ -1,4 +1,4 @@
-# pages.py - CBee Gateway v1.0.0 (Neon Glow & 3D Grid Under Curve)
+# pages.py - CBee Gateway v1.0.0
 import json
 
 LOGIN_HTML = r"""<!DOCTYPE html>
@@ -2293,12 +2293,13 @@ function buildChart(type) {
 
       const yMin = yScale.min;
       const yMax = yScale.max;
-      const stepY = (yMax - yMin) / 20;
-      ctx.strokeStyle = hexToRgba(accent, 0.35); // پررنگ‌تر
-      ctx.lineWidth = 2; // ضخیم‌تر
-      ctx.setLineDash([3, 4]);
+      const gridLinesCount = 30;
+      const stepY = (yMax - yMin) / gridLinesCount;
+      ctx.strokeStyle = hexToRgba(accent, 0.45);
+      ctx.lineWidth = 1.2;
+      ctx.setLineDash([]);
 
-      for (let i = 0; i <= 20; i++) {
+      for (let i = 0; i <= gridLinesCount; i++) {
         const val = yMin + i * stepY;
         const y = yScale.getPixelForValue(val);
         if (y >= top && y <= bottom) {
@@ -2311,8 +2312,8 @@ function buildChart(type) {
 
       const xMin = xScale.min;
       const xMax = xScale.max;
-      const stepX = (xMax - xMin) / 20;
-      for (let i = 0; i <= 20; i++) {
+      const stepX = (xMax - xMin) / gridLinesCount;
+      for (let i = 0; i <= gridLinesCount; i++) {
         const val = xMin + i * stepX;
         const x = xScale.getPixelForValue(val);
         if (x >= left && x <= right) {
@@ -2665,12 +2666,13 @@ function initSecondaryCharts(){
 
       const yMin = yScale.min;
       const yMax = yScale.max;
-      const stepY = (yMax - yMin) / 10;
-      ctx.strokeStyle = hexToRgba(accent, 0.35);
-      ctx.lineWidth = 2;
-      ctx.setLineDash([3, 4]);
+      const gridLinesCount = 16;
+      const stepY = (yMax - yMin) / gridLinesCount;
+      ctx.strokeStyle = hexToRgba(accent, 0.45);
+      ctx.lineWidth = 1.2;
+      ctx.setLineDash([]);
 
-      for (let i = 0; i <= 10; i++) {
+      for (let i = 0; i <= gridLinesCount; i++) {
         const val = yMin + i * stepY;
         const y = yScale.getPixelForValue(val);
         if (y >= top && y <= bottom) {
@@ -2683,8 +2685,8 @@ function initSecondaryCharts(){
 
       const xMin = xScale.min;
       const xMax = xScale.max;
-      const stepX = (xMax - xMin) / 10;
-      for (let i = 0; i <= 10; i++) {
+      const stepX = (xMax - xMin) / gridLinesCount;
+      for (let i = 0; i <= gridLinesCount; i++) {
         const val = xMin + i * stepX;
         const x = xScale.getPixelForValue(val);
         if (x >= left && x <= right) {
