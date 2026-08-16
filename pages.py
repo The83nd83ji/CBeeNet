@@ -21,7 +21,6 @@ body {
   padding: 20px;
   position: relative;
 }
-/* Fine Premium Grid Background */
 .bg-grid {
   position: fixed;
   inset: 0;
@@ -745,7 +744,6 @@ DASHBOARD_HTML = r"""<!DOCTYPE html>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.19.0/dist/tabler-icons.min.css">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
 <style>
-/* ===== RESET & VARIABLES ===== */
 *{margin:0;padding:0;box-sizing:border-box}
 :root{
   --bg:#0d1117;
@@ -866,8 +864,6 @@ a{color:inherit;text-decoration:none}
 .dash-stat-card .sub{font-size:10px;color:var(--t2);margin-top:4px}
 .dash-stat-card .icon{position:absolute;top:16px;left:16px;font-size:22px;color:var(--accent);opacity:.3}
 [dir="ltr"] .dash-stat-card .icon{left:auto;right:16px}
-
-/* ===== AREA CHART CONTAINERS ===== */
 .chart-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;margin-bottom:22px}
 .chart-premium{background:var(--card);border:1px solid var(--card-b);border-radius:var(--radius);padding:16px 18px 14px;transition:all .2s;position:relative;overflow:hidden}
 .chart-premium:hover{border-color:var(--card-bh);box-shadow:var(--shadow)}
@@ -878,27 +874,20 @@ a{color:inherit;text-decoration:none}
 .chart-premium .ch-value .unit{font-size:12px;font-weight:500;color:var(--t3);margin-left:3px}
 .chart-premium .ch-main{height:100px;position:relative;margin-top:0;min-height:80px}
 .chart-premium .ch-main canvas{width:100% !important;height:100% !important}
-
-/* Secondary Charts */
 .dash-charts-second{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:22px}
 .dash-small-chart{background:var(--card);border:1px solid var(--card-b);border-radius:var(--radius);padding:16px 18px;position:relative}
 .dash-small-chart .chart-title{font-size:11px;font-weight:600;color:var(--t2);margin-bottom:10px;display:flex;align-items:center;gap:6px}
 .dash-small-chart .chart-title i{color:var(--accent)}
 .dash-small-chart .chart-wrap{height:120px;position:relative}
 .dash-small-chart .chart-wrap canvas{width:100% !important;height:100% !important}
-
-/* Tooltip (minimal, same as before) */
 .chart-tooltip{display:none;position:fixed;background:rgba(11,17,29,0.92);backdrop-filter:blur(12px);border:1px solid rgba(255,255,255,0.08);border-radius:10px;padding:10px 14px;box-shadow:0 12px 40px rgba(0,0,0,0.7);z-index:1000;pointer-events:none;min-width:140px}
 .chart-tooltip .tt-time{font-size:9px;color:var(--t3);font-family:ui-monospace,monospace;margin-bottom:4px;border-bottom:1px solid var(--card-b);padding-bottom:4px}
 .chart-tooltip .tt-row{display:flex;align-items:center;justify-content:space-between;gap:16px;font-size:11px;padding:2px 0;color:var(--t1)}
 .chart-tooltip .tt-row .tt-dot{width:7px;height:7px;border-radius:50%;display:inline-block;flex-shrink:0;margin-right:6px;border:1px solid rgba(255,255,255,0.15)}
 .chart-tooltip .tt-row .tt-label{color:var(--t2);font-weight:400}
 .chart-tooltip .tt-row .tt-value{font-weight:700;font-variant-numeric:tabular-nums}
-
 @media(max-width:1024px){.dash-stats-grid{grid-template-columns:1fr 1fr}.dash-charts-second{grid-template-columns:1fr 1fr}.chart-grid{grid-template-columns:1fr 1fr}}
 @media(max-width:768px){.chart-grid{grid-template-columns:1fr}.dash-charts-second{grid-template-columns:1fr}.dash-stats-grid{grid-template-columns:1fr}.main{padding:62px 12px 50px}.sidebar{transform:translateX(100%)}[dir="ltr"] .sidebar{transform:translateX(-100%)}.sidebar.open{transform:translateX(0)}.sb-close{display:flex}.main{margin-right:0;padding-top:70px}[dir="ltr"] .main{margin-left:0}.mob-top{display:flex}}
-
-/* ===== REST OF STYLES (unchanged) ===== */
 .btn{font-family:inherit;font-size:12px;font-weight:500;border-radius:9px;padding:8px 14px;cursor:pointer;display:inline-flex;align-items:center;gap:5px;border:none;transition:all .15s;white-space:nowrap}
 .btn i{font-size:13px}
 .btn:disabled{opacity:.4;cursor:not-allowed}
@@ -1303,10 +1292,7 @@ a{color:inherit;text-decoration:none}
 </style>
 </head>
 <body>
-<!-- ===== TOAST ===== -->
 <div class="toast" id="toast"></div>
-
-<!-- ===== MODALS ===== -->
 <div class="modal-bg" id="modal-links">
   <div class="modal-v2" style="max-width:500px">
     <div class="lmodal-head">
@@ -1338,7 +1324,6 @@ a{color:inherit;text-decoration:none}
     </div>
   </div>
 </div>
-
 <div class="modal-bg" id="modal-create-sub">
   <div class="modal-v2">
     <div class="modal-v2-head">
@@ -1368,7 +1353,6 @@ a{color:inherit;text-decoration:none}
     </div>
   </div>
 </div>
-
 <div class="modal-bg" id="modal-edit-link">
   <div class="modal">
     <button class="modal-close" onclick="closeModal('modal-edit-link')"><i class="ti ti-x"></i></button>
@@ -1388,8 +1372,6 @@ a{color:inherit;text-decoration:none}
     </div>
   </div>
 </div>
-
-<!-- ===== MOBILE TOP ===== -->
 <div class="mob-top">
   <div class="ml"><span class="mob-title">CBee</span></div>
   <div class="mob-right">
@@ -1398,8 +1380,6 @@ a{color:inherit;text-decoration:none}
   </div>
 </div>
 <div class="overlay" id="overlay"></div>
-
-<!-- ===== SIDEBAR ===== -->
 <aside class="sidebar" id="sb">
   <button class="sb-close" id="close-sb"><i class="ti ti-x"></i></button>
   <div class="logo">
@@ -1427,11 +1407,7 @@ a{color:inherit;text-decoration:none}
     <button class="logout-btn" id="logout-btn"><i class="ti ti-logout"></i> <span data-lang="logout_btn">Logout</span></button>
   </div>
 </aside>
-
-<!-- ===== MAIN ===== -->
 <main class="main">
-
-<!-- ===== OVERVIEW PAGE ===== -->
 <section class="pg on" id="pg-overview">
   <div class="topbar">
     <div><div class="tb-title"><i class="ti ti-layout-dashboard"></i> <span data-lang="dashboard">Dashboard</span></div><div class="tb-sub" id="last-upd">Loading...</div></div>
@@ -1441,8 +1417,6 @@ a{color:inherit;text-decoration:none}
       <button class="btn btn-p btn-sm" onclick="refreshAll()"><i class="ti ti-refresh"></i> <span data-lang="refresh">Refresh</span></button>
     </div>
   </div>
-
-  <!-- Stats Grid -->
   <div class="dash-stats-grid">
     <div class="dash-stat-card">
       <i class="ti ti-plug-connected icon"></i>
@@ -1469,8 +1443,6 @@ a{color:inherit;text-decoration:none}
       <div class="sub" data-lang="running_time">Running Time</div>
     </div>
   </div>
-
-  <!-- 3 Area Charts (Load, Traffic, Connections) -->
   <div class="chart-grid">
     <div class="chart-premium" id="chart-load-container">
       <div class="ch-header">
@@ -1500,8 +1472,6 @@ a{color:inherit;text-decoration:none}
       </div>
     </div>
   </div>
-
-  <!-- Secondary Charts -->
   <div class="dash-charts-second">
     <div class="dash-small-chart">
       <div class="chart-title"><i class="ti ti-chart-bar"></i> <span data-lang="protocol_distribution">Protocol Distribution</span></div>
@@ -1512,14 +1482,11 @@ a{color:inherit;text-decoration:none}
       <div class="chart-wrap"><canvas id="dashHourlyChart"></canvas></div>
     </div>
   </div>
-
   <div class="dash-footer">
     <span class="df-text">CBee Gateway v1.0.0 · 2026 · Railway</span>
     <a class="df-link" href="https://t.me/CBeeNet" target="_blank"><i class="ti ti-brand-telegram"></i> t.me/CBeeNet</a>
   </div>
 </section>
-
-<!-- ===== LINKS PAGE ===== -->
 <section class="pg" id="pg-links">
   <div class="topbar">
     <div><div class="tb-title"><i class="ti ti-link-plus"></i> <span data-lang="configs">Configs</span></div><div class="tb-sub" data-lang="configs_management">Create and manage configs with quota, expiry and grouping</div></div>
@@ -1618,8 +1585,6 @@ a{color:inherit;text-decoration:none}
   <div class="cfg-grid" id="links-grid"></div>
   <div class="empty" id="links-empty" style="display:none"><i class="ti ti-link-off"></i><p data-lang="no_configs">No configs yet</p></div>
 </section>
-
-<!-- ===== SUB GROUPS PAGE ===== -->
 <section class="pg" id="pg-subgroups">
   <div class="topbar">
     <div><div class="tb-title"><i class="ti ti-folders"></i> <span data-lang="sub_groups_short">Sub Groups</span></div><div class="tb-sub" data-lang="each_group_public">Each group has its own public page with its configs</div></div>
@@ -1638,8 +1603,6 @@ a{color:inherit;text-decoration:none}
     <div class="subs-empty-v2"><div class="subs-empty-v2-icon"><i class="ti ti-folders"></i></div><div class="subs-empty-v2-title" data-lang="no_groups">No groups yet</div><div class="subs-empty-v2-sub" data-lang="create_group">Create a new group to organize your configs</div></div>
   </div>
 </section>
-
-<!-- ===== SUBSCRIPTIONS PAGE ===== -->
 <section class="pg" id="pg-subscriptions">
   <div class="topbar"><div><div class="tb-title"><i class="ti ti-rss"></i> <span data-lang="subscription">Subscription</span></div><div class="tb-sub" data-lang="subscription_links">Subscription links for v2ray apps</div></div></div>
   <div class="g2">
@@ -1659,8 +1622,6 @@ a{color:inherit;text-decoration:none}
     <div id="sub-groups-list" data-lang="loading">Loading...</div>
   </div>
 </section>
-
-<!-- ===== CONNECTIONS PAGE ===== -->
 <section class="pg" id="pg-connections">
   <div class="topbar">
     <div><div class="tb-title"><i class="ti ti-plug-connected"></i> <span data-lang="connections">Connections</span></div><div class="tb-sub" data-lang="connections_monitor">Live IP and traffic monitoring per connection</div></div>
@@ -1683,8 +1644,6 @@ a{color:inherit;text-decoration:none}
     <div class="conn-empty-v2-sub" data-lang="will_appear">They will appear here as soon as clients connect</div>
   </div>
 </section>
-
-<!-- ===== ALERTS PAGE ===== -->
 <section class="pg" id="pg-alerts">
   <div class="topbar">
     <div><div class="tb-title"><i class="ti ti-bell"></i> <span data-lang="smart_alerts">Smart Alerts</span></div><div class="tb-sub" data-lang="alerts_sub">Important events & notifications</div></div>
@@ -1700,8 +1659,6 @@ a{color:inherit;text-decoration:none}
     <div id="alerts-list"></div>
   </div>
 </section>
-
-<!-- ===== SECURITY PAGE ===== -->
 <section class="pg" id="pg-security">
   <div class="topbar"><div><div class="tb-title"><i class="ti ti-shield-lock"></i> <span data-lang="security">Security</span></div></div></div>
   <div class="g2">
@@ -1721,20 +1678,14 @@ a{color:inherit;text-decoration:none}
     </div>
   </div>
 </section>
-
-<!-- ===== ACTIVITY LOGS PAGE ===== -->
 <section class="pg" id="pg-logs">
   <div class="topbar"><div><div class="tb-title"><i class="ti ti-history"></i> <span data-lang="activity_logs">Activity Logs</span></div><div class="tb-sub" data-lang="activity_logs_full">Complete event history</div></div><div class="tb-right"><button class="btn btn-p btn-sm" onclick="loadActivity()"><i class="ti ti-refresh"></i></button></div></div>
   <div class="card"><div class="log-timeline" id="logs-list">—</div><div class="empty" id="logs-empty" style="display:none"><i class="ti ti-history-toggle"></i><p data-lang="no_logs">No logs yet</p></div></div>
 </section>
-
-<!-- ===== ERRORS PAGE ===== -->
 <section class="pg" id="pg-errors">
   <div class="topbar"><div><div class="tb-title"><i class="ti ti-alert-triangle"></i> <span data-lang="errors">Errors</span></div></div><div class="tb-right"><span class="badge bg-red" id="errs-badge">0</span><button class="btn btn-p btn-sm" onclick="refreshAll()"><i class="ti ti-refresh"></i></button></div></div>
   <div class="card"><div class="card-title"><i class="ti ti-bug"></i> <span data-lang="error_logs">Error Logs</span></div><div id="errs-full">—</div></div>
 </section>
-
-<!-- ===== WEBSOCKET TEST PAGE ===== -->
 <section class="pg" id="pg-testws">
   <div class="topbar"><div><div class="tb-title"><i class="ti ti-wifi"></i> <span data-lang="websocket_test">WebSocket Test</span></div></div></div>
   <div class="card" style="max-width:660px">
@@ -1753,15 +1704,12 @@ a{color:inherit;text-decoration:none}
     </div>
   </div>
 </section>
-
-<!-- ===== SETTINGS PAGE ===== -->
 <section class="pg" id="pg-settings">
   <div class="topbar">
     <div><div class="tb-title"><i class="ti ti-settings"></i> <span data-lang="settings">Settings</span></div><div class="tb-sub" data-lang="system_settings">System configuration</div></div>
     <div class="tb-right"><span class="badge bg-blue">v1.0.0</span></div>
   </div>
   <div class="g2">
-    <!-- Theme Settings -->
     <div class="card">
       <div class="card-title"><i class="ti ti-palette"></i> <span data-lang="theme_settings">Theme Settings</span></div>
       <div style="display:flex;flex-direction:column;gap:12px">
@@ -1794,8 +1742,6 @@ a{color:inherit;text-decoration:none}
         </div>
       </div>
     </div>
-
-    <!-- Language Settings -->
     <div class="card">
       <div class="card-title"><i class="ti ti-language"></i> <span data-lang="language_settings">Language Settings</span></div>
       <div style="display:flex;gap:10px;flex-wrap:wrap" id="lang-buttons" dir="ltr">
@@ -1804,8 +1750,6 @@ a{color:inherit;text-decoration:none}
       </div>
       <div class="cl" style="margin-top:12px"><i class="ti ti-info-circle"></i><span data-lang="lang_note">Default language is English. Page will refresh after change.</span></div>
     </div>
-
-    <!-- ===== ONLY Protocol Custom Server Settings (بدون Trojan) ===== -->
     <div class="card" style="grid-column:1/-1">
       <div class="card-title"><i class="ti ti-server-2"></i> <span>Protocol Custom Names & Templates</span></div>
       <div style="display:flex;flex-direction:column;gap:8px">
@@ -1816,28 +1760,24 @@ a{color:inherit;text-decoration:none}
           <div>Link Prefix</div>
           <div>Link Template</div>
         </div>
-        <!-- VLESS-WS -->
         <div style="display:grid;grid-template-columns:1.2fr 1.2fr 1.2fr 2fr;gap:8px;align-items:center;background:rgba(0,0,0,0.08);border-radius:8px;padding:6px 4px">
           <div style="font-size:11px;color:var(--accent2)">VLESS-WS</div>
           <input class="fi" id="ps-vless-ws-name" placeholder="e.g. VLESS-Server" style="min-width:0;padding:6px 8px;font-size:11px">
           <input class="fi" id="ps-vless-ws-prefix" placeholder="e.g. vless" style="min-width:0;padding:6px 8px;font-size:11px">
           <input class="fi" id="ps-vless-ws-template" placeholder="{server}-{label}" style="min-width:0;padding:6px 8px;font-size:11px">
         </div>
-        <!-- XHTTP-packet -->
         <div style="display:grid;grid-template-columns:1.2fr 1.2fr 1.2fr 2fr;gap:8px;align-items:center;background:rgba(0,0,0,0.08);border-radius:8px;padding:6px 4px">
           <div style="font-size:11px;color:var(--amber-t)">XHTTP-packet</div>
           <input class="fi" id="ps-xhttp-packet-up-name" placeholder="e.g. XHTTP-Packet" style="min-width:0;padding:6px 8px;font-size:11px">
           <input class="fi" id="ps-xhttp-packet-up-prefix" placeholder="e.g. xhttp-p" style="min-width:0;padding:6px 8px;font-size:11px">
           <input class="fi" id="ps-xhttp-packet-up-template" placeholder="{server}-{label}" style="min-width:0;padding:6px 8px;font-size:11px">
         </div>
-        <!-- XHTTP-stream -->
         <div style="display:grid;grid-template-columns:1.2fr 1.2fr 1.2fr 2fr;gap:8px;align-items:center;background:rgba(0,0,0,0.04);border-radius:8px;padding:6px 4px">
           <div style="font-size:11px;color:var(--amber-t)">XHTTP-stream</div>
           <input class="fi" id="ps-xhttp-stream-up-name" placeholder="e.g. XHTTP-Stream" style="min-width:0;padding:6px 8px;font-size:11px">
           <input class="fi" id="ps-xhttp-stream-up-prefix" placeholder="e.g. xhttp-s" style="min-width:0;padding:6px 8px;font-size:11px">
           <input class="fi" id="ps-xhttp-stream-up-template" placeholder="{server}-{label}" style="min-width:0;padding:6px 8px;font-size:11px">
         </div>
-        <!-- XHTTP-ultra -->
         <div style="display:grid;grid-template-columns:1.2fr 1.2fr 1.2fr 2fr;gap:8px;align-items:center;background:rgba(0,0,0,0.08);border-radius:8px;padding:6px 4px">
           <div style="font-size:11px;color:var(--amber-t)">XHTTP-ultra</div>
           <input class="fi" id="ps-xhttp-stream-one-name" placeholder="e.g. XHTTP-Ultra" style="min-width:0;padding:6px 8px;font-size:11px">
@@ -1849,8 +1789,6 @@ a{color:inherit;text-decoration:none}
       </div>
     </div>
   </div>
-
-  <!-- Server Info & Change Password -->
   <div class="g2" style="margin-top:16px">
     <div class="srv-panel">
       <div class="srv-hero">
@@ -1889,15 +1827,12 @@ a{color:inherit;text-decoration:none}
   </div>
 </section>
 </main>
-
-<!-- ===== TOOLTIP ===== -->
 <div class="chart-tooltip" id="chart-tooltip">
   <div class="tt-time" id="tt-time">--:--</div>
   <div id="tt-body"></div>
 </div>
 
 <script>
-// ========== LANG DICT ==========
 const LANG_DICT = {
   "en": {
     "dashboard":"Dashboard","dashboard_sub":"System Overview","active_connections":"Active Connections","total_traffic":"Total Traffic","total_links":"Configs","uptime":"Uptime","since_start":"Since Start","active":"Active","inactive":"Inactive","refresh":"Refresh","traffic_trend":"Bandwidth Usage","service_status":"Service Status","top_connections":"Live Connections","no_connections":"No connections","server":"Server","settings":"Settings","language":"Language","farsi":"Persian","english":"English","save":"Save","cancel":"Cancel","delete":"Delete","edit":"Edit","copy":"Copy","created":"Created","expires":"Expires","unlimited":"Unlimited","used":"Used","of":"of","daily":"Daily","hourly":"Hourly","bandwidth":"Bandwidth","connections":"Connections","protocol":"Protocol","ip_address":"IP Address","port":"Port","upload":"Upload","download":"Download","duration":"Duration","status":"Status","online":"Online","offline":"Offline","total":"Total","users":"Users","protocols":"Protocols","traffic_usage":"Traffic Usage","links":"Configs","sub_groups":"Sub Groups","subscription":"Subscription","security":"Security","logs":"Activity Logs","errors":"Errors","test_websocket":"WebSocket Test","dark_theme":"Dark Theme","light_theme":"Light Theme","prestige_theme":"Prestige Theme","blue":"Blue","red":"Red","yellow":"Yellow","current_theme":"Current Theme","background_style":"Background Style","default_blue":"Default Blue","pure_black":"Pure Black","dark_grey":"Dark Grey","server_settings":"Server & Link Settings","server_name":"Server Name","server_prefix":"Link Prefix","link_template":"Link Name Template","template_vars":"Available Variables","template_note":"If `{protocol}` is not in the template, the protocol will not be shown.","change_password":"Change Password","current_password":"Current Password","new_password":"New Password","confirm_password":"Confirm Password","password_strength":"Password Strength","min_chars":"At least 4 characters","contains_number":"Contains number","contains_case":"Uppercase/Lowercase","weak":"Very Weak","medium":"Medium","strong":"Strong","save_password":"Save New Password","login":"Login","logout":"Logout","login_title":"Login to Panel","login_sub":"Enter password to access the dashboard","password":"Password","login_button":"Login to Dashboard","telegram_channel":"Telegram Channel","panel":"Panel","system":"System","configs":"Configs","sub_groups_short":"Sub Groups","activity_logs":"Activity Logs","config_id":"Config ID","sub_group_expiry":"Sub Group & Expiry","no_group":"No Group","days":"Days","traffic_quota":"Traffic Quota","transport_protocols":"Transport Protocols","bulk_count":"Bulk Count","create_config":"Create Config","no_configs":"No configs yet","new_group":"New Group","no_groups":"No groups yet","create_group":"Create a new group to organize your configs","single_sub":"Single Subscription (per config)","full_sub":"Full Subscription (Admin)","full_sub_desc":"Includes all active configs.","group_sub_links":"Group Subscription Links","loading":"Loading...","traffic_analysis":"Bandwidth usage analysis & monitoring","total_traffic_used":"Total Traffic Used","hourly_average":"Hourly Average","per_hour":"/h","peak_usage":"Peak Usage","peak_hour":"Peak Hour","lowest_usage":"Lowest Usage","live_connections":"Live Connections","total_traffic_live":"Total Traffic","avg_duration":"Avg Duration","unique_ips":"Unique IPs","connections_list":"Connections List","auto_update":"Auto-update every 5s","no_active_connections":"No active connections","will_appear":"They will appear here as soon as clients connect","encryption":"Encryption","access_control":"Access Control","hash":"Hash","session":"Session","active_inactive":"Active/Inactive","expiry_date":"Expiry Date","public_page_pw":"Public Page Password","optional":"Optional","activity_logs_full":"Complete event history","no_logs":"No logs yet","error_logs":"Error Logs","websocket_test":"WebSocket Test","ws_note":"Only registered and active UUIDs can connect.","connect":"Connect","disconnect":"Disconnect","send":"Send","waiting_ws":"Waiting for connection...","change_theme":"Change Theme","server_link_settings":"Server & Link Settings","save_settings":"Save Settings","saved":"Saved","online_status":"Online","version":"Version","framework":"Framework","platform":"Platform","storage":"Storage","change_password_title":"Change Password","change_password_sub":"Choose a strong password and keep it safe","current_pw":"Current Password","new_pw":"New Password","confirm_pw":"Confirm Password","save_new_pw":"Save New Password","min_4_chars":"At least 4 chars","contains_num":"Contains number","contains_case_letters":"Uppercase/Lowercase","very_weak":"Very Weak","medium_strength":"Medium","strong_strength":"Strong","logout_btn":"Logout","telegram_btn":"Telegram Channel","load":"Load","connections_live":"Live Connections","traffic_chart":"Traffic Chart","protocol_distribution":"Protocol Distribution","daily_usage":"Daily Usage","active_conns_table":"Active Connections","configs_management":"Configs Management","sub_groups_management":"Sub Groups Management","subscription_links":"Subscription Links","traffic_monitor":"Traffic Monitor","connections_monitor":"Connections Monitor","security_settings":"Security Settings","activity_logs_title":"Activity Logs","error_logs_title":"Error Logs","websocket_tester":"WebSocket Tester","system_settings":"System Settings","language_settings":"Language Settings","theme_settings":"Theme Settings","server_info":"Server Info","password_change":"Password Change","save_changes":"Save Changes","cancel_changes":"Cancel","live":"Live","running_time":"Running Time","manage_configs":"Manage Configs for","select_configs":"Select configs to include in this group","select_all":"Select All","deselect_all":"Deselect All","changes_apply":"Changes apply immediately","new_group_title":"Create New Group","new_group_sub":"Create a separate public page to manage configs","group_name":"Group Name","description_optional":"Description (optional)","public_page_password":"Public Page Password (optional)","public_page_info":"This group's public page will be accessible via a unique link.","edit_config":"Edit Config","quota_0_unlimited":"Quota (0 = unlimited)","expiry_days":"Expiry (days from now, 0 = no change/unlimited)","expiry_note":"To keep current expiry, leave expiry field as 0.","random_uuid":"Random UUID · Choose quota, expiry and protocol","uuid_note":"UUID is generated randomly · Only registered UUIDs can connect · Protocol cannot be changed after creation.","each_group_public":"Each group has its own public page with its configs","single_sub_desc":"Each config has its own subscription URL. Click the","icon_on_card":"icon on the config card.","full_sub_note":"This URL only works in the browser where you're logged in (requires session cookie).","based_on_mb":"Based on MB per hour","lang_note":"Default language is English. Page will refresh after change.","groups":"Groups","usage":"Usage","average":"Average","protocols_legend":"Protocols","daily_legend":"Daily","hourly_legend":"Hourly","bandwidth_usage":"Bandwidth Usage","smart_alerts":"Smart Alerts","alerts_sub":"Important events & notifications","priority":"Priority","critical":"Critical","warning":"Warning","info":"Info","dismiss":"Dismiss","filter_all":"All","filter_critical":"Critical","filter_warning":"Warning","filter_info":"Info","alert_expiry":"Config expiring soon","alert_quota":"Traffic quota exceeded 80%","alert_errors":"Repeated connection errors","alert_new_ip":"New IP connected","no_alerts":"No alerts to show"
@@ -1907,7 +1842,6 @@ const LANG_DICT = {
   }
 };
 
-// ========== STATE ==========
 let currentLang = localStorage.getItem('CBeeNet-lang') || 'en';
 let currentTheme = localStorage.getItem('CBeeNet-theme') || 'dark-prestige';
 let currentBgStyle = localStorage.getItem('CBeeNet-bg-style') || 'grey';
@@ -1918,7 +1852,92 @@ let allSubsList = [];
 let prevTraf = 0;
 let totalTrafficDisplay = 0;
 
-// ========== LANGUAGE & THEME ==========
+// History storage for chart data
+let chartHistory = {
+  traffic: [],
+  load: [],
+  conns: [],
+  times: []
+};
+
+function loadChartHistory() {
+  try {
+    const stored = localStorage.getItem('CBeeNet_chartHistory');
+    if (stored) {
+      const parsed = JSON.parse(stored);
+      if (parsed && parsed.times && parsed.times.length > 0) {
+        chartHistory = parsed;
+        chartHistory.times = chartHistory.times.map(t => new Date(t));
+        return true;
+      }
+    }
+  } catch(e) {}
+  return false;
+}
+
+function saveChartHistory() {
+  try {
+    const toStore = {
+      traffic: chartHistory.traffic,
+      load: chartHistory.load,
+      conns: chartHistory.conns,
+      times: chartHistory.times.map(t => t.toISOString())
+    };
+    localStorage.setItem('CBeeNet_chartHistory', JSON.stringify(toStore));
+  } catch(e) {}
+}
+
+function appendHistoryPoint(traffic, load, conns, time) {
+  chartHistory.traffic.push(traffic);
+  chartHistory.load.push(load);
+  chartHistory.conns.push(conns);
+  chartHistory.times.push(time);
+  
+  if (chartHistory.times.length > 180) {
+    chartHistory.traffic = chartHistory.traffic.slice(-180);
+    chartHistory.load = chartHistory.load.slice(-180);
+    chartHistory.conns = chartHistory.conns.slice(-180);
+    chartHistory.times = chartHistory.times.slice(-180);
+  }
+  saveChartHistory();
+}
+
+function replayHistory() {
+  if (chartHistory.times.length === 0) return;
+  
+  const now = new Date();
+  const cutoff = new Date(now.getTime() - 300000);
+  let startIdx = 0;
+  for (let i = 0; i < chartHistory.times.length; i++) {
+    if (chartHistory.times[i].getTime() >= cutoff.getTime()) {
+      startIdx = i;
+      break;
+    }
+  }
+  
+  if (startIdx > 0) {
+    chartHistory.traffic = chartHistory.traffic.slice(startIdx);
+    chartHistory.load = chartHistory.load.slice(startIdx);
+    chartHistory.conns = chartHistory.conns.slice(startIdx);
+    chartHistory.times = chartHistory.times.slice(startIdx);
+    saveChartHistory();
+  }
+  
+  for (let i = 0; i < chartHistory.times.length; i++) {
+    const t = chartHistory.times[i];
+    if (t.getTime() > now.getTime() - 10000) break;
+    addDataPoint('traffic', chartHistory.traffic[i], t);
+    addDataPoint('load', chartHistory.load[i], t);
+    addDataPoint('conns', chartHistory.conns[i], t);
+  }
+  
+  chartHistory.traffic = [];
+  chartHistory.load = [];
+  chartHistory.conns = [];
+  chartHistory.times = [];
+  saveChartHistory();
+}
+
 function setLanguage(lang){
   currentLang = lang;
   localStorage.setItem('CBeeNet-lang', lang);
@@ -2018,7 +2037,6 @@ function protoBadge(protocols){
   return protocols.map(p => { const v = labels[p] || labels['vless-ws']; return `<span class="proto-chip ${v[1]}">${v[0]}</span>`; }).join('');
 }
 
-// ========== AUTH ==========
 async function checkAuth(){
   try{ const r = await fetch('/api/me'); const d = await r.json(); if(!d.authenticated) location.href = '/login'; }catch(e){ location.href = '/login'; }
 }
@@ -2026,7 +2044,6 @@ async function logout(){ try{ await fetch('/api/logout', {method:'POST'}); }catc
 document.getElementById('logout-btn').addEventListener('click', logout);
 async function authF(url, opts={}){ const r = await fetch(url, opts); if(r.status === 401){ location.href = '/login'; throw new Error('unauthorized'); } return r; }
 
-// ========== UI HELPERS ==========
 function toggleProtoBtnV(el){
   el.classList.toggle('active');
 }
@@ -2070,7 +2087,6 @@ document.querySelectorAll('.nav-it').forEach(el => el.addEventListener('click', 
 function openModal(id){ document.getElementById(id).classList.add('open'); }
 function closeModal(id){ document.getElementById(id).classList.remove('open'); }
 
-// ========== PROTOCOL CUSTOM SETTINGS (بدون Trojan) ==========
 async function loadProtocolSettings(){
   try {
     const r = await authF('/api/settings/protocol');
@@ -2117,7 +2133,6 @@ async function saveProtocolSettings(){
   } catch(e){ toast('Server connection error', 'err'); }
 }
 
-// ========== FORMAT LINK NAME ==========
 function formatLinkName(label, protocol, protoSettings){
   const defaultNames = {
     'vless-ws': 'VLESS-WS',
@@ -2145,7 +2160,6 @@ function formatLinkName(label, protocol, protoSettings){
   return result;
 }
 
-// ========== CHART DATA (PERSISTENT) ==========
 const CHART_STORAGE_KEY = 'CBeeNet_chartData';
 const PREV_TRAF_KEY = 'CBeeNet_prevTraf';
 const CHART_LAST_TIME_KEY = 'CBeeNet_lastChartTime';
@@ -2154,7 +2168,6 @@ let chartTimes = { load: [], traffic: [], conns: [] };
 const MAX_POINTS = 60;
 let chartInstances = { load: null, traffic: null, conns: null };
 
-// ===== CHART HELPERS =====
 function hexToRgba(hex, alpha) {
   let c = hex.trim();
   if (c.startsWith('#')) {
@@ -2228,7 +2241,6 @@ function getGridColor() {
   return getComputedStyle(document.documentElement).getPropertyValue('--card-b').trim() || '#30363d';
 }
 
-// ===== BUILD AREA CHART (Premium style with gradient fill, no grid, zero line dashed) =====
 function buildChart(type) {
   const accent = getAccentColor();
   const textColor = getTextColor();
@@ -2260,12 +2272,10 @@ function buildChart(type) {
   let stepSize = Math.round(yMax / 5);
   if (stepSize === 0) stepSize = 1;
 
-  // Gradient fill (soft blue to transparent) with lower opacity for soft shadow
   const grad = ctx.createLinearGradient(0, 0, 0, 80);
   grad.addColorStop(0, hexToRgba(accent, 0.30));
   grad.addColorStop(1, hexToRgba(accent, 0.01));
 
-  // Glow dataset (thick semi-transparent line behind main)
   const glowDataset = {
     data: dataArr,
     borderColor: hexToRgba(accent, 0.25),
@@ -2276,7 +2286,6 @@ function buildChart(type) {
     borderJoinStyle: 'round'
   };
 
-  // Main dataset with gradient fill
   const mainDataset = {
     data: dataArr,
     borderColor: accent,
@@ -2292,7 +2301,6 @@ function buildChart(type) {
     borderJoinStyle: 'round'
   };
 
-  // Plugin for dashed zero line
   const zeroLinePlugin = {
     id: 'zeroLine',
     beforeDraw: function(chart) {
@@ -2490,7 +2498,6 @@ function addDataPoint(type, value, time) {
   updateChartValue(type);
 }
 
-// ========== fetchStats ==========
 async function fetchStats(){
   try{
     const connResp = await authF('/api/connections');
@@ -2523,76 +2530,23 @@ async function fetchStats(){
     if (delta > 0 && gapSeconds > 5) {
       const pointsToAdd = Math.min(Math.floor(gapSeconds / 5), 60);
       if (pointsToAdd > 0) {
-        const perPoint = delta / (pointsToAdd + 1);
+        const perPoint = delta / (pointsToAdd);
         const lastTrafficTime = chartTimes['traffic'].length > 0 ? chartTimes['traffic'][chartTimes['traffic'].length-1] : new Date(now.getTime() - gapSeconds * 1000);
         const gapMs = gapSeconds * 1000;
 
-        const newTraffic = [];
-        const newLoad = [];
-        const newConns = [];
-        const newTimes = [];
-
         for (let i = 1; i <= pointsToAdd; i++) {
-          const fraction = i / (pointsToAdd + 1);
+          const fraction = i / pointsToAdd;
           const t = new Date(lastTrafficTime.getTime() + fraction * gapMs);
-          newTraffic.push(perPoint);
-          const loadPct = Math.min(100, Math.max(0, (perPoint / 5) * 0.8));
-          newLoad.push(loadPct);
-          newConns.push(activeCount);
-          newTimes.push(t);
+          const trafVal = perPoint;
+          const loadVal = Math.min(100, Math.max(0, (perPoint / 5) * 0.8));
+          appendHistoryPoint(trafVal, loadVal, activeCount, t);
         }
 
-        chartData['traffic'] = chartData['traffic'].concat(newTraffic);
-        chartData['load'] = chartData['load'].concat(newLoad);
-        chartData['conns'] = chartData['conns'].concat(newConns);
-        chartTimes['traffic'] = chartTimes['traffic'].concat(newTimes);
-        chartTimes['load'] = chartTimes['load'].concat(newTimes);
-        chartTimes['conns'] = chartTimes['conns'].concat(newTimes);
-
-        if (chartData['traffic'].length > MAX_POINTS) {
-          const excess = chartData['traffic'].length - MAX_POINTS;
-          chartData['traffic'] = chartData['traffic'].slice(excess);
-          chartData['load'] = chartData['load'].slice(excess);
-          chartData['conns'] = chartData['conns'].slice(excess);
-          chartTimes['traffic'] = chartTimes['traffic'].slice(excess);
-          chartTimes['load'] = chartTimes['load'].slice(excess);
-          chartTimes['conns'] = chartTimes['conns'].slice(excess);
-        }
-
+        replayHistory();
+        
         prevTraf = totalTrafficDisplay;
         localStorage.setItem(PREV_TRAF_KEY, String(prevTraf));
         saveChartDataToStorage();
-
-        for (let type of ['load', 'traffic', 'conns']) {
-          const chart = chartInstances[type];
-          if (chart) {
-            const labels = chartTimes[type].map(d => d ? d.toLocaleTimeString('en-US', {hour:'2-digit', minute:'2-digit', hour12:false}) : '');
-            chart.data.labels = labels;
-            chart.data.datasets[0].data = chartData[type];
-            chart.data.datasets[1].data = chartData[type];
-            const maxVal = chartData[type].length > 0 ? Math.max(...chartData[type], 1) : 1;
-            let yMax = type === 'load' ? 100 : Math.ceil(maxVal * 1.2);
-            if (type === 'traffic' && yMax < 5) yMax = 5;
-            if (type === 'conns' && yMax < 5) yMax = 5;
-            if (maxVal === 0) yMax = 1;
-            const roundToNice = (num) => {
-              if (num <= 10) return 10;
-              if (num <= 20) return 20;
-              if (num <= 50) return 50;
-              if (num <= 100) return 100;
-              if (num <= 200) return 200;
-              if (num <= 500) return 500;
-              return Math.ceil(num / 100) * 100;
-            };
-            yMax = roundToNice(yMax);
-            let stepSize = Math.round(yMax / 5);
-            if (stepSize === 0) stepSize = 1;
-            chart.options.scales.y.max = yMax;
-            chart.options.scales.y.ticks.stepSize = stepSize;
-            chart.update('none');
-            updateChartValue(type);
-          }
-        }
         updateSecondaryCharts(d, allLinksList);
         return;
       }
@@ -2616,7 +2570,6 @@ async function fetchStats(){
   } catch(e){ console.error('fetchStats error:', e); }
 }
 
-// ========== Visibility Change Handler ==========
 document.addEventListener('visibilitychange', function() {
   if (!document.hidden) {
     loadChartDataFromStorage();
@@ -2624,7 +2577,6 @@ document.addEventListener('visibilitychange', function() {
   }
 });
 
-// ========== SECONDARY CHARTS (Hourly chart with gradient fill, no grid, zero line dashed) ==========
 let dashProtoChart = null, dashHourlyChart = null;
 function initSecondaryCharts(){
   const accent = getAccentColor();
@@ -2642,7 +2594,6 @@ function initSecondaryCharts(){
     }
   });
 
-  // Hourly chart with gradient fill and zero line
   const ctxHourly = document.getElementById('dashHourlyChart').getContext('2d');
   const grad = ctxHourly.createLinearGradient(0, 0, 0, 120);
   grad.addColorStop(0, hexToRgba(accent, 0.20));
@@ -2727,7 +2678,6 @@ function updateSecondaryCharts(statsData, linksData){
   }
 }
 
-// ========== LINKS (unchanged) ==========
 async function loadLinks(){
   try{
     const [lr, sr] = await Promise.all([authF('/api/links'), authF('/api/subs')]);
@@ -2867,7 +2817,6 @@ async function deleteLink(uuid){
 }
 function showQR(link){ window.open('https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=' + encodeURIComponent(link), '_blank'); }
 
-// ========== SUB GROUPS (unchanged) ==========
 async function loadSubs(){
   try{
     const r = await authF('/api/subs');
@@ -3022,7 +2971,6 @@ async function copyAllSubLinks(subId){
   navigator.clipboard.writeText(urls.join('\n')).then(() => toast(urls.length + ' links copied ✓', 'ok'));
 }
 
-// ========== CONNECTIONS, ACTIVITY, ERRORS, WEBSOCKET (unchanged) ==========
 async function loadConns(){
   try{
     const r = await authF('/api/connections');
@@ -3128,7 +3076,6 @@ function wsSend(){
 }
 function wsDisc(){ if(ws) ws.close(); }
 
-// ========== CHANGE PASSWORD ==========
 async function changePw(){
   const cur = document.getElementById('cp-cur').value;
   const nw = document.getElementById('cp-new').value;
@@ -3174,7 +3121,6 @@ function checkPwStrength(val){
   label.innerHTML = `<i class="ti ti-shield-check" style="color:${colors[Math.max(0, score-1)]}"></i> ${labels[Math.max(0, score-1)]}`;
 }
 
-// ========== SMART ALERTS (unchanged) ==========
 function generateAlertsFromData(stats, links){
   const alerts = [];
   links.forEach(l => {
@@ -3305,7 +3251,6 @@ setInterval(() => {
   }
 }, 30000);
 
-// ========== REFRESH ==========
 function refreshAll(){
   fetchStats();
   if(document.getElementById('pg-links').classList.contains('on')) loadLinks();
@@ -3317,7 +3262,6 @@ function refreshAll(){
   toast('Refreshed ✓', 'ok');
 }
 
-// ========== DOM READY ==========
 document.addEventListener('DOMContentLoaded', async () => {
   await checkAuth();
   applyLanguage();
@@ -3332,6 +3276,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   prevTraf = parseFloat(localStorage.getItem(PREV_TRAF_KEY)) || 0;
 
   const hasStored = loadChartDataFromStorage();
+  loadChartHistory();
   initPremiumCharts();
   initSecondaryCharts();
   if(!hasStored || chartData.load.length === 0){
@@ -3343,6 +3288,8 @@ document.addEventListener('DOMContentLoaded', async () => {
       addDataPoint('conns', 0, t);
     }
   }
+
+  replayHistory();
 
   document.getElementById('set-host').textContent = location.host;
   document.getElementById('sub-all-url').textContent = location.protocol + '//' + location.host + '/sub-all';
