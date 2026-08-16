@@ -1,5 +1,3 @@
-# ===================== main.py =====================
-
 import asyncio
 import json
 import os
@@ -45,6 +43,69 @@ DATA_DIR = Path(os.environ.get("DATA_DIR", "/app/data"))
 DATA_FILE = DATA_DIR / "cbee_state.json"
 SAVE_LOCK = asyncio.Lock()
 
+async def load_state():
+    global LINKS, AUTH, SUBS, GLOBAL_SETTINGS, RESELLERS
+    try:
+        DATA_DIR.mkdir(parents=True, exist_ok=True)
+        if DATA_FILE.exists():
+            async with aiofiles.open(DATA_FILE, "r", encoding="utf-8") as f:
+                data = json.loads(await f.read())
+            for uid, link in data.get("links", {}).items():
+                if "protocol" in link and "protocols" not in link:
+                    link["protocols"] = [link.pop("protocol")]
+            LINKS.update(data.get("links", {}))
+            SUBS.update(data.get("subs", {}))
+            RESELLERS.update(data.get("resellers", {}))
+            if "global_settings" in data:
+                GLOBAL_SETTINGS.update(data["global_settings"])
+            if "password_hash" in data:
+                AUTH["password_hash"] = data["password_hash"]
+            logger.info(f"Loaded state from {DATA_FILE}: {len(LINKS)} links")
+        else:
+            logger.info("No existing state file found, starting fresh")
+    except Exception as e:
+        logger.error(f"Error loading state: {e}")
+
+async def save_state():
+    try:
+        data = {
+            "links": dict(LINKS),
+            "subs": dict(SUBS),
+            "resellers": dict(RESELLERS),
+            "global_settings": dict(GLOBAL_SETTINGS),
+            "password_hash": AUTH["password_hash"]
+        }
+        DATA_DIR.mkdir(parents=True, exist_ok=True)
+        async with aiofiles.open(DATA_FILE, "w", encoding="utf-8") as f:
+            await f.write(json.dumps(data, indent=2, ensure_ascii=False))
+        logger.debug("State saved successfully")
+    except Exception as e:
+        logger.error(f"Error saving state: {e}")
+
+# ── Traffic History (for real‑time chart continuity) ─────────────────────────
+# Store up to 180 points = 15 minutes at 5s intervals
+traffic_history = deque(maxlen=180)  # each entry: (timestamp_unix, traffic_mb, load_pct, conns)
+
+async def update_traffic_history():
+    """Append current traffic, load and connection count to history."""
+    # compute current values
+    total_mb = stats["total_bytes"] / (1024 * 1024)
+    # load is not directly stored; we approximate using recent error rate?
+    # Instead, we just store the raw traffic; load and connections are derived elsewhere.
+    # For simplicity we store traffic only.
+    now = time.time()
+    # We'll store only traffic; the client can compute load from traffic delta if needed.
+    traffic_history.append((now, total_mb))
+
+async def background_traffic_recorder():
+    """Background task that records traffic every 5 seconds."""
+    while True:
+        try:
+            await update_traffic_history()
+        except Exception as e:
+            logger.error(f"Traffic history update error: {e}")
+        await asyncio.sleep(5)
+
 # ── In-memory state ───────────────────────────────────────────────────────────
 connections: dict = {}
 stats = {"total_bytes": 0, "total_requests": 0, "total_errors": 0, "start_time": time.time()}
@@ -60,13 +121,11 @@ SUBS_LOCK = asyncio.Lock()
 RESELLERS: dict = {}
 RESELLERS_LOCK = asyncio.Lock()
 
-# ── History for charts (server-side) ─────────────────────────────────────────
-HISTORY_MAX = 60  # 5 minutes at 5-second intervals
-history_points: deque = deque(maxlen=HISTORY_MAX)  # each: {"time": iso, "traffic_mb": float, "connections": int}
-
+# لیست پروتکل‌های مجاز (trojan-ws حذف شد)
 PROTOCOLS = ("vless-ws", "xhttp-packet-up", "xhttp-stream-up", "xhttp-stream-one")
 DEFAULT_PROTOCOL = "vless-ws"
 
+# تنظیمات سرور
 GLOBAL_SETTINGS = {
     "ips": [],
     "port": None,
@@ -81,85 +140,13 @@ GLOBAL_SETTINGS = {
     }
 }
 
-# ── History recording task ────────────────────────────────────────────────────
-async def record_history():
-    """Record current stats every 5 seconds."""
-    while True:
-        try:
-            total_bytes = sum(link.get("used_bytes", 0) for link in LINKS.values())
-            traffic_mb = total_bytes / (1024 ** 2)
-            conn_count = len(connections)
-            now = datetime.now().isoformat()
-            history_points.append({
-                "time": now,
-                "traffic_mb": traffic_mb,
-                "connections": conn_count
-            })
-            while len(history_points) > HISTORY_MAX:
-                history_points.popleft()
-            if len(history_points) % 6 == 0:  # every 30 seconds
-                asyncio.create_task(save_state())
-        except Exception as e:
-            logger.error(f"History recording error: {e}")
-        await asyncio.sleep(5)
-
-# ── State load/save with history ─────────────────────────────────────────────
-async def load_state():
-    global LINKS, AUTH, SUBS, GLOBAL_SETTINGS, RESELLERS, history_points
-    try:
-        DATA_DIR.mkdir(parents=True, exist_ok=True)
-        if DATA_FILE.exists():
-            async with aiofiles.open(DATA_FILE, "r", encoding="utf-8") as f:
-                data = json.loads(await f.read())
-            for uid, link in data.get("links", {}).items():
-                if "protocol" in link and "protocols" not in link:
-                    link["protocols"] = [link.pop("protocol")]
-            LINKS.update(data.get("links", {}))
-            SUBS.update(data.get("subs", {}))
-            RESELLERS.update(data.get("resellers", {}))
-            if "global_settings" in data:
-                GLOBAL_SETTINGS.update(data["global_settings"])
-            
-            # ---------- FIX: اولویت با متغیر محیطی ADMIN_PASSWORD ----------
-            env_password = os.environ.get("ADMIN_PASSWORD")
-            if env_password:
-                # اگر متغیر محیطی تنظیم شده باشد، از آن استفاده کن و هش فایل را نادیده بگیر
-                AUTH["password_hash"] = hash_password(env_password)
-                logger.info("Using ADMIN_PASSWORD from environment (saved hash ignored).")
-            elif "password_hash" in data:
-                # در غیر این صورت از هش ذخیره شده در فایل استفاده کن
-                AUTH["password_hash"] = data["password_hash"]
-                logger.info("Using password hash from saved state.")
-            else:
-                logger.warning("No password hash found in state, using default.")
-            # ----------------------------------------------------------------
-            
-            hist = data.get("history", [])
-            for h in hist:
-                if isinstance(h, dict) and "time" in h:
-                    history_points.append(h)
-            logger.info(f"Loaded state from {DATA_FILE}: {len(LINKS)} links, {len(history_points)} history points")
-        else:
-            logger.info("No existing state file found, starting fresh")
-    except Exception as e:
-        logger.error(f"Error loading state: {e}")
-
-async def save_state():
-    try:
-        data = {
-            "links": dict(LINKS),
-            "subs": dict(SUBS),
-            "resellers": dict(RESELLERS),
-            "global_settings": dict(GLOBAL_SETTINGS),
-            "password_hash": AUTH["password_hash"],
-            "history": list(history_points)
-        }
-        DATA_DIR.mkdir(parents=True, exist_ok=True)
-        async with aiofiles.open(DATA_FILE, "w", encoding="utf-8") as f:
-            await f.write(json.dumps(data, indent=2, ensure_ascii=False))
-        logger.debug("State saved successfully")
-    except Exception as e:
-        logger.error(f"Error saving state: {e}")
+def log_activity(kind: str, message: str, level: str = "info"):
+    activity_logs.append({
+        "kind": kind,
+        "level": level,
+        "message": message,
+        "time": datetime.now().isoformat(),
+    })
 
 # ── Auth ──────────────────────────────────────────────────────────────────────
 SESSION_COOKIE = "cbee_session"
@@ -168,7 +155,6 @@ SESSION_TTL = 60 * 60 * 24 * 7
 def hash_password(pw: str) -> str:
     return hashlib.sha256(f"{pw}{CONFIG['secret']}".encode()).hexdigest()
 
-# مقدار اولیه: اگر ADMIN_PASSWORD در محیط باشد از آن استفاده می‌شود، در غیر این صورت "admin"
 AUTH = {"password_hash": hash_password(os.environ.get("ADMIN_PASSWORD", "admin"))}
 SESSIONS: dict = {}
 SESSIONS_LOCK = asyncio.Lock()
@@ -219,7 +205,8 @@ async def startup():
     timeout = httpx.Timeout(30.0, connect=10.0)
     http_client = httpx.AsyncClient(limits=limits, timeout=timeout, follow_redirects=True)
     await load_state()
-    asyncio.create_task(record_history())
+    # Start background traffic recorder
+    asyncio.create_task(background_traffic_recorder())
     log_activity("system", "Server started", "ok")
     logger.info(f"CBeeNet Gateway started on port {CONFIG['port']}")
 
@@ -270,6 +257,7 @@ def format_link_remark(label: str, protocol: str) -> str:
     result = result.replace("{prefix}", prefix)
     result = result.replace("{label}", label)
     
+    # فقط اگر {protocol} در قالب وجود داشت، جایگزین می‌شود
     if "{protocol}" in template:
         default_names = {
             "vless-ws": "VLESS-WS",
@@ -325,6 +313,7 @@ def generate_links(link_data: dict, uuid: str, host: str) -> list[str]:
     for ip in ips:
         for proto in protocols:
             remark = format_link_remark(label, proto)
+            # دیگر هیچ پسوندی اضافه نمی‌شود - فقط قالب کاربر اعمال می‌شود
             links.append(_format_uri(uuid, ip, port, remark, proto, host))
     return links
 
@@ -367,14 +356,6 @@ def client_ip(request: Request) -> str:
     if real_ip: return real_ip.strip()
     return request.client.host if request.client else "unknown"
 
-def log_activity(kind: str, message: str, level: str = "info"):
-    activity_logs.append({
-        "kind": kind,
-        "level": level,
-        "message": message,
-        "time": datetime.now().isoformat(),
-    })
-
 # ── Default link ──────────────────────────────────────────────────────────────
 _default_link_created = False
 async def ensure_default_link():
@@ -410,7 +391,7 @@ async def check_reseller_capacity(reseller_id: str, new_limit_bytes: int):
         if allocated + new_limit_bytes > res.get("total_bytes", 0):
             raise HTTPException(status_code=400, detail="Reseller quota exceeded.")
 
-# ── Endpoints ─────────────────────────────────────────────────────────────────
+# ── Basic endpoints ───────────────────────────────────────────────────────────
 @app.get("/")
 async def root():
     return {"service": "CBeeNet Gateway", "version": "1.0.0", "status": "active", "channel": "https://t.me/CBeeNet"}
@@ -419,11 +400,13 @@ async def root():
 async def health():
     return {"status": "ok", "connections": len(connections), "uptime": uptime()}
 
-# ── History API ──────────────────────────────────────────────────────────────
-@app.get("/api/history")
-async def get_history(_=Depends(require_auth)):
-    """Return the last 60 history points (5 minutes)."""
-    return {"history": list(history_points)}
+# ── Traffic History API ──────────────────────────────────────────────────────
+@app.get("/api/traffic-history")
+async def get_traffic_history(_=Depends(require_auth)):
+    """Return the stored traffic history (timestamp, traffic_mb) for the last 15 minutes."""
+    times = [entry[0] for entry in traffic_history]
+    values = [entry[1] for entry in traffic_history]
+    return {"times": times, "values": values}
 
 # ── Subscriptions ─────────────────────────────────────────────────────────────
 @app.get("/sub/{uuid}")
@@ -674,23 +657,14 @@ async def update_protocol_settings(request: Request, _=Depends(require_auth)):
 # ── Stats ─────────────────────────────────────────────────────────────────────
 @app.get("/stats")
 async def get_stats(_=Depends(require_auth)):
-    async with LINKS_LOCK:
-        total_bytes = sum(link.get("used_bytes", 0) for link in LINKS.values())
-        active_links = sum(1 for l in LINKS.values() if is_link_allowed(l))
-        expired_links = sum(1 for l in LINKS.values() if is_link_expired(l))
+    async with LINKS_LOCK: snap = dict(LINKS)
     return {
-        "active_connections": len(connections),
-        "total_traffic_mb": round(total_bytes / (1024 ** 2), 2),
-        "total_requests": stats["total_requests"],
-        "total_errors": stats["total_errors"],
-        "uptime": uptime(),
-        "timestamp": datetime.now().isoformat(),
-        "hourly": dict(hourly_traffic),
-        "recent_errors": list(error_logs)[-10:],
-        "links_count": len(LINKS),
-        "active_links": active_links,
-        "expired_links": expired_links,
-        "subs_count": len(SUBS),
+        "active_connections": len(connections), "total_traffic_mb": round(stats["total_bytes"] / (1024 ** 2), 2),
+        "total_requests": stats["total_requests"], "total_errors": stats["total_errors"],
+        "uptime": uptime(), "timestamp": datetime.now().isoformat(),
+        "hourly": dict(hourly_traffic), "recent_errors": list(error_logs)[-10:],
+        "links_count": len(snap), "active_links": sum(1 for l in snap.values() if is_link_allowed(l)),
+        "expired_links": sum(1 for l in snap.values() if is_link_expired(l)), "subs_count": len(SUBS),
         "resellers_count": len(RESELLERS),
     }
 
