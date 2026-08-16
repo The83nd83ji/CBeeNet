@@ -86,7 +86,6 @@ async def record_history():
     """Record current stats every 5 seconds."""
     while True:
         try:
-            # Compute total traffic from all links
             total_bytes = sum(link.get("used_bytes", 0) for link in LINKS.values())
             traffic_mb = total_bytes / (1024 ** 2)
             conn_count = len(connections)
@@ -96,10 +95,8 @@ async def record_history():
                 "traffic_mb": traffic_mb,
                 "connections": conn_count
             })
-            # Keep only last 60 points
             while len(history_points) > HISTORY_MAX:
                 history_points.popleft()
-            # Save periodically (every 30 seconds)
             if len(history_points) % 6 == 0:  # every 30 seconds
                 asyncio.create_task(save_state())
         except Exception as e:
@@ -122,9 +119,13 @@ async def load_state():
             RESELLERS.update(data.get("resellers", {}))
             if "global_settings" in data:
                 GLOBAL_SETTINGS.update(data["global_settings"])
+            # ---- FIX: اگر متغیر محیطی ADMIN_PASSWORD تنظیم شده باشد، هش ذخیره شده را نادیده می‌گیریم ----
             if "password_hash" in data:
-                AUTH["password_hash"] = data["password_hash"]
-            # Load history
+                if "ADMIN_PASSWORD" not in os.environ:
+                    AUTH["password_hash"] = data["password_hash"]
+                else:
+                    logger.info("ADMIN_PASSWORD env is set, using env hash instead of saved password hash.")
+            # ---------------------------------------------------------------------
             hist = data.get("history", [])
             for h in hist:
                 if isinstance(h, dict) and "time" in h:
@@ -209,7 +210,6 @@ async def startup():
     timeout = httpx.Timeout(30.0, connect=10.0)
     http_client = httpx.AsyncClient(limits=limits, timeout=timeout, follow_redirects=True)
     await load_state()
-    # Start history recording
     asyncio.create_task(record_history())
     log_activity("system", "Server started", "ok")
     logger.info(f"CBeeNet Gateway started on port {CONFIG['port']}")
