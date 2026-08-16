@@ -2261,8 +2261,8 @@ function buildChart(type) {
   if (stepSize === 0) stepSize = 1;
 
   // Gradient fill (soft blue to transparent) with lower opacity for soft shadow
-  const grad = ctx.createLinearGradient(0, 0, 0, 50);
-  grad.addColorStop(0, hexToRgba(accent, 0.20));
+  const grad = ctx.createLinearGradient(0, 0, 0, 80);
+  grad.addColorStop(0, hexToRgba(accent, 0.30));
   grad.addColorStop(1, hexToRgba(accent, 0.01));
 
   // Glow dataset (thick semi-transparent line behind main)
