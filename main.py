@@ -31,11 +31,15 @@ IRAN_TZ = ZoneInfo("Asia/Tehran")
 
 app = FastAPI(title="CBeeNet Gateway", docs_url=None, redoc_url=None)
 
+# ===== کلید ثابت (اگر در محیط تنظیم نشده باشد) =====
+FALLBACK_SECRET = "a_fixed_32_character_secret_key_1234567890"  # حداقل ۳۲ کاراکتر
 CONFIG = {
     "port": int(os.environ.get("PORT", 8000)),
-    "secret": os.environ.get("SECRET_KEY", secrets.token_urlsafe(32)),
+    "secret": os.environ.get("SECRET_KEY", FALLBACK_SECRET),
     "host": os.environ.get("RAILWAY_PUBLIC_DOMAIN", "localhost"),
 }
+if CONFIG["secret"] == FALLBACK_SECRET:
+    logger.warning("⚠️ SECRET_KEY environment variable not set! Using a fixed fallback key. Please set SECRET_KEY for better security.")
 
 app.add_middleware(
     CORSMiddleware,
@@ -131,16 +135,14 @@ async def update_history():
     global PREV_TRAFFIC, PREV_TIME
     now = time.time()
     async with HISTORY_LOCK:
-        # current values
         traffic_mb = stats["total_bytes"] / (1024 ** 2)
         conn_count = len(connections)
         
-        # compute load as MB/s over last interval
         if PREV_TIME > 0 and now > PREV_TIME:
             delta_time = now - PREV_TIME
             delta_traffic = traffic_mb - PREV_TRAFFIC
             load = (delta_traffic / delta_time) if delta_time > 0 else 0
-            load = max(0, min(100, load * 2))  # scale to 0-100 roughly
+            load = max(0, min(100, load * 2))
         else:
             load = 0
         
@@ -226,7 +228,6 @@ async def startup():
     timeout = httpx.Timeout(30.0, connect=10.0)
     http_client = httpx.AsyncClient(limits=limits, timeout=timeout, follow_redirects=True)
     await load_state()
-    # Start history updater
     asyncio.create_task(history_updater())
     log_activity("system", "Server started", "ok")
     logger.info(f"CBeeNet Gateway started on port {CONFIG['port']}")
