@@ -2293,12 +2293,12 @@ function buildChart(type) {
       ctx.clip();
 
       // Draw fine vertical and horizontal grid lines
-      const gridLinesCount = 30;
+      const gridLinesCount = 35;
       const yMin = yScale.min;
       const yMax = yScale.max;
       const stepY = (yMax - yMin) / gridLinesCount;
       ctx.strokeStyle = hexToRgba(accent, 0.20);
-      ctx.lineWidth = 1.2;
+      ctx.lineWidth = 1;
       ctx.setLineDash([]);
 
       // Horizontal lines
@@ -2660,12 +2660,12 @@ function initSecondaryCharts(){
       ctx.closePath();
       ctx.clip();
 
-      const gridLinesCount = 20;
+      const gridLinesCount = 25;
       const yMin = yScale.min;
       const yMax = yScale.max;
       const stepY = (yMax - yMin) / gridLinesCount;
       ctx.strokeStyle = hexToRgba(accent, 0.20);
-      ctx.lineWidth = 1.2;
+      ctx.lineWidth = 1;
       ctx.setLineDash([]);
 
       for (let i = 0; i <= gridLinesCount; i++) {
