@@ -21,6 +21,7 @@ body {
   padding: 20px;
   position: relative;
 }
+/* Fine Premium Grid Background */
 .bg-grid {
   position: fixed;
   inset: 0;
@@ -743,7 +744,6 @@ DASHBOARD_HTML = r"""<!DOCTYPE html>
 <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.19.0/dist/tabler-icons.min.css">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-zoom@2.0.1/dist/chartjs-plugin-zoom.min.js"></script>
 <style>
 /* ===== RESET & VARIABLES ===== */
 *{margin:0;padding:0;box-sizing:border-box}
@@ -866,60 +866,31 @@ a{color:inherit;text-decoration:none}
 .dash-stat-card .sub{font-size:10px;color:var(--t2);margin-top:4px}
 .dash-stat-card .icon{position:absolute;top:16px;left:16px;font-size:22px;color:var(--accent);opacity:.3}
 [dir="ltr"] .dash-stat-card .icon{left:auto;right:16px}
-/* ===== NEON 3D CHART CONTAINERS ===== */
+
+/* ===== SPARKLINE STYLES ===== */
 .chart-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;margin-bottom:22px}
-.chart-premium{background:var(--card);border:1px solid var(--card-b);border-radius:var(--radius);padding:16px 18px 14px;transition:all .2s}
+.chart-premium{background:var(--card);border:1px solid var(--card-b);border-radius:var(--radius);padding:16px 18px 14px;transition:all .2s;position:relative}
 .chart-premium:hover{border-color:var(--card-bh);box-shadow:var(--shadow)}
-.chart-premium .ch-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:4px}
+.chart-premium .ch-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:2px}
 .chart-premium .ch-title{font-size:10.5px;font-weight:600;color:var(--t2);text-transform:uppercase;letter-spacing:.05em;display:flex;align-items:center;gap:5px}
 .chart-premium .ch-title i{font-size:13px;color:var(--accent)}
 .chart-premium .ch-value{font-size:18px;font-weight:800;color:var(--t1);letter-spacing:-.02em}
 .chart-premium .ch-value .unit{font-size:12px;font-weight:500;color:var(--t3);margin-left:3px}
-.chart-premium .ch-main{height:150px;position:relative;margin-top:2px}
-/* 3D Grid Floor with Neon Blue */
-.chart-3d-wrap {
-  position: relative;
-  width: 100%;
-  height: 100%;
-  overflow: hidden;
-  perspective: 800px;
-}
-.chart-3d-wrap canvas {
-  position: relative;
-  z-index: 2;
-  width: 100% !important;
-  height: 100% !important;
-}
-.chart-3d-wrap .chart-grid-floor {
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  width: 100%;
-  height: 60%;
-  z-index: 1;
-  background-image:
-    linear-gradient(#00d4ff 1px, transparent 1px),
-    linear-gradient(90deg, #00d4ff 1px, transparent 1px);
-  background-size: 25% 25%;
-  transform-origin: bottom center;
-  transform: rotateX(65deg) scaleY(0.85);
-  opacity: 0.4;
-  pointer-events: none;
-  transition: opacity 0.3s;
-}
+.chart-premium .ch-main{height:100px;position:relative;margin-top:0;min-height:80px}
+.chart-premium .ch-main canvas{width:100% !important;height:100% !important}
+.chart-premium .chart-extrema{position:absolute;top:4px;right:4px;display:flex;flex-direction:column;gap:2px;font-size:9px;font-weight:600;pointer-events:none;opacity:0.85;font-family:ui-monospace,monospace}
+.chart-premium .chart-extrema .ext-max{color:var(--accent)}
+.chart-premium .chart-extrema .ext-min{color:var(--t3)}
+.chart-premium .chart-extrema .ext-label{font-size:7px;text-transform:uppercase;opacity:0.6}
+
 /* Secondary Charts */
 .dash-charts-second{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:22px}
-.dash-small-chart{background:var(--card);border:1px solid var(--card-b);border-radius:var(--radius);padding:16px 18px}
+.dash-small-chart{background:var(--card);border:1px solid var(--card-b);border-radius:var(--radius);padding:16px 18px;position:relative}
 .dash-small-chart .chart-title{font-size:11px;font-weight:600;color:var(--t2);margin-bottom:10px;display:flex;align-items:center;gap:6px}
 .dash-small-chart .chart-title i{color:var(--accent)}
 .dash-small-chart .chart-wrap{height:120px;position:relative}
-.dash-small-chart .chart-wrap .chart-3d-wrap .chart-grid-floor {
-    height: 55%;
-    transform: rotateX(55deg) scaleY(0.9);
-}
-.dash-footer{border-top:1px solid var(--card-b);margin-top:14px;padding-top:14px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px}
-.df-text{font-size:10px;color:var(--t3)}
-.df-link{font-size:11.5px;color:var(--accent2);display:flex;align-items:center;gap:5px;font-weight:600}
+.dash-small-chart .chart-wrap canvas{width:100% !important;height:100% !important}
+
 /* Tooltip */
 .chart-tooltip{display:none;position:fixed;background:rgba(11,17,29,0.92);backdrop-filter:blur(12px);border:1px solid rgba(255,255,255,0.08);border-radius:10px;padding:10px 14px;box-shadow:0 12px 40px rgba(0,0,0,0.7);z-index:1000;pointer-events:none;min-width:140px}
 .chart-tooltip .tt-time{font-size:9px;color:var(--t3);font-family:ui-monospace,monospace;margin-bottom:4px;border-bottom:1px solid var(--card-b);padding-bottom:4px}
@@ -930,7 +901,7 @@ a{color:inherit;text-decoration:none}
 @media(max-width:1024px){.dash-stats-grid{grid-template-columns:1fr 1fr}.dash-charts-second{grid-template-columns:1fr 1fr}.chart-grid{grid-template-columns:1fr 1fr}}
 @media(max-width:768px){.chart-grid{grid-template-columns:1fr}.dash-charts-second{grid-template-columns:1fr}.dash-stats-grid{grid-template-columns:1fr}.main{padding:62px 12px 50px}.sidebar{transform:translateX(100%)}[dir="ltr"] .sidebar{transform:translateX(-100%)}.sidebar.open{transform:translateX(0)}.sb-close{display:flex}.main{margin-right:0;padding-top:70px}[dir="ltr"] .main{margin-left:0}.mob-top{display:flex}}
 
-/* ===== REST OF STYLES ===== */
+/* ===== REST OF STYLES (unchanged) ===== */
 .btn{font-family:inherit;font-size:12px;font-weight:500;border-radius:9px;padding:8px 14px;cursor:pointer;display:inline-flex;align-items:center;gap:5px;border:none;transition:all .15s;white-space:nowrap}
 .btn i{font-size:13px}
 .btn:disabled{opacity:.4;cursor:not-allowed}
@@ -1502,16 +1473,19 @@ a{color:inherit;text-decoration:none}
     </div>
   </div>
 
-  <!-- 3 Premium Charts with Neon 3D Grid (Fill from 0 to curve) -->
+  <!-- 3 Sparkline Charts (Load, Traffic, Connections) -->
   <div class="chart-grid">
     <div class="chart-premium" id="chart-load-container">
       <div class="ch-header">
         <div class="ch-title"><i class="ti ti-gauge"></i> <span data-lang="load">Load</span></div>
         <div class="ch-value" id="chart-load-val">0<span class="unit">%</span></div>
       </div>
-      <div class="ch-main chart-3d-wrap">
+      <div class="ch-main">
         <canvas id="chart-load"></canvas>
-        <div class="chart-grid-floor"></div>
+        <div class="chart-extrema" id="extrema-load">
+          <span class="ext-max"><span class="ext-label">max</span> —</span>
+          <span class="ext-min"><span class="ext-label">min</span> —</span>
+        </div>
       </div>
     </div>
     <div class="chart-premium" id="chart-traffic-container">
@@ -1519,9 +1493,12 @@ a{color:inherit;text-decoration:none}
         <div class="ch-title"><i class="ti ti-database"></i> <span data-lang="total_traffic">Traffic</span></div>
         <div class="ch-value" id="chart-traffic-val">0<span class="unit">MB</span></div>
       </div>
-      <div class="ch-main chart-3d-wrap">
+      <div class="ch-main">
         <canvas id="chart-traffic"></canvas>
-        <div class="chart-grid-floor"></div>
+        <div class="chart-extrema" id="extrema-traffic">
+          <span class="ext-max"><span class="ext-label">max</span> —</span>
+          <span class="ext-min"><span class="ext-label">min</span> —</span>
+        </div>
       </div>
     </div>
     <div class="chart-premium" id="chart-conns-container">
@@ -1529,9 +1506,12 @@ a{color:inherit;text-decoration:none}
         <div class="ch-title"><i class="ti ti-plug-connected"></i> <span data-lang="connections_live">Connections</span></div>
         <div class="ch-value" id="chart-conns-val">0</div>
       </div>
-      <div class="ch-main chart-3d-wrap">
+      <div class="ch-main">
         <canvas id="chart-conns"></canvas>
-        <div class="chart-grid-floor"></div>
+        <div class="chart-extrema" id="extrema-conns">
+          <span class="ext-max"><span class="ext-label">max</span> —</span>
+          <span class="ext-min"><span class="ext-label">min</span> —</span>
+        </div>
       </div>
     </div>
   </div>
@@ -1544,10 +1524,7 @@ a{color:inherit;text-decoration:none}
     </div>
     <div class="dash-small-chart">
       <div class="chart-title"><i class="ti ti-arrow-up-right"></i> <span data-lang="hourly_average">Hourly Avg</span></div>
-      <div class="chart-wrap chart-3d-wrap">
-        <canvas id="dashHourlyChart"></canvas>
-        <div class="chart-grid-floor"></div>
-      </div>
+      <div class="chart-wrap"><canvas id="dashHourlyChart"></canvas></div>
     </div>
   </div>
 
@@ -2183,13 +2160,37 @@ function formatLinkName(label, protocol, protoSettings){
   return result;
 }
 
-// ========== NEON PREMIUM CHARTS (Fill from 0 to Curve + 3D Grid) ==========
+// ========== CHART DATA ==========
 const CHART_STORAGE_KEY = 'CBeeNet_chartData';
 const PREV_TRAF_KEY = 'CBeeNet_prevTraf';
 let chartData = { load: [], traffic: [], conns: [] };
 let chartTimes = { load: [], traffic: [], conns: [] };
 const MAX_POINTS = 60;
 let chartInstances = { load: null, traffic: null, conns: null };
+let tooltipEl = null;
+
+// ===== CHART HELPERS =====
+function hexToRgba(hex, alpha) {
+  // handle #hex or rgb/rgba
+  let c = hex.trim();
+  if (c.startsWith('#')) {
+    let h = c.slice(1);
+    if (h.length === 3) h = h.split('').map(ch => ch+ch).join('');
+    if (h.length === 6) {
+      const r = parseInt(h.slice(0,2), 16);
+      const g = parseInt(h.slice(2,4), 16);
+      const b = parseInt(h.slice(4,6), 16);
+      return `rgba(${r},${g},${b},${alpha})`;
+    }
+  }
+  // fallback: try to extract rgb from rgba string
+  const m = c.match(/rgba?\((\d+),\s*(\d+),\s*(\d+)(?:,\s*[\d.]+)?\)/);
+  if (m) {
+    const r = parseInt(m[1]), g = parseInt(m[2]), b = parseInt(m[3]);
+    return `rgba(${r},${g},${b},${alpha})`;
+  }
+  return c;
+}
 
 function loadChartDataFromStorage(){
   try {
@@ -2222,6 +2223,7 @@ function loadChartDataFromStorage(){
   }
   return false;
 }
+
 function saveChartDataToStorage(){
   try {
     const times = {};
@@ -2231,51 +2233,24 @@ function saveChartDataToStorage(){
     localStorage.setItem(CHART_STORAGE_KEY, JSON.stringify({ data: chartData, times: times }));
   } catch(e) {}
 }
-function updateGridVisibility(type) {
-  const container = document.querySelector(`#chart-${type}-container .chart-3d-wrap`) ||
-                    document.querySelector(`#pg-overview .dash-small-chart .chart-3d-wrap`);
-  if(!container) return;
-  const floor = container.querySelector('.chart-grid-floor');
-  if(floor) floor.style.opacity = '0.4';
-}
 
-// ---- Helper: Get accent color from CSS ----
 function getAccentColor() {
-  const el = document.documentElement;
-  const color = getComputedStyle(el).getPropertyValue('--accent').trim();
-  return color || '#1677ff';
-}
-function hexToRgb(hex) {
-  const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
-  if (!result) return { r: 22, g: 119, b: 255 };
-  return {
-    r: parseInt(result[1], 16),
-    g: parseInt(result[2], 16),
-    b: parseInt(result[3], 16)
-  };
-}
-function rgba(color, alpha) {
-  const { r, g, b } = hexToRgb(color);
-  return `rgba(${r},${g},${b},${alpha})`;
+  return getComputedStyle(document.documentElement).getPropertyValue('--accent').trim() || '#1677ff';
 }
 
-// ---- External Tooltip ----
-function getTooltip(container) {
-  let tooltip = container.querySelector('.chart-tooltip');
-  if (!tooltip) {
-    tooltip = document.createElement('div');
-    tooltip.className = 'chart-tooltip';
-    tooltip.innerHTML = `<div class="tt-time" id="tt-time">--:--</div><div id="tt-body"></div>`;
-    container.appendChild(tooltip);
-  }
-  return tooltip;
+function getTextColor() {
+  return getComputedStyle(document.documentElement).getPropertyValue('--t3').trim() || '#6e7681';
 }
 
-// ---- Build Chart (with min/max markers, reference lines, external tooltip) ----
+function getGridColor() {
+  return getComputedStyle(document.documentElement).getPropertyValue('--card-b').trim() || '#30363d';
+}
+
+// ===== BUILD CHART (Sparkline style) =====
 function buildChart(type) {
-  const accentColor = getAccentColor();
-  const textColor = getComputedStyle(document.documentElement).getPropertyValue('--t3').trim() || '#6e7681';
-  const gridColor = getComputedStyle(document.documentElement).getPropertyValue('--card-b').trim() || '#30363d';
+  const accent = getAccentColor();
+  const textColor = getTextColor();
+  const gridColor = getGridColor();
   const canvasId = 'chart-' + type;
   const ctx = document.getElementById(canvasId).getContext('2d');
 
@@ -2285,233 +2260,158 @@ function buildChart(type) {
 
   const maxVal = dataArr.length > 0 ? Math.max(...dataArr, 1) : 1;
   let yMax = type === 'load' ? 100 : Math.ceil(maxVal * 1.2);
-  if(type === 'traffic' && yMax < 5) yMax = 5;
-  if(type === 'conns' && yMax < 5) yMax = 5;
-  if(maxVal === 0) yMax = 1;
+  if (type === 'traffic' && yMax < 5) yMax = 5;
+  if (type === 'conns' && yMax < 5) yMax = 5;
+  if (maxVal === 0) yMax = 1;
 
-  // Datasets: Glow + Main
-  const datasets = [
-    // Glow Layer (Behind)
-    {
-      data: dataArr,
-      borderColor: rgba(accentColor, 0.3),
-      borderWidth: 8,
-      pointRadius: 0,
-      pointHoverRadius: 0,
-      fill: false,
-      tension: 0.4,
-    },
-    // Main Curve Layer
-    {
-      data: dataArr,
-      borderColor: accentColor,
-      borderWidth: 2.5,
-      pointRadius: 0,
-      pointHoverRadius: 4,
-      pointHoverBorderWidth: 2,
-      pointHoverBorderColor: '#fff',
-      pointHoverBackgroundColor: accentColor,
-      fill: 'origin',
-      tension: 0.4,
-      backgroundColor: function(context) {
-        const chart = context.chart;
-        const { ctx, chartArea } = chart;
-        if (!chartArea) return rgba(accentColor, 0.1);
-        const grad = ctx.createLinearGradient(0, chartArea.top, 0, chartArea.bottom);
-        grad.addColorStop(0, rgba(accentColor, 0.05));
-        grad.addColorStop(1, rgba(accentColor, 0.6));
-        return grad;
-      },
-      borderJoinStyle: 'round'
-    }
-  ];
-
-  const options = {
-    responsive: true,
-    maintainAspectRatio: false,
-    animation: { duration: 400, easing: 'easeOutQuart' },
-    interaction: { intersect: false, mode: 'index', axis: 'x' },
-    plugins: {
-      legend: { display: false },
-      tooltip: {
-        enabled: false, // external tooltip
-      }
-    },
-    scales: {
-      x: {
-        display: true,
-        grid: { display: false, drawBorder: false },
-        border: { display: false },
-        ticks: {
-          color: textColor,
-          font: { size: 9 },
-          maxTicksLimit: 8,
-          autoSkip: true,
-          maxRotation: 0,
-          minRotation: 0
-        }
-      },
-      y: {
-        display: true,
-        grid: { color: gridColor, drawBorder: false, borderDash: [4, 4] },
-        border: { display: false },
-        ticks: {
-          color: textColor,
-          font: { size: 9 },
-          maxTicksLimit: 5,
-          callback: function(value) {
-            if (type === 'load') return value + '%';
-            if (type === 'traffic') return value.toFixed(0) + 'MB';
-            return value.toFixed(0);
-          }
-        },
-        min: 0,
-        max: yMax
-      }
-    },
-    elements: {
-      line: { borderJoinStyle: 'round' }
-    }
-  };
+  // Gradient fill
+  const grad = ctx.createLinearGradient(0, 0, 0, 150);
+  grad.addColorStop(0, hexToRgba(accent, 0.2));
+  grad.addColorStop(1, hexToRgba(accent, 0));
 
   const chart = new Chart(ctx, {
     type: 'line',
-    data: { labels: labels, datasets: datasets },
-    options: options
+    data: {
+      labels: labels,
+      datasets: [{
+        data: dataArr,
+        borderColor: accent,
+        borderWidth: 2,
+        pointRadius: 0,
+        pointHoverRadius: 4,
+        pointHoverBorderWidth: 2,
+        pointHoverBorderColor: '#fff',
+        pointHoverBackgroundColor: accent,
+        fill: 'origin',
+        tension: 0.4,
+        backgroundColor: grad,
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      animation: { duration: 400, easing: 'easeOutQuart' },
+      interaction: { intersect: false, mode: 'index', axis: 'x' },
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          enabled: true,
+          backgroundColor: 'rgba(11,17,29,0.92)',
+          borderColor: accent,
+          borderWidth: 1,
+          titleColor: '#fff',
+          bodyColor: '#e8edf5',
+          cornerRadius: 8,
+          padding: 10,
+          callbacks: {
+            title: function(context) {
+              return context[0]?.label || '';
+            },
+            label: function(context) {
+              const val = context.parsed.y;
+              const unit = type === 'load' ? '%' : type === 'traffic' ? ' MB' : '';
+              return val.toFixed(1) + unit;
+            }
+          }
+        }
+      },
+      scales: {
+        x: {
+          display: true,
+          grid: { display: false, drawBorder: false },
+          border: { display: false },
+          ticks: {
+            color: textColor,
+            font: { size: 9 },
+            maxTicksLimit: 8,
+            autoSkip: true,
+            maxRotation: 0,
+            minRotation: 0
+          }
+        },
+        y: {
+          display: true,
+          grid: { color: gridColor, drawBorder: false },
+          border: { display: false },
+          ticks: {
+            color: textColor,
+            font: { size: 9 },
+            maxTicksLimit: 5,
+            callback: function(value) {
+              if (type === 'load') return value + '%';
+              if (type === 'traffic') return value.toFixed(0) + 'MB';
+              return value.toFixed(0);
+            }
+          },
+          min: 0,
+          max: yMax
+        }
+      },
+      elements: {
+        line: { borderJoinStyle: 'round' }
+      }
+    }
   });
 
-  // ---- Custom afterDraw: min/max markers, reference lines, external tooltip ----
-  chart.afterDraw = function(instance) {
-    const { ctx, chartArea: { left, top, right, bottom }, data } = instance;
-    const dpr = window.devicePixelRatio || 1;
-    const accent = getAccentColor();
-    const ringColor = getComputedStyle(document.documentElement).getPropertyValue('--card').trim() || '#161b22';
-
-    // ---- Reference lines (only for Load chart) ----
-    if (type === 'load') {
-      const refs = [80, 90];
-      ctx.save();
-      for (const ref of refs) {
-        const yPos = instance.scales.y.getPixelForValue(ref);
-        if (yPos < top || yPos > bottom) continue;
-        ctx.beginPath();
-        ctx.moveTo(left, yPos);
-        ctx.lineTo(right, yPos);
-        ctx.strokeStyle = ref === 80 ? 'rgba(245,158,11,0.6)' : 'rgba(239,68,68,0.6)';
-        ctx.lineWidth = 1.2 * dpr;
-        ctx.setLineDash([5 * dpr, 4 * dpr]);
-        ctx.stroke();
-        ctx.restore();
-        // Label
-        ctx.save();
-        ctx.fillStyle = ref === 80 ? '#fbbf24' : '#f87171';
-        ctx.font = `600 ${10 * dpr}px system-ui, sans-serif`;
-        ctx.textAlign = 'right';
-        ctx.textBaseline = 'bottom';
-        ctx.fillText(ref + '%', right - 6 * dpr, yPos - 3 * dpr);
-        ctx.restore();
-        ctx.save();
-      }
-    }
-
-    // ---- Min / Max markers ----
-    const arr = data.datasets[1].data;
-    if (arr.length >= 2) {
-      let minIdx = 0, maxIdx = 0;
-      for (let i = 1; i < arr.length; i++) {
-        if (arr[i] < arr[minIdx]) minIdx = i;
-        if (arr[i] > arr[maxIdx]) maxIdx = i;
-      }
-      if (minIdx !== maxIdx) {
-        const drawDot = (idx, color) => {
-          const x = instance.scales.x.getPixelForValue(idx);
-          const y = instance.scales.y.getPixelForValue(arr[idx]);
-          if (x < left || x > right || y < top || y > bottom) return;
-          ctx.save();
-          ctx.beginPath();
-          ctx.arc(x, y, 5 * dpr, 0, Math.PI * 2);
-          ctx.fillStyle = color;
-          ctx.fill();
-          ctx.lineWidth = 2 * dpr;
-          ctx.strokeStyle = ringColor;
-          ctx.stroke();
-          ctx.restore();
-        };
-        drawDot(minIdx, '#52c41a');
-        drawDot(maxIdx, '#fa541c');
-      }
-    }
-
-    // ---- External Tooltip ----
-    const tooltip = getTooltip(instance.canvas.closest('.chart-3d-wrap') || instance.canvas.closest('.chart-premium'));
-    const active = instance.getActiveElements();
-    if (active.length && active[0].datasetIndex === 1) {
-      const idx = active[0].index;
-      const val = data.datasets[1].data[idx];
-      const label = data.labels[idx] || '';
-      const time = chartTimes[type]?.[idx] || new Date();
-      const timeStr = time.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
-      const unit = type === 'load' ? '%' : type === 'traffic' ? ' MB' : '';
-      const valueStr = (typeof val === 'number' ? val.toFixed(1) : '0') + unit;
-
-      const tt = tooltip;
-      tt.style.display = 'block';
-      tt.querySelector('.tt-time').textContent = timeStr;
-      const body = tt.querySelector('#tt-body');
-      body.innerHTML = `<div class="tt-row"><span class="tt-dot" style="background:${accentColor}"></span><span class="tt-label">${type === 'load' ? 'Load' : type === 'traffic' ? 'Traffic' : 'Connections'}</span><span class="tt-value">${valueStr}</span></div>`;
-
-      const canvasRect = instance.canvas.getBoundingClientRect();
-      const x = instance.scales.x.getPixelForValue(idx);
-      const y = instance.scales.y.getPixelForValue(val);
-      const px = canvasRect.left + x;
-      const py = canvasRect.top + y;
-      tt.style.left = (px + 12) + 'px';
-      tt.style.top = (py - 10) + 'px';
-    } else {
-      const tt = getTooltip(instance.canvas.closest('.chart-3d-wrap') || instance.canvas.closest('.chart-premium'));
-      tt.style.display = 'none';
-    }
-  };
-
-  chartInstances[type] = chart;
-  updateChartValue(type);
-  updateGridVisibility(type);
   return chart;
+}
+
+function updateExtrema(type) {
+  const data = chartData[type];
+  if (!data || data.length < 2) {
+    document.querySelector(`#extrema-${type} .ext-max`).innerHTML = '<span class="ext-label">max</span> —';
+    document.querySelector(`#extrema-${type} .ext-min`).innerHTML = '<span class="ext-label">min</span> —';
+    return;
+  }
+  const maxVal = Math.max(...data);
+  const minVal = Math.min(...data);
+  const maxEl = document.querySelector(`#extrema-${type} .ext-max`);
+  const minEl = document.querySelector(`#extrema-${type} .ext-min`);
+  const unit = type === 'load' ? '%' : type === 'traffic' ? ' MB' : '';
+  maxEl.innerHTML = `<span class="ext-label">max</span> ${maxVal.toFixed(1)}${unit}`;
+  minEl.innerHTML = `<span class="ext-label">min</span> ${minVal.toFixed(1)}${unit}`;
+}
+
+function initPremiumCharts() {
+  ['load', 'traffic', 'conns'].forEach(type => {
+    chartInstances[type] = buildChart(type);
+    updateExtrema(type);
+    updateChartValue(type);
+  });
 }
 
 function updateChartValue(type) {
   const el = document.getElementById('chart-' + type + '-val');
   if (!el) return;
+  
   if (type === 'traffic') {
     el.innerHTML = totalTrafficDisplay.toFixed(1) + '<span class="unit">MB</span>';
     return;
   }
+  
   const data = chartData[type];
   const last = data.length > 0 ? data[data.length-1] : 0;
   const unit = type === 'load' ? '%' : '';
   el.innerHTML = last.toFixed(1) + (unit ? '<span class="unit">' + unit + '</span>' : '');
 }
 
-function initPremiumCharts() {
-  ['load', 'traffic', 'conns'].forEach(type => {
-    buildChart(type);
-  });
-}
-
 function addDataPoint(type, value, time) {
   const now = time || new Date();
   const cutoff = now.getTime() - 300000;
+  // Trim old data
   let idx = chartTimes[type].findIndex(t => t.getTime() >= cutoff);
-  if(idx > 0) {
+  if (idx > 0) {
     chartData[type] = chartData[type].slice(idx);
     chartTimes[type] = chartTimes[type].slice(idx);
-  } else if(idx === -1) {
+  } else if (idx === -1) {
     chartData[type] = [];
     chartTimes[type] = [];
   }
+  
   chartData[type].push(value);
   chartTimes[type].push(now);
-  if(chartData[type].length > MAX_POINTS) {
+  
+  if (chartData[type].length > MAX_POINTS) {
     chartData[type].shift();
     chartTimes[type].shift();
   }
@@ -2522,16 +2422,15 @@ function addDataPoint(type, value, time) {
   const labels = chartTimes[type].map(d => d ? d.toLocaleTimeString('en-US', {hour:'2-digit', minute:'2-digit'}) : '');
   chart.data.labels = labels;
   chart.data.datasets[0].data = chartData[type];
-  chart.data.datasets[1].data = chartData[type];
   const maxVal = chartData[type].length > 0 ? Math.max(...chartData[type], 1) : 1;
   let yMax = type === 'load' ? 100 : Math.ceil(maxVal * 1.2);
-  if(type === 'traffic' && yMax < 5) yMax = 5;
-  if(type === 'conns' && yMax < 5) yMax = 5;
-  if(maxVal === 0) yMax = 1;
+  if (type === 'traffic' && yMax < 5) yMax = 5;
+  if (type === 'conns' && yMax < 5) yMax = 5;
+  if (maxVal === 0) yMax = 1;
   chart.options.scales.y.max = yMax;
   chart.update('none');
   updateChartValue(type);
-  updateGridVisibility(type);
+  updateExtrema(type);
 }
 
 // ========== fetchStats (Traffic Delta Fix + Persistence + Visibility) ==========
@@ -2561,7 +2460,7 @@ async function fetchStats(){
     const delta = totalTrafficDisplay - prevTraf;
     const pct = Math.min(100, Math.max(0, Math.round((delta / 50) * 100 * 10) / 10));
     
-    if(delta >= 0) {
+    if (delta >= 0) {
       addDataPoint('traffic', delta, now);
     } else {
       addDataPoint('traffic', 0.01, now);
@@ -2577,7 +2476,7 @@ async function fetchStats(){
   } catch(e){ console.error('fetchStats error:', e); }
 }
 
-// ========== Visibility Change Handler (Updates when tab becomes active) ==========
+// ========== Visibility Change Handler ==========
 document.addEventListener('visibilitychange', function() {
   if (!document.hidden) {
     fetchStats();
@@ -2587,35 +2486,35 @@ document.addEventListener('visibilitychange', function() {
 // ========== SECONDARY CHARTS ==========
 let dashProtoChart = null, dashHourlyChart = null;
 function initSecondaryCharts(){
-  const accentColor = getAccentColor();
-  const amberColor = getComputedStyle(document.documentElement).getPropertyValue('--amber-t').trim() || '#fbbf24';
-  const textColor = getComputedStyle(document.documentElement).getPropertyValue('--t3').trim() || '#6e7681';
-  const gridColor = getComputedStyle(document.documentElement).getPropertyValue('--card-b').trim() || '#30363d';
+  const accent = getAccentColor();
+  const textColor = getTextColor();
+  const gridColor = getGridColor();
   
   const ctxProto = document.getElementById('dashProtoChart').getContext('2d');
   dashProtoChart = new Chart(ctxProto, {
     type: 'bar',
-    data: { labels: ['VLESS/WS', 'XHTTP-packet', 'XHTTP-stream', 'XHTTP-ultra'], datasets: [{ data: [0,0,0,0], backgroundColor: [accentColor, 'rgba(251, 191, 36, 0.8)', 'rgba(245, 158, 11, 0.8)', 'rgba(16, 185, 129, 0.8)'], borderColor: [accentColor, amberColor, '#f59e0b', '#10b981'], borderWidth: 2, borderRadius: 6, barPercentage: 0.6 }] },
+    data: { labels: ['VLESS/WS', 'XHTTP-packet', 'XHTTP-stream', 'XHTTP-ultra'], datasets: [{ data: [0,0,0,0], backgroundColor: [accent, 'rgba(251, 191, 36, 0.8)', 'rgba(245, 158, 11, 0.8)', 'rgba(16, 185, 129, 0.8)'], borderColor: [accent, '#fbbf24', '#f59e0b', '#10b981'], borderWidth: 2, borderRadius: 6, barPercentage: 0.6 }] },
     options: {
       responsive: true, maintainAspectRatio: false,
-      plugins: { legend: { display: false }, tooltip: { backgroundColor: 'rgba(11, 17, 29, 0.9)', borderColor: accentColor, borderWidth: 1, titleColor: '#fff', bodyColor: '#fff', cornerRadius: 8, padding: 10, callbacks: { label: function(context){ return context.parsed.y + ' configs'; } } } },
-      scales: { x: { grid: { display: false }, ticks: { color: textColor, font: { size: 9, family: 'Vazirmatn, sans-serif' } } }, y: { grid: { color: gridColor, drawBorder: false, borderDash: [3,3] }, ticks: { color: textColor, font: { size: 9, family: 'Vazirmatn, sans-serif' }, stepSize: 1 } } },
+      plugins: { legend: { display: false }, tooltip: { backgroundColor: 'rgba(11, 17, 29, 0.9)', borderColor: accent, borderWidth: 1, titleColor: '#fff', bodyColor: '#fff', cornerRadius: 8, padding: 10, callbacks: { label: function(context){ return context.parsed.y + ' configs'; } } } },
+      scales: { x: { grid: { display: false }, ticks: { color: textColor, font: { size: 9, family: 'Vazirmatn, sans-serif' } } }, y: { grid: { color: gridColor, drawBorder: false }, ticks: { color: textColor, font: { size: 9, family: 'Vazirmatn, sans-serif' }, stepSize: 1 } } },
       animation: { duration: 400, easing: 'easeOutQuart' }
     }
   });
   const ctxHourly = document.getElementById('dashHourlyChart').getContext('2d');
   dashHourlyChart = new Chart(ctxHourly, {
     type: 'line',
-    data: { labels: ['00', '04', '08', '12', '16', '20'], datasets: [{ data: [0, 0, 0, 0, 0, 0], borderColor: accentColor, backgroundColor: rgba(accentColor, 0.2), borderWidth: 2, pointRadius: 0, pointHoverRadius: 5, pointHoverBorderWidth: 2, pointHoverBorderColor: '#fff', fill: 'origin', tension: 0.3 }] },
+    data: { labels: ['00', '04', '08', '12', '16', '20'], datasets: [{ data: [0, 0, 0, 0, 0, 0], borderColor: accent, backgroundColor: hexToRgba(accent, 0.2), borderWidth: 2, pointRadius: 0, pointHoverRadius: 5, pointHoverBorderWidth: 2, pointHoverBorderColor: '#fff', fill: 'origin', tension: 0.3 }] },
     options: {
       responsive: true, maintainAspectRatio: false,
-      plugins: { legend: { display: false }, tooltip: { backgroundColor: 'rgba(11, 17, 29, 0.9)', borderColor: accentColor, borderWidth: 1, titleColor: '#fff', bodyColor: '#fff', cornerRadius: 8, padding: 10, callbacks: { label: function(context){ return context.parsed.y + ' MB'; } } } },
-      scales: { x: { grid: { display: false }, ticks: { color: textColor, font: { size: 8, family: 'Vazirmatn, sans-serif' } } }, y: { grid: { color: gridColor, drawBorder: false, borderDash: [3,3] }, ticks: { color: textColor, font: { size: 8, family: 'Vazirmatn, sans-serif' }, callback: function(value) { return value + ' MB'; } } } },
+      plugins: { legend: { display: false }, tooltip: { backgroundColor: 'rgba(11, 17, 29, 0.9)', borderColor: accent, borderWidth: 1, titleColor: '#fff', bodyColor: '#fff', cornerRadius: 8, padding: 10, callbacks: { label: function(context){ return context.parsed.y + ' MB'; } } } },
+      scales: { x: { grid: { display: false }, ticks: { color: textColor, font: { size: 8, family: 'Vazirmatn, sans-serif' } } }, y: { grid: { color: gridColor, drawBorder: false }, ticks: { color: textColor, font: { size: 8, family: 'Vazirmatn, sans-serif' }, callback: function(value) { return value + ' MB'; } } } },
       animation: { duration: 400, easing: 'easeOutQuart' }
     }
   });
 }
 function updateSecondaryCharts(statsData, linksData){
+  const accent = getAccentColor();
   if(dashProtoChart && linksData){
     const protoCounts = { 'vless-ws': 0, 'xhttp-packet-up': 0, 'xhttp-stream-up': 0, 'xhttp-stream-one': 0 };
     linksData.forEach(l => {
@@ -2657,7 +2556,6 @@ async function loadLinks(){
     const empty = document.getElementById('links-empty');
     if(!links.length){ grid.innerHTML = ''; empty.style.display = 'block'; return; }
     empty.style.display = 'none';
-    // load protocol settings for formatting
     const protoSettings = await authF('/api/settings/protocol').then(r => r.json()).catch(() => ({}));
     grid.innerHTML = links.map(l => {
       const lim = l.limit_bytes === 0 ? '∞' : fmtB(l.limit_bytes);
