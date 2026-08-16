@@ -2228,35 +2228,27 @@ function getGridColor() {
   return getComputedStyle(document.documentElement).getPropertyValue('--card-b').trim() || '#30363d';
 }
 
-// ===== BUILD AREA CHART (Neon Glow, Themed Grid, Full Fill, Fixed Scales) =====
 function buildChart(type) {
   const accent = getAccentColor();
   const textColor = getTextColor();
   const canvasId = 'chart-' + type;
-  const ctx = document.getElementById(canvasId).getContext('2d');
+  const canvas = document.getElementById(canvasId);
+  const ctx = canvas.getContext('2d');
 
   const dataArr = chartData[type] || [];
   const timeArr = chartTimes[type] || [];
 
-  // Fix duplicate labels on X-axis by hiding duplicates within the same minute
   const labels = timeArr.map((d, i) => {
     if (!d) return '';
-    if (i > 0 && timeArr[i-1] && Math.abs(d.getTime() - timeArr[i-1].getTime()) < 60000) {
-      return ''; // skip label if within same minute
-    }
+    if (i > 0 && timeArr[i-1] && Math.abs(d.getTime() - timeArr[i-1].getTime()) < 60000) return '';
     return d.toLocaleTimeString('en-US', {hour:'2-digit', minute:'2-digit', hour12:false});
   });
 
   const maxVal = dataArr.length > 0 ? Math.max(...dataArr, 1) : 1;
   
-  // Function to round Y max to a beautiful number (avoid decimals like 33.333)
   const roundToNice = (num) => {
-    if (num <= 10) return 10;
-    if (num <= 20) return 20;
-    if (num <= 50) return 50;
-    if (num <= 100) return 100;
-    if (num <= 200) return 200;
-    if (num <= 500) return 500;
+    if (num <= 10) return 10; if (num <= 20) return 20; if (num <= 50) return 50;
+    if (num <= 100) return 100; if (num <= 200) return 200; if (num <= 500) return 500;
     return Math.ceil(num / 100) * 100;
   };
 
@@ -2268,16 +2260,73 @@ function buildChart(type) {
   let stepSize = Math.round(yMax / 5);
   if (stepSize === 0) stepSize = 1;
 
-  // Gradient fill (very faint, to let grid show through)
-  const grad = ctx.createLinearGradient(0, 0, 0, 150);
-  grad.addColorStop(0, hexToRgba(accent, 0.10));
-  grad.addColorStop(1, hexToRgba(accent, 0.01));
+  const gridPlugin = {
+    id: 'customGridAndFill',
+    beforeDraw: function(chart) {
+      const ctx = chart.ctx;
+      const chartArea = chart.chartArea;
+      const { top, bottom, left, right } = chartArea;
+      const yScale = chart.scales.y;
+      const xScale = chart.scales.x;
 
-  // Glow layer (neon effect)
+      ctx.save();
+      
+      const yTicks = yScale.ticks;
+      for (let i = 0; i < yTicks.length; i++) {
+        const y = yScale.getPixelForValue(yTicks[i].value);
+        ctx.beginPath();
+        ctx.moveTo(left, y);
+        ctx.lineTo(right, y);
+        ctx.strokeStyle = 'rgba(100, 180, 255, 0.15)';
+        ctx.lineWidth = 0.8;
+        ctx.stroke();
+      }
+
+      const xTicks = xScale.ticks;
+      for (let i = 0; i < xTicks.length; i++) {
+        const x = xScale.getPixelForValue(i);
+        ctx.beginPath();
+        ctx.moveTo(x, top);
+        ctx.lineTo(x, bottom);
+        ctx.strokeStyle = 'rgba(100, 180, 255, 0.12)';
+        ctx.lineWidth = 0.8;
+        ctx.stroke();
+      }
+
+      ctx.restore();
+
+      const dataset = chart.data.datasets[1];
+      const meta = chart.getDatasetMeta(1);
+      if (!meta || !meta.data || meta.data.length === 0) return;
+
+      const points = meta.data;
+      const yZero = yScale.getPixelForValue(0);
+
+      ctx.save();
+      ctx.beginPath();
+      ctx.moveTo(points[0].x, yZero);
+
+      for (let i = 0; i < points.length; i++) {
+        ctx.lineTo(points[i].x, points[i].y);
+      }
+
+      ctx.lineTo(points[points.length - 1].x, yZero);
+      ctx.closePath();
+
+      const grad = ctx.createLinearGradient(0, top, 0, bottom);
+      grad.addColorStop(0, hexToRgba(accent, 0.15));
+      grad.addColorStop(1, hexToRgba(accent, 0.0));
+      ctx.fillStyle = grad;
+      ctx.fill();
+      
+      ctx.restore();
+    }
+  };
+
   const glowDataset = {
     data: dataArr,
-    borderColor: hexToRgba(accent, 0.30),
-    borderWidth: 8,
+    borderColor: hexToRgba(accent, 0.25),
+    borderWidth: 6,
     pointRadius: 0,
     fill: false,
     tension: 0.4,
@@ -2293,9 +2342,8 @@ function buildChart(type) {
     pointHoverBorderWidth: 2,
     pointHoverBorderColor: '#fff',
     pointHoverBackgroundColor: accent,
-    fill: 'origin',
+    fill: false,
     tension: 0.4,
-    backgroundColor: grad,
     borderJoinStyle: 'round'
   };
 
@@ -2322,9 +2370,7 @@ function buildChart(type) {
           cornerRadius: 8,
           padding: 10,
           callbacks: {
-            title: function(context) {
-              return context[0]?.label || '';
-            },
+            title: function(context) { return context[0]?.label || ''; },
             label: function(context) {
               const val = context.parsed.y;
               const unit = type === 'load' ? '%' : type === 'traffic' ? ' MB' : '';
@@ -2336,14 +2382,7 @@ function buildChart(type) {
       scales: {
         x: {
           display: true,
-          grid: {
-            display: true,
-            color: 'rgba(255,255,255, 0.15)', // Faint white grid like reference image
-            drawBorder: false,
-            tickLength: 0,
-            drawTicks: false,
-            lineWidth: 0.8
-          },
+          grid: { display: false },
           ticks: {
             color: textColor,
             font: { size: 9 },
@@ -2355,19 +2394,12 @@ function buildChart(type) {
         },
         y: {
           display: true,
-          grid: {
-            display: true,
-            color: 'rgba(255,255,255, 0.15)', // Faint white grid
-            drawBorder: false,
-            tickLength: 0,
-            drawTicks: false,
-            lineWidth: 0.8
-          },
+          grid: { display: false },
           ticks: {
             color: textColor,
             font: { size: 9 },
             maxTicksLimit: 6,
-            stepSize: stepSize, // Clean, non-decimal steps
+            stepSize: stepSize,
             callback: function(value) {
               if (type === 'load') return value + '%';
               if (type === 'traffic') return value.toFixed(0) + 'MB';
@@ -2375,30 +2407,15 @@ function buildChart(type) {
             }
           },
           min: 0,
-          max: yMax
+          max: yMax,
+          border: { display: false }
         }
       },
       elements: {
         line: { borderJoinStyle: 'round' }
-      },
-      // Click to toggle tooltip (single click on point, click away to close)
-      onClick: function(e) {
-        const chart = this;
-        const elements = chart.getElementsAtEventForMode(e, 'index', { intersect: true });
-        if (elements.length > 0) {
-          if (chart.tooltip._active && chart.tooltip._active.length > 0) {
-            chart.tooltip.setActiveElements([], {x:0,y:0});
-            chart.draw();
-          } else {
-            chart.tooltip.setActiveElements(elements, e);
-            chart.draw();
-          }
-        } else {
-          chart.tooltip.setActiveElements([], {x:0,y:0});
-          chart.draw();
-        }
       }
-    }
+    },
+    plugins: [gridPlugin]
   });
 
   return chart;
