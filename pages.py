@@ -2266,7 +2266,7 @@ function buildChart(type) {
   grad.addColorStop(0, hexToRgba(accent, 0.20));
   grad.addColorStop(1, hexToRgba(accent, 0.01));
 
-  // Custom Plugin: Clip grid under the curve
+  // Custom Plugin: Clip grid under the curve (BOLDER and BIGGER)
   const underCurveGridPlugin = {
     id: 'underCurveGrid',
     beforeDraw: function(chart) {
@@ -2281,7 +2281,6 @@ function buildChart(type) {
       const points = meta.data;
       const yZero = yScale.getPixelForValue(0);
 
-      // 1. Create path and clip to the area under the curve
       ctx.save();
       ctx.beginPath();
       ctx.moveTo(points[0].x, yZero);
@@ -2292,13 +2291,12 @@ function buildChart(type) {
       ctx.closePath();
       ctx.clip();
 
-      // 2. Draw fine horizontal and vertical dashed grid inside the clipped area
       const yMin = yScale.min;
       const yMax = yScale.max;
       const stepY = (yMax - yMin) / 20;
-      ctx.strokeStyle = hexToRgba(accent, 0.15);
-      ctx.lineWidth = 1;
-      ctx.setLineDash([2, 3]);
+      ctx.strokeStyle = hexToRgba(accent, 0.35); // پررنگ‌تر
+      ctx.lineWidth = 2; // ضخیم‌تر
+      ctx.setLineDash([3, 4]);
 
       for (let i = 0; i <= 20; i++) {
         const val = yMin + i * stepY;
@@ -2380,7 +2378,12 @@ function buildChart(type) {
             title: function(context) { return context[0]?.label || ''; },
             label: function(context) {
               const val = context.parsed.y;
-              const unit = type === 'load' ? '%' : type === 'traffic' ? ' MB' : '';
+              let unit = '';
+              if (type === 'load') unit = '%';
+              else if (type === 'traffic') {
+                if (val >= 1000) return (val/1024).toFixed(1) + ' GB';
+                return val.toFixed(1) + ' MB';
+              }
               return val.toFixed(1) + unit;
             }
           }
@@ -2389,7 +2392,7 @@ function buildChart(type) {
       scales: {
         x: {
           display: true,
-          grid: { display: false }, // Disabled default grid
+          grid: { display: false },
           ticks: {
             color: textColor,
             font: { size: 9 },
@@ -2401,7 +2404,7 @@ function buildChart(type) {
         },
         y: {
           display: true,
-          grid: { display: false }, // Disabled default grid
+          grid: { display: false },
           ticks: {
             color: textColor,
             font: { size: 9 },
@@ -2409,7 +2412,10 @@ function buildChart(type) {
             stepSize: stepSize,
             callback: function(value) {
               if (type === 'load') return value + '%';
-              if (type === 'traffic') return value.toFixed(0) + 'MB';
+              if (type === 'traffic') {
+                if (value >= 1000) return (value/1024).toFixed(1) + 'GB';
+                return value.toFixed(0) + 'MB';
+              }
               return value.toFixed(0);
             }
           },
@@ -2422,7 +2428,7 @@ function buildChart(type) {
         line: { borderJoinStyle: 'round' }
       }
     },
-    plugins: [underCurveGridPlugin] // Add the custom plugin
+    plugins: [underCurveGridPlugin]
   });
 
   return chart;
@@ -2440,7 +2446,16 @@ function updateChartValue(type) {
   if (!el) return;
   
   if (type === 'traffic') {
-    el.innerHTML = totalTrafficDisplay.toFixed(1) + '<span class="unit">MB</span>';
+    const val = totalTrafficDisplay;
+    let displayVal, unit;
+    if (val >= 1000) {
+      displayVal = (val / 1024).toFixed(1);
+      unit = 'GB';
+    } else {
+      displayVal = val.toFixed(1);
+      unit = 'MB';
+    }
+    el.innerHTML = displayVal + '<span class="unit">' + unit + '</span>';
     return;
   }
   
@@ -2547,21 +2562,23 @@ async function fetchStats(){
 
     const now = new Date();
     const delta = totalTrafficDisplay - prevTraf;
-    
     const lastTime = localStorage.getItem(CHART_LAST_TIME_KEY);
-    let gapSeconds = 0;
-    if (lastTime) {
-      gapSeconds = (Date.now() - parseInt(lastTime)) / 1000;
-    }
-    
+    let gapSeconds = lastTime ? (Date.now() - parseInt(lastTime)) / 1000 : 5;
+    gapSeconds = Math.max(1, gapSeconds);
+
+    // درج نقاط گم‌شده با interpolation خطی
     if (delta > 0 && gapSeconds > 5) {
-      const pointsToAdd = Math.min(Math.floor(gapSeconds / 5), 20);
+      const pointsToAdd = Math.min(Math.floor(gapSeconds / 5), 60);
       if (pointsToAdd > 1) {
         const perPoint = delta / pointsToAdd;
         for (let i = 1; i <= pointsToAdd; i++) {
           const t = new Date(now.getTime() - (pointsToAdd - i) * 5000);
-          const val = prevTraf + perPoint * i;
-          addDataPoint('traffic', Math.max(0, val - prevTraf), t);
+          addDataPoint('traffic', Math.max(0, perPoint), t);
+          // برای لود نیز نرخ لحظه‌ای را در هر نقطه محاسبه می‌کنیم
+          const ratePerPoint = perPoint / 5; // MB/s
+          const loadPct = Math.min(100, Math.max(0, (ratePerPoint / 60) * 10));
+          addDataPoint('load', loadPct, t);
+          addDataPoint('conns', activeCount, t);
         }
         prevTraf = totalTrafficDisplay;
         localStorage.setItem(PREV_TRAF_KEY, String(prevTraf));
@@ -2569,18 +2586,20 @@ async function fetchStats(){
         return;
       }
     }
-    
+
+    // نقطه جدید برای بازه فعلی
     if (delta >= 0) {
       addDataPoint('traffic', delta, now);
     } else {
       addDataPoint('traffic', 0.01, now);
     }
-    
     prevTraf = totalTrafficDisplay;
     localStorage.setItem(PREV_TRAF_KEY, String(prevTraf));
-    
-    const pct = Math.min(100, Math.max(0, Math.round((delta / 50) * 100 * 10) / 10));
-    addDataPoint('load', pct, now);
+
+    // محاسبه لود بر اساس نرخ مصرف در ثانیه
+    const rate = delta / gapSeconds; // MB/s
+    const loadPct = Math.min(100, Math.max(0, (rate / 60) * 10)); // 60 MB/s = 10%
+    addDataPoint('load', loadPct, now);
     addDataPoint('conns', activeCount, now);
     
     updateSecondaryCharts(d, allLinksList);
@@ -2614,7 +2633,7 @@ function initSecondaryCharts(){
     }
   });
 
-  // Hourly chart with under-curve grid
+  // Hourly chart with under-curve grid (BOLDER and BIGGER)
   const ctxHourly = document.getElementById('dashHourlyChart').getContext('2d');
   const grad = ctxHourly.createLinearGradient(0, 0, 0, 120);
   grad.addColorStop(0, hexToRgba(accent, 0.20));
@@ -2647,9 +2666,9 @@ function initSecondaryCharts(){
       const yMin = yScale.min;
       const yMax = yScale.max;
       const stepY = (yMax - yMin) / 10;
-      ctx.strokeStyle = hexToRgba(accent, 0.15);
-      ctx.lineWidth = 1;
-      ctx.setLineDash([2, 3]);
+      ctx.strokeStyle = hexToRgba(accent, 0.35);
+      ctx.lineWidth = 2;
+      ctx.setLineDash([3, 4]);
 
       for (let i = 0; i <= 10; i++) {
         const val = yMin + i * stepY;
