@@ -1,4 +1,5 @@
 # pages.py - CBee Gateway v1.0.0
+
 import json
 
 LOGIN_HTML = r"""<!DOCTYPE html>
@@ -21,7 +22,6 @@ body {
   padding: 20px;
   position: relative;
 }
-/* Fine Premium Grid Background */
 .bg-grid {
   position: fixed;
   inset: 0;
@@ -986,6 +986,8 @@ a{color:inherit;text-decoration:none}
 .proto-btn-v .proto-icon{width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0}
 .proto-btn-v .proto-icon.vless{background:rgba(22,119,255,0.2);color:#1677ff}
 .proto-btn-v .proto-icon.xhttp{background:rgba(245,158,11,0.2);color:#f59e0b}
+.proto-btn-v .proto-icon.trojan{background:rgba(239,68,68,0.2);color:#ef4444}
+.proto-btn-v .proto-icon.vmess{background:rgba(124,58,237,0.2);color:#7c3aed}
 .proto-btn-v .proto-info{flex:1;min-width:0}
 .proto-btn-v .proto-name{font-weight:700;font-size:12.5px;color:var(--t1)}
 .proto-btn-v .proto-desc{font-size:10px;color:var(--t3);margin-top:1px}
@@ -1238,6 +1240,8 @@ a{color:inherit;text-decoration:none}
 .pc-ws{background:var(--accent-d);color:var(--accent2)}
 .pc-xhttp{background:var(--purple-bg);color:var(--purple)}
 .pc-ultra{background:var(--green-bg);color:var(--green-t)}
+.pc-trojan{background:rgba(239,68,68,0.15);color:#ef4444}
+.pc-vmess{background:rgba(124,58,237,0.15);color:#7c3aed}
 .cfg-sub-tag{font-size:9.5px;color:var(--t3);display:flex;align-items:center;gap:4px;white-space:nowrap}
 .cfg-sub-tag i{color:var(--purple);font-size:11px}
 .tog{width:19px;height:30px;border-radius:19px;background:rgba(100,116,139,0.25);position:relative;cursor:pointer;transition:.2s;flex-shrink:0;border:none}
@@ -1598,6 +1602,22 @@ a{color:inherit;text-decoration:none}
             </span>
             <span class="proto-badge">Ultra</span>
           </button>
+          <button class="proto-btn-v" data-proto="trojan-ws" onclick="toggleProtoBtnV(this)">
+            <span class="proto-icon trojan"><i class="ti ti-shield-lock"></i></span>
+            <span class="proto-info">
+              <span class="proto-name">Trojan / WS</span>
+              <span class="proto-desc">HTTPUpgrade · TLS</span>
+            </span>
+            <span class="proto-badge">Secure</span>
+          </button>
+          <button class="proto-btn-v" data-proto="vmess-ws" onclick="toggleProtoBtnV(this)">
+            <span class="proto-icon vmess"><i class="ti ti-key"></i></span>
+            <span class="proto-info">
+              <span class="proto-name">VMess / WS</span>
+              <span class="proto-desc">AES-128-CFB · TLS</span>
+            </span>
+            <span class="proto-badge">Standard</span>
+          </button>
         </div>
         <div style="margin-top:12px;display:flex;align-items:center;gap:10px;padding:8px 12px;background:var(--accent-d);border-radius:10px;border:1px solid var(--card-b)">
           <span style="font-size:12px;font-weight:700;color:var(--t2)"><i class="ti ti-layers-intersect"></i> <span data-lang="bulk_count">Bulk Count</span></span>
@@ -1708,7 +1728,7 @@ a{color:inherit;text-decoration:none}
     <div class="card"><div class="card-title"><i class="ti ti-lock"></i> <span data-lang="encryption">Encryption</span></div>
       <div class="sr"><span class="sr-k"><i class="ti ti-certificate"></i> TLS/HTTPS</span><span class="sr-v" style="color:var(--green-t)">● <span data-lang="active">Active</span> (443)</span></div>
       <div class="sr"><span class="sr-k"><i class="ti ti-fingerprint"></i> Fingerprint</span><span class="sr-v">Chrome Spoof</span></div>
-      <div class="sr"><span class="sr-k"><i class="ti ti-network"></i> <span data-lang="protocols">Protocols</span></span><span class="sr-v">VLESS/WS + XHTTP Ultra</span></div>
+      <div class="sr"><span class="sr-k"><i class="ti ti-network"></i> <span data-lang="protocols">Protocols</span></span><span class="sr-v">VLESS/WS + XHTTP Ultra + Trojan + VMess</span></div>
       <div class="sr"><span class="sr-k"><i class="ti ti-key"></i> <span data-lang="hash">Hash</span></span><span class="sr-v">SHA-256+Salt</span></div>
       <div class="sr"><span class="sr-k"><i class="ti ti-cookie"></i> <span data-lang="session">Session</span></span><span class="sr-v">HttpOnly · 7 <span data-lang="days">Days</span></span></div>
     </div>
@@ -1730,7 +1750,7 @@ a{color:inherit;text-decoration:none}
 
 <!-- ===== ERRORS PAGE ===== -->
 <section class="pg" id="pg-errors">
-  <div class="topbar"><div><div class="tb-title"><i class="ti ti-alert-triangle"></i> <span data-lang="errors">Errors</span></div></div><div class="tb-right"><span class="badge bg-red" id="errs-badge">0</span><button class="btn btn-p btn-sm" onclick="refreshAll()"><i class="ti ti-refresh"></i></button></div></div>
+  <div class="topbar"><div><div class="tb-title"><i class="ti ti-alert-triangle"></i> <span data-lang="errors">Errors</span></div></div><div class="tb-right"><span class="badge bg-red" id="errs-badge">0</span><button class="btn btn-p btn-sm" onclick="refreshAll()"><i class="ti ti-refresh"></i></span></button></div></div>
   <div class="card"><div class="card-title"><i class="ti ti-bug"></i> <span data-lang="error_logs">Error Logs</span></div><div id="errs-full">—</div></div>
 </section>
 
@@ -1805,7 +1825,7 @@ a{color:inherit;text-decoration:none}
       <div class="cl" style="margin-top:12px"><i class="ti ti-info-circle"></i><span data-lang="lang_note">Default language is English. Page will refresh after change.</span></div>
     </div>
 
-    <!-- ===== ONLY Protocol Custom Server Settings (بدون Trojan) ===== -->
+    <!-- ===== Protocol Custom Server Settings (همه پروتکل‌ها) ===== -->
     <div class="card" style="grid-column:1/-1">
       <div class="card-title"><i class="ti ti-server-2"></i> <span>Protocol Custom Names & Templates</span></div>
       <div style="display:flex;flex-direction:column;gap:8px">
@@ -1843,6 +1863,20 @@ a{color:inherit;text-decoration:none}
           <input class="fi" id="ps-xhttp-stream-one-name" placeholder="e.g. XHTTP-Ultra" style="min-width:0;padding:6px 8px;font-size:11px">
           <input class="fi" id="ps-xhttp-stream-one-prefix" placeholder="e.g. xhttp-u" style="min-width:0;padding:6px 8px;font-size:11px">
           <input class="fi" id="ps-xhttp-stream-one-template" placeholder="{server}-{label}" style="min-width:0;padding:6px 8px;font-size:11px">
+        </div>
+        <!-- Trojan-WS -->
+        <div style="display:grid;grid-template-columns:1.2fr 1.2fr 1.2fr 2fr;gap:8px;align-items:center;background:rgba(239,68,68,0.06);border-radius:8px;padding:6px 4px">
+          <div style="font-size:11px;color:#ef4444">Trojan-WS</div>
+          <input class="fi" id="ps-trojan-ws-name" placeholder="e.g. Trojan-Server" style="min-width:0;padding:6px 8px;font-size:11px">
+          <input class="fi" id="ps-trojan-ws-prefix" placeholder="e.g. trojan" style="min-width:0;padding:6px 8px;font-size:11px">
+          <input class="fi" id="ps-trojan-ws-template" placeholder="{server}-{label}" style="min-width:0;padding:6px 8px;font-size:11px">
+        </div>
+        <!-- VMess-WS -->
+        <div style="display:grid;grid-template-columns:1.2fr 1.2fr 1.2fr 2fr;gap:8px;align-items:center;background:rgba(124,58,237,0.06);border-radius:8px;padding:6px 4px">
+          <div style="font-size:11px;color:#7c3aed">VMess-WS</div>
+          <input class="fi" id="ps-vmess-ws-name" placeholder="e.g. VMess-Server" style="min-width:0;padding:6px 8px;font-size:11px">
+          <input class="fi" id="ps-vmess-ws-prefix" placeholder="e.g. vmess" style="min-width:0;padding:6px 8px;font-size:11px">
+          <input class="fi" id="ps-vmess-ws-template" placeholder="{server}-{label}" style="min-width:0;padding:6px 8px;font-size:11px">
         </div>
         <button class="btn btn-p" onclick="saveProtocolSettings()" style="margin-top:6px"><i class="ti ti-device-floppy"></i> <span data-lang="save_settings">Save Protocol Settings</span></button>
         <div id="protocol-save-result" style="font-size:11px;color:var(--green-t);display:none">✓ <span data-lang="saved">Saved</span></div>
@@ -2013,7 +2047,9 @@ function protoBadge(protocols){
     'vless-ws': ['VLESS · WS', 'pc-ws'],
     'xhttp-packet-up': ['XHTTP · packet-up', 'pc-xhttp'],
     'xhttp-stream-up': ['XHTTP · stream-up', 'pc-xhttp'],
-    'xhttp-stream-one': ['XHTTP ULTRA', 'pc-ultra']
+    'xhttp-stream-one': ['XHTTP ULTRA', 'pc-ultra'],
+    'trojan-ws': ['Trojan · WS', 'pc-trojan'],
+    'vmess-ws': ['VMess · WS', 'pc-vmess']
   };
   return protocols.map(p => { const v = labels[p] || labels['vless-ws']; return `<span class="proto-chip ${v[1]}">${v[0]}</span>`; }).join('');
 }
@@ -2070,12 +2106,12 @@ document.querySelectorAll('.nav-it').forEach(el => el.addEventListener('click', 
 function openModal(id){ document.getElementById(id).classList.add('open'); }
 function closeModal(id){ document.getElementById(id).classList.remove('open'); }
 
-// ========== PROTOCOL CUSTOM SETTINGS (بدون Trojan) ==========
+// ========== PROTOCOL CUSTOM SETTINGS ==========
 async function loadProtocolSettings(){
   try {
     const r = await authF('/api/settings/protocol');
     const data = await r.json();
-    const protos = ['vless-ws','xhttp-packet-up','xhttp-stream-up','xhttp-stream-one'];
+    const protos = ['vless-ws','xhttp-packet-up','xhttp-stream-up','xhttp-stream-one','trojan-ws','vmess-ws'];
     for (const proto of protos) {
       const nameEl = document.getElementById('ps-'+proto+'-name');
       const prefEl = document.getElementById('ps-'+proto+'-prefix');
@@ -2087,7 +2123,7 @@ async function loadProtocolSettings(){
   } catch(e){ console.warn('Could not load protocol settings:', e); }
 }
 async function saveProtocolSettings(){
-  const protos = ['vless-ws','xhttp-packet-up','xhttp-stream-up','xhttp-stream-one'];
+  const protos = ['vless-ws','xhttp-packet-up','xhttp-stream-up','xhttp-stream-one','trojan-ws','vmess-ws'];
   const payload = {};
   for (const proto of protos) {
     const nameEl = document.getElementById('ps-'+proto+'-name');
@@ -2117,34 +2153,6 @@ async function saveProtocolSettings(){
   } catch(e){ toast('Server connection error', 'err'); }
 }
 
-// ========== FORMAT LINK NAME ==========
-function formatLinkName(label, protocol, protoSettings){
-  const defaultNames = {
-    'vless-ws': 'VLESS-WS',
-    'xhttp-packet-up': 'XHTTP-packet',
-    'xhttp-stream-up': 'XHTTP-stream',
-    'xhttp-stream-one': 'XHTTP-ultra'
-  };
-  const defaultTemplate = '{server}-{label}';
-  const defaultServer = 'CBeeNet';
-  const defaultPrefix = '';
-  let server = defaultServer, prefix = defaultPrefix, template = defaultTemplate;
-  if(protoSettings && protoSettings[protocol]){
-    if(protoSettings[protocol].server_name) server = protoSettings[protocol].server_name;
-    if(protoSettings[protocol].link_prefix) prefix = protoSettings[protocol].link_prefix;
-    if(protoSettings[protocol].link_template) template = protoSettings[protocol].link_template;
-  }
-  let result = template;
-  result = result.replace(/{server}/g, server);
-  result = result.replace(/{prefix}/g, prefix);
-  result = result.replace(/{label}/g, label);
-  if(template.includes('{protocol}')){
-    let displayName = defaultNames[protocol] || protocol;
-    result = result.replace(/{protocol}/g, displayName);
-  }
-  return result;
-}
-
 // ========== CHART DATA (PERSISTENT) ==========
 const CHART_STORAGE_KEY = 'CBeeNet_chartData';
 const PREV_TRAF_KEY = 'CBeeNet_prevTraf';
@@ -2154,7 +2162,6 @@ let chartTimes = { load: [], traffic: [], conns: [] };
 const MAX_POINTS = 60;
 let chartInstances = { load: null, traffic: null, conns: null };
 
-// ===== CHART HELPERS =====
 function hexToRgba(hex, alpha) {
   let c = hex.trim();
   if (c.startsWith('#')) {
@@ -2260,7 +2267,7 @@ function buildChart(type) {
   let stepSize = Math.round(yMax / 5);
   if (stepSize === 0) stepSize = 1;
 
-  // Gradient fill (soft blue to transparent) with lower opacity for soft shadow
+  // Gradient fill (soft accent to transparent)
   const grad = ctx.createLinearGradient(0, 0, 0, 80);
   grad.addColorStop(0, hexToRgba(accent, 0.30));
   grad.addColorStop(1, hexToRgba(accent, 0.01));
@@ -2490,7 +2497,7 @@ function addDataPoint(type, value, time) {
   updateChartValue(type);
 }
 
-// ========== fetchStats ==========
+// ========== fetchStats (with chart update) ==========
 async function fetchStats(){
   try{
     const connResp = await authF('/api/connections');
@@ -2624,7 +2631,7 @@ document.addEventListener('visibilitychange', function() {
   }
 });
 
-// ========== SECONDARY CHARTS (Hourly chart with gradient fill, no grid, zero line dashed) ==========
+// ========== SECONDARY CHARTS ==========
 let dashProtoChart = null, dashHourlyChart = null;
 function initSecondaryCharts(){
   const accent = getAccentColor();
@@ -2633,7 +2640,7 @@ function initSecondaryCharts(){
   const ctxProto = document.getElementById('dashProtoChart').getContext('2d');
   dashProtoChart = new Chart(ctxProto, {
     type: 'bar',
-    data: { labels: ['VLESS/WS', 'XHTTP-packet', 'XHTTP-stream', 'XHTTP-ultra'], datasets: [{ data: [0,0,0,0], backgroundColor: [accent, 'rgba(251, 191, 36, 0.8)', 'rgba(245, 158, 11, 0.8)', 'rgba(16, 185, 129, 0.8)'], borderColor: [accent, '#fbbf24', '#f59e0b', '#10b981'], borderWidth: 2, borderRadius: 6, barPercentage: 0.6 }] },
+    data: { labels: ['VLESS/WS', 'XHTTP-p', 'XHTTP-s', 'XHTTP-u', 'Trojan', 'VMess'], datasets: [{ data: [0,0,0,0,0,0], backgroundColor: [accent, 'rgba(251, 191, 36, 0.8)', 'rgba(245, 158, 11, 0.8)', 'rgba(16, 185, 129, 0.8)', 'rgba(239,68,68,0.8)', 'rgba(124,58,237,0.8)'], borderColor: [accent, '#fbbf24', '#f59e0b', '#10b981', '#ef4444', '#7c3aed'], borderWidth: 2, borderRadius: 6, barPercentage: 0.6 }] },
     options: {
       responsive: true, maintainAspectRatio: false,
       plugins: { legend: { display: false }, tooltip: { backgroundColor: 'rgba(11, 17, 29, 0.9)', borderColor: accent, borderWidth: 1, titleColor: '#fff', bodyColor: '#fff', cornerRadius: 8, padding: 10, callbacks: { label: function(context){ return context.parsed.y + ' configs'; } } } },
@@ -2642,7 +2649,6 @@ function initSecondaryCharts(){
     }
   });
 
-  // Hourly chart with gradient fill and zero line
   const ctxHourly = document.getElementById('dashHourlyChart').getContext('2d');
   const grad = ctxHourly.createLinearGradient(0, 0, 0, 120);
   grad.addColorStop(0, hexToRgba(accent, 0.20));
@@ -2690,12 +2696,12 @@ function initSecondaryCharts(){
 function updateSecondaryCharts(statsData, linksData){
   const accent = getAccentColor();
   if(dashProtoChart && linksData){
-    const protoCounts = { 'vless-ws': 0, 'xhttp-packet-up': 0, 'xhttp-stream-up': 0, 'xhttp-stream-one': 0 };
+    const protoCounts = { 'vless-ws': 0, 'xhttp-packet-up': 0, 'xhttp-stream-up': 0, 'xhttp-stream-one': 0, 'trojan-ws': 0, 'vmess-ws': 0 };
     linksData.forEach(l => {
       const protos = l.protocols || ['vless-ws'];
       protos.forEach(p => { if(protoCounts[p] !== undefined) protoCounts[p]++; });
     });
-    const counts = [protoCounts['vless-ws'], protoCounts['xhttp-packet-up'], protoCounts['xhttp-stream-up'], protoCounts['xhttp-stream-one']];
+    const counts = [protoCounts['vless-ws'], protoCounts['xhttp-packet-up'], protoCounts['xhttp-stream-up'], protoCounts['xhttp-stream-one'], protoCounts['trojan-ws'], protoCounts['vmess-ws']];
     dashProtoChart.data.datasets[0].data = counts;
     dashProtoChart.update('none');
   }
@@ -3045,7 +3051,7 @@ async function loadConns(){
       const secs = c.connected_at ? Math.max(0, Math.floor((Date.now() - new Date(c.connected_at).getTime()) / 1000)) : 0;
       const dur = secs < 60 ? secs + 's' : secs < 3600 ? Math.floor(secs/60) + 'm' : Math.floor(secs/3600) + 'h';
       const durPct = Math.min(100, Math.round((secs / maxDur) * 100));
-      const protoVal = c.transport === 'vless-ws' ? 'vless-ws' : (c.transport || '').replace('xhttp-', 'xhttp-');
+      const protoVal = c.transport || 'vless-ws';
       return `<div class="conn-card-v2">
         <div class="conn-card-v2-glow"></div>
         <div class="conn-card-v2-top">
@@ -3396,6 +3402,36 @@ async function loadData(pw=''){{const url='/api/public/sub/'+UUID_KEY+(pw?'?pw='
 async function renderContent(d){{let html=`<div class="card"><h2 style="color:var(--accent2)">${{d.name}}</h2><p style="color:var(--t3)">${{d.desc||''}}</p><p>Active connections: ${{d.active_connections}}</p><p>Total usage: ${{d.total_used_fmt}}</p><hr style="margin:15px 0;border-color:var(--card-b)"><div>`;for(let l of d.links){{html+=`<div style="background:rgba(0,0,0,.2);border-radius:12px;padding:12px;margin-bottom:8px;border:1px solid var(--card-b)"><strong style="color:var(--accent2)">${{l.label}}</strong> <span style="color:var(--t3)">${{l.used_fmt}} / ${{l.limit_fmt}}</span><div style="font-size:10px;color:var(--t3)">${{l.vless_link.substring(0,60)}}…</div></div>`;}}html+=`</div></div>`;document.getElementById('root').innerHTML=html;}}
 async function init(){{const data=await loadData();if(data.locked){{document.getElementById('root').innerHTML=`<div class="card" style="text-align:center"><h3 style="color:var(--accent2)">${{data.name}}</h3><p>This group is password protected.</p><input type="password" id="pw" placeholder="Enter password" style="margin:10px;padding:8px;border-radius:8px;border:1px solid var(--card-b);background:rgba(0,0,0,.2);color:white;width:200px"><br><button onclick="submitPw()" style="padding:8px 16px;background:var(--accent);border:none;border-radius:8px;cursor:pointer;color:#fff;font-weight:700">Login</button></div>`;}}else{{renderContent(data);}}}}
 async function submitPw(){{const pw=document.getElementById('pw').value;const data=await loadData(pw);if(data.locked){{alert('Wrong password');return;}}savedPw=pw;renderContent(data);}}
+init();
+</script>
+</body></html>"""
+
+def get_single_sub_page_html(uuid: str) -> str:
+    return f"""<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>CBee Config</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.19.0/dist/tabler-icons.min.css">
+<style>
+*{{margin:0;padding:0;box-sizing:border-box}}
+:root{{--bg:#0d1117;--card:#161b22;--card-b:#30363d;--accent:#1677ff;--accent2:#4096ff;--t1:#f0f6fc;--t2:#8b949e;--t3:#6e7681;--radius:16px}}
+body{{font-family:'Vazirmatn','Segoe UI',sans-serif;background:var(--bg);color:var(--t1);min-height:100vh;display:flex;justify-content:center;align-items:center;padding:20px}}
+.wrap{{max-width:800px;width:100%}}
+.brand{{font-size:28px;font-weight:900;text-align:center;margin-bottom:20px;color:var(--accent2)}}
+.loading{{text-align:center;padding:40px;color:var(--t3)}}
+.card{{background:var(--card);border:1px solid var(--card-b);border-radius:var(--radius);padding:20px}}
+</style>
+</head>
+<body>
+<div class="wrap"><div class="brand">CBee</div><div id="root" class="loading">Loading...</div></div>
+<script>
+const UUID='{uuid}';
+async function loadData(){{const r=await fetch('/api/public/sub-single/'+UUID);return r.json();}}
+async function renderContent(d){{let html=`<div class="card"><h2 style="color:var(--accent2)">${{d.name}}</h2><p style="color:var(--t3)">${{d.desc||''}}</p><p>Active connections: ${{d.active_connections}}</p><p>Total usage: ${{d.total_used_fmt}}</p><hr style="margin:15px 0;border-color:var(--card-b)"><div>`;for(let l of d.links){{html+=`<div style="background:rgba(0,0,0,.2);border-radius:12px;padding:12px;margin-bottom:8px;border:1px solid var(--card-b)"><strong style="color:var(--accent2)">${{l.label}}</strong> <span style="color:var(--t3)">${{l.used_fmt}} / ${{l.limit_fmt}}</span><div style="font-size:10px;color:var(--t3)">${{l.vless_link.substring(0,60)}}…</div></div>`;}}html+=`</div></div>`;document.getElementById('root').innerHTML=html;}}
+async function init(){{const data=await loadData();renderContent(data);}}
 init();
 </script>
 </body></html>"""
