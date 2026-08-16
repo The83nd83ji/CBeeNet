@@ -119,13 +119,21 @@ async def load_state():
             RESELLERS.update(data.get("resellers", {}))
             if "global_settings" in data:
                 GLOBAL_SETTINGS.update(data["global_settings"])
-            # ---- FIX: اگر متغیر محیطی ADMIN_PASSWORD تنظیم شده باشد، هش ذخیره شده را نادیده می‌گیریم ----
-            if "password_hash" in data:
-                if "ADMIN_PASSWORD" not in os.environ:
-                    AUTH["password_hash"] = data["password_hash"]
-                else:
-                    logger.info("ADMIN_PASSWORD env is set, using env hash instead of saved password hash.")
-            # ---------------------------------------------------------------------
+            
+            # ---------- FIX: اولویت با متغیر محیطی ADMIN_PASSWORD ----------
+            env_password = os.environ.get("ADMIN_PASSWORD")
+            if env_password:
+                # اگر متغیر محیطی تنظیم شده باشد، از آن استفاده کن و هش فایل را نادیده بگیر
+                AUTH["password_hash"] = hash_password(env_password)
+                logger.info("Using ADMIN_PASSWORD from environment (saved hash ignored).")
+            elif "password_hash" in data:
+                # در غیر این صورت از هش ذخیره شده در فایل استفاده کن
+                AUTH["password_hash"] = data["password_hash"]
+                logger.info("Using password hash from saved state.")
+            else:
+                logger.warning("No password hash found in state, using default.")
+            # ----------------------------------------------------------------
+            
             hist = data.get("history", [])
             for h in hist:
                 if isinstance(h, dict) and "time" in h:
@@ -160,6 +168,7 @@ SESSION_TTL = 60 * 60 * 24 * 7
 def hash_password(pw: str) -> str:
     return hashlib.sha256(f"{pw}{CONFIG['secret']}".encode()).hexdigest()
 
+# مقدار اولیه: اگر ADMIN_PASSWORD در محیط باشد از آن استفاده می‌شود، در غیر این صورت "admin"
 AUTH = {"password_hash": hash_password(os.environ.get("ADMIN_PASSWORD", "admin"))}
 SESSIONS: dict = {}
 SESSIONS_LOCK = asyncio.Lock()
