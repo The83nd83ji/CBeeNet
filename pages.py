@@ -1605,7 +1605,7 @@ a{color:inherit;text-decoration:none}
           <button class="proto-btn-v" data-proto="trojan-ws" onclick="toggleProtoBtnV(this)">
             <span class="proto-icon trojan"><i class="ti ti-shield-lock"></i></span>
             <span class="proto-info">
-              <span class="proto-name">Trojan / WS</span>
+              <span class="proto-name">Trojan-HTTPUpgrade</span>
               <span class="proto-desc">HTTPUpgrade · TLS</span>
             </span>
             <span class="proto-badge">Secure</span>
@@ -1728,7 +1728,7 @@ a{color:inherit;text-decoration:none}
     <div class="card"><div class="card-title"><i class="ti ti-lock"></i> <span data-lang="encryption">Encryption</span></div>
       <div class="sr"><span class="sr-k"><i class="ti ti-certificate"></i> TLS/HTTPS</span><span class="sr-v" style="color:var(--green-t)">● <span data-lang="active">Active</span> (443)</span></div>
       <div class="sr"><span class="sr-k"><i class="ti ti-fingerprint"></i> Fingerprint</span><span class="sr-v">Chrome Spoof</span></div>
-      <div class="sr"><span class="sr-k"><i class="ti ti-network"></i> <span data-lang="protocols">Protocols</span></span><span class="sr-v">VLESS/WS + XHTTP Ultra + Trojan + VMess</span></div>
+      <div class="sr"><span class="sr-k"><i class="ti ti-network"></i> <span data-lang="protocols">Protocols</span></span><span class="sr-v">VLESS/WS + XHTTP Ultra + Trojan-HTTPUpgrade + VMess</span></div>
       <div class="sr"><span class="sr-k"><i class="ti ti-key"></i> <span data-lang="hash">Hash</span></span><span class="sr-v">SHA-256+Salt</span></div>
       <div class="sr"><span class="sr-k"><i class="ti ti-cookie"></i> <span data-lang="session">Session</span></span><span class="sr-v">HttpOnly · 7 <span data-lang="days">Days</span></span></div>
     </div>
@@ -1750,7 +1750,7 @@ a{color:inherit;text-decoration:none}
 
 <!-- ===== ERRORS PAGE ===== -->
 <section class="pg" id="pg-errors">
-  <div class="topbar"><div><div class="tb-title"><i class="ti ti-alert-triangle"></i> <span data-lang="errors">Errors</span></div></div><div class="tb-right"><span class="badge bg-red" id="errs-badge">0</span><button class="btn btn-p btn-sm" onclick="refreshAll()"><i class="ti ti-refresh"></i></span></button></div></div>
+  <div class="topbar"><div><div class="tb-title"><i class="ti ti-alert-triangle"></i> <span data-lang="errors">Errors</span></div></div><div class="tb-right"><span class="badge bg-red" id="errs-badge">0</span><button class="btn btn-p btn-sm" onclick="refreshAll()"><i class="ti ti-refresh"></i></button></div></div>
   <div class="card"><div class="card-title"><i class="ti ti-bug"></i> <span data-lang="error_logs">Error Logs</span></div><div id="errs-full">—</div></div>
 </section>
 
@@ -1864,9 +1864,9 @@ a{color:inherit;text-decoration:none}
           <input class="fi" id="ps-xhttp-stream-one-prefix" placeholder="e.g. xhttp-u" style="min-width:0;padding:6px 8px;font-size:11px">
           <input class="fi" id="ps-xhttp-stream-one-template" placeholder="{server}-{label}" style="min-width:0;padding:6px 8px;font-size:11px">
         </div>
-        <!-- Trojan-WS -->
+        <!-- Trojan-HTTPUpgrade -->
         <div style="display:grid;grid-template-columns:1.2fr 1.2fr 1.2fr 2fr;gap:8px;align-items:center;background:rgba(239,68,68,0.06);border-radius:8px;padding:6px 4px">
-          <div style="font-size:11px;color:#ef4444">Trojan-WS</div>
+          <div style="font-size:11px;color:#ef4444">Trojan-HTTPUpgrade</div>
           <input class="fi" id="ps-trojan-ws-name" placeholder="e.g. Trojan-Server" style="min-width:0;padding:6px 8px;font-size:11px">
           <input class="fi" id="ps-trojan-ws-prefix" placeholder="e.g. trojan" style="min-width:0;padding:6px 8px;font-size:11px">
           <input class="fi" id="ps-trojan-ws-template" placeholder="{server}-{label}" style="min-width:0;padding:6px 8px;font-size:11px">
@@ -2041,6 +2041,7 @@ function expChip(exp, expired){
   if(d <= 3) return `<span class="exp-chip ec-warn"><i class="ti ti-alert-triangle"></i> ${d} days left</span>`;
   return `<span class="exp-chip ec-ok"><i class="ti ti-calendar-check"></i> ${d} days left</span>`;
 }
+// ===== اصلاح: پشتیبانی از پروتکل‌های جدید در برچسب‌ها =====
 function protoBadge(protocols){
   if(!protocols || !protocols.length) protocols = ['vless-ws'];
   const labels = {
@@ -2048,7 +2049,7 @@ function protoBadge(protocols){
     'xhttp-packet-up': ['XHTTP · packet-up', 'pc-xhttp'],
     'xhttp-stream-up': ['XHTTP · stream-up', 'pc-xhttp'],
     'xhttp-stream-one': ['XHTTP ULTRA', 'pc-ultra'],
-    'trojan-ws': ['Trojan · WS', 'pc-trojan'],
+    'trojan-ws': ['Trojan · HTTPUpgrade', 'pc-trojan'],
     'vmess-ws': ['VMess · WS', 'pc-vmess']
   };
   return protocols.map(p => { const v = labels[p] || labels['vless-ws']; return `<span class="proto-chip ${v[1]}">${v[0]}</span>`; }).join('');
@@ -2153,7 +2154,37 @@ async function saveProtocolSettings(){
   } catch(e){ toast('Server connection error', 'err'); }
 }
 
-// ========== CHART DATA (PERSISTENT) ==========
+// ========== FORMAT LINK NAME (اصلاح برای پروتکل‌های جدید) ==========
+function formatLinkName(label, protocol, protoSettings){
+  const defaultNames = {
+    'vless-ws': 'VLESS-WS',
+    'xhttp-packet-up': 'XHTTP-packet',
+    'xhttp-stream-up': 'XHTTP-stream',
+    'xhttp-stream-one': 'XHTTP-ultra',
+    'trojan-ws': 'Trojan-HTTPUpgrade',
+    'vmess-ws': 'VMess-WS'
+  };
+  const defaultTemplate = '{server}-{label}';
+  const defaultServer = 'CBeeNet';
+  const defaultPrefix = '';
+  let server = defaultServer, prefix = defaultPrefix, template = defaultTemplate;
+  if(protoSettings && protoSettings[protocol]){
+    if(protoSettings[protocol].server_name) server = protoSettings[protocol].server_name;
+    if(protoSettings[protocol].link_prefix) prefix = protoSettings[protocol].link_prefix;
+    if(protoSettings[protocol].link_template) template = protoSettings[protocol].link_template;
+  }
+  let result = template;
+  result = result.replace(/{server}/g, server);
+  result = result.replace(/{prefix}/g, prefix);
+  result = result.replace(/{label}/g, label);
+  if(template.includes('{protocol}')){
+    let displayName = defaultNames[protocol] || protocol;
+    result = result.replace(/{protocol}/g, displayName);
+  }
+  return result;
+}
+
+// ===== CHART DATA (PERSISTENT) =====
 const CHART_STORAGE_KEY = 'CBeeNet_chartData';
 const PREV_TRAF_KEY = 'CBeeNet_prevTraf';
 const CHART_LAST_TIME_KEY = 'CBeeNet_lastChartTime';
@@ -2235,7 +2266,7 @@ function getGridColor() {
   return getComputedStyle(document.documentElement).getPropertyValue('--card-b').trim() || '#30363d';
 }
 
-// ===== BUILD AREA CHART (Premium style with gradient fill, no grid, zero line dashed) =====
+// ===== BUILD AREA CHART =====
 function buildChart(type) {
   const accent = getAccentColor();
   const textColor = getTextColor();
@@ -2267,12 +2298,10 @@ function buildChart(type) {
   let stepSize = Math.round(yMax / 5);
   if (stepSize === 0) stepSize = 1;
 
-  // Gradient fill (soft accent to transparent)
   const grad = ctx.createLinearGradient(0, 0, 0, 80);
   grad.addColorStop(0, hexToRgba(accent, 0.30));
   grad.addColorStop(1, hexToRgba(accent, 0.01));
 
-  // Glow dataset (thick semi-transparent line behind main)
   const glowDataset = {
     data: dataArr,
     borderColor: hexToRgba(accent, 0.25),
@@ -2283,7 +2312,6 @@ function buildChart(type) {
     borderJoinStyle: 'round'
   };
 
-  // Main dataset with gradient fill
   const mainDataset = {
     data: dataArr,
     borderColor: accent,
@@ -2299,7 +2327,6 @@ function buildChart(type) {
     borderJoinStyle: 'round'
   };
 
-  // Plugin for dashed zero line
   const zeroLinePlugin = {
     id: 'zeroLine',
     beforeDraw: function(chart) {
@@ -2497,7 +2524,7 @@ function addDataPoint(type, value, time) {
   updateChartValue(type);
 }
 
-// ========== fetchStats (with chart update) ==========
+// ========== fetchStats ==========
 async function fetchStats(){
   try{
     const connResp = await authF('/api/connections');
@@ -2733,7 +2760,7 @@ function updateSecondaryCharts(statsData, linksData){
   }
 }
 
-// ========== LINKS (unchanged) ==========
+// ========== LINKS (با formatLinkName اصلاح شده) ==========
 async function loadLinks(){
   try{
     const [lr, sr] = await Promise.all([authF('/api/links'), authF('/api/subs')]);
@@ -3180,7 +3207,7 @@ function checkPwStrength(val){
   label.innerHTML = `<i class="ti ti-shield-check" style="color:${colors[Math.max(0, score-1)]}"></i> ${labels[Math.max(0, score-1)]}`;
 }
 
-// ========== SMART ALERTS (unchanged) ==========
+// ========== SMART ALERTS ==========
 function generateAlertsFromData(stats, links){
   const alerts = [];
   links.forEach(l => {
