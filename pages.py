@@ -867,7 +867,7 @@ a{color:inherit;text-decoration:none}
 .dash-stat-card .icon{position:absolute;top:16px;left:16px;font-size:22px;color:var(--accent);opacity:.3}
 [dir="ltr"] .dash-stat-card .icon{left:auto;right:16px}
 
-/* ===== SPARKLINE STYLES ===== */
+/* ===== SPARKLINE STYLES (Modern Area Charts) ===== */
 .chart-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;margin-bottom:22px}
 .chart-premium{background:var(--card);border:1px solid var(--card-b);border-radius:var(--radius);padding:16px 18px 14px;transition:all .2s;position:relative}
 .chart-premium:hover{border-color:var(--card-bh);box-shadow:var(--shadow)}
@@ -877,7 +877,7 @@ a{color:inherit;text-decoration:none}
 .chart-premium .ch-value{font-size:18px;font-weight:800;color:var(--t1);letter-spacing:-.02em}
 .chart-premium .ch-value .unit{font-size:12px;font-weight:500;color:var(--t3);margin-left:3px}
 .chart-premium .ch-main{height:100px;position:relative;margin-top:0;min-height:80px}
-.chart-premium .ch-main canvas{width:100% !important;height:100% !important}
+.chart-premium .ch-main canvas{width:100% !important;height:100% !important;border-radius:0}
 .chart-premium .chart-extrema{position:absolute;top:4px;right:4px;display:flex;flex-direction:column;gap:2px;font-size:9px;font-weight:600;pointer-events:none;opacity:0.85;font-family:ui-monospace,monospace}
 .chart-premium .chart-extrema .ext-max{color:var(--accent)}
 .chart-premium .chart-extrema .ext-min{color:var(--t3)}
@@ -889,7 +889,7 @@ a{color:inherit;text-decoration:none}
 .dash-small-chart .chart-title{font-size:11px;font-weight:600;color:var(--t2);margin-bottom:10px;display:flex;align-items:center;gap:6px}
 .dash-small-chart .chart-title i{color:var(--accent)}
 .dash-small-chart .chart-wrap{height:120px;position:relative}
-.dash-small-chart .chart-wrap canvas{width:100% !important;height:100% !important}
+.dash-small-chart .chart-wrap canvas{width:100% !important;height:100% !important;border-radius:0}
 
 /* Tooltip */
 .chart-tooltip{display:none;position:fixed;background:rgba(11,17,29,0.92);backdrop-filter:blur(12px);border:1px solid rgba(255,255,255,0.08);border-radius:10px;padding:10px 14px;box-shadow:0 12px 40px rgba(0,0,0,0.7);z-index:1000;pointer-events:none;min-width:140px}
@@ -1473,7 +1473,7 @@ a{color:inherit;text-decoration:none}
     </div>
   </div>
 
-  <!-- 3 Sparkline Charts (Load, Traffic, Connections) -->
+  <!-- 4 Modern Area Charts: Load, Traffic, Connections, Hourly -->
   <div class="chart-grid">
     <div class="chart-premium" id="chart-load-container">
       <div class="ch-header">
@@ -1514,17 +1514,30 @@ a{color:inherit;text-decoration:none}
         </div>
       </div>
     </div>
+    <div class="chart-premium" id="chart-hourly-container">
+      <div class="ch-header">
+        <div class="ch-title"><i class="ti ti-chart-area"></i> <span data-lang="hourly_average">Hourly Avg</span></div>
+        <div class="ch-value" id="chart-hourly-val">0<span class="unit">MB</span></div>
+      </div>
+      <div class="ch-main">
+        <canvas id="chart-hourly"></canvas>
+        <div class="chart-extrema" id="extrema-hourly">
+          <span class="ext-max"><span class="ext-label">max</span> —</span>
+          <span class="ext-min"><span class="ext-label">min</span> —</span>
+        </div>
+      </div>
+    </div>
   </div>
 
-  <!-- Secondary Charts -->
+  <!-- Secondary Charts (Protocol Distribution & Daily Usage) -->
   <div class="dash-charts-second">
     <div class="dash-small-chart">
       <div class="chart-title"><i class="ti ti-chart-bar"></i> <span data-lang="protocol_distribution">Protocol Distribution</span></div>
       <div class="chart-wrap"><canvas id="dashProtoChart"></canvas></div>
     </div>
     <div class="dash-small-chart">
-      <div class="chart-title"><i class="ti ti-arrow-up-right"></i> <span data-lang="hourly_average">Hourly Avg</span></div>
-      <div class="chart-wrap"><canvas id="dashHourlyChart"></canvas></div>
+      <div class="chart-title"><i class="ti ti-arrow-up-right"></i> <span data-lang="daily_usage">Daily Usage</span></div>
+      <div class="chart-wrap"><canvas id="dashDailyChart"></canvas></div>
     </div>
   </div>
 
@@ -2163,15 +2176,13 @@ function formatLinkName(label, protocol, protoSettings){
 // ========== CHART DATA ==========
 const CHART_STORAGE_KEY = 'CBeeNet_chartData';
 const PREV_TRAF_KEY = 'CBeeNet_prevTraf';
-let chartData = { load: [], traffic: [], conns: [] };
-let chartTimes = { load: [], traffic: [], conns: [] };
+let chartData = { load: [], traffic: [], conns: [], hourly: [] };
+let chartTimes = { load: [], traffic: [], conns: [], hourly: [] };
 const MAX_POINTS = 60;
-let chartInstances = { load: null, traffic: null, conns: null };
-let tooltipEl = null;
+let chartInstances = { load: null, traffic: null, conns: null, hourly: null };
 
 // ===== CHART HELPERS =====
 function hexToRgba(hex, alpha) {
-  // handle #hex or rgb/rgba
   let c = hex.trim();
   if (c.startsWith('#')) {
     let h = c.slice(1);
@@ -2183,7 +2194,6 @@ function hexToRgba(hex, alpha) {
       return `rgba(${r},${g},${b},${alpha})`;
     }
   }
-  // fallback: try to extract rgb from rgba string
   const m = c.match(/rgba?\((\d+),\s*(\d+),\s*(\d+)(?:,\s*[\d.]+)?\)/);
   if (m) {
     const r = parseInt(m[1]), g = parseInt(m[2]), b = parseInt(m[3]);
@@ -2200,7 +2210,7 @@ function loadChartDataFromStorage(){
       if(parsed.data && parsed.times){
         chartData = parsed.data;
         chartTimes = parsed.times;
-        for(let key of ['load','traffic','conns']){
+        for(let key of ['load','traffic','conns','hourly']){
           chartTimes[key] = chartTimes[key].map(t => new Date(t));
           const cutoff = Date.now() - 300000;
           const indices = chartTimes[key].map((d,i) => d.getTime() >= cutoff ? i : -1).filter(i => i >= 0);
@@ -2217,8 +2227,8 @@ function loadChartDataFromStorage(){
       }
     }
   } catch(e) {
-    chartData = { load: [], traffic: [], conns: [] };
-    chartTimes = { load: [], traffic: [], conns: [] };
+    chartData = { load: [], traffic: [], conns: [], hourly: [] };
+    chartTimes = { load: [], traffic: [], conns: [], hourly: [] };
     return false;
   }
   return false;
@@ -2227,7 +2237,7 @@ function loadChartDataFromStorage(){
 function saveChartDataToStorage(){
   try {
     const times = {};
-    for(let key of ['load','traffic','conns']){
+    for(let key of ['load','traffic','conns','hourly']){
       times[key] = chartTimes[key].map(d => d.toISOString());
     }
     localStorage.setItem(CHART_STORAGE_KEY, JSON.stringify({ data: chartData, times: times }));
@@ -2237,16 +2247,93 @@ function saveChartDataToStorage(){
 function getAccentColor() {
   return getComputedStyle(document.documentElement).getPropertyValue('--accent').trim() || '#1677ff';
 }
-
 function getTextColor() {
   return getComputedStyle(document.documentElement).getPropertyValue('--t3').trim() || '#6e7681';
 }
-
 function getGridColor() {
   return getComputedStyle(document.documentElement).getPropertyValue('--card-b').trim() || '#30363d';
 }
 
-// ===== BUILD CHART (Sparkline style) =====
+// ===== SQUARE GRID PATTERN (only inside the filled area) =====
+const gridPatternCanvas = document.createElement('canvas');
+gridPatternCanvas.width = 20;
+gridPatternCanvas.height = 20;
+const gctx = gridPatternCanvas.getContext('2d');
+gctx.clearRect(0, 0, 20, 20);
+gctx.strokeStyle = 'rgba(255,255,255,0.06)';
+gctx.lineWidth = 0.5;
+for (let i = 0; i <= 20; i += 4) {
+  gctx.beginPath();
+  gctx.moveTo(i, 0);
+  gctx.lineTo(i, 20);
+  gctx.stroke();
+  gctx.beginPath();
+  gctx.moveTo(0, i);
+  gctx.lineTo(20, i);
+  gctx.stroke();
+}
+const gridPattern = gctx.createPattern(gridPatternCanvas, 'repeat');
+
+// ===== CUSTOM PLUGIN: draw square grid only under the curve =====
+const gridPlugin = {
+  id: 'gridPlugin',
+  afterDraw: function(chart) {
+    const ctx = chart.ctx;
+    const meta = chart.getDatasetMeta(0);
+    if (!meta || !meta.data || meta.data.length < 2) return;
+    const data = chart.data.datasets[0].data;
+    if (!data || data.length < 2) return;
+    const area = chart.chartArea;
+    const scaleY = chart.scales.y;
+    const scaleX = chart.scales.x;
+
+    // Build path for the area under the curve (from first point to last)
+    ctx.save();
+    ctx.beginPath();
+    for (let i = 0; i < meta.data.length; i++) {
+      const x = meta.data[i].x;
+      const y = meta.data[i].y;
+      if (i === 0) ctx.moveTo(x, y);
+      else {
+        // Smooth curve using tension
+        const prev = meta.data[i-1];
+        const cp1x = prev.x + (x - prev.x) * 0.35;
+        const cp1y = prev.y;
+        const cp2x = x - (x - prev.x) * 0.35;
+        const cp2y = y;
+        ctx.bezierCurveTo(cp1x, cp1y, cp2x, cp2y, x, y);
+      }
+    }
+    // line to bottom-right, then bottom-left, then close
+    const lastX = meta.data[meta.data.length-1].x;
+    const firstX = meta.data[0].x;
+    const bottomY = area.bottom;
+    ctx.lineTo(lastX, bottomY);
+    ctx.lineTo(firstX, bottomY);
+    ctx.closePath();
+    ctx.clip();
+
+    // Draw grid pattern inside clipped area with low opacity
+    ctx.fillStyle = gridPattern;
+    ctx.globalAlpha = 0.4;
+    ctx.fillRect(area.left, area.top, area.right - area.left, area.bottom - area.top);
+    ctx.restore();
+
+    // Draw a subtle zero baseline
+    ctx.save();
+    ctx.beginPath();
+    const zeroY = scaleY.getPixelForValue(0);
+    ctx.moveTo(area.left, zeroY);
+    ctx.lineTo(area.right, zeroY);
+    ctx.strokeStyle = getGridColor();
+    ctx.lineWidth = 0.5;
+    ctx.setLineDash([3, 3]);
+    ctx.stroke();
+    ctx.restore();
+  }
+};
+
+// ===== BUILD MODERN AREA CHART =====
 function buildChart(type) {
   const accent = getAccentColor();
   const textColor = getTextColor();
@@ -2262,12 +2349,13 @@ function buildChart(type) {
   let yMax = type === 'load' ? 100 : Math.ceil(maxVal * 1.2);
   if (type === 'traffic' && yMax < 5) yMax = 5;
   if (type === 'conns' && yMax < 5) yMax = 5;
+  if (type === 'hourly' && yMax < 1) yMax = 1;
   if (maxVal === 0) yMax = 1;
 
   // Gradient fill
   const grad = ctx.createLinearGradient(0, 0, 0, 150);
-  grad.addColorStop(0, hexToRgba(accent, 0.2));
-  grad.addColorStop(1, hexToRgba(accent, 0));
+  grad.addColorStop(0, hexToRgba(accent, 0.25));
+  grad.addColorStop(1, hexToRgba(accent, 0.02));
 
   const chart = new Chart(ctx, {
     type: 'line',
@@ -2309,7 +2397,7 @@ function buildChart(type) {
             },
             label: function(context) {
               const val = context.parsed.y;
-              const unit = type === 'load' ? '%' : type === 'traffic' ? ' MB' : '';
+              const unit = type === 'load' ? '%' : type === 'traffic' ? ' MB' : type === 'hourly' ? ' MB' : '';
               return val.toFixed(1) + unit;
             }
           }
@@ -2336,10 +2424,10 @@ function buildChart(type) {
           ticks: {
             color: textColor,
             font: { size: 9 },
-            maxTicksLimit: 5,
+            maxTicksLimit: 4,
             callback: function(value) {
               if (type === 'load') return value + '%';
-              if (type === 'traffic') return value.toFixed(0) + 'MB';
+              if (type === 'traffic' || type === 'hourly') return value.toFixed(0) + 'MB';
               return value.toFixed(0);
             }
           },
@@ -2350,7 +2438,8 @@ function buildChart(type) {
       elements: {
         line: { borderJoinStyle: 'round' }
       }
-    }
+    },
+    plugins: [gridPlugin]
   });
 
   return chart;
@@ -2358,22 +2447,22 @@ function buildChart(type) {
 
 function updateExtrema(type) {
   const data = chartData[type];
+  const elMax = document.querySelector(`#extrema-${type} .ext-max`);
+  const elMin = document.querySelector(`#extrema-${type} .ext-min`);
   if (!data || data.length < 2) {
-    document.querySelector(`#extrema-${type} .ext-max`).innerHTML = '<span class="ext-label">max</span> —';
-    document.querySelector(`#extrema-${type} .ext-min`).innerHTML = '<span class="ext-label">min</span> —';
+    if (elMax) elMax.innerHTML = '<span class="ext-label">max</span> —';
+    if (elMin) elMin.innerHTML = '<span class="ext-label">min</span> —';
     return;
   }
   const maxVal = Math.max(...data);
   const minVal = Math.min(...data);
-  const maxEl = document.querySelector(`#extrema-${type} .ext-max`);
-  const minEl = document.querySelector(`#extrema-${type} .ext-min`);
-  const unit = type === 'load' ? '%' : type === 'traffic' ? ' MB' : '';
-  maxEl.innerHTML = `<span class="ext-label">max</span> ${maxVal.toFixed(1)}${unit}`;
-  minEl.innerHTML = `<span class="ext-label">min</span> ${minVal.toFixed(1)}${unit}`;
+  const unit = type === 'load' ? '%' : (type === 'traffic' || type === 'hourly') ? ' MB' : '';
+  if (elMax) elMax.innerHTML = `<span class="ext-label">max</span> ${maxVal.toFixed(1)}${unit}`;
+  if (elMin) elMin.innerHTML = `<span class="ext-label">min</span> ${minVal.toFixed(1)}${unit}`;
 }
 
 function initPremiumCharts() {
-  ['load', 'traffic', 'conns'].forEach(type => {
+  ['load', 'traffic', 'conns', 'hourly'].forEach(type => {
     chartInstances[type] = buildChart(type);
     updateExtrema(type);
     updateChartValue(type);
@@ -2383,22 +2472,19 @@ function initPremiumCharts() {
 function updateChartValue(type) {
   const el = document.getElementById('chart-' + type + '-val');
   if (!el) return;
-  
   if (type === 'traffic') {
     el.innerHTML = totalTrafficDisplay.toFixed(1) + '<span class="unit">MB</span>';
     return;
   }
-  
   const data = chartData[type];
   const last = data.length > 0 ? data[data.length-1] : 0;
-  const unit = type === 'load' ? '%' : '';
+  const unit = type === 'load' ? '%' : (type === 'hourly' ? ' MB' : '');
   el.innerHTML = last.toFixed(1) + (unit ? '<span class="unit">' + unit + '</span>' : '');
 }
 
 function addDataPoint(type, value, time) {
   const now = time || new Date();
   const cutoff = now.getTime() - 300000;
-  // Trim old data
   let idx = chartTimes[type].findIndex(t => t.getTime() >= cutoff);
   if (idx > 0) {
     chartData[type] = chartData[type].slice(idx);
@@ -2407,10 +2493,8 @@ function addDataPoint(type, value, time) {
     chartData[type] = [];
     chartTimes[type] = [];
   }
-  
   chartData[type].push(value);
   chartTimes[type].push(now);
-  
   if (chartData[type].length > MAX_POINTS) {
     chartData[type].shift();
     chartTimes[type].shift();
@@ -2426,6 +2510,7 @@ function addDataPoint(type, value, time) {
   let yMax = type === 'load' ? 100 : Math.ceil(maxVal * 1.2);
   if (type === 'traffic' && yMax < 5) yMax = 5;
   if (type === 'conns' && yMax < 5) yMax = 5;
+  if (type === 'hourly' && yMax < 1) yMax = 1;
   if (maxVal === 0) yMax = 1;
   chart.options.scales.y.max = yMax;
   chart.update('none');
@@ -2465,12 +2550,18 @@ async function fetchStats(){
     } else {
       addDataPoint('traffic', 0.01, now);
     }
-    
     prevTraf = totalTrafficDisplay;
     localStorage.setItem(PREV_TRAF_KEY, String(prevTraf));
     
     addDataPoint('load', pct, now);
     addDataPoint('conns', activeCount, now);
+
+    // Hourly chart: use the hourly data from stats
+    const hourlyData = d.hourly || {};
+    const labels = Object.keys(hourlyData).sort();
+    const values = labels.map(h => (hourlyData[h] || 0) / (1024 * 1024));
+    const totalHourly = values.reduce((a, b) => a + b, 0);
+    addDataPoint('hourly', totalHourly / (values.length || 1), now);
     
     updateSecondaryCharts(d, allLinksList);
   } catch(e){ console.error('fetchStats error:', e); }
@@ -2484,7 +2575,7 @@ document.addEventListener('visibilitychange', function() {
 });
 
 // ========== SECONDARY CHARTS ==========
-let dashProtoChart = null, dashHourlyChart = null;
+let dashProtoChart = null, dashDailyChart = null;
 function initSecondaryCharts(){
   const accent = getAccentColor();
   const textColor = getTextColor();
@@ -2501,14 +2592,14 @@ function initSecondaryCharts(){
       animation: { duration: 400, easing: 'easeOutQuart' }
     }
   });
-  const ctxHourly = document.getElementById('dashHourlyChart').getContext('2d');
-  dashHourlyChart = new Chart(ctxHourly, {
+  const ctxDaily = document.getElementById('dashDailyChart').getContext('2d');
+  dashDailyChart = new Chart(ctxDaily, {
     type: 'line',
-    data: { labels: ['00', '04', '08', '12', '16', '20'], datasets: [{ data: [0, 0, 0, 0, 0, 0], borderColor: accent, backgroundColor: hexToRgba(accent, 0.2), borderWidth: 2, pointRadius: 0, pointHoverRadius: 5, pointHoverBorderWidth: 2, pointHoverBorderColor: '#fff', fill: 'origin', tension: 0.3 }] },
+    data: { labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'], datasets: [{ data: [0, 0, 0, 0, 0, 0, 0], borderColor: accent, backgroundColor: hexToRgba(accent, 0.2), borderWidth: 2, pointRadius: 0, pointHoverRadius: 5, pointHoverBorderWidth: 2, pointHoverBorderColor: '#fff', fill: 'origin', tension: 0.3 }] },
     options: {
       responsive: true, maintainAspectRatio: false,
       plugins: { legend: { display: false }, tooltip: { backgroundColor: 'rgba(11, 17, 29, 0.9)', borderColor: accent, borderWidth: 1, titleColor: '#fff', bodyColor: '#fff', cornerRadius: 8, padding: 10, callbacks: { label: function(context){ return context.parsed.y + ' MB'; } } } },
-      scales: { x: { grid: { display: false }, ticks: { color: textColor, font: { size: 8, family: 'Vazirmatn, sans-serif' } } }, y: { grid: { color: gridColor, drawBorder: false }, ticks: { color: textColor, font: { size: 8, family: 'Vazirmatn, sans-serif' }, callback: function(value) { return value + ' MB'; } } } },
+      scales: { x: { grid: { display: false }, ticks: { color: textColor, font: { size: 9, family: 'Vazirmatn, sans-serif' } } }, y: { grid: { color: gridColor, drawBorder: false }, ticks: { color: textColor, font: { size: 9, family: 'Vazirmatn, sans-serif' }, callback: function(value) { return value + ' MB'; } } } },
       animation: { duration: 400, easing: 'easeOutQuart' }
     }
   });
@@ -2525,20 +2616,16 @@ function updateSecondaryCharts(statsData, linksData){
     dashProtoChart.data.datasets[0].data = counts;
     dashProtoChart.update('none');
   }
-  if(dashHourlyChart && statsData){
-    const hourly = statsData.hourly || {};
-    const labels = Object.keys(hourly).sort();
-    const data = labels.map(h => (hourly[h] || 0) / (1024 * 1024));
-    let slicedLabels = labels.slice(0, 6);
-    let slicedData = data.slice(0, 6);
-    while(slicedLabels.length < 6){ slicedLabels.push('—'); slicedData.push(0); }
-    dashHourlyChart.data.labels = slicedLabels;
-    dashHourlyChart.data.datasets[0].data = slicedData;
-    dashHourlyChart.update('none');
+  if(dashDailyChart && statsData){
+    const daily = statsData.daily || {};
+    const labels = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
+    const data = labels.map(day => (daily[day] || 0) / (1024 * 1024));
+    dashDailyChart.data.datasets[0].data = data;
+    dashDailyChart.update('none');
   }
 }
 
-// ========== LINKS ==========
+// ========== LINKS (unchanged) ==========
 async function loadLinks(){
   try{
     const [lr, sr] = await Promise.all([authF('/api/links'), authF('/api/subs')]);
@@ -2833,7 +2920,7 @@ async function copyAllSubLinks(subId){
   navigator.clipboard.writeText(urls.join('\n')).then(() => toast(urls.length + ' links copied ✓', 'ok'));
 }
 
-// ========== CONNECTIONS, ACTIVITY, ERRORS, WEBSOCKET ==========
+// ========== CONNECTIONS, ACTIVITY, ERRORS, WEBSOCKET (unchanged) ==========
 async function loadConns(){
   try{
     const r = await authF('/api/connections');
@@ -3152,6 +3239,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       addDataPoint('load', 0, t);
       addDataPoint('traffic', 0, t);
       addDataPoint('conns', 0, t);
+      addDataPoint('hourly', 0, t);
     }
   }
 
