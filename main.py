@@ -4,10 +4,11 @@ import os
 import hashlib
 import secrets
 import time
+import base64
 import aiofiles
 from datetime import datetime, timedelta
 from zoneinfo import ZoneInfo
-from urllib.parse import quote
+from urllib.parse import quote, urlencode
 from collections import deque, defaultdict
 from pathlib import Path
 from fastapi import FastAPI, Request, HTTPException, WebSocket, WebSocketDisconnect, Depends
@@ -16,7 +17,6 @@ from fastapi.middleware.cors import CORSMiddleware
 import uvicorn
 import httpx
 import logging
-import base64
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(message)s")
 logger = logging.getLogger("CBeeNet-Gateway")
@@ -38,7 +38,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# ── Persistence ───────────────────────────────────────────────────────────────
+# ===== PERSISTENCE =====
 DATA_DIR = Path(os.environ.get("DATA_DIR", "/app/data"))
 DATA_FILE = DATA_DIR / "cbee_state.json"
 SAVE_LOCK = asyncio.Lock()
@@ -82,7 +82,7 @@ async def save_state():
     except Exception as e:
         logger.error(f"Error saving state: {e}")
 
-# ── In-memory state ───────────────────────────────────────────────────────────
+# ===== IN-MEMORY STATE =====
 connections: dict = {}
 stats = {"total_bytes": 0, "total_requests": 0, "total_errors": 0, "start_time": time.time()}
 error_logs: deque = deque(maxlen=50)
@@ -97,11 +97,17 @@ SUBS_LOCK = asyncio.Lock()
 RESELLERS: dict = {}
 RESELLERS_LOCK = asyncio.Lock()
 
-# لیست پروتکل‌های مجاز (trojan-ws حذف شد)
-PROTOCOLS = ("vless-ws", "xhttp-packet-up", "xhttp-stream-up", "xhttp-stream-one")
+# پروتکل‌های پشتیبانی شده (نام‌های داخلی)
+PROTOCOLS = (
+    "vless-ws",
+    "xhttp-packet-up",
+    "xhttp-stream-up",
+    "xhttp-stream-one",
+    "trojan-ws",
+    "vmess-ws"
+)
 DEFAULT_PROTOCOL = "vless-ws"
 
-# تنظیمات سرور
 GLOBAL_SETTINGS = {
     "ips": [],
     "port": None,
@@ -113,6 +119,8 @@ GLOBAL_SETTINGS = {
         "xhttp-packet-up": {"server_name": "", "link_prefix": "", "link_template": ""},
         "xhttp-stream-up": {"server_name": "", "link_prefix": "", "link_template": ""},
         "xhttp-stream-one": {"server_name": "", "link_prefix": "", "link_template": ""},
+        "trojan-ws": {"server_name": "", "link_prefix": "", "link_template": ""},
+        "vmess-ws": {"server_name": "", "link_prefix": "", "link_template": ""},
     }
 }
 
@@ -124,7 +132,7 @@ def log_activity(kind: str, message: str, level: str = "info"):
         "time": datetime.now().isoformat(),
     })
 
-# ── Auth ──────────────────────────────────────────────────────────────────────
+# ===== AUTH =====
 SESSION_COOKIE = "cbee_session"
 SESSION_TTL = 60 * 60 * 24 * 7
 
@@ -173,7 +181,7 @@ async def require_reseller_auth(request: Request):
         raise HTTPException(status_code=401, detail="unauthorized")
     return s
 
-# ── Startup / Shutdown ────────────────────────────────────────────────────────
+# ===== STARTUP / SHUTDOWN =====
 @app.on_event("startup")
 async def startup():
     global http_client
@@ -190,7 +198,7 @@ async def shutdown():
     if http_client:
         await http_client.aclose()
 
-# ── Helpers ───────────────────────────────────────────────────────────────────
+# ===== HELPERS =====
 def get_host() -> str:
     return os.environ.get("RAILWAY_PUBLIC_DOMAIN", CONFIG["host"])
 
@@ -231,31 +239,31 @@ def format_link_remark(label: str, protocol: str) -> str:
     result = result.replace("{prefix}", prefix)
     result = result.replace("{label}", label)
     
-    # فقط اگر {protocol} در قالب وجود داشت، جایگزین می‌شود
     if "{protocol}" in template:
         default_names = {
             "vless-ws": "VLESS-WS",
             "xhttp-packet-up": "XHTTP-packet",
             "xhttp-stream-up": "XHTTP-stream",
-            "xhttp-stream-one": "XHTTP-ultra"
+            "xhttp-stream-one": "XHTTP-ultra",
+            "trojan-ws": "Trojan-WS",
+            "vmess-ws": "VMess-WS"
         }
         proto_name = default_names.get(protocol, protocol)
         result = result.replace("{protocol}", proto_name)
     
     return result
 
-def _format_uri(uuid: str, ip: str, port: int, remark: str, protocol: str, original_host: str) -> str:
-    if protocol == "vless-ws":
-        path = f"/ws/{uuid}"
-        params = {
-            "encryption": "none", "security": "tls", "type": "ws",
-            "host": original_host, "path": path, "sni": original_host,
-            "fp": "chrome", "alpn": "http/1.1"
-        }
-        query = "&".join(f"{k}={quote(str(v))}" for k, v in params.items())
-        return f"vless://{uuid}@{ip}:{port}?{query}#{quote(remark)}"
+def _format_vless_uri(uuid: str, ip: str, port: int, remark: str, protocol: str, original_host: str) -> str:
+    path = f"/ws/{uuid}"
+    params = {
+        "encryption": "none", "security": "tls", "type": "ws",
+        "host": original_host, "path": path, "sni": original_host,
+        "fp": "chrome", "alpn": "http/1.1"
+    }
+    query = "&".join(f"{k}={quote(str(v))}" for k, v in params.items())
+    return f"vless://{uuid}@{ip}:{port}?{query}#{quote(remark)}"
 
-    # XHTTP protocols
+def _format_xhttp_uri(uuid: str, ip: str, port: int, remark: str, protocol: str, original_host: str) -> str:
     mode = protocol.replace("xhttp-", "")
     path = f"/xhttp-siz10/{mode}/{uuid}"
     params = {
@@ -265,6 +273,56 @@ def _format_uri(uuid: str, ip: str, port: int, remark: str, protocol: str, origi
     }
     query = "&".join(f"{k}={quote(str(v))}" for k, v in params.items())
     return f"vless://{uuid}@{ip}:{port}?{query}#{quote(remark)}"
+
+def _format_trojan_uri(uuid: str, ip: str, port: int, remark: str, protocol: str, original_host: str) -> str:
+    # مسیر ثابت با UUID در انتها
+    path = f"/CBeeNet-----CBeeNet-----CBeeNet-----CBeeNet-----CBeeNet-----CBeeNet-----CBeeNet-----CBeeNet-----CBeeNet-----CBeeNet/{uuid}"
+    params = {
+        "path": path,
+        "security": "tls",
+        "type": "httpupgrade",
+        "host": original_host,
+        "sni": original_host,
+        "insecure": "0",
+        "allowInsecure": "0"
+    }
+    query = "&".join(f"{k}={quote(str(v))}" for k, v in params.items())
+    # پسورد ثابت = CBeeNet
+    return f"trojan://CBeeNet@{ip}:{port}?{query}#{quote(remark)}"
+
+def _format_vmess_uri(uuid: str, ip: str, port: int, remark: str, protocol: str, original_host: str) -> str:
+    # ساخت JSON استاندارد VMess
+    path = f"/CBeeNet-----CBeeNet-----CBeeNet-----CBeeNet-----CBeeNet-----CBeeNet-----CBeeNet-----CBeeNet-----CBeeNet-----CBeeNet/{uuid}"
+    config = {
+        "v": "2",
+        "ps": remark,
+        "add": ip,
+        "port": str(port),
+        "id": uuid,
+        "aid": "0",
+        "net": "ws",
+        "type": "none",
+        "host": original_host,
+        "path": path,
+        "tls": "tls",
+        "sni": original_host
+    }
+    json_str = json.dumps(config, separators=(',', ':'))
+    b64 = base64.b64encode(json_str.encode()).decode()
+    return f"vmess://{b64}"
+
+def _format_uri(uuid: str, ip: str, port: int, remark: str, protocol: str, original_host: str) -> str:
+    if protocol == "vless-ws":
+        return _format_vless_uri(uuid, ip, port, remark, protocol, original_host)
+    elif protocol.startswith("xhttp-"):
+        return _format_xhttp_uri(uuid, ip, port, remark, protocol, original_host)
+    elif protocol == "trojan-ws":
+        return _format_trojan_uri(uuid, ip, port, remark, protocol, original_host)
+    elif protocol == "vmess-ws":
+        return _format_vmess_uri(uuid, ip, port, remark, protocol, original_host)
+    else:
+        # fallback to VLESS
+        return _format_vless_uri(uuid, ip, port, remark, protocol, original_host)
 
 def generate_links(link_data: dict, uuid: str, host: str) -> list[str]:
     links = []
@@ -287,7 +345,6 @@ def generate_links(link_data: dict, uuid: str, host: str) -> list[str]:
     for ip in ips:
         for proto in protocols:
             remark = format_link_remark(label, proto)
-            # دیگر هیچ پسوندی اضافه نمی‌شود - فقط قالب کاربر اعمال می‌شود
             links.append(_format_uri(uuid, ip, port, remark, proto, host))
     return links
 
@@ -330,7 +387,7 @@ def client_ip(request: Request) -> str:
     if real_ip: return real_ip.strip()
     return request.client.host if request.client else "unknown"
 
-# ── Default link ──────────────────────────────────────────────────────────────
+# ===== DEFAULT LINK =====
 _default_link_created = False
 async def ensure_default_link():
     global _default_link_created
@@ -349,7 +406,7 @@ async def ensure_default_link():
     asyncio.create_task(save_state())
     _default_link_created = True
 
-# ── Reseller Capacity ─────────────────────────────────────────────────────────
+# ===== RESELLER CAPACITY =====
 async def check_reseller_capacity(reseller_id: str, new_limit_bytes: int):
     if new_limit_bytes == 0:
         raise HTTPException(status_code=400, detail="Reseller cannot create unlimited config.")
@@ -365,7 +422,7 @@ async def check_reseller_capacity(reseller_id: str, new_limit_bytes: int):
         if allocated + new_limit_bytes > res.get("total_bytes", 0):
             raise HTTPException(status_code=400, detail="Reseller quota exceeded.")
 
-# ── Basic endpoints ───────────────────────────────────────────────────────────
+# ===== BASIC ENDPOINTS =====
 @app.get("/")
 async def root():
     return {"service": "CBeeNet Gateway", "version": "1.0.0", "status": "active", "channel": "https://t.me/CBeeNet"}
@@ -374,7 +431,7 @@ async def root():
 async def health():
     return {"status": "ok", "connections": len(connections), "uptime": uptime()}
 
-# ── Subscriptions ─────────────────────────────────────────────────────────────
+# ===== SUBSCRIPTIONS =====
 @app.get("/sub/{uuid}")
 async def subscription_single(uuid: str, request: Request):
     async with LINKS_LOCK:
@@ -430,7 +487,7 @@ async def sub_group_subscription(uuid_key: str, request: Request):
     return Response(content=content, media_type="text/plain",
         headers={"profile-title": quote(sub["name"]), "support-url": "https://t.me/CBeeNet", "profile-update-interval": "12"})
 
-# ── Sub Groups (Admin) ────────────────────────────────────────────────────────
+# ===== SUB GROUPS (Admin) =====
 @app.post("/api/subs")
 async def create_sub(request: Request, _=Depends(require_auth)):
     body = await request.json()
@@ -514,7 +571,7 @@ async def assign_link_to_sub(sub_id: str, request: Request, _=Depends(require_au
     asyncio.create_task(save_state())
     return {"ok": True}
 
-# ── Auth ──────────────────────────────────────────────────────────────────────
+# ===== AUTH =====
 @app.post("/api/login")
 async def api_login(request: Request):
     body = await request.json()
@@ -567,7 +624,7 @@ async def api_change_password(request: Request, token=Depends(require_auth)):
     log_activity("auth", "Panel password changed", "ok")
     return {"ok": True}
 
-# ── Global IP Settings ────────────────────────────────────────────────────────
+# ===== GLOBAL IP SETTINGS =====
 @app.get("/api/settings/global-ips")
 async def get_global_ips(_=Depends(require_auth)):
     return GLOBAL_SETTINGS
@@ -581,7 +638,7 @@ async def update_global_ips(request: Request, _=Depends(require_auth)):
     log_activity("system", "Global IP/port settings updated", "info")
     return {"ok": True, "settings": dict(GLOBAL_SETTINGS)}
 
-# ── Server Settings (default + protocol configs) ────────────────────────────
+# ===== SERVER SETTINGS =====
 @app.get("/api/settings/server")
 async def get_server_settings(_=Depends(require_auth)):
     return {
@@ -620,7 +677,7 @@ async def update_protocol_settings(request: Request, _=Depends(require_auth)):
     log_activity("system", "Protocol settings updated", "info")
     return {"ok": True, "settings": GLOBAL_SETTINGS["protocol_configs"]}
 
-# ── Stats ─────────────────────────────────────────────────────────────────────
+# ===== STATS =====
 @app.get("/stats")
 async def get_stats(_=Depends(require_auth)):
     async with LINKS_LOCK: snap = dict(LINKS)
@@ -665,7 +722,7 @@ async def get_connections(_=Depends(require_auth)):
     result.sort(key=lambda x: x.get("last_connected_at") or "", reverse=True)
     return {"connections": result, "count": len(result), "raw_count": len(connections)}
 
-# ── Link Management ───────────────────────────────────────────────────────────
+# ===== LINK MANAGEMENT =====
 @app.post("/api/links")
 async def create_link(request: Request):
     s = await require_reseller_auth(request)
@@ -868,7 +925,7 @@ async def delete_link(uid: str, request: Request):
     log_activity("link", f"Link {uid[:8]}... deleted", "err")
     return {"ok": True, "deleted": uid}
 
-# ── Reset Reseller Token ──────────────────────────────────────────────────────
+# ===== RESELLER MANAGEMENT =====
 @app.post("/api/resellers/{rid}/reset-token")
 async def reset_reseller_token(rid: str, _=Depends(require_auth)):
     async with RESELLERS_LOCK:
@@ -877,7 +934,6 @@ async def reset_reseller_token(rid: str, _=Depends(require_auth)):
     asyncio.create_task(save_state())
     return {"ok": True, "login_token": RESELLERS[rid]["login_token"]}
 
-# ── Reseller Management (Admin Only) ──────────────────────────────────────────
 @app.get("/api/resellers")
 async def list_resellers(_=Depends(require_auth)):
     host = get_host()
@@ -950,14 +1006,12 @@ async def delete_reseller(rid: str, _=Depends(require_auth)):
     log_activity("system", f"Reseller {rid[:8]}... deleted", "warn")
     return {"ok": True, "deleted": rid}
 
-# ── Reseller Report (Admin) ───────────────────────────────────────────────────
 @app.get("/api/resellers/{rid}/links")
 async def reseller_links(rid: str, _=Depends(require_auth)):
     async with LINKS_LOCK:
         result = [{"uuid": uid, **d} for uid, d in LINKS.items() if d.get("creator_id") == rid]
     return {"links": result}
 
-# ── Reseller Token Login ──────────────────────────────────────────────────────
 @app.get("/r/{login_token}")
 async def reseller_token_login(login_token: str):
     async with RESELLERS_LOCK:
@@ -970,15 +1024,23 @@ async def reseller_token_login(login_token: str):
                 return resp
     return HTMLResponse("<h2 style='padding:40px;font-family:sans-serif'>Invalid link</h2>", status_code=404)
 
-# ── VLESS Relay ───────────────────────────────────────────────────────────────
+# ===== VLESS RELAY =====
 from relay_vless import RELAY_BUF, parse_vless_header, check_and_use, relay_ws_to_tcp, relay_tcp_to_ws, websocket_tunnel
 app.add_api_websocket_route("/ws/{uuid}", websocket_tunnel)
 
-# ── XHTTP ─────────────────────────────────────────────────────────────────────
+# ===== XHTTP =====
 from xhttp_siz10 import router as xhttp_router
 app.include_router(xhttp_router)
 
-# ── HTTP Proxy ────────────────────────────────────────────────────────────────
+# ===== TROJAN =====
+from relay_trojan import router as trojan_router
+app.include_router(trojan_router)
+
+# ===== VMESS =====
+from relay_vmess import router as vmess_router
+app.include_router(vmess_router)
+
+# ===== HTTP PROXY =====
 _HOP = {"connection","keep-alive","proxy-authenticate","proxy-authorization","te","trailers","transfer-encoding","upgrade","content-encoding","content-length"}
 @app.api_route("/proxy/{target_url:path}", methods=["GET","POST","PUT","DELETE","PATCH","HEAD","OPTIONS"])
 async def http_proxy(target_url: str, request: Request):
@@ -997,7 +1059,7 @@ async def http_proxy(target_url: str, request: Request):
         error_logs.append({"error": str(exc), "url": target_url, "time": datetime.now().isoformat()})
         raise HTTPException(status_code=502, detail=f"Proxy error: {exc}")
 
-# ── Public Sub Page ───────────────────────────────────────────────────────────
+# ===== PUBLIC SUB PAGES =====
 @app.get("/p/{uuid_key}", response_class=HTMLResponse)
 async def public_sub_page(uuid_key: str, request: Request):
     from public_page import get_public_page_html
@@ -1072,6 +1134,7 @@ async def public_single_sub_data(uuid: str):
             }]
         }
 
+# ===== PAGES =====
 from pages import LOGIN_HTML, DASHBOARD_HTML
 
 @app.get("/login", response_class=HTMLResponse)
