@@ -1917,6 +1917,7 @@ let allLinksList = [];
 let allSubsList = [];
 let prevTraf = 0;
 let totalTrafficDisplay = 0;
+let historyLoaded = false; // new flag for server-side history
 
 // ========== LANGUAGE & THEME ==========
 function setLanguage(lang){
@@ -2490,9 +2491,68 @@ function addDataPoint(type, value, time) {
   updateChartValue(type);
 }
 
-// ========== fetchStats ==========
+// ========== Load history from server ==========
+async function loadHistoryFromServer() {
+    try {
+        const r = await authF('/api/history');
+        const data = await r.json();
+        const hist = data.history || [];
+        if (hist.length === 0) {
+            historyLoaded = false;
+            return;
+        }
+
+        // Clear existing chart data
+        chartData = { load: [], traffic: [], conns: [] };
+        chartTimes = { load: [], traffic: [], conns: [] };
+
+        // Populate with history points
+        let lastTraffic = 0;
+        for (let i = 0; i < hist.length; i++) {
+            const h = hist[i];
+            const t = new Date(h.time);
+            const trafficMB = h.traffic_mb || 0;
+            const conns = h.connections || 0;
+            // Compute load as rate of traffic change (MB per second)
+            let load = 0;
+            if (i > 0) {
+                const prev = hist[i-1];
+                const prevTraffic = prev.traffic_mb || 0;
+                const dt = (t.getTime() - new Date(prev.time).getTime()) / 1000;
+                if (dt > 0) {
+                    const rateMBs = (trafficMB - prevTraffic) / dt;
+                    load = Math.min(100, Math.max(0, rateMBs * 2)); // scale to percentage
+                }
+            }
+            addDataPoint('traffic', trafficMB - lastTraffic, t);
+            addDataPoint('load', load, t);
+            addDataPoint('conns', conns, t);
+            lastTraffic = trafficMB;
+        }
+
+        // Set prevTraf to the last traffic value from history
+        if (hist.length > 0) {
+            prevTraf = hist[hist.length-1].traffic_mb || 0;
+            localStorage.setItem(PREV_TRAF_KEY, String(prevTraf));
+        }
+
+        historyLoaded = true;
+        saveChartDataToStorage();
+    } catch(e) {
+        console.warn('Could not load history from server:', e);
+        historyLoaded = false;
+    }
+}
+
+// ========== fetchStats (modified) ==========
 async function fetchStats(){
   try{
+    // If history not loaded, load it first (will be called again after 5s)
+    if (!historyLoaded) {
+        await loadHistoryFromServer();
+        // After loading history, proceed to fetch current stats
+    }
+
     const connResp = await authF('/api/connections');
     const connData = await connResp.json();
     const conns = connData.connections || [];
@@ -2514,102 +2574,24 @@ async function fetchStats(){
     document.getElementById('last-upd').textContent = 'Last update: ' + new Date().toLocaleTimeString();
 
     const now = new Date();
-    const savedPrevTraf = parseFloat(localStorage.getItem(PREV_TRAF_KEY)) || 0;
-    const delta = totalTrafficDisplay - savedPrevTraf;
-    const lastTime = localStorage.getItem(CHART_LAST_TIME_KEY);
-    let gapSeconds = lastTime ? (Date.now() - parseInt(lastTime)) / 1000 : 5;
-    gapSeconds = Math.max(1, gapSeconds);
-
-    if (delta > 0 && gapSeconds > 5) {
-      const pointsToAdd = Math.min(Math.floor(gapSeconds / 5), 60);
-      if (pointsToAdd > 0) {
-        const perPoint = delta / (pointsToAdd + 1);
-        const lastTrafficTime = chartTimes['traffic'].length > 0 ? chartTimes['traffic'][chartTimes['traffic'].length-1] : new Date(now.getTime() - gapSeconds * 1000);
-        const gapMs = gapSeconds * 1000;
-
-        const newTraffic = [];
-        const newLoad = [];
-        const newConns = [];
-        const newTimes = [];
-
-        for (let i = 1; i <= pointsToAdd; i++) {
-          const fraction = i / (pointsToAdd + 1);
-          const t = new Date(lastTrafficTime.getTime() + fraction * gapMs);
-          newTraffic.push(perPoint);
-          const loadPct = Math.min(100, Math.max(0, (perPoint / 5) * 0.8));
-          newLoad.push(loadPct);
-          newConns.push(activeCount);
-          newTimes.push(t);
-        }
-
-        chartData['traffic'] = chartData['traffic'].concat(newTraffic);
-        chartData['load'] = chartData['load'].concat(newLoad);
-        chartData['conns'] = chartData['conns'].concat(newConns);
-        chartTimes['traffic'] = chartTimes['traffic'].concat(newTimes);
-        chartTimes['load'] = chartTimes['load'].concat(newTimes);
-        chartTimes['conns'] = chartTimes['conns'].concat(newTimes);
-
-        if (chartData['traffic'].length > MAX_POINTS) {
-          const excess = chartData['traffic'].length - MAX_POINTS;
-          chartData['traffic'] = chartData['traffic'].slice(excess);
-          chartData['load'] = chartData['load'].slice(excess);
-          chartData['conns'] = chartData['conns'].slice(excess);
-          chartTimes['traffic'] = chartTimes['traffic'].slice(excess);
-          chartTimes['load'] = chartTimes['load'].slice(excess);
-          chartTimes['conns'] = chartTimes['conns'].slice(excess);
-        }
-
-        prevTraf = totalTrafficDisplay;
-        localStorage.setItem(PREV_TRAF_KEY, String(prevTraf));
-        saveChartDataToStorage();
-
-        for (let type of ['load', 'traffic', 'conns']) {
-          const chart = chartInstances[type];
-          if (chart) {
-            const labels = chartTimes[type].map(d => d ? d.toLocaleTimeString('en-US', {hour:'2-digit', minute:'2-digit', hour12:false}) : '');
-            chart.data.labels = labels;
-            chart.data.datasets[0].data = chartData[type];
-            chart.data.datasets[1].data = chartData[type];
-            const maxVal = chartData[type].length > 0 ? Math.max(...chartData[type], 1) : 1;
-            let yMax = type === 'load' ? 100 : Math.ceil(maxVal * 1.2);
-            if (type === 'traffic' && yMax < 5) yMax = 5;
-            if (type === 'conns' && yMax < 5) yMax = 5;
-            if (maxVal === 0) yMax = 1;
-            const roundToNice = (num) => {
-              if (num <= 10) return 10;
-              if (num <= 20) return 20;
-              if (num <= 50) return 50;
-              if (num <= 100) return 100;
-              if (num <= 200) return 200;
-              if (num <= 500) return 500;
-              return Math.ceil(num / 100) * 100;
-            };
-            yMax = roundToNice(yMax);
-            let stepSize = Math.round(yMax / 5);
-            if (stepSize === 0) stepSize = 1;
-            chart.options.scales.y.max = yMax;
-            chart.options.scales.y.ticks.stepSize = stepSize;
-            chart.update('none');
-            updateChartValue(type);
-          }
-        }
-        updateSecondaryCharts(d, allLinksList);
-        return;
-      }
-    }
-
+    const delta = totalTrafficDisplay - prevTraf;
+    const gap = (now.getTime() - (localStorage.getItem(CHART_LAST_TIME_KEY) || Date.now())) / 1000;
+    
+    // Add the current point (delta is the traffic change since last poll)
     if (delta >= 0) {
-      addDataPoint('traffic', delta, now);
+        addDataPoint('traffic', delta, now);
     } else {
-      addDataPoint('traffic', 0.01, now);
+        addDataPoint('traffic', 0.01, now);
     }
-    prevTraf = totalTrafficDisplay;
-    localStorage.setItem(PREV_TRAF_KEY, String(prevTraf));
-
-    const rate = delta / gapSeconds;
+    // Update load based on rate
+    const rate = delta / Math.max(gap, 1);
     const loadPct = Math.min(100, Math.max(0, (rate / 60) * 10));
     addDataPoint('load', loadPct, now);
     addDataPoint('conns', activeCount, now);
+
+    prevTraf = totalTrafficDisplay;
+    localStorage.setItem(PREV_TRAF_KEY, String(prevTraf));
+    localStorage.setItem(CHART_LAST_TIME_KEY, String(now.getTime()));
     
     updateSecondaryCharts(d, allLinksList);
     saveChartDataToStorage();
@@ -3331,18 +3313,22 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   prevTraf = parseFloat(localStorage.getItem(PREV_TRAF_KEY)) || 0;
 
-  const hasStored = loadChartDataFromStorage();
+  // Load history from server before initializing charts
+  await loadHistoryFromServer();
+
+  // If history loaded successfully, we have chart data; otherwise create dummy points
+  if (!historyLoaded || chartData.traffic.length === 0) {
+      const now = new Date();
+      for(let i=0; i<10; i++){
+          const t = new Date(now.getTime() - (10-i)*5000);
+          addDataPoint('load', 0, t);
+          addDataPoint('traffic', 0, t);
+          addDataPoint('conns', 0, t);
+      }
+  }
+
   initPremiumCharts();
   initSecondaryCharts();
-  if(!hasStored || chartData.load.length === 0){
-    const now = new Date();
-    for(let i=0; i<10; i++){
-      const t = new Date(now.getTime() - (10-i)*5000);
-      addDataPoint('load', 0, t);
-      addDataPoint('traffic', 0, t);
-      addDataPoint('conns', 0, t);
-    }
-  }
 
   document.getElementById('set-host').textContent = location.host;
   document.getElementById('sub-all-url').textContent = location.protocol + '//' + location.host + '/sub-all';
