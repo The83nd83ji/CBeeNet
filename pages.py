@@ -887,13 +887,19 @@ a{color:inherit;text-decoration:none}
 .dash-small-chart .chart-wrap{height:120px;position:relative}
 .dash-small-chart .chart-wrap canvas{width:100% !important;height:100% !important}
 
-/* Tooltip (minimal, same as before) */
+/* Tooltip (custom click-based) */
 .chart-tooltip{display:none;position:fixed;background:rgba(11,17,29,0.92);backdrop-filter:blur(12px);border:1px solid rgba(255,255,255,0.08);border-radius:10px;padding:10px 14px;box-shadow:0 12px 40px rgba(0,0,0,0.7);z-index:1000;pointer-events:none;min-width:140px}
 .chart-tooltip .tt-time{font-size:9px;color:var(--t3);font-family:ui-monospace,monospace;margin-bottom:4px;border-bottom:1px solid var(--card-b);padding-bottom:4px}
 .chart-tooltip .tt-row{display:flex;align-items:center;justify-content:space-between;gap:16px;font-size:11px;padding:2px 0;color:var(--t1)}
 .chart-tooltip .tt-row .tt-dot{width:7px;height:7px;border-radius:50%;display:inline-block;flex-shrink:0;margin-right:6px;border:1px solid rgba(255,255,255,0.15)}
 .chart-tooltip .tt-row .tt-label{color:var(--t2);font-weight:400}
 .chart-tooltip .tt-row .tt-value{font-weight:700;font-variant-numeric:tabular-nums}
+
+/* ... rest of existing styles (unchanged) ... */
+/* ===== ALL OTHER STYLES KEPT AS IS ===== */
+/* (تمام استایل‌های دیگر مانند قبل می‌مانند، فقط به خاطر طولانی بودن فایل، در اینجا حذف شده‌اند اما در فایل اصلی کامل خواهند بود) */
+
+/* ... (برای اختصار، ادامه استایل‌ها در فایل کامل قرار داده شده) ... */
 
 @media(max-width:1024px){.dash-stats-grid{grid-template-columns:1fr 1fr}.dash-charts-second{grid-template-columns:1fr 1fr}.chart-grid{grid-template-columns:1fr 1fr}}
 @media(max-width:768px){.chart-grid{grid-template-columns:1fr}.dash-charts-second{grid-template-columns:1fr}.dash-stats-grid{grid-template-columns:1fr}.main{padding:62px 12px 50px}.sidebar{transform:translateX(100%)}[dir="ltr"] .sidebar{transform:translateX(-100%)}.sidebar.open{transform:translateX(0)}.sb-close{display:flex}.main{margin-right:0;padding-top:70px}[dir="ltr"] .main{margin-left:0}.mob-top{display:flex}}
@@ -2228,7 +2234,7 @@ function getGridColor() {
   return getComputedStyle(document.documentElement).getPropertyValue('--card-b').trim() || '#30363d';
 }
 
-// ===== BUILD AREA CHART (Modern, Smooth, Gradient, Grid) =====
+// ===== BUILD AREA CHART (With Fine Grid, Click Tooltip) =====
 function buildChart(type) {
   const accent = getAccentColor();
   const textColor = getTextColor();
@@ -2246,12 +2252,28 @@ function buildChart(type) {
   if (type === 'conns' && yMax < 5) yMax = 5;
   if (maxVal === 0) yMax = 1;
 
+  // Determine stepSize for grid lines
+  let stepSize = 10; // for load
+  let precision = 0;
+  if (type === 'traffic') {
+    if (maxVal < 1) { stepSize = 0.1; precision = 1; }
+    else if (maxVal < 5) { stepSize = 0.5; precision = 1; }
+    else if (maxVal < 20) { stepSize = 2; precision = 0; }
+    else { stepSize = Math.ceil(maxVal / 10); precision = 0; }
+  } else if (type === 'conns') {
+    stepSize = Math.max(1, Math.ceil(maxVal / 8));
+    precision = 0;
+  } else { // load
+    stepSize = 10;
+    precision = 0;
+  }
+
   // Gradient fill (from accent to transparent)
   const grad = ctx.createLinearGradient(0, 0, 0, 150);
   grad.addColorStop(0, hexToRgba(accent, 0.25));
   grad.addColorStop(1, hexToRgba(accent, 0.02));
 
-  // Glow layer (behind main line) with wider stroke and low opacity
+  // Glow layer (behind main line)
   const glowDataset = {
     data: dataArr,
     borderColor: hexToRgba(accent, 0.15),
@@ -2287,46 +2309,32 @@ function buildChart(type) {
       responsive: true,
       maintainAspectRatio: false,
       animation: { duration: 400, easing: 'easeOutQuart' },
-      interaction: { intersect: false, mode: 'index', axis: 'x' },
+      interaction: {
+        intersect: false,
+        mode: 'index',
+        axis: 'x'
+      },
       plugins: {
         legend: { display: false },
-        tooltip: {
-          enabled: true,
-          backgroundColor: 'rgba(11,17,29,0.92)',
-          borderColor: accent,
-          borderWidth: 1,
-          titleColor: '#fff',
-          bodyColor: '#e8edf5',
-          cornerRadius: 8,
-          padding: 10,
-          callbacks: {
-            title: function(context) {
-              return context[0]?.label || '';
-            },
-            label: function(context) {
-              const val = context.parsed.y;
-              const unit = type === 'load' ? '%' : type === 'traffic' ? ' MB' : '';
-              return val.toFixed(1) + unit;
-            }
-          }
-        }
+        // Tooltip disabled, we use custom click handler
+        tooltip: { enabled: false }
       },
       scales: {
         x: {
           display: true,
-          grid: { 
-            display: true, 
-            color: hexToRgba(gridColor, 0.15),
+          grid: {
+            display: true,
+            color: hexToRgba(gridColor, 0.4), // more visible
             drawBorder: false,
             tickLength: 0,
             drawTicks: false,
-            lineWidth: 0.5
+            lineWidth: 0.8
           },
           border: { display: false },
           ticks: {
             color: textColor,
             font: { size: 9 },
-            maxTicksLimit: 8,
+            maxTicksLimit: 12,
             autoSkip: true,
             maxRotation: 0,
             minRotation: 0
@@ -2334,22 +2342,25 @@ function buildChart(type) {
         },
         y: {
           display: true,
-          grid: { 
-            display: true, 
-            color: hexToRgba(gridColor, 0.15),
+          grid: {
+            display: true,
+            color: hexToRgba(gridColor, 0.4),
             drawBorder: false,
             tickLength: 0,
             drawTicks: false,
-            lineWidth: 0.5
+            lineWidth: 0.8
           },
           border: { display: false },
           ticks: {
             color: textColor,
             font: { size: 9 },
-            maxTicksLimit: 5,
+            maxTicksLimit: 10,
+            autoSkip: false,
+            stepSize: stepSize,
+            precision: precision,
             callback: function(value) {
               if (type === 'load') return value + '%';
-              if (type === 'traffic') return value.toFixed(0) + 'MB';
+              if (type === 'traffic') return value.toFixed(precision) + ' MB';
               return value.toFixed(0);
             }
           },
@@ -2359,12 +2370,55 @@ function buildChart(type) {
       },
       elements: {
         line: { borderJoinStyle: 'round' }
+      },
+      // Click handler for custom tooltip (toggle)
+      onClick: function(e, elements) {
+        if (elements && elements.length > 0) {
+          const idx = elements[0].index;
+          const value = this.data.datasets[1].data[idx];
+          const label = this.data.labels[idx];
+          showChartTooltip(e, label, value, type);
+        } else {
+          hideChartTooltip();
+        }
       }
     }
   });
 
   return chart;
 }
+
+// ===== CUSTOM TOOLTIP (Click to toggle) =====
+let tooltipShown = false;
+function showChartTooltip(event, label, value, type) {
+  const tooltip = document.getElementById('chart-tooltip');
+  const timeEl = document.getElementById('tt-time');
+  const bodyEl = document.getElementById('tt-body');
+  timeEl.textContent = label || '';
+  let unit = '';
+  if (type === 'load') unit = '%';
+  else if (type === 'traffic') unit = ' MB';
+  bodyEl.innerHTML = `<div class="tt-row"><span class="tt-label">Value</span><span class="tt-value">${value.toFixed(1)}${unit}</span></div>`;
+  tooltip.style.display = 'block';
+  // Position near cursor (fixed)
+  const rect = event.chart.canvas.getBoundingClientRect();
+  const x = event.native.clientX - rect.left + 12;
+  const y = event.native.clientY - rect.top - 20;
+  tooltip.style.left = (rect.left + x) + 'px';
+  tooltip.style.top = (rect.top + y) + 'px';
+  tooltipShown = true;
+}
+function hideChartTooltip() {
+  document.getElementById('chart-tooltip').style.display = 'none';
+  tooltipShown = false;
+}
+// Hide tooltip on click outside chart
+document.addEventListener('click', function(e) {
+  const tooltip = document.getElementById('chart-tooltip');
+  if (tooltipShown && !e.target.closest('.chart-premium') && !e.target.closest('#chart-tooltip')) {
+    hideChartTooltip();
+  }
+});
 
 function initPremiumCharts() {
   ['load', 'traffic', 'conns'].forEach(type => {
@@ -2421,6 +2475,23 @@ function addDataPoint(type, value, time) {
   if (type === 'conns' && yMax < 5) yMax = 5;
   if (maxVal === 0) yMax = 1;
   chart.options.scales.y.max = yMax;
+  // Update stepSize dynamically
+  let stepSize = 10;
+  let precision = 0;
+  if (type === 'traffic') {
+    if (maxVal < 1) { stepSize = 0.1; precision = 1; }
+    else if (maxVal < 5) { stepSize = 0.5; precision = 1; }
+    else if (maxVal < 20) { stepSize = 2; precision = 0; }
+    else { stepSize = Math.ceil(maxVal / 10); precision = 0; }
+  } else if (type === 'conns') {
+    stepSize = Math.max(1, Math.ceil(maxVal / 8));
+    precision = 0;
+  } else { // load
+    stepSize = 10;
+    precision = 0;
+  }
+  chart.options.scales.y.ticks.stepSize = stepSize;
+  chart.options.scales.y.ticks.precision = precision;
   chart.update('none');
   updateChartValue(type);
 }
@@ -2546,7 +2617,7 @@ function initSecondaryCharts(){
     options: {
       responsive: true, maintainAspectRatio: false,
       plugins: { legend: { display: false }, tooltip: { backgroundColor: 'rgba(11, 17, 29, 0.9)', borderColor: accent, borderWidth: 1, titleColor: '#fff', bodyColor: '#fff', cornerRadius: 8, padding: 10, callbacks: { label: function(context){ return context.parsed.y + ' MB'; } } } },
-      scales: { x: { grid: { display: false }, ticks: { color: textColor, font: { size: 8, family: 'Vazirmatn, sans-serif' } } }, y: { grid: { color: gridColor, drawBorder: false }, ticks: { color: textColor, font: { size: 8, family: 'Vazirmatn, sans-serif' }, callback: function(value) { return value + ' MB'; } } } },
+      scales: { x: { grid: { display: true, color: hexToRgba(gridColor, 0.3), drawBorder: false }, ticks: { color: textColor, font: { size: 8, family: 'Vazirmatn, sans-serif' } } }, y: { grid: { display: true, color: hexToRgba(gridColor, 0.3), drawBorder: false }, ticks: { color: textColor, font: { size: 8, family: 'Vazirmatn, sans-serif' }, stepSize: 1, callback: function(value) { return value + ' MB'; } } } },
       animation: { duration: 400, easing: 'easeOutQuart' }
     }
   });
