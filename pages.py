@@ -2514,7 +2514,8 @@ async function fetchStats(){
     document.getElementById('last-upd').textContent = 'Last update: ' + new Date().toLocaleTimeString();
 
     const now = new Date();
-    const delta = totalTrafficDisplay - prevTraf;
+    const savedPrevTraf = parseFloat(localStorage.getItem(PREV_TRAF_KEY)) || 0;
+    const delta = totalTrafficDisplay - savedPrevTraf;
     const lastTime = localStorage.getItem(CHART_LAST_TIME_KEY);
     let gapSeconds = lastTime ? (Date.now() - parseInt(lastTime)) / 1000 : 5;
     gapSeconds = Math.max(1, gapSeconds);
@@ -2523,20 +2524,76 @@ async function fetchStats(){
       const pointsToAdd = Math.min(Math.floor(gapSeconds / 5), 60);
       if (pointsToAdd > 0) {
         const perPoint = delta / (pointsToAdd + 1);
-        const trafficTimes = chartTimes['traffic'];
-        const lastTrafficTime = trafficTimes.length > 0 ? trafficTimes[trafficTimes.length-1] : new Date(now.getTime() - gapSeconds * 1000);
+        const lastTrafficTime = chartTimes['traffic'].length > 0 ? chartTimes['traffic'][chartTimes['traffic'].length-1] : new Date(now.getTime() - gapSeconds * 1000);
         const gapMs = gapSeconds * 1000;
-        for (let i = 1; i <= pointsToAdd + 1; i++) {
+
+        const newTraffic = [];
+        const newLoad = [];
+        const newConns = [];
+        const newTimes = [];
+
+        for (let i = 1; i <= pointsToAdd; i++) {
           const fraction = i / (pointsToAdd + 1);
           const t = new Date(lastTrafficTime.getTime() + fraction * gapMs);
-          addDataPoint('traffic', perPoint, t);
+          newTraffic.push(perPoint);
           const loadPct = Math.min(100, Math.max(0, (perPoint / 5) * 0.8));
-          addDataPoint('load', loadPct, t);
-          addDataPoint('conns', activeCount, t);
+          newLoad.push(loadPct);
+          newConns.push(activeCount);
+          newTimes.push(t);
         }
+
+        chartData['traffic'] = chartData['traffic'].concat(newTraffic);
+        chartData['load'] = chartData['load'].concat(newLoad);
+        chartData['conns'] = chartData['conns'].concat(newConns);
+        chartTimes['traffic'] = chartTimes['traffic'].concat(newTimes);
+        chartTimes['load'] = chartTimes['load'].concat(newTimes);
+        chartTimes['conns'] = chartTimes['conns'].concat(newTimes);
+
+        if (chartData['traffic'].length > MAX_POINTS) {
+          const excess = chartData['traffic'].length - MAX_POINTS;
+          chartData['traffic'] = chartData['traffic'].slice(excess);
+          chartData['load'] = chartData['load'].slice(excess);
+          chartData['conns'] = chartData['conns'].slice(excess);
+          chartTimes['traffic'] = chartTimes['traffic'].slice(excess);
+          chartTimes['load'] = chartTimes['load'].slice(excess);
+          chartTimes['conns'] = chartTimes['conns'].slice(excess);
+        }
+
         prevTraf = totalTrafficDisplay;
         localStorage.setItem(PREV_TRAF_KEY, String(prevTraf));
         saveChartDataToStorage();
+
+        for (let type of ['load', 'traffic', 'conns']) {
+          const chart = chartInstances[type];
+          if (chart) {
+            const labels = chartTimes[type].map(d => d ? d.toLocaleTimeString('en-US', {hour:'2-digit', minute:'2-digit', hour12:false}) : '');
+            chart.data.labels = labels;
+            chart.data.datasets[0].data = chartData[type];
+            chart.data.datasets[1].data = chartData[type];
+            const maxVal = chartData[type].length > 0 ? Math.max(...chartData[type], 1) : 1;
+            let yMax = type === 'load' ? 100 : Math.ceil(maxVal * 1.2);
+            if (type === 'traffic' && yMax < 5) yMax = 5;
+            if (type === 'conns' && yMax < 5) yMax = 5;
+            if (maxVal === 0) yMax = 1;
+            const roundToNice = (num) => {
+              if (num <= 10) return 10;
+              if (num <= 20) return 20;
+              if (num <= 50) return 50;
+              if (num <= 100) return 100;
+              if (num <= 200) return 200;
+              if (num <= 500) return 500;
+              return Math.ceil(num / 100) * 100;
+            };
+            yMax = roundToNice(yMax);
+            let stepSize = Math.round(yMax / 5);
+            if (stepSize === 0) stepSize = 1;
+            chart.options.scales.y.max = yMax;
+            chart.options.scales.y.ticks.stepSize = stepSize;
+            chart.update('none');
+            updateChartValue(type);
+          }
+        }
+        updateSecondaryCharts(d, allLinksList);
         return;
       }
     }
