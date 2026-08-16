@@ -2228,11 +2228,10 @@ function getGridColor() {
   return getComputedStyle(document.documentElement).getPropertyValue('--card-b').trim() || '#30363d';
 }
 
-// ===== BUILD AREA CHART (Premium style with glow, fine grid removed, only gradient fill) =====
+// ===== BUILD AREA CHART (Premium style with gradient fill, no grid, zero line dashed) =====
 function buildChart(type) {
   const accent = getAccentColor();
   const textColor = getTextColor();
-  const gridColor = getGridColor();
   const canvasId = 'chart-' + type;
   const ctx = document.getElementById(canvasId).getContext('2d');
 
@@ -2261,9 +2260,9 @@ function buildChart(type) {
   let stepSize = Math.round(yMax / 5);
   if (stepSize === 0) stepSize = 1;
 
-  // Gradient fill (soft blue to transparent)
+  // Gradient fill (soft blue to transparent) with lower opacity for soft shadow
   const grad = ctx.createLinearGradient(0, 0, 0, 150);
-  grad.addColorStop(0, hexToRgba(accent, 0.25));
+  grad.addColorStop(0, hexToRgba(accent, 0.20));
   grad.addColorStop(1, hexToRgba(accent, 0.01));
 
   // Glow dataset (thick semi-transparent line behind main)
@@ -2291,6 +2290,27 @@ function buildChart(type) {
     backgroundColor: grad,
     tension: 0.4,
     borderJoinStyle: 'round'
+  };
+
+  // Plugin for dashed zero line
+  const zeroLinePlugin = {
+    id: 'zeroLine',
+    beforeDraw: function(chart) {
+      const yScale = chart.scales.y;
+      if (!yScale) return;
+      const zeroPixel = yScale.getPixelForValue(0);
+      if (zeroPixel === undefined || zeroPixel < chart.chartArea.top || zeroPixel > chart.chartArea.bottom) return;
+      const ctx = chart.ctx;
+      ctx.save();
+      ctx.beginPath();
+      ctx.moveTo(chart.chartArea.left, zeroPixel);
+      ctx.lineTo(chart.chartArea.right, zeroPixel);
+      ctx.strokeStyle = hexToRgba(accent, 0.3);
+      ctx.lineWidth = 1;
+      ctx.setLineDash([4, 4]);
+      ctx.stroke();
+      ctx.restore();
+    }
   };
 
   const chart = new Chart(ctx, {
@@ -2369,7 +2389,7 @@ function buildChart(type) {
         line: { borderJoinStyle: 'round' }
       }
     },
-    plugins: []
+    plugins: [zeroLinePlugin]
   });
 
   return chart;
@@ -2504,19 +2524,14 @@ async function fetchStats(){
       const pointsToAdd = Math.min(Math.floor(gapSeconds / 5), 60);
       if (pointsToAdd > 0) {
         const perPoint = delta / (pointsToAdd || 1);
-        // Generate points with proper timing and values
         for (let i = 0; i < pointsToAdd; i++) {
-          // Compute a fractional time offset so that points are evenly spaced from now going backwards
           const offset = (pointsToAdd - i) * (gapSeconds / pointsToAdd) * 1000;
           const t = new Date(now.getTime() - offset);
-          // Add traffic point with average consumption for that interval
           addDataPoint('traffic', Math.max(0, perPoint), t);
-          // Load and connections: use current values for all points (or average if needed)
           const loadPct = Math.min(100, Math.max(0, (perPoint / 5) * 0.8));
           addDataPoint('load', loadPct, t);
           addDataPoint('conns', activeCount, t);
         }
-        // Update previous traffic so future deltas are correct
         prevTraf = totalTrafficDisplay;
         localStorage.setItem(PREV_TRAF_KEY, String(prevTraf));
         saveChartDataToStorage();
@@ -2551,7 +2566,7 @@ document.addEventListener('visibilitychange', function() {
   }
 });
 
-// ========== SECONDARY CHARTS (Hourly chart with under-curve grid removed, only gradient) ==========
+// ========== SECONDARY CHARTS (Hourly chart with gradient fill, no grid, zero line dashed) ==========
 let dashProtoChart = null, dashHourlyChart = null;
 function initSecondaryCharts(){
   const accent = getAccentColor();
@@ -2569,11 +2584,31 @@ function initSecondaryCharts(){
     }
   });
 
-  // Hourly chart with only gradient fill, no grid
+  // Hourly chart with gradient fill and zero line
   const ctxHourly = document.getElementById('dashHourlyChart').getContext('2d');
   const grad = ctxHourly.createLinearGradient(0, 0, 0, 120);
-  grad.addColorStop(0, hexToRgba(accent, 0.25));
+  grad.addColorStop(0, hexToRgba(accent, 0.20));
   grad.addColorStop(1, hexToRgba(accent, 0.01));
+
+  const zeroLinePluginHourly = {
+    id: 'zeroLineHourly',
+    beforeDraw: function(chart) {
+      const yScale = chart.scales.y;
+      if (!yScale) return;
+      const zeroPixel = yScale.getPixelForValue(0);
+      if (zeroPixel === undefined || zeroPixel < chart.chartArea.top || zeroPixel > chart.chartArea.bottom) return;
+      const ctx = chart.ctx;
+      ctx.save();
+      ctx.beginPath();
+      ctx.moveTo(chart.chartArea.left, zeroPixel);
+      ctx.lineTo(chart.chartArea.right, zeroPixel);
+      ctx.strokeStyle = hexToRgba(accent, 0.3);
+      ctx.lineWidth = 1;
+      ctx.setLineDash([4, 4]);
+      ctx.stroke();
+      ctx.restore();
+    }
+  };
 
   dashHourlyChart = new Chart(ctxHourly, {
     type: 'line',
@@ -2590,7 +2625,7 @@ function initSecondaryCharts(){
       },
       animation: { duration: 400, easing: 'easeOutQuart' }
     },
-    plugins: []
+    plugins: [zeroLinePluginHourly]
   });
 }
 
