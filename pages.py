@@ -2228,7 +2228,7 @@ function getGridColor() {
   return getComputedStyle(document.documentElement).getPropertyValue('--card-b').trim() || '#30363d';
 }
 
-// ===== BUILD AREA CHART (Sparkline uPlot style - dashed grid, gradient fill, single color) =====
+// ===== BUILD AREA CHART (Custom Grid clipped under the curve, fine lines) =====
 function buildChart(type) {
   const accent = getAccentColor();
   const textColor = getTextColor();
@@ -2261,12 +2261,74 @@ function buildChart(type) {
   let stepSize = Math.round(yMax / 5);
   if (stepSize === 0) stepSize = 1;
 
-  // Gradient fill (from accent color to transparent)
+  // Gradient fill
   const grad = ctx.createLinearGradient(0, 0, 0, 150);
-  grad.addColorStop(0, hexToRgba(accent, 0.25));
+  grad.addColorStop(0, hexToRgba(accent, 0.20));
   grad.addColorStop(1, hexToRgba(accent, 0.01));
 
-  // Glow layer (neon effect)
+  // Custom Plugin: Clip grid under the curve
+  const underCurveGridPlugin = {
+    id: 'underCurveGrid',
+    beforeDraw: function(chart) {
+      const ctx = chart.ctx;
+      const chartArea = chart.chartArea;
+      const { top, bottom, left, right } = chartArea;
+      const yScale = chart.scales.y;
+      const xScale = chart.scales.x;
+      const meta = chart.getDatasetMeta(1);
+      if (!meta || !meta.data || meta.data.length === 0) return;
+
+      const points = meta.data;
+      const yZero = yScale.getPixelForValue(0);
+
+      // 1. Create path and clip to the area under the curve
+      ctx.save();
+      ctx.beginPath();
+      ctx.moveTo(points[0].x, yZero);
+      for (let i = 0; i < points.length; i++) {
+        ctx.lineTo(points[i].x, points[i].y);
+      }
+      ctx.lineTo(points[points.length - 1].x, yZero);
+      ctx.closePath();
+      ctx.clip();
+
+      // 2. Draw fine horizontal and vertical dashed grid inside the clipped area
+      const yMin = yScale.min;
+      const yMax = yScale.max;
+      const stepY = (yMax - yMin) / 20;
+      ctx.strokeStyle = hexToRgba(accent, 0.15);
+      ctx.lineWidth = 1;
+      ctx.setLineDash([2, 3]);
+
+      for (let i = 0; i <= 20; i++) {
+        const val = yMin + i * stepY;
+        const y = yScale.getPixelForValue(val);
+        if (y >= top && y <= bottom) {
+          ctx.beginPath();
+          ctx.moveTo(left, y);
+          ctx.lineTo(right, y);
+          ctx.stroke();
+        }
+      }
+
+      const xMin = xScale.min;
+      const xMax = xScale.max;
+      const stepX = (xMax - xMin) / 20;
+      for (let i = 0; i <= 20; i++) {
+        const val = xMin + i * stepX;
+        const x = xScale.getPixelForValue(val);
+        if (x >= left && x <= right) {
+          ctx.beginPath();
+          ctx.moveTo(x, yZero);
+          ctx.lineTo(x, top);
+          ctx.stroke();
+        }
+      }
+
+      ctx.restore();
+    }
+  };
+
   const glowDataset = {
     data: dataArr,
     borderColor: hexToRgba(accent, 0.25),
@@ -2327,15 +2389,7 @@ function buildChart(type) {
       scales: {
         x: {
           display: true,
-          grid: {
-            display: true,
-            color: hexToRgba(gridColor, 0.3),
-            borderDash: [5, 5],
-            drawBorder: false,
-            tickLength: 0,
-            drawTicks: false,
-            lineWidth: 0.8
-          },
+          grid: { display: false }, // Disabled default grid
           ticks: {
             color: textColor,
             font: { size: 9 },
@@ -2347,15 +2401,7 @@ function buildChart(type) {
         },
         y: {
           display: true,
-          grid: {
-            display: true,
-            color: hexToRgba(gridColor, 0.3),
-            borderDash: [5, 5],
-            drawBorder: false,
-            tickLength: 0,
-            drawTicks: false,
-            lineWidth: 0.8
-          },
+          grid: { display: false }, // Disabled default grid
           ticks: {
             color: textColor,
             font: { size: 9 },
@@ -2375,7 +2421,8 @@ function buildChart(type) {
       elements: {
         line: { borderJoinStyle: 'round' }
       }
-    }
+    },
+    plugins: [underCurveGridPlugin] // Add the custom plugin
   });
 
   return chart;
@@ -2549,12 +2596,11 @@ document.addEventListener('visibilitychange', function() {
   }
 });
 
-// ========== SECONDARY CHARTS (با استایل مشابه uPlot برای چارت ساعتی) ==========
+// ========== SECONDARY CHARTS (با استایل مشابه برای چارت ساعتی) ==========
 let dashProtoChart = null, dashHourlyChart = null;
 function initSecondaryCharts(){
   const accent = getAccentColor();
   const textColor = getTextColor();
-  const gridColor = getGridColor();
   
   const ctxProto = document.getElementById('dashProtoChart').getContext('2d');
   dashProtoChart = new Chart(ctxProto, {
@@ -2563,17 +2609,77 @@ function initSecondaryCharts(){
     options: {
       responsive: true, maintainAspectRatio: false,
       plugins: { legend: { display: false }, tooltip: { backgroundColor: 'rgba(11, 17, 29, 0.9)', borderColor: accent, borderWidth: 1, titleColor: '#fff', bodyColor: '#fff', cornerRadius: 8, padding: 10, callbacks: { label: function(context){ return context.parsed.y + ' configs'; } } } },
-      scales: { x: { grid: { display: false }, ticks: { color: textColor, font: { size: 9, family: 'Vazirmatn, sans-serif' } } }, y: { grid: { color: hexToRgba(gridColor, 0.3), borderDash: [5, 5], drawBorder: false }, ticks: { color: textColor, font: { size: 9, family: 'Vazirmatn, sans-serif' }, stepSize: 1 } } },
+      scales: { x: { grid: { display: false }, ticks: { color: textColor, font: { size: 9, family: 'Vazirmatn, sans-serif' } } }, y: { grid: { display: false }, ticks: { color: textColor, font: { size: 9, family: 'Vazirmatn, sans-serif' }, stepSize: 1 } } },
       animation: { duration: 400, easing: 'easeOutQuart' }
     }
   });
 
-  // Hourly chart with exact same Sparkline style (dashed grid, gradient, single color)
+  // Hourly chart with under-curve grid
   const ctxHourly = document.getElementById('dashHourlyChart').getContext('2d');
   const grad = ctxHourly.createLinearGradient(0, 0, 0, 120);
-  grad.addColorStop(0, hexToRgba(accent, 0.25));
+  grad.addColorStop(0, hexToRgba(accent, 0.20));
   grad.addColorStop(1, hexToRgba(accent, 0.01));
   
+  const underCurveGridPluginHourly = {
+    id: 'underCurveGridHourly',
+    beforeDraw: function(chart) {
+      const ctx = chart.ctx;
+      const chartArea = chart.chartArea;
+      const { top, bottom, left, right } = chartArea;
+      const yScale = chart.scales.y;
+      const xScale = chart.scales.x;
+      const meta = chart.getDatasetMeta(0);
+      if (!meta || !meta.data || meta.data.length === 0) return;
+
+      const points = meta.data;
+      const yZero = yScale.getPixelForValue(0);
+
+      ctx.save();
+      ctx.beginPath();
+      ctx.moveTo(points[0].x, yZero);
+      for (let i = 0; i < points.length; i++) {
+        ctx.lineTo(points[i].x, points[i].y);
+      }
+      ctx.lineTo(points[points.length - 1].x, yZero);
+      ctx.closePath();
+      ctx.clip();
+
+      const yMin = yScale.min;
+      const yMax = yScale.max;
+      const stepY = (yMax - yMin) / 10;
+      ctx.strokeStyle = hexToRgba(accent, 0.15);
+      ctx.lineWidth = 1;
+      ctx.setLineDash([2, 3]);
+
+      for (let i = 0; i <= 10; i++) {
+        const val = yMin + i * stepY;
+        const y = yScale.getPixelForValue(val);
+        if (y >= top && y <= bottom) {
+          ctx.beginPath();
+          ctx.moveTo(left, y);
+          ctx.lineTo(right, y);
+          ctx.stroke();
+        }
+      }
+
+      const xMin = xScale.min;
+      const xMax = xScale.max;
+      const stepX = (xMax - xMin) / 10;
+      for (let i = 0; i <= 10; i++) {
+        const val = xMin + i * stepX;
+        const x = xScale.getPixelForValue(val);
+        if (x >= left && x <= right) {
+          ctx.beginPath();
+          ctx.moveTo(x, yZero);
+          ctx.lineTo(x, top);
+          ctx.stroke();
+        }
+      }
+
+      ctx.restore();
+    }
+  };
+
   dashHourlyChart = new Chart(ctxHourly, {
     type: 'line',
     data: { labels: ['00', '04', '08', '12', '16', '20'], datasets: [{ data: [0, 0, 0, 0, 0, 0], borderColor: accent, backgroundColor: grad, borderWidth: 2, pointRadius: 0, pointHoverRadius: 6, pointHoverBorderWidth: 2, pointHoverBorderColor: '#fff', fill: 'origin', tension: 0.3, borderJoinStyle: 'round' }] },
@@ -2583,12 +2689,13 @@ function initSecondaryCharts(){
       scales: { 
         x: { grid: { display: false }, ticks: { color: textColor, font: { size: 8, family: 'Vazirmatn, sans-serif' } } }, 
         y: { 
-          grid: { color: hexToRgba(gridColor, 0.3), borderDash: [5, 5], drawBorder: false }, 
+          grid: { display: false }, 
           ticks: { color: textColor, font: { size: 8, family: 'Vazirmatn, sans-serif' }, callback: function(value) { return value + ' MB'; }, stepSize: 2 } 
         } 
       },
       animation: { duration: 400, easing: 'easeOutQuart' }
-    }
+    },
+    plugins: [underCurveGridPluginHourly]
   });
 }
 
