@@ -2228,12 +2228,13 @@ function getGridColor() {
   return getComputedStyle(document.documentElement).getPropertyValue('--card-b').trim() || '#30363d';
 }
 
+// ===== BUILD AREA CHART (Sparkline uPlot style - dashed grid, gradient fill, single color) =====
 function buildChart(type) {
   const accent = getAccentColor();
   const textColor = getTextColor();
+  const gridColor = getGridColor();
   const canvasId = 'chart-' + type;
-  const canvas = document.getElementById(canvasId);
-  const ctx = canvas.getContext('2d');
+  const ctx = document.getElementById(canvasId).getContext('2d');
 
   const dataArr = chartData[type] || [];
   const timeArr = chartTimes[type] || [];
@@ -2260,69 +2261,12 @@ function buildChart(type) {
   let stepSize = Math.round(yMax / 5);
   if (stepSize === 0) stepSize = 1;
 
-  const gridPlugin = {
-    id: 'customGridAndFill',
-    beforeDraw: function(chart) {
-      const ctx = chart.ctx;
-      const chartArea = chart.chartArea;
-      const { top, bottom, left, right } = chartArea;
-      const yScale = chart.scales.y;
-      const xScale = chart.scales.x;
+  // Gradient fill (from accent color to transparent)
+  const grad = ctx.createLinearGradient(0, 0, 0, 150);
+  grad.addColorStop(0, hexToRgba(accent, 0.25));
+  grad.addColorStop(1, hexToRgba(accent, 0.01));
 
-      ctx.save();
-      
-      const yTicks = yScale.ticks;
-      for (let i = 0; i < yTicks.length; i++) {
-        const y = yScale.getPixelForValue(yTicks[i].value);
-        ctx.beginPath();
-        ctx.moveTo(left, y);
-        ctx.lineTo(right, y);
-        ctx.strokeStyle = 'rgba(100, 180, 255, 0.15)';
-        ctx.lineWidth = 0.8;
-        ctx.stroke();
-      }
-
-      const xTicks = xScale.ticks;
-      for (let i = 0; i < xTicks.length; i++) {
-        const x = xScale.getPixelForValue(i);
-        ctx.beginPath();
-        ctx.moveTo(x, top);
-        ctx.lineTo(x, bottom);
-        ctx.strokeStyle = 'rgba(100, 180, 255, 0.12)';
-        ctx.lineWidth = 0.8;
-        ctx.stroke();
-      }
-
-      ctx.restore();
-
-      const dataset = chart.data.datasets[1];
-      const meta = chart.getDatasetMeta(1);
-      if (!meta || !meta.data || meta.data.length === 0) return;
-
-      const points = meta.data;
-      const yZero = yScale.getPixelForValue(0);
-
-      ctx.save();
-      ctx.beginPath();
-      ctx.moveTo(points[0].x, yZero);
-
-      for (let i = 0; i < points.length; i++) {
-        ctx.lineTo(points[i].x, points[i].y);
-      }
-
-      ctx.lineTo(points[points.length - 1].x, yZero);
-      ctx.closePath();
-
-      const grad = ctx.createLinearGradient(0, top, 0, bottom);
-      grad.addColorStop(0, hexToRgba(accent, 0.15));
-      grad.addColorStop(1, hexToRgba(accent, 0.0));
-      ctx.fillStyle = grad;
-      ctx.fill();
-      
-      ctx.restore();
-    }
-  };
-
+  // Glow layer (neon effect)
   const glowDataset = {
     data: dataArr,
     borderColor: hexToRgba(accent, 0.25),
@@ -2336,13 +2280,14 @@ function buildChart(type) {
   const mainDataset = {
     data: dataArr,
     borderColor: accent,
-    borderWidth: 2.5,
+    borderWidth: 2,
     pointRadius: 0,
-    pointHoverRadius: 5,
+    pointHoverRadius: 6,
     pointHoverBorderWidth: 2,
     pointHoverBorderColor: '#fff',
     pointHoverBackgroundColor: accent,
-    fill: false,
+    fill: 'origin',
+    backgroundColor: grad,
     tension: 0.4,
     borderJoinStyle: 'round'
   };
@@ -2382,7 +2327,15 @@ function buildChart(type) {
       scales: {
         x: {
           display: true,
-          grid: { display: false },
+          grid: {
+            display: true,
+            color: hexToRgba(gridColor, 0.3),
+            borderDash: [5, 5],
+            drawBorder: false,
+            tickLength: 0,
+            drawTicks: false,
+            lineWidth: 0.8
+          },
           ticks: {
             color: textColor,
             font: { size: 9 },
@@ -2394,7 +2347,15 @@ function buildChart(type) {
         },
         y: {
           display: true,
-          grid: { display: false },
+          grid: {
+            display: true,
+            color: hexToRgba(gridColor, 0.3),
+            borderDash: [5, 5],
+            drawBorder: false,
+            tickLength: 0,
+            drawTicks: false,
+            lineWidth: 0.8
+          },
           ticks: {
             color: textColor,
             font: { size: 9 },
@@ -2414,8 +2375,7 @@ function buildChart(type) {
       elements: {
         line: { borderJoinStyle: 'round' }
       }
-    },
-    plugins: [gridPlugin]
+    }
   });
 
   return chart;
@@ -2455,9 +2415,7 @@ function addDataPoint(type, value, time) {
     chartTimes[type] = [];
   }
   
-  // Prevent adding duplicate timestamps (within 500ms)
   if (chartTimes[type].length > 0 && Math.abs(now.getTime() - chartTimes[type][chartTimes[type].length-1].getTime()) < 500) {
-    // Update the last point instead of adding new one
     chartData[type][chartData[type].length-1] = value;
     saveChartDataToStorage();
     const chart = chartInstances[type];
@@ -2515,7 +2473,6 @@ function interpolateMissingPoints() {
   if (!lastTime) return;
   const elapsed = Date.now() - parseInt(lastTime);
   if (elapsed < 60000) return;
-  // Handled in fetchStats
 }
 
 // ========== fetchStats (Traffic Delta Fix + Interpolation) ==========
@@ -2592,11 +2549,12 @@ document.addEventListener('visibilitychange', function() {
   }
 });
 
-// ========== SECONDARY CHARTS (با استایل مشابه، گرید سفید و ی محور تمیز) ==========
+// ========== SECONDARY CHARTS (با استایل مشابه uPlot برای چارت ساعتی) ==========
 let dashProtoChart = null, dashHourlyChart = null;
 function initSecondaryCharts(){
   const accent = getAccentColor();
   const textColor = getTextColor();
+  const gridColor = getGridColor();
   
   const ctxProto = document.getElementById('dashProtoChart').getContext('2d');
   dashProtoChart = new Chart(ctxProto, {
@@ -2605,46 +2563,31 @@ function initSecondaryCharts(){
     options: {
       responsive: true, maintainAspectRatio: false,
       plugins: { legend: { display: false }, tooltip: { backgroundColor: 'rgba(11, 17, 29, 0.9)', borderColor: accent, borderWidth: 1, titleColor: '#fff', bodyColor: '#fff', cornerRadius: 8, padding: 10, callbacks: { label: function(context){ return context.parsed.y + ' configs'; } } } },
-      scales: { x: { grid: { display: false }, ticks: { color: textColor, font: { size: 9, family: 'Vazirmatn, sans-serif' } } }, y: { grid: { color: 'rgba(255,255,255, 0.15)', drawBorder: false }, ticks: { color: textColor, font: { size: 9, family: 'Vazirmatn, sans-serif' }, stepSize: 1 } } },
+      scales: { x: { grid: { display: false }, ticks: { color: textColor, font: { size: 9, family: 'Vazirmatn, sans-serif' } } }, y: { grid: { color: hexToRgba(gridColor, 0.3), borderDash: [5, 5], drawBorder: false }, ticks: { color: textColor, font: { size: 9, family: 'Vazirmatn, sans-serif' }, stepSize: 1 } } },
       animation: { duration: 400, easing: 'easeOutQuart' }
     }
   });
 
-  // Hourly chart with same neon style, white grid, fixed steps
+  // Hourly chart with exact same Sparkline style (dashed grid, gradient, single color)
   const ctxHourly = document.getElementById('dashHourlyChart').getContext('2d');
   const grad = ctxHourly.createLinearGradient(0, 0, 0, 120);
-  grad.addColorStop(0, hexToRgba(accent, 0.10));
+  grad.addColorStop(0, hexToRgba(accent, 0.25));
   grad.addColorStop(1, hexToRgba(accent, 0.01));
+  
   dashHourlyChart = new Chart(ctxHourly, {
     type: 'line',
-    data: { labels: ['00', '04', '08', '12', '16', '20'], datasets: [{ data: [0, 0, 0, 0, 0, 0], borderColor: accent, backgroundColor: grad, borderWidth: 2.5, pointRadius: 0, pointHoverRadius: 5, pointHoverBorderWidth: 2, pointHoverBorderColor: '#fff', fill: 'origin', tension: 0.3, borderJoinStyle: 'round' }] },
+    data: { labels: ['00', '04', '08', '12', '16', '20'], datasets: [{ data: [0, 0, 0, 0, 0, 0], borderColor: accent, backgroundColor: grad, borderWidth: 2, pointRadius: 0, pointHoverRadius: 6, pointHoverBorderWidth: 2, pointHoverBorderColor: '#fff', fill: 'origin', tension: 0.3, borderJoinStyle: 'round' }] },
     options: {
       responsive: true, maintainAspectRatio: false,
       plugins: { legend: { display: false }, tooltip: { backgroundColor: 'rgba(11, 17, 29, 0.9)', borderColor: accent, borderWidth: 1, titleColor: '#fff', bodyColor: '#fff', cornerRadius: 8, padding: 10, callbacks: { label: function(context){ return context.parsed.y + ' MB'; } } } },
       scales: { 
         x: { grid: { display: false }, ticks: { color: textColor, font: { size: 8, family: 'Vazirmatn, sans-serif' } } }, 
         y: { 
-          grid: { color: 'rgba(255,255,255, 0.15)', drawBorder: false }, 
+          grid: { color: hexToRgba(gridColor, 0.3), borderDash: [5, 5], drawBorder: false }, 
           ticks: { color: textColor, font: { size: 8, family: 'Vazirmatn, sans-serif' }, callback: function(value) { return value + ' MB'; }, stepSize: 2 } 
         } 
       },
-      animation: { duration: 400, easing: 'easeOutQuart' },
-      onClick: function(e) {
-        const chart = this;
-        const elements = chart.getElementsAtEventForMode(e, 'index', { intersect: true });
-        if (elements.length > 0) {
-          if (chart.tooltip._active && chart.tooltip._active.length > 0) {
-            chart.tooltip.setActiveElements([], {x:0,y:0});
-            chart.draw();
-          } else {
-            chart.tooltip.setActiveElements(elements, e);
-            chart.draw();
-          }
-        } else {
-          chart.tooltip.setActiveElements([], {x:0,y:0});
-          chart.draw();
-        }
-      }
+      animation: { duration: 400, easing: 'easeOutQuart' }
     }
   });
 }
@@ -2668,7 +2611,6 @@ function updateSecondaryCharts(statsData, linksData){
     let slicedLabels = labels.slice(0, 6);
     let slicedData = data.slice(0, 6);
     while(slicedLabels.length < 6){ slicedLabels.push('—'); slicedData.push(0); }
-    // Update y-axis step size based on max value
     const maxVal = Math.max(...slicedData, 1);
     let yMax = Math.ceil(maxVal * 1.2);
     if (yMax < 5) yMax = 5;
