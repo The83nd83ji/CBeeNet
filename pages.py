@@ -2522,11 +2522,14 @@ async function fetchStats(){
     if (delta > 0 && gapSeconds > 5) {
       const pointsToAdd = Math.min(Math.floor(gapSeconds / 5), 60);
       if (pointsToAdd > 0) {
-        const perPoint = delta / (pointsToAdd || 1);
-        for (let i = pointsToAdd - 1; i >= 0; i--) {
-          const offset = (pointsToAdd - i) * (gapSeconds / pointsToAdd) * 1000;
-          const t = new Date(now.getTime() - offset);
-          addDataPoint('traffic', Math.max(0, perPoint), t);
+        const perPoint = delta / (pointsToAdd + 1);
+        const trafficTimes = chartTimes['traffic'];
+        const lastTrafficTime = trafficTimes.length > 0 ? trafficTimes[trafficTimes.length-1] : new Date(now.getTime() - gapSeconds * 1000);
+        const gapMs = gapSeconds * 1000;
+        for (let i = 1; i <= pointsToAdd + 1; i++) {
+          const fraction = i / (pointsToAdd + 1);
+          const t = new Date(lastTrafficTime.getTime() + fraction * gapMs);
+          addDataPoint('traffic', perPoint, t);
           const loadPct = Math.min(100, Math.max(0, (perPoint / 5) * 0.8));
           addDataPoint('load', loadPct, t);
           addDataPoint('conns', activeCount, t);
