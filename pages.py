@@ -1784,13 +1784,13 @@ a{color:inherit;text-decoration:none}
             <button class="btn btn-p theme-btn-select" data-theme="light-mixed" style="background:linear-gradient(135deg,#ff3333,#0099ff,#ffcc00);color:#fff;box-shadow:0 2px 8px rgba(255,51,51,0.3)" onclick="setTheme('light-mixed')"><i class="ti ti-circle"></i> <span data-lang="mixed">Mixed</span></button>
           </div>
         </div>
-        <div class="cl"><i class="ti ti-info-circle"></i><span data-lang="current_theme">Current Theme</span>: <strong id="current-theme-display">dark-blue</strong></div>
+        <div class="cl"><i class="ti ti-info-circle"></i><span data-lang="current_theme">Current Theme</span>: <strong id="current-theme-display">dark-prestige</strong></div>
       </div>
       <div class="cl" style="margin-top:16px"><i class="ti ti-info-circle"></i><span data-lang="background_style">Background Style</span>: 
         <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:10px" id="bg-styles">
           <button class="btn btn-g btn-sm" data-bg="blue" onclick="setBackgroundStyle('blue')" style="background:#0d1117;color:#f0f6fc;border:1px solid #30363d"><span data-lang="default_blue">Default Blue</span></button>
           <button class="btn btn-g btn-sm" data-bg="black" onclick="setBackgroundStyle('black')" style="background:#000000;color:#f0f6fc;border:1px solid #1f1f1f"><span data-lang="pure_black">Pure Black</span></button>
-          <button class="btn btn-g btn-sm" data-bg="grey" onclick="setBackgroundStyle('grey')" style="background:#1a1a1a;color:#f0f6fc;border:1px solid #333333"><span data-lang="dark_grey">Dark Grey</span></button>
+          <button class="btn btn-g btn-sm active" data-bg="grey" onclick="setBackgroundStyle('grey')" style="background:#1a1a1a;color:#f0f6fc;border:1px solid #333333"><span data-lang="dark_grey">Dark Grey</span></button>
         </div>
       </div>
     </div>
@@ -1909,7 +1909,7 @@ const LANG_DICT = {
 
 // ========== STATE ==========
 let currentLang = localStorage.getItem('CBeeNet-lang') || 'en';
-let currentTheme = localStorage.getItem('CBeeNet-theme') || 'dark-blue';
+let currentTheme = localStorage.getItem('CBeeNet-theme') || 'dark-prestige';
 let currentBgStyle = localStorage.getItem('CBeeNet-bg-style') || 'grey';
 let alertsData = [];
 let currentAlertFilter = 'all';
@@ -2151,7 +2151,7 @@ const PREV_TRAF_KEY = 'CBeeNet_prevTraf';
 const CHART_LAST_TIME_KEY = 'CBeeNet_lastChartTime';
 let chartData = { load: [], traffic: [], conns: [] };
 let chartTimes = { load: [], traffic: [], conns: [] };
-const MAX_POINTS = 60; // 60 * 5s = 5 min
+const MAX_POINTS = 60;
 let chartInstances = { load: null, traffic: null, conns: null };
 
 // ===== CHART HELPERS =====
@@ -2228,7 +2228,7 @@ function getGridColor() {
   return getComputedStyle(document.documentElement).getPropertyValue('--card-b').trim() || '#30363d';
 }
 
-// ===== BUILD AREA CHART (Premium style with glow, fine grid under curve) =====
+// ===== BUILD AREA CHART (Premium style with glow, fine grid removed, only gradient fill) =====
 function buildChart(type) {
   const accent = getAccentColor();
   const textColor = getTextColor();
@@ -2265,72 +2265,6 @@ function buildChart(type) {
   const grad = ctx.createLinearGradient(0, 0, 0, 150);
   grad.addColorStop(0, hexToRgba(accent, 0.25));
   grad.addColorStop(1, hexToRgba(accent, 0.01));
-
-  // Custom Plugin: Fine square grid under the curve (both vertical and horizontal)
-  const underCurveGridPlugin = {
-    id: 'underCurveGrid',
-    beforeDraw: function(chart) {
-      const ctx = chart.ctx;
-      const chartArea = chart.chartArea;
-      const { top, bottom, left, right } = chartArea;
-      const yScale = chart.scales.y;
-      const xScale = chart.scales.x;
-      const meta = chart.getDatasetMeta(1); // main dataset (index 1)
-      if (!meta || !meta.data || meta.data.length === 0) return;
-
-      const points = meta.data;
-      const yZero = yScale.getPixelForValue(0);
-
-      // Clip to area under the curve
-      ctx.save();
-      ctx.beginPath();
-      ctx.moveTo(points[0].x, yZero);
-      for (let i = 0; i < points.length; i++) {
-        ctx.lineTo(points[i].x, points[i].y);
-      }
-      ctx.lineTo(points[points.length - 1].x, yZero);
-      ctx.closePath();
-      ctx.clip();
-
-      // Draw fine vertical and horizontal grid lines
-      const gridLinesCount = 35;
-      const yMin = yScale.min;
-      const yMax = yScale.max;
-      const stepY = (yMax - yMin) / gridLinesCount;
-      ctx.strokeStyle = hexToRgba(accent, 0.20);
-      ctx.lineWidth = 1;
-      ctx.setLineDash([]);
-
-      // Horizontal lines
-      for (let i = 0; i <= gridLinesCount; i++) {
-        const val = yMin + i * stepY;
-        const y = yScale.getPixelForValue(val);
-        if (y >= top && y <= bottom) {
-          ctx.beginPath();
-          ctx.moveTo(left, y);
-          ctx.lineTo(right, y);
-          ctx.stroke();
-        }
-      }
-
-      // Vertical lines
-      const xMin = xScale.min;
-      const xMax = xScale.max;
-      const stepX = (xMax - xMin) / gridLinesCount;
-      for (let i = 0; i <= gridLinesCount; i++) {
-        const val = xMin + i * stepX;
-        const x = xScale.getPixelForValue(val);
-        if (x >= left && x <= right) {
-          ctx.beginPath();
-          ctx.moveTo(x, yZero);
-          ctx.lineTo(x, top);
-          ctx.stroke();
-        }
-      }
-
-      ctx.restore();
-    }
-  };
 
   // Glow dataset (thick semi-transparent line behind main)
   const glowDataset = {
@@ -2435,7 +2369,7 @@ function buildChart(type) {
         line: { borderJoinStyle: 'round' }
       }
     },
-    plugins: [underCurveGridPlugin]
+    plugins: []
   });
 
   return chart;
@@ -2536,7 +2470,7 @@ function addDataPoint(type, value, time) {
   updateChartValue(type);
 }
 
-// ========== fetchStats (Traffic Delta Fix + Interpolation) ==========
+// ========== fetchStats (Fixed: proper interpolation for missing time) ==========
 async function fetchStats(){
   try{
     const connResp = await authF('/api/connections');
@@ -2565,19 +2499,24 @@ async function fetchStats(){
     let gapSeconds = lastTime ? (Date.now() - parseInt(lastTime)) / 1000 : 5;
     gapSeconds = Math.max(1, gapSeconds);
 
-    // Interpolate missing points if gap > 5 seconds
+    // If gap is larger than 5 seconds, interpolate missing points
     if (delta > 0 && gapSeconds > 5) {
       const pointsToAdd = Math.min(Math.floor(gapSeconds / 5), 60);
-      if (pointsToAdd > 1) {
-        const perPoint = delta / pointsToAdd;
-        for (let i = 1; i <= pointsToAdd; i++) {
-          const t = new Date(now.getTime() - (pointsToAdd - i) * 5000);
+      if (pointsToAdd > 0) {
+        const perPoint = delta / (pointsToAdd || 1);
+        // Generate points with proper timing and values
+        for (let i = 0; i < pointsToAdd; i++) {
+          // Compute a fractional time offset so that points are evenly spaced from now going backwards
+          const offset = (pointsToAdd - i) * (gapSeconds / pointsToAdd) * 1000;
+          const t = new Date(now.getTime() - offset);
+          // Add traffic point with average consumption for that interval
           addDataPoint('traffic', Math.max(0, perPoint), t);
-          const ratePerPoint = perPoint / 5;
-          const loadPct = Math.min(100, Math.max(0, (ratePerPoint / 60) * 10));
+          // Load and connections: use current values for all points (or average if needed)
+          const loadPct = Math.min(100, Math.max(0, (perPoint / 5) * 0.8));
           addDataPoint('load', loadPct, t);
           addDataPoint('conns', activeCount, t);
         }
+        // Update previous traffic so future deltas are correct
         prevTraf = totalTrafficDisplay;
         localStorage.setItem(PREV_TRAF_KEY, String(prevTraf));
         saveChartDataToStorage();
@@ -2585,7 +2524,7 @@ async function fetchStats(){
       }
     }
 
-    // Add current point
+    // Normal case: add a single point for the current interval
     if (delta >= 0) {
       addDataPoint('traffic', delta, now);
     } else {
@@ -2612,7 +2551,7 @@ document.addEventListener('visibilitychange', function() {
   }
 });
 
-// ========== SECONDARY CHARTS (Hourly chart with under-curve grid) ==========
+// ========== SECONDARY CHARTS (Hourly chart with under-curve grid removed, only gradient) ==========
 let dashProtoChart = null, dashHourlyChart = null;
 function initSecondaryCharts(){
   const accent = getAccentColor();
@@ -2630,72 +2569,11 @@ function initSecondaryCharts(){
     }
   });
 
-  // Hourly chart with under-curve grid (same premium style)
+  // Hourly chart with only gradient fill, no grid
   const ctxHourly = document.getElementById('dashHourlyChart').getContext('2d');
   const grad = ctxHourly.createLinearGradient(0, 0, 0, 120);
   grad.addColorStop(0, hexToRgba(accent, 0.25));
   grad.addColorStop(1, hexToRgba(accent, 0.01));
-  
-  const underCurveGridPluginHourly = {
-    id: 'underCurveGridHourly',
-    beforeDraw: function(chart) {
-      const ctx = chart.ctx;
-      const chartArea = chart.chartArea;
-      const { top, bottom, left, right } = chartArea;
-      const yScale = chart.scales.y;
-      const xScale = chart.scales.x;
-      const meta = chart.getDatasetMeta(0);
-      if (!meta || !meta.data || meta.data.length === 0) return;
-
-      const points = meta.data;
-      const yZero = yScale.getPixelForValue(0);
-
-      ctx.save();
-      ctx.beginPath();
-      ctx.moveTo(points[0].x, yZero);
-      for (let i = 0; i < points.length; i++) {
-        ctx.lineTo(points[i].x, points[i].y);
-      }
-      ctx.lineTo(points[points.length - 1].x, yZero);
-      ctx.closePath();
-      ctx.clip();
-
-      const gridLinesCount = 25;
-      const yMin = yScale.min;
-      const yMax = yScale.max;
-      const stepY = (yMax - yMin) / gridLinesCount;
-      ctx.strokeStyle = hexToRgba(accent, 0.20);
-      ctx.lineWidth = 1;
-      ctx.setLineDash([]);
-
-      for (let i = 0; i <= gridLinesCount; i++) {
-        const val = yMin + i * stepY;
-        const y = yScale.getPixelForValue(val);
-        if (y >= top && y <= bottom) {
-          ctx.beginPath();
-          ctx.moveTo(left, y);
-          ctx.lineTo(right, y);
-          ctx.stroke();
-        }
-      }
-
-      const xMin = xScale.min;
-      const xMax = xScale.max;
-      const stepX = (xMax - xMin) / gridLinesCount;
-      for (let i = 0; i <= gridLinesCount; i++) {
-        const val = xMin + i * stepX;
-        const x = xScale.getPixelForValue(val);
-        if (x >= left && x <= right) {
-          ctx.beginPath();
-          ctx.moveTo(x, yZero);
-          ctx.lineTo(x, top);
-          ctx.stroke();
-        }
-      }
-
-      ctx.restore();
-    }
-  };
 
   dashHourlyChart = new Chart(ctxHourly, {
     type: 'line',
@@ -2712,7 +2590,7 @@ function initSecondaryCharts(){
       },
       animation: { duration: 400, easing: 'easeOutQuart' }
     },
-    plugins: [underCurveGridPluginHourly]
+    plugins: []
   });
 }
 
