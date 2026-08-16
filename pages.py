@@ -1,4 +1,4 @@
-# pages.py - CBee Gateway v1.0.0 (با نمودارهای Chart.js)
+# pages.py - CBee Gateway v1.0.0 (Neon Glow & 3D Grid Under Curve) - با نمودارهای uPlot
 import json
 
 LOGIN_HTML = r"""<!DOCTYPE html>
@@ -21,6 +21,7 @@ body {
   padding: 20px;
   position: relative;
 }
+/* Fine Premium Grid Background */
 .bg-grid {
   position: fixed;
   inset: 0;
@@ -742,7 +743,9 @@ DASHBOARD_HTML = r"""<!DOCTYPE html>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.19.0/dist/tabler-icons.min.css">
-<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<!-- uPlot CSS & JS -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/uplot@1.6.30/dist/uPlot.min.css">
+<script src="https://cdn.jsdelivr.net/npm/uplot@1.6.30/dist/uPlot.min.js"></script>
 <style>
 /* ===== RESET & VARIABLES ===== */
 *{margin:0;padding:0;box-sizing:border-box}
@@ -865,29 +868,51 @@ a{color:inherit;text-decoration:none}
 .dash-stat-card .sub{font-size:10px;color:var(--t2);margin-top:4px}
 .dash-stat-card .icon{position:absolute;top:16px;left:16px;font-size:22px;color:var(--accent);opacity:.3}
 [dir="ltr"] .dash-stat-card .icon{left:auto;right:16px}
-/* ===== CHART CARDS ===== */
+/* ===== NEON 3D CHART CONTAINERS با uPlot ===== */
 .chart-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;margin-bottom:22px}
-.chart-premium{background:var(--card);border:1px solid var(--card-b);border-radius:var(--radius);padding:12px 14px 10px;transition:all .2s}
+.chart-premium{background:var(--card);border:1px solid var(--card-b);border-radius:var(--radius);padding:16px 18px 14px;transition:all .2s;position:relative}
 .chart-premium:hover{border-color:var(--card-bh);box-shadow:var(--shadow)}
-.chart-premium .ch-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:2px}
+.chart-premium .ch-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:4px}
 .chart-premium .ch-title{font-size:10.5px;font-weight:600;color:var(--t2);text-transform:uppercase;letter-spacing:.05em;display:flex;align-items:center;gap:5px}
 .chart-premium .ch-title i{font-size:13px;color:var(--accent)}
-.chart-premium .ch-value{font-size:16px;font-weight:800;color:var(--t1);letter-spacing:-.02em}
-.chart-premium .ch-value .unit{font-size:11px;font-weight:500;color:var(--t3);margin-left:2px}
-.chart-premium .ch-main{height:80px;position:relative;margin-top:0}
-.chart-premium .ch-main canvas{width:100%!important;height:100%!important}
+.chart-premium .ch-value{font-size:18px;font-weight:800;color:var(--t1);letter-spacing:-.02em}
+.chart-premium .ch-value .unit{font-size:12px;font-weight:500;color:var(--t3);margin-left:3px}
+.chart-premium .ch-main{height:150px;position:relative;margin-top:2px}
+.chart-3d-wrap{position:relative;width:100%;height:100%;overflow:hidden;perspective:800px}
+.chart-3d-wrap .uplot{position:relative;z-index:2;width:100% !important;height:100% !important}
+.chart-3d-wrap .chart-grid-floor{
+  position:absolute;bottom:0;left:0;width:100%;height:60%;z-index:1;
+  background-image:linear-gradient(#00d4ff 1px, transparent 1px), linear-gradient(90deg, #00d4ff 1px, transparent 1px);
+  background-size:25% 25%;transform-origin:bottom center;transform:rotateX(65deg) scaleY(0.85);opacity:0.4;pointer-events:none;transition:opacity .3s
+}
+/* Sparkline uPlot styling override */
+.sparkline-tooltip{
+  position:absolute;background:rgba(11,17,29,0.92);backdrop-filter:blur(12px);border:1px solid rgba(255,255,255,0.08);border-radius:10px;padding:8px 12px;box-shadow:0 12px 40px rgba(0,0,0,0.7);z-index:1000;pointer-events:none;min-width:120px;color:var(--t1);font-size:11px;font-family:var(--font-family)
+}
+.sparkline-tooltip .tt-label{font-size:9px;color:var(--t3);border-bottom:1px solid var(--card-b);padding-bottom:4px;margin-bottom:4px}
+.sparkline-tooltip .tt-row{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:2px 0}
+.sparkline-tooltip .tt-dot{width:7px;height:7px;border-radius:50%;display:inline-block;margin-right:4px;border:1px solid rgba(255,255,255,0.15)}
+.sparkline-tooltip .tt-name{color:var(--t2);font-weight:400}
+.sparkline-tooltip .tt-val{font-weight:700;font-variant-numeric:tabular-nums}
+.uplot .u-axis .u-label{font-family:var(--font-family) !important}
+.uplot .u-axis .u-ticks .u-tick .u-tick-label{font-family:var(--font-family) !important}
+.uplot .u-select{display:none !important}
+/* Extrema labels on chart */
+.chart-extrema{display:flex;gap:12px;font-size:9px;font-weight:700;position:absolute;top:8px;right:8px;z-index:5;pointer-events:none}
+.chart-extrema .extrema-item{display:flex;align-items:center;gap:3px;opacity:0.8}
+/* Secondary Charts */
 .dash-charts-second{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:22px}
-.dash-small-chart{background:var(--card);border:1px solid var(--card-b);border-radius:var(--radius);padding:12px 14px 10px}
-.dash-small-chart .chart-title{font-size:11px;font-weight:600;color:var(--t2);margin-bottom:2px;display:flex;align-items:center;gap:6px}
+.dash-small-chart{background:var(--card);border:1px solid var(--card-b);border-radius:var(--radius);padding:16px 18px}
+.dash-small-chart .chart-title{font-size:11px;font-weight:600;color:var(--t2);margin-bottom:10px;display:flex;align-items:center;gap:6px}
 .dash-small-chart .chart-title i{color:var(--accent)}
-.dash-small-chart .chart-wrap{height:80px;position:relative}
-.dash-small-chart .chart-wrap canvas{width:100%!important;height:100%!important}
+.dash-small-chart .chart-wrap{height:120px;position:relative}
 .dash-footer{border-top:1px solid var(--card-b);margin-top:14px;padding-top:14px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px}
 .df-text{font-size:10px;color:var(--t3)}
 .df-link{font-size:11.5px;color:var(--accent2);display:flex;align-items:center;gap:5px;font-weight:600}
 @media(max-width:1024px){.dash-stats-grid{grid-template-columns:1fr 1fr}.dash-charts-second{grid-template-columns:1fr 1fr}.chart-grid{grid-template-columns:1fr 1fr}}
 @media(max-width:768px){.chart-grid{grid-template-columns:1fr}.dash-charts-second{grid-template-columns:1fr}.dash-stats-grid{grid-template-columns:1fr}.main{padding:62px 12px 50px}.sidebar{transform:translateX(100%)}[dir="ltr"] .sidebar{transform:translateX(-100%)}.sidebar.open{transform:translateX(0)}.sb-close{display:flex}.main{margin-right:0;padding-top:70px}[dir="ltr"] .main{margin-left:0}.mob-top{display:flex}}
-/* ===== REST OF STYLES (unchanged) ===== */
+
+/* ===== REST OF STYLES (بدون تغییر) ===== */
 .btn{font-family:inherit;font-size:12px;font-weight:500;border-radius:9px;padding:8px 14px;cursor:pointer;display:inline-flex;align-items:center;gap:5px;border:none;transition:all .15s;white-space:nowrap}
 .btn i{font-size:13px}
 .btn:disabled{opacity:.4;cursor:not-allowed}
@@ -1459,34 +1484,52 @@ a{color:inherit;text-decoration:none}
     </div>
   </div>
 
-  <!-- 4 Sparklines with Chart.js -->
+  <!-- 3 Premium Charts with uPlot -->
   <div class="chart-grid">
     <div class="chart-premium" id="chart-load-container">
       <div class="ch-header">
         <div class="ch-title"><i class="ti ti-gauge"></i> <span data-lang="load">Load</span></div>
         <div class="ch-value" id="chart-load-val">0<span class="unit">%</span></div>
       </div>
-      <div class="ch-main"><canvas id="spark-load" height="80"></canvas></div>
+      <div class="ch-main chart-3d-wrap">
+        <div id="chart-load-uplot" style="width:100%;height:100%;position:relative;z-index:2;"></div>
+        <div class="chart-grid-floor"></div>
+      </div>
     </div>
     <div class="chart-premium" id="chart-traffic-container">
       <div class="ch-header">
-        <div class="ch-title"><i class="ti ti-database"></i> <span data-lang="traffic_chart">Traffic</span></div>
+        <div class="ch-title"><i class="ti ti-database"></i> <span data-lang="total_traffic">Traffic</span></div>
         <div class="ch-value" id="chart-traffic-val">0<span class="unit">MB</span></div>
       </div>
-      <div class="ch-main"><canvas id="spark-traffic" height="80"></canvas></div>
+      <div class="ch-main chart-3d-wrap">
+        <div id="chart-traffic-uplot" style="width:100%;height:100%;position:relative;z-index:2;"></div>
+        <div class="chart-grid-floor"></div>
+      </div>
     </div>
     <div class="chart-premium" id="chart-conns-container">
       <div class="ch-header">
         <div class="ch-title"><i class="ti ti-plug-connected"></i> <span data-lang="connections_live">Connections</span></div>
         <div class="ch-value" id="chart-conns-val">0</div>
       </div>
-      <div class="ch-main"><canvas id="spark-conns" height="80"></canvas></div>
+      <div class="ch-main chart-3d-wrap">
+        <div id="chart-conns-uplot" style="width:100%;height:100%;position:relative;z-index:2;"></div>
+        <div class="chart-grid-floor"></div>
+      </div>
     </div>
   </div>
+
+  <!-- Secondary Charts -->
   <div class="dash-charts-second">
-    <div class="dash-small-chart" id="chart-hourly-container">
-      <div class="chart-title"><i class="ti ti-clock"></i> <span data-lang="hourly_average">Hourly Usage (MB)</span></div>
-      <div class="chart-wrap"><canvas id="spark-hourly" height="80"></canvas></div>
+    <div class="dash-small-chart">
+      <div class="chart-title"><i class="ti ti-chart-bar"></i> <span data-lang="protocol_distribution">Protocol Distribution</span></div>
+      <div class="chart-wrap"><canvas id="dashProtoChart"></canvas></div>
+    </div>
+    <div class="dash-small-chart">
+      <div class="chart-title"><i class="ti ti-arrow-up-right"></i> <span data-lang="hourly_average">Hourly Avg</span></div>
+      <div class="chart-wrap chart-3d-wrap">
+        <div id="dashHourly-uplot" style="width:100%;height:100%;position:relative;z-index:2;"></div>
+        <div class="chart-grid-floor"></div>
+      </div>
     </div>
   </div>
 
@@ -1496,7 +1539,7 @@ a{color:inherit;text-decoration:none}
   </div>
 </section>
 
-<!-- ===== LINKS PAGE (unchanged) ===== -->
+<!-- ===== LINKS PAGE ===== -->
 <section class="pg" id="pg-links">
   <div class="topbar">
     <div><div class="tb-title"><i class="ti ti-link-plus"></i> <span data-lang="configs">Configs</span></div><div class="tb-sub" data-lang="configs_management">Create and manage configs with quota, expiry and grouping</div></div>
@@ -1596,7 +1639,7 @@ a{color:inherit;text-decoration:none}
   <div class="empty" id="links-empty" style="display:none"><i class="ti ti-link-off"></i><p data-lang="no_configs">No configs yet</p></div>
 </section>
 
-<!-- ===== SUB GROUPS PAGE (unchanged) ===== -->
+<!-- ===== SUB GROUPS PAGE ===== -->
 <section class="pg" id="pg-subgroups">
   <div class="topbar">
     <div><div class="tb-title"><i class="ti ti-folders"></i> <span data-lang="sub_groups_short">Sub Groups</span></div><div class="tb-sub" data-lang="each_group_public">Each group has its own public page with its configs</div></div>
@@ -1616,7 +1659,7 @@ a{color:inherit;text-decoration:none}
   </div>
 </section>
 
-<!-- ===== SUBSCRIPTIONS PAGE (unchanged) ===== -->
+<!-- ===== SUBSCRIPTIONS PAGE ===== -->
 <section class="pg" id="pg-subscriptions">
   <div class="topbar"><div><div class="tb-title"><i class="ti ti-rss"></i> <span data-lang="subscription">Subscription</span></div><div class="tb-sub" data-lang="subscription_links">Subscription links for v2ray apps</div></div></div>
   <div class="g2">
@@ -1637,7 +1680,7 @@ a{color:inherit;text-decoration:none}
   </div>
 </section>
 
-<!-- ===== CONNECTIONS PAGE (unchanged) ===== -->
+<!-- ===== CONNECTIONS PAGE ===== -->
 <section class="pg" id="pg-connections">
   <div class="topbar">
     <div><div class="tb-title"><i class="ti ti-plug-connected"></i> <span data-lang="connections">Connections</span></div><div class="tb-sub" data-lang="connections_monitor">Live IP and traffic monitoring per connection</div></div>
@@ -1661,7 +1704,7 @@ a{color:inherit;text-decoration:none}
   </div>
 </section>
 
-<!-- ===== ALERTS PAGE (unchanged) ===== -->
+<!-- ===== ALERTS PAGE ===== -->
 <section class="pg" id="pg-alerts">
   <div class="topbar">
     <div><div class="tb-title"><i class="ti ti-bell"></i> <span data-lang="smart_alerts">Smart Alerts</span></div><div class="tb-sub" data-lang="alerts_sub">Important events & notifications</div></div>
@@ -1678,7 +1721,7 @@ a{color:inherit;text-decoration:none}
   </div>
 </section>
 
-<!-- ===== SECURITY PAGE (unchanged) ===== -->
+<!-- ===== SECURITY PAGE ===== -->
 <section class="pg" id="pg-security">
   <div class="topbar"><div><div class="tb-title"><i class="ti ti-shield-lock"></i> <span data-lang="security">Security</span></div></div></div>
   <div class="g2">
@@ -1699,19 +1742,19 @@ a{color:inherit;text-decoration:none}
   </div>
 </section>
 
-<!-- ===== ACTIVITY LOGS PAGE (unchanged) ===== -->
+<!-- ===== ACTIVITY LOGS PAGE ===== -->
 <section class="pg" id="pg-logs">
   <div class="topbar"><div><div class="tb-title"><i class="ti ti-history"></i> <span data-lang="activity_logs">Activity Logs</span></div><div class="tb-sub" data-lang="activity_logs_full">Complete event history</div></div><div class="tb-right"><button class="btn btn-p btn-sm" onclick="loadActivity()"><i class="ti ti-refresh"></i></button></div></div>
   <div class="card"><div class="log-timeline" id="logs-list">—</div><div class="empty" id="logs-empty" style="display:none"><i class="ti ti-history-toggle"></i><p data-lang="no_logs">No logs yet</p></div></div>
 </section>
 
-<!-- ===== ERRORS PAGE (unchanged) ===== -->
+<!-- ===== ERRORS PAGE ===== -->
 <section class="pg" id="pg-errors">
   <div class="topbar"><div><div class="tb-title"><i class="ti ti-alert-triangle"></i> <span data-lang="errors">Errors</span></div></div><div class="tb-right"><span class="badge bg-red" id="errs-badge">0</span><button class="btn btn-p btn-sm" onclick="refreshAll()"><i class="ti ti-refresh"></i></button></div></div>
   <div class="card"><div class="card-title"><i class="ti ti-bug"></i> <span data-lang="error_logs">Error Logs</span></div><div id="errs-full">—</div></div>
 </section>
 
-<!-- ===== WEBSOCKET TEST PAGE (unchanged) ===== -->
+<!-- ===== WEBSOCKET TEST PAGE ===== -->
 <section class="pg" id="pg-testws">
   <div class="topbar"><div><div class="tb-title"><i class="ti ti-wifi"></i> <span data-lang="websocket_test">WebSocket Test</span></div></div></div>
   <div class="card" style="max-width:660px">
@@ -1731,13 +1774,14 @@ a{color:inherit;text-decoration:none}
   </div>
 </section>
 
-<!-- ===== SETTINGS PAGE (unchanged) ===== -->
+<!-- ===== SETTINGS PAGE ===== -->
 <section class="pg" id="pg-settings">
   <div class="topbar">
     <div><div class="tb-title"><i class="ti ti-settings"></i> <span data-lang="settings">Settings</span></div><div class="tb-sub" data-lang="system_settings">System configuration</div></div>
     <div class="tb-right"><span class="badge bg-blue">v1.0.0</span></div>
   </div>
   <div class="g2">
+    <!-- Theme Settings -->
     <div class="card">
       <div class="card-title"><i class="ti ti-palette"></i> <span data-lang="theme_settings">Theme Settings</span></div>
       <div style="display:flex;flex-direction:column;gap:12px">
@@ -1771,6 +1815,7 @@ a{color:inherit;text-decoration:none}
       </div>
     </div>
 
+    <!-- Language Settings -->
     <div class="card">
       <div class="card-title"><i class="ti ti-language"></i> <span data-lang="language_settings">Language Settings</span></div>
       <div style="display:flex;gap:10px;flex-wrap:wrap" id="lang-buttons" dir="ltr">
@@ -1780,6 +1825,7 @@ a{color:inherit;text-decoration:none}
       <div class="cl" style="margin-top:12px"><i class="ti ti-info-circle"></i><span data-lang="lang_note">Default language is English. Page will refresh after change.</span></div>
     </div>
 
+    <!-- ===== Protocol Custom Server Settings (بدون Trojan) ===== -->
     <div class="card" style="grid-column:1/-1">
       <div class="card-title"><i class="ti ti-server-2"></i> <span>Protocol Custom Names & Templates</span></div>
       <div style="display:flex;flex-direction:column;gap:8px">
@@ -1790,24 +1836,28 @@ a{color:inherit;text-decoration:none}
           <div>Link Prefix</div>
           <div>Link Template</div>
         </div>
+        <!-- VLESS-WS -->
         <div style="display:grid;grid-template-columns:1.2fr 1.2fr 1.2fr 2fr;gap:8px;align-items:center;background:rgba(0,0,0,0.08);border-radius:8px;padding:6px 4px">
           <div style="font-size:11px;color:var(--accent2)">VLESS-WS</div>
           <input class="fi" id="ps-vless-ws-name" placeholder="e.g. VLESS-Server" style="min-width:0;padding:6px 8px;font-size:11px">
           <input class="fi" id="ps-vless-ws-prefix" placeholder="e.g. vless" style="min-width:0;padding:6px 8px;font-size:11px">
           <input class="fi" id="ps-vless-ws-template" placeholder="{server}-{label}" style="min-width:0;padding:6px 8px;font-size:11px">
         </div>
+        <!-- XHTTP-packet -->
         <div style="display:grid;grid-template-columns:1.2fr 1.2fr 1.2fr 2fr;gap:8px;align-items:center;background:rgba(0,0,0,0.08);border-radius:8px;padding:6px 4px">
           <div style="font-size:11px;color:var(--amber-t)">XHTTP-packet</div>
           <input class="fi" id="ps-xhttp-packet-up-name" placeholder="e.g. XHTTP-Packet" style="min-width:0;padding:6px 8px;font-size:11px">
           <input class="fi" id="ps-xhttp-packet-up-prefix" placeholder="e.g. xhttp-p" style="min-width:0;padding:6px 8px;font-size:11px">
           <input class="fi" id="ps-xhttp-packet-up-template" placeholder="{server}-{label}" style="min-width:0;padding:6px 8px;font-size:11px">
         </div>
+        <!-- XHTTP-stream -->
         <div style="display:grid;grid-template-columns:1.2fr 1.2fr 1.2fr 2fr;gap:8px;align-items:center;background:rgba(0,0,0,0.04);border-radius:8px;padding:6px 4px">
           <div style="font-size:11px;color:var(--amber-t)">XHTTP-stream</div>
           <input class="fi" id="ps-xhttp-stream-up-name" placeholder="e.g. XHTTP-Stream" style="min-width:0;padding:6px 8px;font-size:11px">
           <input class="fi" id="ps-xhttp-stream-up-prefix" placeholder="e.g. xhttp-s" style="min-width:0;padding:6px 8px;font-size:11px">
           <input class="fi" id="ps-xhttp-stream-up-template" placeholder="{server}-{label}" style="min-width:0;padding:6px 8px;font-size:11px">
         </div>
+        <!-- XHTTP-ultra -->
         <div style="display:grid;grid-template-columns:1.2fr 1.2fr 1.2fr 2fr;gap:8px;align-items:center;background:rgba(0,0,0,0.08);border-radius:8px;padding:6px 4px">
           <div style="font-size:11px;color:var(--amber-t)">XHTTP-ultra</div>
           <input class="fi" id="ps-xhttp-stream-one-name" placeholder="e.g. XHTTP-Ultra" style="min-width:0;padding:6px 8px;font-size:11px">
@@ -1820,6 +1870,7 @@ a{color:inherit;text-decoration:none}
     </div>
   </div>
 
+  <!-- Server Info & Change Password -->
   <div class="g2" style="margin-top:16px">
     <div class="srv-panel">
       <div class="srv-hero">
@@ -1859,8 +1910,10 @@ a{color:inherit;text-decoration:none}
 </section>
 </main>
 
+<!-- ===== TOOLTIP (uPlot dynamic) ===== -->
+
 <script>
-// ========== LANG DICT ==========
+// ========== LANG DICT (همان قبل) ==========
 const LANG_DICT = {
   "en": {
     "dashboard":"Dashboard","dashboard_sub":"System Overview","active_connections":"Active Connections","total_traffic":"Total Traffic","total_links":"Configs","uptime":"Uptime","since_start":"Since Start","active":"Active","inactive":"Inactive","refresh":"Refresh","traffic_trend":"Bandwidth Usage","service_status":"Service Status","top_connections":"Live Connections","no_connections":"No connections","server":"Server","settings":"Settings","language":"Language","farsi":"Persian","english":"English","save":"Save","cancel":"Cancel","delete":"Delete","edit":"Edit","copy":"Copy","created":"Created","expires":"Expires","unlimited":"Unlimited","used":"Used","of":"of","daily":"Daily","hourly":"Hourly","bandwidth":"Bandwidth","connections":"Connections","protocol":"Protocol","ip_address":"IP Address","port":"Port","upload":"Upload","download":"Download","duration":"Duration","status":"Status","online":"Online","offline":"Offline","total":"Total","users":"Users","protocols":"Protocols","traffic_usage":"Traffic Usage","links":"Configs","sub_groups":"Sub Groups","subscription":"Subscription","security":"Security","logs":"Activity Logs","errors":"Errors","test_websocket":"WebSocket Test","dark_theme":"Dark Theme","light_theme":"Light Theme","prestige_theme":"Prestige Theme","blue":"Blue","red":"Red","yellow":"Yellow","current_theme":"Current Theme","background_style":"Background Style","default_blue":"Default Blue","pure_black":"Pure Black","dark_grey":"Dark Grey","server_settings":"Server & Link Settings","server_name":"Server Name","server_prefix":"Link Prefix","link_template":"Link Name Template","template_vars":"Available Variables","template_note":"If `{protocol}` is not in the template, the protocol will not be shown.","change_password":"Change Password","current_password":"Current Password","new_password":"New Password","confirm_password":"Confirm Password","password_strength":"Password Strength","min_chars":"At least 4 characters","contains_number":"Contains number","contains_case":"Uppercase/Lowercase","weak":"Very Weak","medium":"Medium","strong":"Strong","save_password":"Save New Password","login":"Login","logout":"Logout","login_title":"Login to Panel","login_sub":"Enter password to access the dashboard","password":"Password","login_button":"Login to Dashboard","telegram_channel":"Telegram Channel","panel":"Panel","system":"System","configs":"Configs","sub_groups_short":"Sub Groups","activity_logs":"Activity Logs","config_id":"Config ID","sub_group_expiry":"Sub Group & Expiry","no_group":"No Group","days":"Days","traffic_quota":"Traffic Quota","transport_protocols":"Transport Protocols","bulk_count":"Bulk Count","create_config":"Create Config","no_configs":"No configs yet","new_group":"New Group","no_groups":"No groups yet","create_group":"Create a new group to organize your configs","single_sub":"Single Subscription (per config)","full_sub":"Full Subscription (Admin)","full_sub_desc":"Includes all active configs.","group_sub_links":"Group Subscription Links","loading":"Loading...","traffic_analysis":"Bandwidth usage analysis & monitoring","total_traffic_used":"Total Traffic Used","hourly_average":"Hourly Average","per_hour":"/h","peak_usage":"Peak Usage","peak_hour":"Peak Hour","lowest_usage":"Lowest Usage","live_connections":"Live Connections","total_traffic_live":"Total Traffic","avg_duration":"Avg Duration","unique_ips":"Unique IPs","connections_list":"Connections List","auto_update":"Auto-update every 5s","no_active_connections":"No active connections","will_appear":"They will appear here as soon as clients connect","encryption":"Encryption","access_control":"Access Control","hash":"Hash","session":"Session","active_inactive":"Active/Inactive","expiry_date":"Expiry Date","public_page_pw":"Public Page Password","optional":"Optional","activity_logs_full":"Complete event history","no_logs":"No logs yet","error_logs":"Error Logs","websocket_test":"WebSocket Test","ws_note":"Only registered and active UUIDs can connect.","connect":"Connect","disconnect":"Disconnect","send":"Send","waiting_ws":"Waiting for connection...","change_theme":"Change Theme","server_link_settings":"Server & Link Settings","save_settings":"Save Settings","saved":"Saved","online_status":"Online","version":"Version","framework":"Framework","platform":"Platform","storage":"Storage","change_password_title":"Change Password","change_password_sub":"Choose a strong password and keep it safe","current_pw":"Current Password","new_pw":"New Password","confirm_pw":"Confirm Password","save_new_pw":"Save New Password","min_4_chars":"At least 4 chars","contains_num":"Contains number","contains_case_letters":"Uppercase/Lowercase","very_weak":"Very Weak","medium_strength":"Medium","strong_strength":"Strong","logout_btn":"Logout","telegram_btn":"Telegram Channel","load":"Load","connections_live":"Live Connections","traffic_chart":"Traffic Chart","protocol_distribution":"Protocol Distribution","daily_usage":"Daily Usage","active_conns_table":"Active Connections","configs_management":"Configs Management","sub_groups_management":"Sub Groups Management","subscription_links":"Subscription Links","traffic_monitor":"Traffic Monitor","connections_monitor":"Connections Monitor","security_settings":"Security Settings","activity_logs_title":"Activity Logs","error_logs_title":"Error Logs","websocket_tester":"WebSocket Tester","system_settings":"System Settings","language_settings":"Language Settings","theme_settings":"Theme Settings","server_info":"Server Info","password_change":"Password Change","save_changes":"Save Changes","cancel_changes":"Cancel","live":"Live","running_time":"Running Time","manage_configs":"Manage Configs for","select_configs":"Select configs to include in this group","select_all":"Select All","deselect_all":"Deselect All","changes_apply":"Changes apply immediately","new_group_title":"Create New Group","new_group_sub":"Create a separate public page to manage configs","group_name":"Group Name","description_optional":"Description (optional)","public_page_password":"Public Page Password (optional)","public_page_info":"This group's public page will be accessible via a unique link.","edit_config":"Edit Config","quota_0_unlimited":"Quota (0 = unlimited)","expiry_days":"Expiry (days from now, 0 = no change/unlimited)","expiry_note":"To keep current expiry, leave expiry field as 0.","random_uuid":"Random UUID · Choose quota, expiry and protocol","uuid_note":"UUID is generated randomly · Only registered UUIDs can connect · Protocol cannot be changed after creation.","each_group_public":"Each group has its own public page with its configs","single_sub_desc":"Each config has its own subscription URL. Click the","icon_on_card":"icon on the config card.","full_sub_note":"This URL only works in the browser where you're logged in (requires session cookie).","based_on_mb":"Based on MB per hour","lang_note":"Default language is English. Page will refresh after change.","groups":"Groups","usage":"Usage","average":"Average","protocols_legend":"Protocols","daily_legend":"Daily","hourly_legend":"Hourly","bandwidth_usage":"Bandwidth Usage","smart_alerts":"Smart Alerts","alerts_sub":"Important events & notifications","priority":"Priority","critical":"Critical","warning":"Warning","info":"Info","dismiss":"Dismiss","filter_all":"All","filter_critical":"Critical","filter_warning":"Warning","filter_info":"Info","alert_expiry":"Config expiring soon","alert_quota":"Traffic quota exceeded 80%","alert_errors":"Repeated connection errors","alert_new_ip":"New IP connected","no_alerts":"No alerts to show"
@@ -1878,207 +1931,8 @@ let alertsData = [];
 let currentAlertFilter = 'all';
 let allLinksList = [];
 let allSubsList = [];
-let prevTraf = parseFloat(localStorage.getItem('CBeeNet_prevTraf')) || 0;
+let prevTraf = 0;
 let totalTrafficDisplay = 0;
-
-// ========== CHART.JS SPARKLINES ==========
-let chartInstances = { load: null, traffic: null, conns: null, hourly: null };
-let chartData = { load: [], traffic: [], conns: [], hourly: [] };
-let chartLabels = { load: [], traffic: [], conns: [], hourly: [] };
-const MAX_POINTS = 60;
-
-function initSparklines() {
-  loadChartDataFromStorage();
-
-  ['load', 'traffic', 'conns', 'hourly'].forEach(type => {
-    const canvas = document.getElementById('spark-' + type);
-    if (!canvas) return;
-    const ctx = canvas.getContext('2d');
-
-    const accentColor = getComputedStyle(document.documentElement).getPropertyValue('--accent').trim() || '#1677ff';
-    const isLoad = type === 'load';
-    const isTraffic = type === 'traffic';
-    const isConns = type === 'conns';
-    const isHourly = type === 'hourly';
-
-    const strokeColor = isLoad ? accentColor :
-                        isTraffic ? '#10b981' :
-                        isHourly ? '#7c3aed' : '#f59e0b';
-
-    const data = chartData[type] || [];
-    const labels = chartLabels[type] || [];
-
-    const chart = new Chart(ctx, {
-      type: 'line',
-      data: {
-        labels: labels,
-        datasets: [{
-          data: data,
-          borderColor: strokeColor,
-          backgroundColor: strokeColor + '22',
-          borderWidth: 2,
-          pointRadius: 0,
-          pointHoverRadius: 4,
-          tension: 0.3,
-          fill: true,
-        }]
-      },
-      options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        plugins: {
-          legend: { display: false },
-          tooltip: {
-            backgroundColor: 'rgba(11,17,29,0.9)',
-            borderColor: strokeColor,
-            borderWidth: 1,
-            titleColor: '#fff',
-            bodyColor: '#fff',
-            cornerRadius: 8,
-            padding: 10,
-            callbacks: {
-              label: (ctx) => {
-                let val = ctx.parsed.y;
-                if (isLoad) return val.toFixed(1) + '%';
-                if (isTraffic) return val.toFixed(2) + ' MB';
-                if (isHourly) return val.toFixed(1) + ' MB';
-                return val.toFixed(0);
-              }
-            }
-          }
-        },
-        scales: {
-          x: { display: false, grid: { display: false } },
-          y: {
-            display: false,
-            grid: { display: false },
-            min: 0,
-            max: isLoad ? 100 : undefined,
-          }
-        },
-        animation: { duration: 300, easing: 'easeOutQuart' },
-        elements: { line: { borderJoinStyle: 'round' } },
-        interaction: { intersect: false, mode: 'index' },
-      }
-    });
-
-    chartInstances[type] = chart;
-    updateChartValue(type);
-  });
-}
-
-function updateSparklineData(type, data, labels) {
-  const chart = chartInstances[type];
-  if (!chart) return;
-  chart.data.labels = labels || chart.data.labels;
-  chart.data.datasets[0].data = data;
-  chart.update('none');
-
-  if (type === 'traffic' || type === 'conns' || type === 'hourly') {
-    const max = Math.max(1, ...data);
-    chart.options.scales.y.max = max * 1.2;
-    chart.update('none');
-  }
-  updateChartValue(type);
-}
-
-function updateChartValue(type) {
-  const data = chartData[type] || [];
-  const last = data.length ? data[data.length-1] : 0;
-  if (type === 'load') {
-    document.getElementById('chart-load-val').innerHTML = last.toFixed(1) + '<span class="unit">%</span>';
-  } else if (type === 'traffic') {
-    // traffic value is shown separately via totalTrafficDisplay
-  } else if (type === 'conns') {
-    document.getElementById('chart-conns-val').textContent = last.toFixed(0);
-  }
-}
-
-function addDataPoint(type, value, time) {
-  const now = time || new Date();
-  const cutoff = now.getTime() - 300000;
-  if (chartLabels[type] && chartLabels[type].length) {
-    const times = chartLabels[type].map(t => new Date(t));
-    const valid = times.map((d,i) => d.getTime() >= cutoff ? i : -1).filter(i => i >= 0);
-    if (valid.length > 0) {
-      const start = valid[0];
-      chartData[type] = chartData[type].slice(start);
-      chartLabels[type] = chartLabels[type].slice(start);
-    } else {
-      chartData[type] = [];
-      chartLabels[type] = [];
-    }
-  }
-  chartData[type].push(value);
-  chartLabels[type].push(now.toLocaleTimeString());
-  if (chartData[type].length > MAX_POINTS) {
-    chartData[type].shift();
-    chartLabels[type].shift();
-  }
-  saveChartDataToStorage();
-  updateSparklineData(type, chartData[type], chartLabels[type]);
-}
-
-function updateHourlyChart(hourlyData) {
-  if (!hourlyData) return;
-  const labels = Object.keys(hourlyData).sort();
-  const data = labels.map(h => (hourlyData[h] || 0) / (1024 * 1024));
-  const slicedLabels = labels.slice(-6);
-  const slicedData = data.slice(-6);
-  chartData.hourly = slicedData;
-  chartLabels.hourly = slicedLabels;
-  saveChartDataToStorage();
-  updateSparklineData('hourly', slicedData, slicedLabels);
-}
-
-const CHART_STORAGE_KEY = 'CBeeNet_chartData';
-function loadChartDataFromStorage() {
-  try {
-    const stored = localStorage.getItem(CHART_STORAGE_KEY);
-    if (stored) {
-      const parsed = JSON.parse(stored);
-      if (parsed.data && parsed.labels) {
-        chartData = parsed.data;
-        chartLabels = parsed.labels;
-        const cutoff = Date.now() - 300000;
-        for (let key of ['load', 'traffic', 'conns']) {
-          if (chartLabels[key] && chartLabels[key].length) {
-            const times = chartLabels[key].map(t => new Date(t));
-            const valid = times.map((d,i) => d.getTime() >= cutoff ? i : -1).filter(i => i >= 0);
-            if (valid.length > 0) {
-              const start = valid[0];
-              chartData[key] = chartData[key].slice(start);
-              chartLabels[key] = chartLabels[key].slice(start);
-            } else {
-              chartData[key] = [];
-              chartLabels[key] = [];
-            }
-          }
-        }
-        return true;
-      }
-    }
-  } catch(e) {}
-  // If no data, generate dummy
-  const now = Date.now();
-  for (let key of ['load', 'traffic', 'conns']) {
-    if (!chartData[key] || chartData[key].length === 0) {
-      chartData[key] = [];
-      chartLabels[key] = [];
-      for (let i = 0; i < 10; i++) {
-        const t = new Date(now - (10 - i) * 5000);
-        chartData[key].push(0);
-        chartLabels[key].push(t.toLocaleTimeString());
-      }
-    }
-  }
-  return false;
-}
-function saveChartDataToStorage() {
-  try {
-    localStorage.setItem(CHART_STORAGE_KEY, JSON.stringify({ data: chartData, labels: chartLabels }));
-  } catch(e) {}
-}
 
 // ========== LANGUAGE & THEME ==========
 function setLanguage(lang){
@@ -2095,6 +1949,10 @@ function applyLanguage(){
   document.querySelectorAll('[data-lang]').forEach(el => {
     const key = el.getAttribute('data-lang');
     if(dict[key] !== undefined) el.textContent = dict[key];
+  });
+  document.querySelectorAll('[data-lang-placeholder]').forEach(el => {
+    const key = el.getAttribute('data-lang-placeholder');
+    if(dict[key] !== undefined) el.placeholder = dict[key];
   });
 }
 function applyBackgroundStyle(style) {
@@ -2128,6 +1986,10 @@ function applyTheme(theme){
   document.getElementById('theme-label').textContent = dict[labelKey] || (isLight ? 'Light Theme' : 'Dark Theme');
   document.getElementById('theme-mob-icon').className = 'ti ' + icon;
   applyBackgroundStyle(currentBgStyle);
+  // Redraw charts on theme change
+  if(window.uplotInstances) {
+    window.uplotInstances.forEach(u => u.redraw(false));
+  }
 }
 function setTheme(theme){ applyTheme(theme); toast('Theme changed to ' + theme, 'ok'); }
 function setBackgroundStyle(style){
@@ -2185,7 +2047,9 @@ document.getElementById('logout-btn').addEventListener('click', logout);
 async function authF(url, opts={}){ const r = await fetch(url, opts); if(r.status === 401){ location.href = '/login'; throw new Error('unauthorized'); } return r; }
 
 // ========== UI HELPERS ==========
-function toggleProtoBtnV(el){ el.classList.toggle('active'); }
+function toggleProtoBtnV(el){
+  el.classList.toggle('active');
+}
 function getSelectedProtocolsV(){
   const btns = document.querySelectorAll('.proto-btn-v');
   const selected = [];
@@ -2226,7 +2090,7 @@ document.querySelectorAll('.nav-it').forEach(el => el.addEventListener('click', 
 function openModal(id){ document.getElementById(id).classList.add('open'); }
 function closeModal(id){ document.getElementById(id).classList.remove('open'); }
 
-// ========== PROTOCOL SETTINGS ==========
+// ========== PROTOCOL CUSTOM SETTINGS ==========
 async function loadProtocolSettings(){
   try {
     const r = await authF('/api/settings/protocol');
@@ -2272,6 +2136,8 @@ async function saveProtocolSettings(){
     }
   } catch(e){ toast('Server connection error', 'err'); }
 }
+
+// ========== FORMAT LINK NAME ==========
 function formatLinkName(label, protocol, protoSettings){
   const defaultNames = {
     'vless-ws': 'VLESS-WS',
@@ -2297,6 +2163,408 @@ function formatLinkName(label, protocol, protoSettings){
     result = result.replace(/{protocol}/g, displayName);
   }
   return result;
+}
+
+// ========== UPUOT SPARKLINE IMPLEMENTATION ==========
+// نگهداری از نمونه‌های uPlot
+window.uplotInstances = [];
+
+function createSparkline(containerId, getData, options = {}) {
+  const container = document.getElementById(containerId);
+  if (!container) return null;
+  const {
+    height = 150,
+    strokeColor = 'var(--accent)',
+    fillColor = 'var(--accent-d)',
+    gridColor = 'var(--card-b)',
+    textColor = 'var(--t3)',
+    showExtrema = true,
+    yMin = 0,
+    yMax = null,
+    yFormatter = v => v.toFixed(1),
+    xTickFormatter = (idx, label) => label || '',
+    tooltipFormatter = null,
+    valueSuffix = ''
+  } = options;
+
+  let dataArr = getData();
+  const dpr = window.devicePixelRatio || 1;
+
+  const buildData = () => {
+    const arr = getData();
+    const xs = arr.map((_, i) => i);
+    return [xs, arr];
+  };
+
+  const seriesColor = () => strokeColor;
+
+  const yDomain = () => {
+    const arr = getData();
+    if (arr.length === 0) return [0, 1];
+    const max = Math.max(...arr);
+    let upper = yMax !== null ? yMax : Math.max(max * 1.2, 1);
+    if (upper === 0) upper = 1;
+    return [yMin, upper];
+  };
+
+  const tooltipEl = document.createElement('div');
+  tooltipEl.className = 'sparkline-tooltip';
+  tooltipEl.style.display = 'none';
+  container.appendChild(tooltipEl);
+
+  const opts = {
+    width: container.clientWidth || 300,
+    height: height,
+    padding: [4, 4, 2, 2],
+    legend: { show: false },
+    cursor: {
+      show: true,
+      x: true,
+      y: false,
+      drag: { x: false, y: false, setScale: false },
+      points: {
+        show: true,
+        size: 6,
+        width: 0,
+        stroke: seriesColor,
+        fill: seriesColor
+      }
+    },
+    scales: {
+      x: {
+        time: false,
+        range: (u, dmin, dmax) => (dmin === dmax ? [dmin - 0.5, dmax + 0.5] : [dmin, dmax])
+      },
+      y: {
+        range: yDomain
+      }
+    },
+    series: [
+      {},
+      {
+        stroke: seriesColor,
+        width: 2,
+        fill: (u, sidx) => {
+          const { ctx, bbox } = u;
+          const grad = ctx.createLinearGradient(0, bbox.top, 0, bbox.top + bbox.height);
+          grad.addColorStop(0, 'rgba(0, 212, 255, 0.0)');
+          grad.addColorStop(0.3, 'rgba(0, 212, 255, 0.15)');
+          grad.addColorStop(1, 'rgba(0, 212, 255, 0.3)');
+          return grad;
+        },
+        paths: uPlot.paths.spline?.(),
+        points: { show: false },
+        spanGaps: true
+      }
+    ],
+    axes: [
+      {
+        show: true,
+        stroke: textColor,
+        grid: { show: false },
+        ticks: { show: false },
+        font: '10px ' + getComputedStyle(document.documentElement).getPropertyValue('--font-family'),
+        gap: 6,
+        size: 28,
+        splits: () => {
+          const arr = getData();
+          const n = arr.length;
+          if (n <= 1) return [0];
+          const count = Math.min(6, n);
+          const step = Math.max(1, Math.floor((n - 1) / (count - 1)));
+          const indices = [];
+          for (let i = 0; i < n; i += step) indices.push(i);
+          if (indices[indices.length - 1] !== n - 1) indices.push(n - 1);
+          return indices;
+        },
+        values: (u, splits) => {
+          const arr = getData();
+          return splits.map(i => xTickFormatter(i, String(arr[i]?.label || i + 1)));
+        }
+      },
+      {
+        show: true,
+        scale: 'y',
+        side: 3,
+        stroke: textColor,
+        grid: { show: false },
+        ticks: { show: false },
+        font: '10px ' + getComputedStyle(document.documentElement).getPropertyValue('--font-family'),
+        gap: 4,
+        size: 40,
+        splits: () => {
+          const [min, max] = yDomain();
+          const n = 4;
+          return Array.from({ length: n + 1 }, (_, i) => min + ((max - min) * i) / n);
+        },
+        values: (u, splits) => splits.map(v => yFormatter(v) + valueSuffix)
+      }
+    ],
+    hooks: {
+      drawClear: [
+        (u) => {
+          // رسم خطوط افقی grid با رنگ متناسب
+          if (options.showGrid !== false) {
+            const { ctx, bbox } = u;
+            const dpr2 = u.width > 0 ? u.ctx.canvas.width / u.width : 1;
+            ctx.save();
+            ctx.strokeStyle = getComputedStyle(document.documentElement).getPropertyValue('--card-b') || '#30363d';
+            ctx.lineWidth = dpr2;
+            ctx.setLineDash([3 * dpr2, 4 * dpr2]);
+            const [min, max] = yDomain();
+            const n = 4;
+            for (let i = 0; i <= n; i++) {
+              const y = min + ((max - min) * i) / n;
+              const py = Math.round(u.valToPos(y, 'y', true)) + 0.5;
+              ctx.beginPath();
+              ctx.moveTo(bbox.left, py);
+              ctx.lineTo(bbox.left + bbox.width, py);
+              ctx.stroke();
+            }
+            ctx.restore();
+          }
+        }
+      ],
+      draw: [
+        (u) => {
+          // رسم نقاط افراطی (min/max)
+          if (!showExtrema) return;
+          const arr = getData();
+          if (arr.length < 2) return;
+          let minIdx = 0, maxIdx = 0;
+          for (let i = 1; i < arr.length; i++) {
+            if (arr[i] < arr[minIdx]) minIdx = i;
+            if (arr[i] > arr[maxIdx]) maxIdx = i;
+          }
+          if (minIdx === maxIdx) return;
+          const { ctx, bbox } = u;
+          const dpr2 = u.width > 0 ? u.ctx.canvas.width / u.width : 1;
+          const dot = (idx, color) => {
+            const px = u.valToPos(idx, 'x', true);
+            const py = u.valToPos(arr[idx], 'y', true);
+            ctx.beginPath();
+            ctx.arc(px, py, 5 * dpr2, 0, 2 * Math.PI);
+            ctx.fillStyle = color;
+            ctx.fill();
+            ctx.strokeStyle = '#fff';
+            ctx.lineWidth = 1.5 * dpr2;
+            ctx.stroke();
+          };
+          dot(maxIdx, '#fa541c');
+          dot(minIdx, '#52c41a');
+        }
+      ],
+      setCursor: [
+        (u) => {
+          const idx = u.cursor.idx;
+          if (idx == null || idx < 0 || idx >= getData().length) {
+            tooltipEl.style.display = 'none';
+            return;
+          }
+          const arr = getData();
+          const val = arr[idx];
+          const label = xTickFormatter(idx, String(arr[idx]?.label || idx + 1));
+          const fmt = tooltipFormatter || yFormatter;
+          tooltipEl.innerHTML = '';
+          const labelDiv = document.createElement('div');
+          labelDiv.className = 'tt-label';
+          labelDiv.textContent = label;
+          tooltipEl.appendChild(labelDiv);
+          const row = document.createElement('div');
+          row.className = 'tt-row';
+          const dotSpan = document.createElement('span');
+          dotSpan.className = 'tt-dot';
+          dotSpan.style.background = getComputedStyle(document.documentElement).getPropertyValue('--accent') || '#1677ff';
+          row.appendChild(dotSpan);
+          const nameSpan = document.createElement('span');
+          nameSpan.className = 'tt-name';
+          nameSpan.textContent = options.seriesName || '';
+          row.appendChild(nameSpan);
+          const valSpan = document.createElement('span');
+          valSpan.className = 'tt-val';
+          valSpan.textContent = fmt(val) + (valueSuffix ? ' ' + valueSuffix : '');
+          row.appendChild(valSpan);
+          tooltipEl.appendChild(row);
+          tooltipEl.style.display = '';
+          const overW = u.over.clientWidth;
+          const overH = u.over.clientHeight;
+          const cx = u.cursor.left || 0;
+          const cy = u.cursor.top || 0;
+          const tw = tooltipEl.offsetWidth;
+          const th = tooltipEl.offsetHeight;
+          let left = cx + 12;
+          if (left + tw + 8 > overW) left = cx - tw - 12;
+          if (left < 0) left = 4;
+          let top = cy - th - 12;
+          if (top < 0) top = Math.min(cy + 12, overH - th - 4);
+          tooltipEl.style.transform = `translate(${Math.round(left)}px, ${Math.round(top)}px)`;
+        }
+      ]
+    }
+  };
+
+  const u = new uPlot(opts, buildData(), container);
+  window.uplotInstances.push(u);
+
+  // Resize observer
+  const ro = new ResizeObserver(() => {
+    const w = container.clientWidth;
+    if (w > 0) u.setSize({ width: w, height });
+  });
+  ro.observe(container);
+
+  // Update function
+  function update() {
+    const newData = buildData();
+    u.setData(newData);
+    // به‌روزرسانی domain
+    const [min, max] = yDomain();
+    u.setScale('y', { range: () => [min, max] });
+    u.redraw(false);
+  }
+
+  // ذخیره reference برای استفاده در addDataPoint
+  const instance = { u, update, container, ro };
+  return instance;
+}
+
+// ========== INIT CHARTS با uPlot ==========
+let chartInstances = {};
+
+function initPremiumCharts() {
+  // Load Chart
+  const loadData = () => chartData.load || [];
+  const loadInstance = createSparkline('chart-load-uplot', loadData, {
+    height: 150,
+    seriesName: 'Load',
+    yFormatter: v => v.toFixed(0),
+    valueSuffix: '%',
+    showExtrema: true,
+    yMax: 100
+  });
+  chartInstances.load = loadInstance;
+
+  // Traffic Chart
+  const trafficData = () => chartData.traffic || [];
+  const trafficInstance = createSparkline('chart-traffic-uplot', trafficData, {
+    height: 150,
+    seriesName: 'Traffic',
+    yFormatter: v => v.toFixed(1),
+    valueSuffix: 'MB',
+    showExtrema: true,
+    yMax: null
+  });
+  chartInstances.traffic = trafficInstance;
+
+  // Connections Chart
+  const connsData = () => chartData.conns || [];
+  const connsInstance = createSparkline('chart-conns-uplot', connsData, {
+    height: 150,
+    seriesName: 'Connections',
+    yFormatter: v => v.toFixed(0),
+    valueSuffix: '',
+    showExtrema: true,
+    yMax: null
+  });
+  chartInstances.conns = connsInstance;
+
+  // Hourly Chart (secondary)
+  const hourlyData = () => hourlyChartData || [];
+  const hourlyInstance = createSparkline('dashHourly-uplot', hourlyData, {
+    height: 120,
+    seriesName: 'Hourly Avg',
+    yFormatter: v => v.toFixed(1),
+    valueSuffix: 'MB',
+    showExtrema: true,
+    yMax: null
+  });
+  chartInstances.hourly = hourlyInstance;
+}
+
+// ========== DATA ARRAYS ==========
+let chartData = { load: [], traffic: [], conns: [] };
+let chartTimes = { load: [], traffic: [], conns: [] };
+let hourlyChartData = [];
+const MAX_POINTS = 60;
+
+function loadChartDataFromStorage(){
+  try {
+    const stored = localStorage.getItem('CBeeNet_chartData');
+    if(stored){
+      const parsed = JSON.parse(stored);
+      if(parsed.data && parsed.times){
+        chartData = parsed.data;
+        chartTimes = parsed.times;
+        for(let key of ['load','traffic','conns']){
+          chartTimes[key] = chartTimes[key].map(t => new Date(t));
+          const cutoff = Date.now() - 300000;
+          const indices = chartTimes[key].map((d,i) => d.getTime() >= cutoff ? i : -1).filter(i => i >= 0);
+          if(indices.length > 0){
+            const start = indices[0];
+            chartData[key] = chartData[key].slice(start);
+            chartTimes[key] = chartTimes[key].slice(start);
+          } else {
+            chartData[key] = [];
+            chartTimes[key] = [];
+          }
+        }
+        return true;
+      }
+    }
+  } catch(e) {
+    chartData = { load: [], traffic: [], conns: [] };
+    chartTimes = { load: [], traffic: [], conns: [] };
+    return false;
+  }
+  return false;
+}
+function saveChartDataToStorage(){
+  try {
+    const times = {};
+    for(let key of ['load','traffic','conns']){
+      times[key] = chartTimes[key].map(d => d.toISOString());
+    }
+    localStorage.setItem('CBeeNet_chartData', JSON.stringify({ data: chartData, times: times }));
+  } catch(e) {}
+}
+
+function addDataPoint(type, value, time) {
+  const now = time || new Date();
+  const cutoff = now.getTime() - 300000;
+  let idx = chartTimes[type].findIndex(t => t.getTime() >= cutoff);
+  if(idx > 0) {
+    chartData[type] = chartData[type].slice(idx);
+    chartTimes[type] = chartTimes[type].slice(idx);
+  } else if(idx === -1) {
+    chartData[type] = [];
+    chartTimes[type] = [];
+  }
+  chartData[type].push(value);
+  chartTimes[type].push(now);
+  if(chartData[type].length > MAX_POINTS) {
+    chartData[type].shift();
+    chartTimes[type].shift();
+  }
+  saveChartDataToStorage();
+
+  // به‌روزرسانی نمودار
+  if (chartInstances[type]) {
+    chartInstances[type].update();
+  }
+  updateChartValue(type);
+}
+
+function updateChartValue(type) {
+  const el = document.getElementById('chart-' + type + '-val');
+  if (!el) return;
+  if (type === 'traffic') {
+    el.innerHTML = totalTrafficDisplay.toFixed(1) + '<span class="unit">MB</span>';
+    return;
+  }
+  const data = chartData[type];
+  const last = data.length > 0 ? data[data.length-1] : 0;
+  const unit = type === 'load' ? '%' : '';
+  el.innerHTML = last.toFixed(1) + (unit ? '<span class="unit">' + unit + '</span>' : '');
 }
 
 // ========== FETCH STATS ==========
@@ -2325,32 +2593,60 @@ async function fetchStats(){
     const now = new Date();
     const delta = totalTrafficDisplay - prevTraf;
     const pct = Math.min(100, Math.max(0, Math.round((delta / 50) * 100 * 10) / 10));
-    
-    if(delta >= 0) {
-      addDataPoint('traffic', delta, now);
-    } else {
-      addDataPoint('traffic', 0.01, now);
-    }
-    
+    if(delta >= 0) addDataPoint('traffic', delta, now);
+    else addDataPoint('traffic', 0.01, now);
     prevTraf = totalTrafficDisplay;
     localStorage.setItem('CBeeNet_prevTraf', String(prevTraf));
-    
     addDataPoint('load', pct, now);
     addDataPoint('conns', activeCount, now);
-
-    if(d.hourly) {
-      updateHourlyChart(d.hourly);
+    
+    // به‌روزرسانی Hourly Chart
+    const hourly = d.hourly || {};
+    const labels = Object.keys(hourly).sort();
+    const data = labels.map(h => (hourly[h] || 0) / (1024 * 1024)); // MB
+    hourlyChartData = data.slice(-12); // آخرین ۱۲ ساعت
+    if (chartInstances.hourly) {
+      chartInstances.hourly.update();
     }
+
+    updateSecondaryCharts(d, allLinksList);
   } catch(e){ console.error('fetchStats error:', e); }
 }
 
-document.addEventListener('visibilitychange', function() {
-  if (!document.hidden) {
-    fetchStats();
+// ========== SECONDARY CHARTS (Protocol Distribution با Chart.js) ==========
+let dashProtoChart = null;
+function initSecondaryCharts() {
+  // Protocol distribution chart (با Chart.js)
+  const ctx = document.getElementById('dashProtoChart').getContext('2d');
+  const neonBlue = '#00d4ff';
+  const amberColor = getComputedStyle(document.documentElement).getPropertyValue('--amber-t').trim() || '#fbbf24';
+  const textColor = getComputedStyle(document.documentElement).getPropertyValue('--t3').trim() || '#5a7298';
+  const gridColor = getComputedStyle(document.documentElement).getPropertyValue('--card-b').trim() || '#1e2d45';
+  dashProtoChart = new Chart(ctx, {
+    type: 'bar',
+    data: { labels: ['VLESS/WS', 'XHTTP-packet', 'XHTTP-stream', 'XHTTP-ultra'], datasets: [{ data: [0,0,0,0], backgroundColor: [neonBlue, 'rgba(251, 191, 36, 0.8)', 'rgba(245, 158, 11, 0.8)', 'rgba(16, 185, 129, 0.8)'], borderColor: [neonBlue, amberColor, '#f59e0b', '#10b981'], borderWidth: 2, borderRadius: 6, barPercentage: 0.6 }] },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: { legend: { display: false }, tooltip: { backgroundColor: 'rgba(11, 17, 29, 0.9)', borderColor: neonBlue, borderWidth: 1, titleColor: '#fff', bodyColor: '#fff', cornerRadius: 8, padding: 10, callbacks: { label: function(context){ return context.parsed.y + ' configs'; } } } },
+      scales: { x: { grid: { display: false }, ticks: { color: textColor, font: { size: 9, family: 'Vazirmatn, sans-serif' } } }, y: { grid: { color: gridColor, drawBorder: false }, ticks: { color: textColor, font: { size: 9, family: 'Vazirmatn, sans-serif' }, stepSize: 1 } } },
+      animation: { duration: 400, easing: 'easeOutQuart' }
+    }
+  });
+}
+function updateSecondaryCharts(statsData, linksData){
+  if(dashProtoChart && linksData){
+    const protoCounts = { 'vless-ws': 0, 'xhttp-packet-up': 0, 'xhttp-stream-up': 0, 'xhttp-stream-one': 0 };
+    linksData.forEach(l => {
+      const protos = l.protocols || ['vless-ws'];
+      protos.forEach(p => { if(protoCounts[p] !== undefined) protoCounts[p]++; });
+    });
+    const counts = [protoCounts['vless-ws'], protoCounts['xhttp-packet-up'], protoCounts['xhttp-stream-up'], protoCounts['xhttp-stream-one']];
+    dashProtoChart.data.datasets[0].data = counts;
+    dashProtoChart.update('none');
   }
-});
+}
 
-// ========== LINKS (unchanged) ==========
+// ========== LINKS (بدون تغییر) ==========
 async function loadLinks(){
   try{
     const [lr, sr] = await Promise.all([authF('/api/links'), authF('/api/subs')]);
@@ -2412,6 +2708,8 @@ async function loadLinks(){
         </div>
       </div>`;
     }).join('');
+    const stats = await authF('/stats').then(r => r.json());
+    updateSecondaryCharts(stats, links);
   } catch(e){ console.error(e); }
 }
 async function createLink(){
@@ -2488,7 +2786,7 @@ async function deleteLink(uuid){
 }
 function showQR(link){ window.open('https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=' + encodeURIComponent(link), '_blank'); }
 
-// ========== SUB GROUPS (unchanged) ==========
+// ========== SUB GROUPS (بدون تغییر) ==========
 async function loadSubs(){
   try{
     const r = await authF('/api/subs');
@@ -2643,7 +2941,7 @@ async function copyAllSubLinks(subId){
   navigator.clipboard.writeText(urls.join('\n')).then(() => toast(urls.length + ' links copied ✓', 'ok'));
 }
 
-// ========== CONNECTIONS, ACTIVITY, ERRORS, WEBSOCKET ==========
+// ========== CONNECTIONS, ACTIVITY, ERRORS, WEBSOCKET (بدون تغییر) ==========
 async function loadConns(){
   try{
     const r = await authF('/api/connections');
@@ -2951,8 +3249,19 @@ document.addEventListener('DOMContentLoaded', async () => {
   });
 
   prevTraf = parseFloat(localStorage.getItem('CBeeNet_prevTraf')) || 0;
-  loadChartDataFromStorage();
-  initSparklines();
+
+  const hasStored = loadChartDataFromStorage();
+  initPremiumCharts();
+  initSecondaryCharts();
+  if(!hasStored || chartData.load.length === 0){
+    const now = new Date();
+    for(let i=0; i<10; i++){
+      const t = new Date(now.getTime() - (10-i)*5000);
+      addDataPoint('load', 0, t);
+      addDataPoint('traffic', 0, t);
+      addDataPoint('conns', 0, t);
+    }
+  }
 
   document.getElementById('set-host').textContent = location.host;
   document.getElementById('sub-all-url').textContent = location.protocol + '//' + location.host + '/sub-all';
