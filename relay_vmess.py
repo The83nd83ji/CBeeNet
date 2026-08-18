@@ -17,17 +17,10 @@ from relay_vless import _ws_client_ip, check_and_use, RELAY_BUF
 
 router = APIRouter()
 
-# ─── توابع VMess ──────────────────────────────────────────────────────────
 def vmess_key_from_uuid(uuid: str) -> bytes:
-    """استخراج کلید 16 بایتی از UUID با استفاده از MD5 (طبق استاندارد VMess)."""
     return hashlib.md5(uuid.encode()).digest()
 
 def vmess_decrypt_header(key: bytes, data: bytes) -> tuple:
-    """
-    رمزگشایی هدر VMess (نسخه 1) با AES-128-CFB.
-    ورودی: کلید 16 بایتی و داده‌های خام (شامل IV 16 بایتی + هدر رمزنگاری‌شده)
-    خروجی: (command, address, port, remaining_payload)
-    """
     if len(data) < 16:
         raise ValueError("Header too short for IV")
     iv = data[:16]
@@ -37,20 +30,22 @@ def vmess_decrypt_header(key: bytes, data: bytes) -> tuple:
         raise ValueError("Decrypted header too short")
     version = decrypted[0]
     if version != 0x01:
+        # کلاینت ممکن است نسخه‌ی دیگری ارسال کند، اما ما فقط نسخه‌ی ۱ را پشتیبانی می‌کنیم
         raise ValueError(f"Unsupported VMess version: {version}")
-    command = decrypted[17]          # 0x01 = CONNECT
+    
+    command = decrypted[17]
     port = struct.unpack('>H', decrypted[18:20])[0]
     addr_type = decrypted[20]
     pos = 21
-    if addr_type == 1:   # IPv4
+    if addr_type == 1:
         address = ".".join(str(b) for b in decrypted[pos:pos+4])
         pos += 4
-    elif addr_type == 2: # domain
+    elif addr_type == 2:
         dlen = decrypted[pos]
         pos += 1
         address = decrypted[pos:pos+dlen].decode('utf-8', errors='ignore')
         pos += dlen
-    elif addr_type == 3: # IPv6
+    elif addr_type == 3:
         ab = decrypted[pos:pos+16]
         pos += 16
         address = ":".join(f"{ab[i]:02x}{ab[i+1]:02x}" for i in range(0, 16, 2))
@@ -58,7 +53,6 @@ def vmess_decrypt_header(key: bytes, data: bytes) -> tuple:
         raise ValueError(f"Unknown address type: {addr_type}")
     return command, address, port, decrypted[pos:]
 
-# ─── توابع رله ───────────────────────────────────────────────────────────
 async def relay_ws_to_tcp(ws, writer, conn_id, uuid):
     try:
         while True:
@@ -101,7 +95,6 @@ async def relay_tcp_to_ws(ws, reader, conn_id, uuid):
     except Exception:
         pass
 
-# ===== مسیر جدید: /vmess-ws/{uuid} =====
 @router.websocket("/vmess-ws/{uuid}")
 async def vmess_standard_tunnel(ws: WebSocket, uuid: str):
     await ws.accept()
