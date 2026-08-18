@@ -10,7 +10,7 @@ from main import (
     LINKS, LINKS_LOCK, stats, connections, error_logs, logger,
     is_link_allowed, save_state, log_activity, now_ir
 )
-from relay_vless import _ws_client_ip, check_and_use, RELAY_BUF
+from relay_vless import _ws_client_ip, check_and_use, RELAY_BUF, parse_vless_header
 
 router = APIRouter()
 
@@ -119,12 +119,21 @@ async def vmess_standard_tunnel(ws: WebSocket, uuid: str):
         return
 
     key = vmess_key_from_uuid(uuid)
+    use_vless_fallback = False
     try:
         command, address, port, remaining = vmess_decrypt_header(key, first_chunk)
     except Exception as e:
-        logger.warning(f"VMess header decryption error: {e}")
-        await ws.close(code=1008, reason="invalid vmess header")
-        return
+        logger.warning(f"VMess header decryption error: {e} → fallback to VLESS")
+        use_vless_fallback = True
+
+    if use_vless_fallback:
+        try:
+            command, address, port, remaining = await parse_vless_header(first_chunk)
+            logger.info(f"VMess fallback VLESS → {address}:{port}")
+        except Exception as e2:
+            logger.warning(f"VMess VLESS fallback also failed: {e2}")
+            await ws.close(code=1008, reason="invalid header")
+            return
 
     ip = _ws_client_ip(ws)
     conn_id = secrets.token_urlsafe(6)
