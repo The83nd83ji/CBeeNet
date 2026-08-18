@@ -10,7 +10,8 @@ from main import (
 from relay_vless import _ws_client_ip, check_and_use, RELAY_BUF
 
 router = APIRouter()
-TROJAN_EXPECTED_PASSWORD = "CBeeNet"  # پسورد ثابت در هدر
+TROJAN_EXPECTED_PASSWORD = "CBeeNet"
+
 
 async def parse_trojan_header_full(chunk: bytes):
     if len(chunk) < 57 + 1 + 2 + 1:
@@ -23,20 +24,28 @@ async def parse_trojan_header_full(chunk: bytes):
     if not password:
         raise ValueError("empty password")
     pos = 57
-    command = chunk[pos]; pos += 1
-    port = int.from_bytes(chunk[pos:pos+2], "big"); pos += 2
-    addr_type = chunk[pos]; pos += 1
+    command = chunk[pos]
+    pos += 1
+    port = int.from_bytes(chunk[pos:pos+2], "big")
+    pos += 2
+    addr_type = chunk[pos]
+    pos += 1
     if addr_type == 1:
-        address = ".".join(str(b) for b in chunk[pos:pos+4]); pos += 4
+        address = ".".join(str(b) for b in chunk[pos:pos+4])
+        pos += 4
     elif addr_type == 2:
-        dlen = chunk[pos]; pos += 1
-        address = chunk[pos:pos+dlen].decode("utf-8", errors="ignore"); pos += dlen
+        dlen = chunk[pos]
+        pos += 1
+        address = chunk[pos:pos+dlen].decode("utf-8", errors="ignore")
+        pos += dlen
     elif addr_type == 3:
-        ab = chunk[pos:pos+16]; pos += 16
+        ab = chunk[pos:pos+16]
+        pos += 16
         address = ":".join(f"{ab[i]:02x}{ab[i+1]:02x}" for i in range(0, 16, 2))
     else:
         raise ValueError(f"unknown addr type: {addr_type}")
     return command, password, address, port, chunk[pos:]
+
 
 async def relay_ws_to_tcp(ws, writer, conn_id, uuid):
     try:
@@ -63,6 +72,7 @@ async def relay_ws_to_tcp(ws, writer, conn_id, uuid):
         except Exception:
             pass
 
+
 async def relay_tcp_to_ws(ws, reader, conn_id, uuid):
     first = True
     try:
@@ -80,11 +90,11 @@ async def relay_tcp_to_ws(ws, reader, conn_id, uuid):
     except Exception:
         pass
 
+
 @router.websocket("/CBeeNet-----CBeeNet-----CBeeNet-----CBeeNet-----CBeeNet-----CBeeNet-----CBeeNet-----CBeeNet-----CBeeNet-----CBeeNet/{uuid}")
 async def trojan_tunnel(ws: WebSocket, uuid: str):
     await ws.accept()
 
-    # احراز هویت با UUID دریافتی از مسیر
     async with LINKS_LOCK:
         link = LINKS.get(uuid)
     if not is_link_allowed(link):
@@ -92,7 +102,6 @@ async def trojan_tunnel(ws: WebSocket, uuid: str):
         await ws.close(code=1008, reason="not authorized")
         return
 
-    # دریافت اولین پکت (شامل هدر تروجان)
     try:
         first_msg = await asyncio.wait_for(ws.receive(), timeout=15.0)
         if first_msg["type"] == "websocket.disconnect":
@@ -105,7 +114,6 @@ async def trojan_tunnel(ws: WebSocket, uuid: str):
         await ws.close(code=1008, reason="timeout")
         return
 
-    # Parse هدر و بررسی پسورد ثابت
     try:
         command, password, address, port, payload = await parse_trojan_header_full(first_chunk)
         if password != TROJAN_EXPECTED_PASSWORD:
