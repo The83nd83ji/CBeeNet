@@ -13,22 +13,27 @@ from main import (
 from relay_vless import _ws_client_ip, check_and_use, RELAY_BUF
 
 router = APIRouter()
-TROJAN_EXPECTED_PASSWORD = "CBeeNet"  # پسورد ثابت در هدر تروجان
+TROJAN_EXPECTED_PASSWORD = "CBeeNet"
 
 async def parse_trojan_header_full(chunk: bytes):
     if len(chunk) < 57 + 1 + 2 + 1:
         raise ValueError("chunk too small")
+    
     version = chunk[0]
-    if version != 0x01:
+    # پشتیبانی از نسخه‌های 0x01 و 0x57 (Trojan-Go)
+    if version not in (0x01, 0x57):
         raise ValueError(f"unsupported version: {version}")
+    
     password_bytes = chunk[1:57]
     password = password_bytes.split(b'\x00')[0].decode('utf-8', errors='ignore')
     if not password:
         raise ValueError("empty password")
+    
     pos = 57
     command = chunk[pos]; pos += 1
     port = int.from_bytes(chunk[pos:pos+2], "big"); pos += 2
     addr_type = chunk[pos]; pos += 1
+    
     if addr_type == 1:
         address = ".".join(str(b) for b in chunk[pos:pos+4]); pos += 4
     elif addr_type == 2:
@@ -39,6 +44,7 @@ async def parse_trojan_header_full(chunk: bytes):
         address = ":".join(f"{ab[i]:02x}{ab[i+1]:02x}" for i in range(0, 16, 2))
     else:
         raise ValueError(f"unknown addr type: {addr_type}")
+    
     return command, password, address, port, chunk[pos:]
 
 async def relay_ws_to_tcp(ws, writer, conn_id, uuid):
@@ -83,7 +89,6 @@ async def relay_tcp_to_ws(ws, reader, conn_id, uuid):
     except Exception:
         pass
 
-# ===== مسیر جدید: /trojan-ws/{uuid} =====
 @router.websocket("/trojan-ws/{uuid}")
 async def trojan_tunnel(ws: WebSocket, uuid: str):
     await ws.accept()
