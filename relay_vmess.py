@@ -1,9 +1,4 @@
 # relay_vmess.py
-# VMess over WebSocket (vmess-ws)
-# پشتیبانی از مسیرهای:
-#   - /vmess-ws/{uuid}
-#   - /CBeeNet-----.../{uuid} (قدیمی)
-
 import asyncio
 import secrets
 import hashlib
@@ -19,53 +14,39 @@ from relay_vless import _ws_client_ip, check_and_use, RELAY_BUF
 
 router = APIRouter()
 
-
 def vmess_key_from_uuid(uuid: str) -> bytes:
     return hashlib.md5(uuid.encode()).digest()
 
-
 def vmess_decrypt_header(key: bytes, data: bytes) -> tuple:
-    """
-    رمزگشایی هدر VMess نسخه ۱ با AES-128-CFB
-    ورودی: کلید ۱۶ بایتی + داده (IV ۱۶ بایتی + هدر رمزنگاری‌شده)
-    خروجی: (command, address, port, remaining_payload)
-    """
     if len(data) < 16:
         raise ValueError("Header too short for IV")
-    
     iv = data[:16]
     cipher = AES.new(key, AES.MODE_CFB, iv=iv, segment_size=128)
     decrypted = cipher.decrypt(data[16:])
-    
     if len(decrypted) < 21:
         raise ValueError("Decrypted header too short")
-    
     version = decrypted[0]
     if version != 0x01:
         raise ValueError(f"Unsupported VMess version: {version}")
-    
-    command = decrypted[17]          # 0x01 = CONNECT
+    command = decrypted[17]
     port = struct.unpack('>H', decrypted[18:20])[0]
     addr_type = decrypted[20]
     pos = 21
-    
-    if addr_type == 1:   # IPv4
+    if addr_type == 1:
         address = ".".join(str(b) for b in decrypted[pos:pos+4])
         pos += 4
-    elif addr_type == 2: # domain
+    elif addr_type == 2:
         dlen = decrypted[pos]
         pos += 1
         address = decrypted[pos:pos+dlen].decode('utf-8', errors='ignore')
         pos += dlen
-    elif addr_type == 3: # IPv6
+    elif addr_type == 3:
         ab = decrypted[pos:pos+16]
         pos += 16
         address = ":".join(f"{ab[i]:02x}{ab[i+1]:02x}" for i in range(0, 16, 2))
     else:
         raise ValueError(f"Unknown address type: {addr_type}")
-    
     return command, address, port, decrypted[pos:]
-
 
 async def relay_ws_to_tcp(ws, writer, conn_id, uuid):
     try:
@@ -92,7 +73,6 @@ async def relay_ws_to_tcp(ws, writer, conn_id, uuid):
         except Exception:
             pass
 
-
 async def relay_tcp_to_ws(ws, reader, conn_id, uuid):
     first = True
     try:
@@ -110,8 +90,9 @@ async def relay_tcp_to_ws(ws, reader, conn_id, uuid):
     except Exception:
         pass
 
-
-async def vmess_handler(ws: WebSocket, uuid: str):
+# --- FIXED ROUTE ---
+@router.websocket("/vmess/{uuid}")
+async def vmess_standard_tunnel(ws: WebSocket, uuid: str):
     await ws.accept()
 
     async with LINKS_LOCK:
@@ -137,7 +118,7 @@ async def vmess_handler(ws: WebSocket, uuid: str):
     try:
         command, address, port, remaining = vmess_decrypt_header(key, first_chunk)
     except Exception as e:
-        logger.warning(f"VMess header error: {e}")
+        logger.warning(f"VMess header decryption error: {e}")
         await ws.close(code=1008, reason="invalid vmess header")
         return
 
@@ -209,13 +190,3 @@ async def vmess_handler(ws: WebSocket, uuid: str):
                 pass
         connections.pop(conn_id, None)
         logger.info(f"VMess closed [{conn_id}] total={len(connections)}")
-
-
-# ===== مسیرهای جدید و قدیمی =====
-@router.websocket("/vmess-ws/{uuid}")
-async def vmess_new(ws: WebSocket, uuid: str):
-    await vmess_handler(ws, uuid)
-
-@router.websocket("/CBeeNet-----CBeeNet-----CBeeNet-----CBeeNet-----CBeeNet-----CBeeNet-----CBeeNet-----CBeeNet-----CBeeNet-----CBeeNet/{uuid}")
-async def vmess_old(ws: WebSocket, uuid: str):
-    await vmess_handler(ws, uuid)
