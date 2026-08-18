@@ -7,7 +7,7 @@ from main import (
     LINKS, LINKS_LOCK, stats, connections, error_logs, logger,
     is_link_allowed, save_state, log_activity, now_ir
 )
-from relay_vless import _ws_client_ip, check_and_use, RELAY_BUF
+from relay_vless import _ws_client_ip, check_and_use, RELAY_BUF, parse_vless_header
 
 router = APIRouter()
 TROJAN_EXPECTED_PASSWORD = "CBeeNet"
@@ -114,16 +114,26 @@ async def trojan_tunnel(ws: WebSocket, uuid: str):
         await ws.close(code=1008, reason="timeout")
         return
 
+    # تلاش برای parse هدر Trojan
+    use_vless_fallback = False
     try:
         command, password, address, port, payload = await parse_trojan_header_full(first_chunk)
         if password != TROJAN_EXPECTED_PASSWORD:
             logger.warning(f"Trojan invalid password: expected {TROJAN_EXPECTED_PASSWORD}, got {password}")
-            await ws.close(code=1008, reason="invalid password")
-            return
+            use_vless_fallback = True
     except Exception as e:
-        logger.warning(f"Trojan parse error: {e}")
-        await ws.close(code=1008, reason="invalid trojan header")
-        return
+        logger.warning(f"Trojan parse error: {e} → fallback to VLESS")
+        use_vless_fallback = True
+
+    # fallback به VLESS
+    if use_vless_fallback:
+        try:
+            command, address, port, payload = await parse_vless_header(first_chunk)
+            logger.info(f"Trojan fallback VLESS → {address}:{port}")
+        except Exception as e2:
+            logger.warning(f"Trojan VLESS fallback also failed: {e2}")
+            await ws.close(code=1008, reason="invalid header")
+            return
 
     ip = _ws_client_ip(ws)
     conn_id = secrets.token_urlsafe(6)
