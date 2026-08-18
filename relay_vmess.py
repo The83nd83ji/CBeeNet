@@ -1,7 +1,4 @@
 # relay_vmess.py
-# پیاده‌سازی استاندارد VMess (WebSocket) با رمزگشایی AES-128-CFB
-# مسیر: /CBeeNet-----.../UUID
-
 import asyncio
 import secrets
 import hashlib
@@ -17,17 +14,12 @@ from relay_vless import _ws_client_ip, check_and_use, RELAY_BUF
 
 router = APIRouter()
 
-# ─── توابع VMess ──────────────────────────────────────────────────────────
+
 def vmess_key_from_uuid(uuid: str) -> bytes:
-    """استخراج کلید 16 بایتی از UUID با استفاده از MD5 (طبق استاندارد VMess)."""
     return hashlib.md5(uuid.encode()).digest()
 
+
 def vmess_decrypt_header(key: bytes, data: bytes) -> tuple:
-    """
-    رمزگشایی هدر VMess (نسخه 1) با AES-128-CFB.
-    ورودی: کلید 16 بایتی و داده‌های خام (شامل IV 16 بایتی + هدر رمزنگاری‌شده)
-    خروجی: (command, address, port, remaining_payload)
-    """
     if len(data) < 16:
         raise ValueError("Header too short for IV")
     iv = data[:16]
@@ -38,29 +30,27 @@ def vmess_decrypt_header(key: bytes, data: bytes) -> tuple:
     version = decrypted[0]
     if version != 0x01:
         raise ValueError(f"Unsupported VMess version: {version}")
-    command = decrypted[17]          # 0x01 = CONNECT
+    command = decrypted[17]
     port = struct.unpack('>H', decrypted[18:20])[0]
     addr_type = decrypted[20]
     pos = 21
-    if addr_type == 1:   # IPv4
+    if addr_type == 1:
         address = ".".join(str(b) for b in decrypted[pos:pos+4])
         pos += 4
-    elif addr_type == 2: # domain
+    elif addr_type == 2:
         dlen = decrypted[pos]
         pos += 1
         address = decrypted[pos:pos+dlen].decode('utf-8', errors='ignore')
         pos += dlen
-    elif addr_type == 3: # IPv6
+    elif addr_type == 3:
         ab = decrypted[pos:pos+16]
         pos += 16
         address = ":".join(f"{ab[i]:02x}{ab[i+1]:02x}" for i in range(0, 16, 2))
     else:
         raise ValueError(f"Unknown address type: {addr_type}")
-    # باقیمانده داده‌ها (payload) که ممکن است رمزنگاری‌شده باشد، اما در این پیاده‌سازی
-    # ما آن را بدون تغییر ارسال می‌کنیم (چون کلاینت خودش رمز کرده و مقصد انتظار رمز را دارد)
     return command, address, port, decrypted[pos:]
 
-# ─── توابع رله (همانند VLESS) ───────────────────────────────────────────
+
 async def relay_ws_to_tcp(ws, writer, conn_id, uuid):
     try:
         while True:
@@ -86,6 +76,7 @@ async def relay_ws_to_tcp(ws, writer, conn_id, uuid):
         except Exception:
             pass
 
+
 async def relay_tcp_to_ws(ws, reader, conn_id, uuid):
     first = True
     try:
@@ -103,7 +94,7 @@ async def relay_tcp_to_ws(ws, reader, conn_id, uuid):
     except Exception:
         pass
 
-# ─── WebSocket Endpoint ──────────────────────────────────────────────────
+
 @router.websocket("/CBeeNet-----CBeeNet-----CBeeNet-----CBeeNet-----CBeeNet-----CBeeNet-----CBeeNet-----CBeeNet-----CBeeNet-----CBeeNet/{uuid}")
 async def vmess_standard_tunnel(ws: WebSocket, uuid: str):
     await ws.accept()
@@ -115,7 +106,6 @@ async def vmess_standard_tunnel(ws: WebSocket, uuid: str):
         await ws.close(code=1008, reason="not authorized")
         return
 
-    # دریافت اولین پیام (شامل IV و هدر رمزنگاری‌شده)
     try:
         first_msg = await asyncio.wait_for(ws.receive(), timeout=15.0)
         if first_msg["type"] == "websocket.disconnect":
@@ -128,7 +118,6 @@ async def vmess_standard_tunnel(ws: WebSocket, uuid: str):
         await ws.close(code=1008, reason="timeout")
         return
 
-    # استخراج کلید از UUID و رمزگشایی هدر
     key = vmess_key_from_uuid(uuid)
     try:
         command, address, port, remaining = vmess_decrypt_header(key, first_chunk)
@@ -167,7 +156,6 @@ async def vmess_standard_tunnel(ws: WebSocket, uuid: str):
             import socket
             sock.setsockopt(socket.IPPROTO_TCP, socket.TCP_NODELAY, 1)
 
-        # ارسال payload (که ممکن است رمزنگاری‌شده باشد) به مقصد
         if remaining:
             writer.write(remaining)
             await writer.drain()
