@@ -97,7 +97,6 @@ SUBS_LOCK = asyncio.Lock()
 RESELLERS: dict = {}
 RESELLERS_LOCK = asyncio.Lock()
 
-# پروتکل‌های پشتیبانی شده (نام‌های داخلی)
 PROTOCOLS = (
     "vless-ws",
     "xhttp-packet-up",
@@ -275,24 +274,21 @@ def _format_xhttp_uri(uuid: str, ip: str, port: int, remark: str, protocol: str,
     return f"vless://{uuid}@{ip}:{port}?{query}#{quote(remark)}"
 
 def _format_trojan_uri(uuid: str, ip: str, port: int, remark: str, protocol: str, original_host: str) -> str:
-    # مسیر ثابت با UUID در انتها
-    path = f"/CBeeNet-----CBeeNet-----CBeeNet-----CBeeNet-----CBeeNet-----CBeeNet-----CBeeNet-----CBeeNet-----CBeeNet-----CBeeNet/{uuid}"
+    path = f"/trojan-ws/{uuid}"
     params = {
         "path": path,
         "security": "tls",
-        "type": "httpupgrade",
+        "type": "ws",
         "host": original_host,
         "sni": original_host,
         "insecure": "0",
         "allowInsecure": "0"
     }
     query = "&".join(f"{k}={quote(str(v))}" for k, v in params.items())
-    # پسورد ثابت = CBeeNet
     return f"trojan://CBeeNet@{ip}:{port}?{query}#{quote(remark)}"
 
 def _format_vmess_uri(uuid: str, ip: str, port: int, remark: str, protocol: str, original_host: str) -> str:
-    # ساخت JSON استاندارد VMess
-    path = f"/CBeeNet-----CBeeNet-----CBeeNet-----CBeeNet-----CBeeNet-----CBeeNet-----CBeeNet-----CBeeNet-----CBeeNet-----CBeeNet/{uuid}"
+    path = f"/vmess-ws/{uuid}"
     config = {
         "v": "2",
         "ps": remark,
@@ -321,7 +317,6 @@ def _format_uri(uuid: str, ip: str, port: int, remark: str, protocol: str, origi
     elif protocol == "vmess-ws":
         return _format_vmess_uri(uuid, ip, port, remark, protocol, original_host)
     else:
-        # fallback to VLESS
         return _format_vless_uri(uuid, ip, port, remark, protocol, original_host)
 
 def generate_links(link_data: dict, uuid: str, host: str) -> list[str]:
