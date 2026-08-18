@@ -1,4 +1,4 @@
-# relay_vmess.py
+# relay_vmess.py - نسخه دیباگ کامل
 import asyncio
 import secrets
 import hashlib
@@ -10,7 +10,7 @@ from main import (
     LINKS, LINKS_LOCK, stats, connections, error_logs, logger,
     is_link_allowed, save_state, log_activity, now_ir
 )
-from relay_vless import _ws_client_ip, check_and_use, RELAY_BUF, parse_vless_header
+from relay_vless import _ws_client_ip, check_and_use, RELAY_BUF
 
 router = APIRouter()
 
@@ -21,12 +21,12 @@ def vmess_key_from_uuid(uuid: str) -> bytes:
 
 def vmess_decrypt_header(key: bytes, data: bytes) -> tuple:
     if len(data) < 16:
-        raise ValueError("Header too short for IV")
+        raise ValueError(f"Header too short for IV: got {len(data)} bytes")
     iv = data[:16]
     cipher = AES.new(key, AES.MODE_CFB, iv=iv, segment_size=128)
     decrypted = cipher.decrypt(data[16:])
     if len(decrypted) < 21:
-        raise ValueError("Decrypted header too short")
+        raise ValueError(f"Decrypted header too short: {len(decrypted)} bytes")
     version = decrypted[0]
     if version != 0x01:
         raise ValueError(f"Unsupported VMess version: {version}")
@@ -114,26 +114,29 @@ async def vmess_standard_tunnel(ws: WebSocket, uuid: str):
         if not first_chunk:
             await ws.close(code=1008, reason="empty payload")
             return
+        
+        # دیباگ
+        logger.info(f"VMess first chunk size: {len(first_chunk)}")
+        logger.info(f"VMess first chunk hex (first 64 bytes): {first_chunk[:64].hex()}")
+        
     except asyncio.TimeoutError:
         await ws.close(code=1008, reason="timeout")
         return
 
     key = vmess_key_from_uuid(uuid)
-    use_vless_fallback = False
+    logger.info(f"VMess key derived from UUID: {key.hex()}")
+    
     try:
         command, address, port, remaining = vmess_decrypt_header(key, first_chunk)
+        logger.info(f"VMess decrypted: addr={address}:{port}, cmd={command}")
     except Exception as e:
-        logger.warning(f"VMess header decryption error: {e} → fallback to VLESS")
-        use_vless_fallback = True
-
-    if use_vless_fallback:
-        try:
-            command, address, port, remaining = await parse_vless_header(first_chunk)
-            logger.info(f"VMess fallback VLESS → {address}:{port}")
-        except Exception as e2:
-            logger.warning(f"VMess VLESS fallback also failed: {e2}")
-            await ws.close(code=1008, reason="invalid header")
-            return
+        logger.error(f"VMess header decryption error: {e}")
+        # fallback: شاید کلاینت هدر VMess استاندارد نمی‌فرسته
+        logger.warning("VMess: trying fallback mode (raw data to 127.0.0.1:443)")
+        address = "127.0.0.1"
+        port = 443
+        remaining = first_chunk
+        command = 0x01
 
     ip = _ws_client_ip(ws)
     conn_id = secrets.token_urlsafe(6)
