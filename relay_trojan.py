@@ -80,8 +80,8 @@ async def relay_tcp_to_ws(ws, reader, conn_id, uuid):
     except Exception:
         pass
 
-# --- FIXED ROUTE ---
-@router.websocket("/trojan/{uuid}")
+# Original long route for Trojan (compatible with existing clients)
+@router.websocket("/CBeeNet-----CBeeNet-----CBeeNet-----CBeeNet-----CBeeNet-----CBeeNet-----CBeeNet-----CBeeNet-----CBeeNet-----CBeeNet/{uuid}")
 async def trojan_tunnel(ws: WebSocket, uuid: str):
     await ws.accept()
 
