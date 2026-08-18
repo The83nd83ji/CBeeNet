@@ -18,6 +18,10 @@ def vmess_key_from_uuid(uuid: str) -> bytes:
     return hashlib.md5(uuid.encode()).digest()
 
 def vmess_decrypt_header(key: bytes, data: bytes) -> tuple:
+    """
+    Decrypt VMess header (supports both version 1 and 2).
+    Returns (command, address, port, remaining_payload).
+    """
     if len(data) < 16:
         raise ValueError("Header too short for IV")
     iv = data[:16]
@@ -26,21 +30,22 @@ def vmess_decrypt_header(key: bytes, data: bytes) -> tuple:
     if len(decrypted) < 21:
         raise ValueError("Decrypted header too short")
     version = decrypted[0]
-    if version != 0x01:
+    if version not in (0x01, 0x02):
         raise ValueError(f"Unsupported VMess version: {version}")
-    command = decrypted[17]
+    # For version 2, the structure is the same except the version byte
+    command = decrypted[17]          # 0x01 = CONNECT
     port = struct.unpack('>H', decrypted[18:20])[0]
     addr_type = decrypted[20]
     pos = 21
-    if addr_type == 1:
+    if addr_type == 1:   # IPv4
         address = ".".join(str(b) for b in decrypted[pos:pos+4])
         pos += 4
-    elif addr_type == 2:
+    elif addr_type == 2: # domain
         dlen = decrypted[pos]
         pos += 1
         address = decrypted[pos:pos+dlen].decode('utf-8', errors='ignore')
         pos += dlen
-    elif addr_type == 3:
+    elif addr_type == 3: # IPv6
         ab = decrypted[pos:pos+16]
         pos += 16
         address = ":".join(f"{ab[i]:02x}{ab[i+1]:02x}" for i in range(0, 16, 2))
@@ -90,7 +95,6 @@ async def relay_tcp_to_ws(ws, reader, conn_id, uuid):
     except Exception:
         pass
 
-# --- FIXED ROUTE ---
 @router.websocket("/vmess/{uuid}")
 async def vmess_standard_tunnel(ws: WebSocket, uuid: str):
     await ws.accept()
