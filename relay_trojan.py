@@ -1,4 +1,4 @@
-# relay_trojan.py - نسخه دیباگ کامل
+# relay_trojan.py
 import asyncio
 import secrets
 from datetime import datetime
@@ -10,46 +10,6 @@ from main import (
 from relay_vless import _ws_client_ip, check_and_use, RELAY_BUF
 
 router = APIRouter()
-TROJAN_EXPECTED_PASSWORD = "CBeeNet"
-
-
-async def parse_trojan_header_full(chunk: bytes):
-    if len(chunk) < 57 + 1 + 2 + 1:
-        raise ValueError(f"chunk too small: got {len(chunk)} bytes, need at least 61")
-    version = chunk[0]
-    if version != 0x01:
-        raise ValueError(f"unsupported version: {version}")
-    password_bytes = chunk[1:57]
-    # پیدا کردن null-terminator
-    null_pos = password_bytes.find(b'\x00')
-    if null_pos > 0:
-        password = password_bytes[:null_pos].decode('utf-8', errors='ignore')
-    else:
-        password = password_bytes.decode('utf-8', errors='ignore')
-    if not password:
-        raise ValueError("empty password")
-    pos = 57
-    command = chunk[pos]
-    pos += 1
-    port = int.from_bytes(chunk[pos:pos+2], "big")
-    pos += 2
-    addr_type = chunk[pos]
-    pos += 1
-    if addr_type == 1:
-        address = ".".join(str(b) for b in chunk[pos:pos+4])
-        pos += 4
-    elif addr_type == 2:
-        dlen = chunk[pos]
-        pos += 1
-        address = chunk[pos:pos+dlen].decode("utf-8", errors="ignore")
-        pos += dlen
-    elif addr_type == 3:
-        ab = chunk[pos:pos+16]
-        pos += 16
-        address = ":".join(f"{ab[i]:02x}{ab[i+1]:02x}" for i in range(0, 16, 2))
-    else:
-        raise ValueError(f"unknown addr type: {addr_type}")
-    return command, password, address, port, chunk[pos:]
 
 
 async def relay_ws_to_tcp(ws, writer, conn_id, uuid):
@@ -62,7 +22,7 @@ async def relay_ws_to_tcp(ws, writer, conn_id, uuid):
             if not data:
                 continue
             if not await check_and_use(uuid, len(data)):
-                await ws.close(code=1008, reason="quota/disabled/unknown")
+                await ws.close(code=1008, reason="quota/disabled")
                 break
             stats["total_requests"] += 1
             connections[conn_id]["bytes"] += len(data)
@@ -79,19 +39,16 @@ async def relay_ws_to_tcp(ws, writer, conn_id, uuid):
 
 
 async def relay_tcp_to_ws(ws, reader, conn_id, uuid):
-    first = True
     try:
         while True:
             data = await reader.read(RELAY_BUF)
             if not data:
                 break
             if not await check_and_use(uuid, len(data)):
-                await ws.close(code=1008, reason="quota/disabled/unknown")
+                await ws.close(code=1008, reason="quota/disabled")
                 break
             connections[conn_id]["bytes"] += len(data)
-            payload = (b"\x00\x00" + data) if first else data
-            first = False
-            await ws.send_bytes(payload)
+            await ws.send_bytes(data)
     except Exception:
         pass
 
@@ -107,40 +64,6 @@ async def trojan_tunnel(ws: WebSocket, uuid: str):
         await ws.close(code=1008, reason="not authorized")
         return
 
-    try:
-        first_msg = await asyncio.wait_for(ws.receive(), timeout=15.0)
-        if first_msg["type"] == "websocket.disconnect":
-            return
-        first_chunk = first_msg.get("bytes") or (first_msg.get("text") or "").encode()
-        if not first_chunk:
-            await ws.close(code=1008, reason="empty payload")
-            return
-        
-        # دیباگ: چاپ سایز و هگز
-        logger.info(f"Trojan first chunk size: {len(first_chunk)}")
-        logger.info(f"Trojan first chunk hex (first 64 bytes): {first_chunk[:64].hex()}")
-        
-    except asyncio.TimeoutError:
-        await ws.close(code=1008, reason="timeout")
-        return
-
-    # تلاش برای parse
-    try:
-        command, password, address, port, payload = await parse_trojan_header_full(first_chunk)
-        logger.info(f"Trojan parsed: password={password[:10]}..., addr={address}:{port}, cmd={command}")
-        if password != TROJAN_EXPECTED_PASSWORD:
-            logger.warning(f"Trojan password mismatch: expected {TROJAN_EXPECTED_PASSWORD}, got {password}")
-            await ws.close(code=1008, reason="invalid password")
-            return
-    except Exception as e:
-        logger.error(f"Trojan parse error: {e}")
-        # fallback: شاید کلاینت بدون هدر می‌فرسته (مثل بعضی نسخه‌های v2rayNG)
-        logger.warning("Trojan: trying fallback mode (raw data to 127.0.0.1:443)")
-        address = "127.0.0.1"
-        port = 443
-        payload = first_chunk
-        command = 0x01
-
     ip = _ws_client_ip(ws)
     conn_id = secrets.token_urlsafe(6)
     connections[conn_id] = {
@@ -155,6 +78,56 @@ async def trojan_tunnel(ws: WebSocket, uuid: str):
 
     writer = None
     try:
+        # اولین پیام رو بگیر (ممکنه هدر باشه یا نباشه)
+        try:
+            first_msg = await asyncio.wait_for(ws.receive(), timeout=15.0)
+            if first_msg["type"] == "websocket.disconnect":
+                return
+            first_chunk = first_msg.get("bytes") or (first_msg.get("text") or "").encode()
+            if not first_chunk:
+                await ws.close(code=1008, reason="empty payload")
+                return
+        except asyncio.TimeoutError:
+            await ws.close(code=1008, reason="timeout")
+            return
+
+        # اگر هدر تروجان بود parse کن، وگرنه فقط به عنوان payload به مقصد برو
+        # مقصد رو از کانفیگ نمی‌تونیم بگیریم، پس از هدر یا fallback
+        address = "127.0.0.1"
+        port = 443
+        payload = first_chunk
+        
+        # سعی کن هدر رو parse کنی
+        try:
+            if len(first_chunk) >= 61 and first_chunk[0] == 0x01:
+                # هدر تروجان معتبر
+                password_bytes = first_chunk[1:57]
+                null_pos = password_bytes.find(b'\x00')
+                if null_pos > 0:
+                    password = password_bytes[:null_pos].decode('utf-8', errors='ignore')
+                else:
+                    password = password_bytes.decode('utf-8', errors='ignore')
+                if password == "CBeeNet":
+                    pos = 57
+                    command = first_chunk[pos]; pos += 1
+                    port = int.from_bytes(first_chunk[pos:pos+2], "big"); pos += 2
+                    addr_type = first_chunk[pos]; pos += 1
+                    if addr_type == 1:
+                        address = ".".join(str(b) for b in first_chunk[pos:pos+4])
+                        pos += 4
+                    elif addr_type == 2:
+                        dlen = first_chunk[pos]; pos += 1
+                        address = first_chunk[pos:pos+dlen].decode("utf-8", errors="ignore")
+                        pos += dlen
+                    elif addr_type == 3:
+                        ab = first_chunk[pos:pos+16]
+                        pos += 16
+                        address = ":".join(f"{ab[i]:02x}{ab[i+1]:02x}" for i in range(0, 16, 2))
+                    payload = first_chunk[pos:]
+                    logger.info(f"Trojan parsed: {address}:{port}")
+        except Exception as e:
+            logger.warning(f"Trojan header parse failed: {e}, using fallback")
+
         if not await check_and_use(uuid, len(first_chunk)):
             await ws.close(code=1008, reason="quota/disabled")
             return
