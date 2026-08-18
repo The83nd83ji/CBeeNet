@@ -1,5 +1,4 @@
 # pages.py - CBee Gateway v1.0.0
-
 import json
 
 LOGIN_HTML = r"""<!DOCTYPE html>
@@ -898,7 +897,7 @@ a{color:inherit;text-decoration:none}
 @media(max-width:1024px){.dash-stats-grid{grid-template-columns:1fr 1fr}.dash-charts-second{grid-template-columns:1fr 1fr}.chart-grid{grid-template-columns:1fr 1fr}}
 @media(max-width:768px){.chart-grid{grid-template-columns:1fr}.dash-charts-second{grid-template-columns:1fr}.dash-stats-grid{grid-template-columns:1fr}.main{padding:62px 12px 50px}.sidebar{transform:translateX(100%)}[dir="ltr"] .sidebar{transform:translateX(-100%)}.sidebar.open{transform:translateX(0)}.sb-close{display:flex}.main{margin-right:0;padding-top:70px}[dir="ltr"] .main{margin-left:0}.mob-top{display:flex}}
 
-/* ===== REST OF STYLES (unchanged) ===== */
+/* ===== REST OF STYLES (with added protocol icon & chip styles) ===== */
 .btn{font-family:inherit;font-size:12px;font-weight:500;border-radius:9px;padding:8px 14px;cursor:pointer;display:inline-flex;align-items:center;gap:5px;border:none;transition:all .15s;white-space:nowrap}
 .btn i{font-size:13px}
 .btn:disabled{opacity:.4;cursor:not-allowed}
@@ -988,6 +987,9 @@ a{color:inherit;text-decoration:none}
 .proto-btn-v .proto-icon.xhttp{background:rgba(245,158,11,0.2);color:#f59e0b}
 .proto-btn-v .proto-icon.trojan{background:rgba(239,68,68,0.2);color:#ef4444}
 .proto-btn-v .proto-icon.vmess{background:rgba(124,58,237,0.2);color:#7c3aed}
+.proto-btn-v .proto-icon.ss{background:rgba(16,185,129,0.2);color:#10b981}
+.proto-btn-v .proto-icon.mtproto{background:rgba(0,191,255,0.2);color:#00bfff}
+.proto-btn-v .proto-icon.grpc{background:rgba(255,204,0,0.2);color:#ffcc00}
 .proto-btn-v .proto-info{flex:1;min-width:0}
 .proto-btn-v .proto-name{font-weight:700;font-size:12.5px;color:var(--t1)}
 .proto-btn-v .proto-desc{font-size:10px;color:var(--t3);margin-top:1px}
@@ -1242,6 +1244,9 @@ a{color:inherit;text-decoration:none}
 .pc-ultra{background:var(--green-bg);color:var(--green-t)}
 .pc-trojan{background:rgba(239,68,68,0.15);color:#ef4444}
 .pc-vmess{background:rgba(124,58,237,0.15);color:#7c3aed}
+.pc-ss{background:rgba(16,185,129,0.15);color:#10b981}
+.pc-mtproto{background:rgba(0,191,255,0.15);color:#00bfff}
+.pc-grpc{background:rgba(255,204,0,0.15);color:#ffcc00}
 .cfg-sub-tag{font-size:9.5px;color:var(--t3);display:flex;align-items:center;gap:4px;white-space:nowrap}
 .cfg-sub-tag i{color:var(--purple);font-size:11px}
 .tog{width:19px;height:30px;border-radius:19px;background:rgba(100,116,139,0.25);position:relative;cursor:pointer;transition:.2s;flex-shrink:0;border:none}
@@ -1602,6 +1607,7 @@ a{color:inherit;text-decoration:none}
             </span>
             <span class="proto-badge">Ultra</span>
           </button>
+          <!-- RVG: New protocols added -->
           <button class="proto-btn-v" data-proto="trojan-ws" onclick="toggleProtoBtnV(this)">
             <span class="proto-icon trojan"><i class="ti ti-shield-lock"></i></span>
             <span class="proto-info">
@@ -1617,6 +1623,30 @@ a{color:inherit;text-decoration:none}
               <span class="proto-desc">AES-128-CFB · TLS</span>
             </span>
             <span class="proto-badge">Standard</span>
+          </button>
+          <button class="proto-btn-v" data-proto="shadowsocks" onclick="toggleProtoBtnV(this)">
+            <span class="proto-icon ss"><i class="ti ti-lock"></i></span>
+            <span class="proto-info">
+              <span class="proto-name">Shadowsocks</span>
+              <span class="proto-desc">AEAD aes-256-gcm</span>
+            </span>
+            <span class="proto-badge">Light</span>
+          </button>
+          <button class="proto-btn-v" data-proto="mtproto" onclick="toggleProtoBtnV(this)">
+            <span class="proto-icon mtproto"><i class="ti ti-brand-telegram"></i></span>
+            <span class="proto-info">
+              <span class="proto-name">MTProto</span>
+              <span class="proto-desc">Telegram Proxy</span>
+            </span>
+            <span class="proto-badge">Telegram</span>
+          </button>
+          <button class="proto-btn-v" data-proto="grpc" onclick="toggleProtoBtnV(this)">
+            <span class="proto-icon grpc"><i class="ti ti-arrow-ramp-2"></i></span>
+            <span class="proto-info">
+              <span class="proto-name">gRPC</span>
+              <span class="proto-desc">HTTP/2 · TLS</span>
+            </span>
+            <span class="proto-badge">Modern</span>
           </button>
         </div>
         <div style="margin-top:12px;display:flex;align-items:center;gap:10px;padding:8px 12px;background:var(--accent-d);border-radius:10px;border:1px solid var(--card-b)">
@@ -1728,7 +1758,7 @@ a{color:inherit;text-decoration:none}
     <div class="card"><div class="card-title"><i class="ti ti-lock"></i> <span data-lang="encryption">Encryption</span></div>
       <div class="sr"><span class="sr-k"><i class="ti ti-certificate"></i> TLS/HTTPS</span><span class="sr-v" style="color:var(--green-t)">● <span data-lang="active">Active</span> (443)</span></div>
       <div class="sr"><span class="sr-k"><i class="ti ti-fingerprint"></i> Fingerprint</span><span class="sr-v">Chrome Spoof</span></div>
-      <div class="sr"><span class="sr-k"><i class="ti ti-network"></i> <span data-lang="protocols">Protocols</span></span><span class="sr-v">VLESS/WS + XHTTP Ultra + Trojan-HTTPUpgrade + VMess</span></div>
+      <div class="sr"><span class="sr-k"><i class="ti ti-network"></i> <span data-lang="protocols">Protocols</span></span><span class="sr-v">VLESS/WS + XHTTP Ultra + Trojan-HTTPUpgrade + VMess + Shadowsocks + MTProto + gRPC</span></div>
       <div class="sr"><span class="sr-k"><i class="ti ti-key"></i> <span data-lang="hash">Hash</span></span><span class="sr-v">SHA-256+Salt</span></div>
       <div class="sr"><span class="sr-k"><i class="ti ti-cookie"></i> <span data-lang="session">Session</span></span><span class="sr-v">HttpOnly · 7 <span data-lang="days">Days</span></span></div>
     </div>
@@ -1825,7 +1855,7 @@ a{color:inherit;text-decoration:none}
       <div class="cl" style="margin-top:12px"><i class="ti ti-info-circle"></i><span data-lang="lang_note">Default language is English. Page will refresh after change.</span></div>
     </div>
 
-    <!-- ===== Protocol Custom Server Settings (همه پروتکل‌ها) ===== -->
+    <!-- ===== Protocol Custom Server Settings (all protocols) ===== -->
     <div class="card" style="grid-column:1/-1">
       <div class="card-title"><i class="ti ti-server-2"></i> <span>Protocol Custom Names & Templates</span></div>
       <div style="display:flex;flex-direction:column;gap:8px">
@@ -1877,6 +1907,27 @@ a{color:inherit;text-decoration:none}
           <input class="fi" id="ps-vmess-ws-name" placeholder="e.g. VMess-Server" style="min-width:0;padding:6px 8px;font-size:11px">
           <input class="fi" id="ps-vmess-ws-prefix" placeholder="e.g. vmess" style="min-width:0;padding:6px 8px;font-size:11px">
           <input class="fi" id="ps-vmess-ws-template" placeholder="{server}-{label}" style="min-width:0;padding:6px 8px;font-size:11px">
+        </div>
+        <!-- Shadowsocks -->
+        <div style="display:grid;grid-template-columns:1.2fr 1.2fr 1.2fr 2fr;gap:8px;align-items:center;background:rgba(16,185,129,0.06);border-radius:8px;padding:6px 4px">
+          <div style="font-size:11px;color:#10b981">Shadowsocks</div>
+          <input class="fi" id="ps-shadowsocks-name" placeholder="e.g. SS-Server" style="min-width:0;padding:6px 8px;font-size:11px">
+          <input class="fi" id="ps-shadowsocks-prefix" placeholder="e.g. ss" style="min-width:0;padding:6px 8px;font-size:11px">
+          <input class="fi" id="ps-shadowsocks-template" placeholder="{server}-{label}" style="min-width:0;padding:6px 8px;font-size:11px">
+        </div>
+        <!-- MTProto -->
+        <div style="display:grid;grid-template-columns:1.2fr 1.2fr 1.2fr 2fr;gap:8px;align-items:center;background:rgba(0,191,255,0.06);border-radius:8px;padding:6px 4px">
+          <div style="font-size:11px;color:#00bfff">MTProto</div>
+          <input class="fi" id="ps-mtproto-name" placeholder="e.g. MTProto-Server" style="min-width:0;padding:6px 8px;font-size:11px">
+          <input class="fi" id="ps-mtproto-prefix" placeholder="e.g. mtp" style="min-width:0;padding:6px 8px;font-size:11px">
+          <input class="fi" id="ps-mtproto-template" placeholder="{server}-{label}" style="min-width:0;padding:6px 8px;font-size:11px">
+        </div>
+        <!-- gRPC -->
+        <div style="display:grid;grid-template-columns:1.2fr 1.2fr 1.2fr 2fr;gap:8px;align-items:center;background:rgba(255,204,0,0.06);border-radius:8px;padding:6px 4px">
+          <div style="font-size:11px;color:#ffcc00">gRPC</div>
+          <input class="fi" id="ps-grpc-name" placeholder="e.g. gRPC-Server" style="min-width:0;padding:6px 8px;font-size:11px">
+          <input class="fi" id="ps-grpc-prefix" placeholder="e.g. grpc" style="min-width:0;padding:6px 8px;font-size:11px">
+          <input class="fi" id="ps-grpc-template" placeholder="{server}-{label}" style="min-width:0;padding:6px 8px;font-size:11px">
         </div>
         <button class="btn btn-p" onclick="saveProtocolSettings()" style="margin-top:6px"><i class="ti ti-device-floppy"></i> <span data-lang="save_settings">Save Protocol Settings</span></button>
         <div id="protocol-save-result" style="font-size:11px;color:var(--green-t);display:none">✓ <span data-lang="saved">Saved</span></div>
@@ -2041,7 +2092,7 @@ function expChip(exp, expired){
   if(d <= 3) return `<span class="exp-chip ec-warn"><i class="ti ti-alert-triangle"></i> ${d} days left</span>`;
   return `<span class="exp-chip ec-ok"><i class="ti ti-calendar-check"></i> ${d} days left</span>`;
 }
-// ===== اصلاح: پشتیبانی از پروتکل‌های جدید در برچسب‌ها =====
+// ===== UPDATED: support all RVG protocols =====
 function protoBadge(protocols){
   if(!protocols || !protocols.length) protocols = ['vless-ws'];
   const labels = {
@@ -2050,7 +2101,10 @@ function protoBadge(protocols){
     'xhttp-stream-up': ['XHTTP · stream-up', 'pc-xhttp'],
     'xhttp-stream-one': ['XHTTP ULTRA', 'pc-ultra'],
     'trojan-ws': ['Trojan · HTTPUpgrade', 'pc-trojan'],
-    'vmess-ws': ['VMess · WS', 'pc-vmess']
+    'vmess-ws': ['VMess · WS', 'pc-vmess'],
+    'shadowsocks': ['Shadowsocks', 'pc-ss'],
+    'mtproto': ['MTProto', 'pc-mtproto'],
+    'grpc': ['gRPC', 'pc-grpc']
   };
   return protocols.map(p => { const v = labels[p] || labels['vless-ws']; return `<span class="proto-chip ${v[1]}">${v[0]}</span>`; }).join('');
 }
@@ -2107,12 +2161,12 @@ document.querySelectorAll('.nav-it').forEach(el => el.addEventListener('click', 
 function openModal(id){ document.getElementById(id).classList.add('open'); }
 function closeModal(id){ document.getElementById(id).classList.remove('open'); }
 
-// ========== PROTOCOL CUSTOM SETTINGS ==========
+// ========== PROTOCOL CUSTOM SETTINGS (all protocols) ==========
 async function loadProtocolSettings(){
   try {
     const r = await authF('/api/settings/protocol');
     const data = await r.json();
-    const protos = ['vless-ws','xhttp-packet-up','xhttp-stream-up','xhttp-stream-one','trojan-ws','vmess-ws'];
+    const protos = ['vless-ws','xhttp-packet-up','xhttp-stream-up','xhttp-stream-one','trojan-ws','vmess-ws','shadowsocks','mtproto','grpc'];
     for (const proto of protos) {
       const nameEl = document.getElementById('ps-'+proto+'-name');
       const prefEl = document.getElementById('ps-'+proto+'-prefix');
@@ -2124,7 +2178,7 @@ async function loadProtocolSettings(){
   } catch(e){ console.warn('Could not load protocol settings:', e); }
 }
 async function saveProtocolSettings(){
-  const protos = ['vless-ws','xhttp-packet-up','xhttp-stream-up','xhttp-stream-one','trojan-ws','vmess-ws'];
+  const protos = ['vless-ws','xhttp-packet-up','xhttp-stream-up','xhttp-stream-one','trojan-ws','vmess-ws','shadowsocks','mtproto','grpc'];
   const payload = {};
   for (const proto of protos) {
     const nameEl = document.getElementById('ps-'+proto+'-name');
@@ -2154,7 +2208,7 @@ async function saveProtocolSettings(){
   } catch(e){ toast('Server connection error', 'err'); }
 }
 
-// ========== FORMAT LINK NAME (اصلاح برای پروتکل‌های جدید) ==========
+// ========== FORMAT LINK NAME (updated for RVG protocols) ==========
 function formatLinkName(label, protocol, protoSettings){
   const defaultNames = {
     'vless-ws': 'VLESS-WS',
@@ -2162,7 +2216,10 @@ function formatLinkName(label, protocol, protoSettings){
     'xhttp-stream-up': 'XHTTP-stream',
     'xhttp-stream-one': 'XHTTP-ultra',
     'trojan-ws': 'Trojan-HTTPUpgrade',
-    'vmess-ws': 'VMess-WS'
+    'vmess-ws': 'VMess-WS',
+    'shadowsocks': 'Shadowsocks',
+    'mtproto': 'MTProto',
+    'grpc': 'gRPC'
   };
   const defaultTemplate = '{server}-{label}';
   const defaultServer = 'CBeeNet';
@@ -2184,7 +2241,7 @@ function formatLinkName(label, protocol, protoSettings){
   return result;
 }
 
-// ===== CHART DATA (PERSISTENT) =====
+// ========== CHART DATA (PERSISTENT) ==========
 const CHART_STORAGE_KEY = 'CBeeNet_chartData';
 const PREV_TRAF_KEY = 'CBeeNet_prevTraf';
 const CHART_LAST_TIME_KEY = 'CBeeNet_lastChartTime';
@@ -2667,7 +2724,11 @@ function initSecondaryCharts(){
   const ctxProto = document.getElementById('dashProtoChart').getContext('2d');
   dashProtoChart = new Chart(ctxProto, {
     type: 'bar',
-    data: { labels: ['VLESS/WS', 'XHTTP-p', 'XHTTP-s', 'XHTTP-u', 'Trojan', 'VMess'], datasets: [{ data: [0,0,0,0,0,0], backgroundColor: [accent, 'rgba(251, 191, 36, 0.8)', 'rgba(245, 158, 11, 0.8)', 'rgba(16, 185, 129, 0.8)', 'rgba(239,68,68,0.8)', 'rgba(124,58,237,0.8)'], borderColor: [accent, '#fbbf24', '#f59e0b', '#10b981', '#ef4444', '#7c3aed'], borderWidth: 2, borderRadius: 6, barPercentage: 0.6 }] },
+    data: { labels: ['VLESS/WS', 'XHTTP-p', 'XHTTP-s', 'XHTTP-u', 'Trojan', 'VMess', 'SS', 'MTProto', 'gRPC'], 
+            datasets: [{ data: [0,0,0,0,0,0,0,0,0], 
+                         backgroundColor: [accent, 'rgba(251, 191, 36, 0.8)', 'rgba(245, 158, 11, 0.8)', 'rgba(16, 185, 129, 0.8)', 'rgba(239,68,68,0.8)', 'rgba(124,58,237,0.8)', 'rgba(16,185,129,0.8)', 'rgba(0,191,255,0.8)', 'rgba(255,204,0,0.8)'],
+                         borderColor: [accent, '#fbbf24', '#f59e0b', '#10b981', '#ef4444', '#7c3aed', '#10b981', '#00bfff', '#ffcc00'],
+                         borderWidth: 2, borderRadius: 6, barPercentage: 0.6 }] },
     options: {
       responsive: true, maintainAspectRatio: false,
       plugins: { legend: { display: false }, tooltip: { backgroundColor: 'rgba(11, 17, 29, 0.9)', borderColor: accent, borderWidth: 1, titleColor: '#fff', bodyColor: '#fff', cornerRadius: 8, padding: 10, callbacks: { label: function(context){ return context.parsed.y + ' configs'; } } } },
@@ -2723,12 +2784,12 @@ function initSecondaryCharts(){
 function updateSecondaryCharts(statsData, linksData){
   const accent = getAccentColor();
   if(dashProtoChart && linksData){
-    const protoCounts = { 'vless-ws': 0, 'xhttp-packet-up': 0, 'xhttp-stream-up': 0, 'xhttp-stream-one': 0, 'trojan-ws': 0, 'vmess-ws': 0 };
+    const protoCounts = { 'vless-ws': 0, 'xhttp-packet-up': 0, 'xhttp-stream-up': 0, 'xhttp-stream-one': 0, 'trojan-ws': 0, 'vmess-ws': 0, 'shadowsocks': 0, 'mtproto': 0, 'grpc': 0 };
     linksData.forEach(l => {
       const protos = l.protocols || ['vless-ws'];
       protos.forEach(p => { if(protoCounts[p] !== undefined) protoCounts[p]++; });
     });
-    const counts = [protoCounts['vless-ws'], protoCounts['xhttp-packet-up'], protoCounts['xhttp-stream-up'], protoCounts['xhttp-stream-one'], protoCounts['trojan-ws'], protoCounts['vmess-ws']];
+    const counts = [protoCounts['vless-ws'], protoCounts['xhttp-packet-up'], protoCounts['xhttp-stream-up'], protoCounts['xhttp-stream-one'], protoCounts['trojan-ws'], protoCounts['vmess-ws'], protoCounts['shadowsocks'], protoCounts['mtproto'], protoCounts['grpc']];
     dashProtoChart.data.datasets[0].data = counts;
     dashProtoChart.update('none');
   }
@@ -2760,7 +2821,7 @@ function updateSecondaryCharts(statsData, linksData){
   }
 }
 
-// ========== LINKS (با formatLinkName اصلاح شده) ==========
+// ========== LINKS (with formatLinkName updated) ==========
 async function loadLinks(){
   try{
     const [lr, sr] = await Promise.all([authF('/api/links'), authF('/api/subs')]);
@@ -3009,456 +3070,4 @@ function renderLmodalList(links){
   }).join('');
   updateLmodalCount();
 }
-function toggleLrow(uuid, el){ if(lmodalInSub.has(uuid)){ lmodalInSub.delete(uuid); el.classList.remove('checked'); } else { lmodalInSub.add(uuid); el.classList.add('checked'); } updateLmodalCount(); }
-function lmodalSelectAll(state){ lmodalLinks.forEach(l => { if(state) lmodalInSub.add(l.uuid); else lmodalInSub.delete(l.uuid); }); renderLmodalList(lmodalLinks); }
-function updateLmodalCount(){ document.getElementById('lmodal-count').textContent = lmodalInSub.size + ' selected'; }
-function filterLmodal(q){ q = q.trim().toLowerCase(); document.querySelectorAll('#modal-links-body .lrow-v2').forEach(row => { row.style.display = !q || row.dataset.name.includes(q) ? '' : 'none'; }); }
-async function saveSubLinks(){
-  if(!currentSubId) return;
-  const link_ids = [...lmodalInSub];
-  try{
-    const r = await authF('/api/subs/' + currentSubId, { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ link_ids }) });
-    if(!r.ok) throw new Error();
-    await Promise.all(lmodalLinks.map(l => authF('/api/links/' + l.uuid, { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ sub_id: lmodalInSub.has(l.uuid) ? currentSubId : null }) })));
-    closeModal('modal-links');
-    toast('Group configs saved ✓', 'ok');
-    loadSubs();
-    loadLinks();
-  } catch(e){ toast('Error saving', 'err'); }
-}
-async function loadSubsPage(){
-  document.getElementById('sub-all-url').textContent = location.protocol + '//' + location.host + '/sub-all';
-  try{
-    const r = await authF('/api/subs');
-    const d = await r.json();
-    const subs = d.subs || [];
-    const el = document.getElementById('sub-groups-list');
-    if(!subs.length){ el.innerHTML = '<div class="empty">No groups yet</div>'; return; }
-    el.innerHTML = subs.map(s => `
-      <div style="padding:13px 15px;background:var(--accent-d);border:1px solid var(--card-b);border-radius:10px;margin-bottom:8px;display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap">
-        <div><div style="font-weight:700;font-size:13px">${esc(s.name)}</div><div style="font-size:10px;color:var(--accent)">${esc(s.sub_url)}</div><div style="font-size:10px;color:var(--t3)">${toFa(s.links_count)} configs · ${esc(s.total_used_fmt)}</div></div>
-        <div style="display:flex;gap:5px"><button class="btn btn-sm btn-pur" onclick="navigator.clipboard.writeText('${esc(s.sub_url)}')"><i class="ti ti-copy"></i> Sub</button><button class="btn btn-sm btn-g" onclick="showQR('${esc(s.sub_url)}')"><i class="ti ti-qrcode"></i></button></div>
-      </div>
-    `).join('');
-  } catch(e){}
-}
-function cpSubAll(){ navigator.clipboard.writeText(location.protocol + '//' + location.host + '/sub-all').then(() => toast('Copied ✓', 'ok')); }
-async function copyAllSubLinks(subId){
-  const r = await authF('/api/links');
-  const d = await r.json();
-  const links = d.links || [];
-  const sub = allSubsList.find(s => s.sub_id === subId);
-  if(!sub){ toast('Group not found', 'err'); return; }
-  const subLinkIds = sub.link_ids || [];
-  const urls = links.filter(l => subLinkIds.includes(l.uuid) && l.active && !l.expired).map(l => l.sub_url);
-  if(!urls.length){ toast('No active configs', 'err'); return; }
-  navigator.clipboard.writeText(urls.join('\n')).then(() => toast(urls.length + ' links copied ✓', 'ok'));
-}
-
-// ========== CONNECTIONS, ACTIVITY, ERRORS, WEBSOCKET (unchanged) ==========
-async function loadConns(){
-  try{
-    const r = await authF('/api/connections');
-    const d = await r.json();
-    const grid = document.getElementById('conns-grid');
-    const ce = document.getElementById('conns-empty');
-    document.getElementById('ch-count').textContent = toFa(d.count);
-    const conns = d.connections || [];
-    if(!d.count){ grid.innerHTML = ''; ce.style.display = 'block'; document.getElementById('ch-traffic').textContent = '—'; document.getElementById('ch-avgdur').textContent = '—'; document.getElementById('ch-uniq').textContent = '—'; return; }
-    ce.style.display = 'none';
-    const totalBytes = conns.reduce((s, c) => s + parseBytesFmt(c.bytes_fmt), 0);
-    document.getElementById('ch-traffic').textContent = fmtB(totalBytes);
-    const uniqIps = new Set(conns.map(c => c.ip)).size;
-    document.getElementById('ch-uniq').textContent = toFa(uniqIps);
-    const durs = conns.map(c => c.connected_at ? Math.max(0, Math.floor((Date.now() - new Date(c.connected_at).getTime()) / 1000)) : 0);
-    const avgSec = durs.length ? Math.floor(durs.reduce((a,b) => a+b, 0) / durs.length) : 0;
-    document.getElementById('ch-avgdur').textContent = avgSec < 60 ? avgSec + 's' : avgSec < 3600 ? Math.floor(avgSec/60) + 'm' : Math.floor(avgSec/3600) + 'h';
-    const maxDur = Math.max(...durs, 1);
-    grid.innerHTML = conns.map(c => {
-      const secs = c.connected_at ? Math.max(0, Math.floor((Date.now() - new Date(c.connected_at).getTime()) / 1000)) : 0;
-      const dur = secs < 60 ? secs + 's' : secs < 3600 ? Math.floor(secs/60) + 'm' : Math.floor(secs/3600) + 'h';
-      const durPct = Math.min(100, Math.round((secs / maxDur) * 100));
-      const protoVal = c.transport || 'vless-ws';
-      return `<div class="conn-card-v2">
-        <div class="conn-card-v2-glow"></div>
-        <div class="conn-card-v2-top">
-          <div class="conn-avatar"><i class="ti ti-device-desktop"></i></div>
-          <div class="conn-card-v2-id"><div class="conn-ip-v2">${esc(c.ip)}<button class="conn-ip-copy" onclick="navigator.clipboard.writeText('${esc(c.ip)}')"><i class="ti ti-copy"></i></button></div><div class="conn-label-v2">${esc(c.label)}</div></div>
-          <span class="conn-status-pill"><span class="dot dg pulse"></span> Live</span>
-        </div>
-        <div class="conn-card-v2-divider"></div>
-        <div class="conn-card-v2-body">
-          <div class="conn-proto-row">${protoBadge([protoVal])}</div>
-          <div class="conn-stat-row">
-            <div class="conn-stat-box"><div class="conn-stat-icon"><i class="ti ti-transfer"></i></div><div><div class="conn-stat-text-label">Traffic</div><div class="conn-stat-text-val">${esc(c.bytes_fmt)}</div></div></div>
-            <div class="conn-stat-box"><div class="conn-stat-icon time"><i class="ti ti-clock"></i></div><div><div class="conn-stat-text-label">Duration</div><div class="conn-stat-text-val">${dur}</div></div></div>
-          </div>
-          <div class="conn-duration-track"><div class="conn-duration-fill" style="width:${durPct}%"></div></div>
-        </div>
-      </div>`;
-    }).join('');
-  } catch(e){ console.error(e); }
-}
-function parseBytesFmt(s){ if(!s) return 0; const m = String(s).match(/([\d.]+)\s*([A-Za-z]+)/); if(!m) return 0; const n = parseFloat(m[1]), u = m[2].toUpperCase(); const mult = { B:1, KB:1024, MB:1024**2, GB:1024**3, TB:1024**4 }; return n * (mult[u] || 0); }
-async function loadActivity(){
-  try{
-    const r = await authF('/api/activity');
-    const d = await r.json();
-    const logs = (d.logs || []).slice().reverse();
-    const el = document.getElementById('logs-list');
-    const em = document.getElementById('logs-empty');
-    if(!logs.length){ el.innerHTML = ''; em.style.display = 'block'; return; }
-    em.style.display = 'none';
-    const icMap = { ok: 'ti-circle-check', err: 'ti-circle-x', warn: 'ti-alert-triangle', info: 'ti-info-circle' };
-    const kindFa = { link: 'Config', sub: 'Group', auth: 'Login', connection: 'Connection', system: 'System' };
-    el.innerHTML = logs.map(l => `
-      <div class="log-item">
-        <div class="log-ic ${l.level}"><i class="ti ${icMap[l.level] || 'ti-info-circle'}"></i></div>
-        <div class="log-body">
-          <div class="log-msg">${esc(l.message)}</div>
-          <div class="log-time"><i class="ti ti-clock"></i> ${new Date(l.time).toLocaleString()} <span class="log-kind">${kindFa[l.kind] || l.kind}</span></div>
-        </div>
-      </div>
-    `).join('');
-  } catch(e){ console.error(e); }
-}
-async function loadErrs(){
-  try{ const r = await authF('/stats'); const d = await r.json(); renderErrs(d.recent_errors || []); } catch(e){}
-}
-function renderErrs(errs){
-  const el = document.getElementById('errs-full');
-  if(!el) return;
-  if(!errs.length){ el.innerHTML = '<div style="color:var(--green-t);padding:10px;font-size:12px;display:flex;align-items:center;gap:5px"><i class="ti ti-circle-check"></i> No errors</div>'; return; }
-  el.innerHTML = errs.slice().reverse().map(e => `<div class="erow"><div class="etime"><i class="ti ti-clock"></i> ${new Date(e.time).toLocaleString()}</div><div class="emsg">${esc(e.error)}${e.url ? ' — ' + esc(e.url) : ''}</div></div>`).join('');
-}
-let ws = null;
-function wsLog(c, m){
-  const l = document.getElementById('ws-log');
-  const p = document.createElement('p');
-  const colors = { ok: '#10b981', err: '#ef4444', info: '#8b949e', sent: '#1677ff' };
-  p.style.color = colors[c] || '#fff';
-  p.textContent = '[' + new Date().toLocaleTimeString() + '] ' + m;
-  l.appendChild(p);
-  l.scrollTop = l.scrollHeight;
-}
-function wsConn(){
-  const u = document.getElementById('ws-uuid').value.trim();
-  if(!u){ toast('Enter UUID', 'err'); return; }
-  const url = (location.protocol === 'https:' ? 'wss' : 'ws') + '://' + location.host + '/ws/' + u;
-  wsLog('info', 'Connecting: ' + url);
-  ws = new WebSocket(url);
-  ws.onopen = () => wsLog('ok', '✓ Connected');
-  ws.onerror = () => wsLog('err', '✗ Error');
-  ws.onmessage = m => wsLog('info', 'Received ' + m.data.length + ' bytes');
-  ws.onclose = e => wsLog('err', 'Disconnected (' + e.code + ')');
-}
-function wsSend(){
-  const m = document.getElementById('ws-msg').value;
-  if(!m || !ws || ws.readyState !== 1) return;
-  ws.send(m);
-  wsLog('sent', 'Sent: ' + m);
-  document.getElementById('ws-msg').value = '';
-}
-function wsDisc(){ if(ws) ws.close(); }
-
-// ========== CHANGE PASSWORD ==========
-async function changePw(){
-  const cur = document.getElementById('cp-cur').value;
-  const nw = document.getElementById('cp-new').value;
-  const cf = document.getElementById('cp-cf').value;
-  if(!cur || !nw || !cf){ toast('Fill all fields', 'err'); return; }
-  if(nw.length < 4){ toast('Min 4 characters', 'err'); return; }
-  if(nw !== cf){ toast('Passwords do not match', 'err'); return; }
-  try{
-    const r = await authF('/api/change-password', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ current_password: cur, new_password: nw }) });
-    const d = await r.json().catch(() => ({}));
-    if(!r.ok) throw new Error(d.detail || 'Error');
-    toast('Password changed ✓', 'ok');
-    document.getElementById('cp-cur').value = '';
-    document.getElementById('cp-new').value = '';
-    document.getElementById('cp-cf').value = '';
-  } catch(e){ toast('✗ ' + e.message, 'err'); }
-}
-function togglePwField(id, btn){
-  const inp = document.getElementById(id);
-  const icon = btn.querySelector('i');
-  const toText = inp.type === 'password';
-  inp.type = toText ? 'text' : 'password';
-  icon.className = 'ti ' + (toText ? 'ti-eye-off' : 'ti-eye');
-}
-function checkPwStrength(val){
-  const segs = document.querySelectorAll('#pw-strength-bar .pw-strength-seg');
-  const label = document.getElementById('pw-strength-label');
-  const reqLen = document.getElementById('req-len');
-  const reqNum = document.getElementById('req-num');
-  const reqCase = document.getElementById('req-case');
-  const hasLen = val.length >= 4;
-  const hasNum = /\d/.test(val);
-  const hasCase = /[a-z]/.test(val) && /[A-Z]/.test(val);
-  const hasLong = val.length >= 8;
-  reqLen.classList.toggle('met', hasLen);
-  reqNum.classList.toggle('met', hasNum);
-  reqCase.classList.toggle('met', hasCase);
-  let score = 0; if(hasLen) score++; if(hasNum) score++; if(hasCase) score++; if(hasLong) score++;
-  const colors = ['#1677ff', '#4096ff', '#0050b3', '#003a8c'];
-  const labels = ['Very Weak', 'Weak', 'Medium', 'Strong'];
-  segs.forEach((s, i) => { s.style.background = i < score ? colors[Math.max(0, score-1)] : 'rgba(100,116,139,.2)'; });
-  if(val.length === 0){ label.innerHTML = '<i class="ti ti-shield"></i> Password Strength'; return; }
-  label.innerHTML = `<i class="ti ti-shield-check" style="color:${colors[Math.max(0, score-1)]}"></i> ${labels[Math.max(0, score-1)]}`;
-}
-
-// ========== SMART ALERTS ==========
-function generateAlertsFromData(stats, links){
-  const alerts = [];
-  links.forEach(l => {
-    if(l.expires_at && !l.expired){
-      const d = daysLeft(l.expires_at);
-      if(d !== null && d <= 3){
-        alerts.push({
-          id: 'exp-' + l.uuid,
-          priority: d <= 1 ? 'critical' : 'warning',
-          icon: 'ti ti-calendar-x',
-          titleKey: 'alert_expiry',
-          title: 'Config expiring soon',
-          description: `"${l.label}" expires in ${d} day${d>1?'s':''}`,
-          time: new Date().toISOString(),
-          link: '/CFOX#pg-links',
-          dismissable: true
-        });
-      }
-    }
-    if(l.limit_bytes > 0){
-      const pct = l.used_bytes / l.limit_bytes * 100;
-      if(pct > 80){
-        alerts.push({
-          id: 'quota-' + l.uuid,
-          priority: pct > 95 ? 'critical' : 'warning',
-          icon: 'ti ti-gauge',
-          titleKey: 'alert_quota',
-          title: 'Traffic quota exceeded 80%',
-          description: `"${l.label}" used ${fmtB(l.used_bytes)} of ${fmtB(l.limit_bytes)} (${Math.round(pct)}%)`,
-          time: new Date().toISOString(),
-          link: '/CFOX#pg-links',
-          dismissable: true
-        });
-      }
-    }
-  });
-  const recentErrors = stats.recent_errors || [];
-  const fiveMinAgo = Date.now() - 300000;
-  const recent = recentErrors.filter(e => new Date(e.time).getTime() > fiveMinAgo);
-  if(recent.length >= 3){
-    alerts.push({
-      id: 'errors-' + Date.now(),
-      priority: 'critical',
-      icon: 'ti ti-alert-triangle',
-      titleKey: 'alert_errors',
-      title: 'Repeated connection errors',
-      description: `${recent.length} errors in the last 5 minutes. Check logs.`,
-      time: new Date().toISOString(),
-      link: '/CFOX#pg-errors',
-      dismissable: true
-    });
-  }
-  const connCount = stats.active_connections || 0;
-  if(connCount > 0){
-    const lastAlert = alertsData.find(a => a.id && a.id.startsWith('newip-'));
-    if(!lastAlert || (new Date() - new Date(lastAlert.time) > 3600000)){
-      alerts.push({
-        id: 'newip-' + Date.now(),
-        priority: 'info',
-        icon: 'ti ti-user-plus',
-        titleKey: 'alert_new_ip',
-        title: 'New IP connected',
-        description: `A new connection was established from a different IP.`,
-        time: new Date().toISOString(),
-        link: '/CFOX#pg-connections',
-        dismissable: true
-      });
-    }
-  }
-  return alerts;
-}
-async function loadAlerts(){
-  try{
-    const r = await authF('/stats');
-    const stats = await r.json();
-    const linksResp = await authF('/api/links');
-    const {links = []} = await linksResp.json();
-    const newAlerts = generateAlertsFromData(stats, links);
-    const dismissedIds = alertsData.filter(a => a.dismissed).map(a => a.id);
-    alertsData = newAlerts.map(a => ({
-      ...a,
-      dismissed: dismissedIds.includes(a.id)
-    }));
-    renderAlerts(currentAlertFilter);
-    document.getElementById('alerts-badge').textContent = alertsData.filter(a => !a.dismissed).length;
-    document.getElementById('alerts-count-badge').textContent = alertsData.filter(a => !a.dismissed).length;
-  } catch(e){ console.error('Alerts load error:', e); }
-}
-function renderAlerts(filter){
-  const list = document.getElementById('alerts-list');
-  const filtered = alertsData.filter(a => !a.dismissed && (filter === 'all' || a.priority === filter));
-  if(!filtered.length){
-    list.innerHTML = `<div class="alerts-empty"><i class="ti ti-bell-off"></i><span data-lang="no_alerts">No alerts to show</span></div>`;
-    return;
-  }
-  const dict = LANG_DICT[currentLang] || LANG_DICT['en'];
-  list.innerHTML = filtered.map(a => `
-    <div class="alert-item ${a.priority}">
-      <div class="alert-icon ${a.priority}"><i class="${a.icon}"></i></div>
-      <div class="alert-body">
-        <div class="alert-title">${dict[a.titleKey] || a.title}</div>
-        <div class="alert-desc">${a.description}</div>
-        <div class="alert-time"><i class="ti ti-clock"></i> ${new Date(a.time).toLocaleString()}</div>
-      </div>
-      <div class="alert-actions">
-        ${a.link ? `<a href="${a.link}" class="btn btn-sm btn-g"><i class="ti ti-eye"></i></a>` : ''}
-        ${a.dismissable ? `<button class="btn btn-sm btn-dismiss" onclick="dismissAlert('${a.id}')"><i class="ti ti-x"></i> <span data-lang="dismiss">Dismiss</span></button>` : ''}
-      </div>
-    </div>
-  `).join('');
-}
-function filterAlerts(filter, btn){
-  currentAlertFilter = filter;
-  document.querySelectorAll('.alerts-filters .btn').forEach(b => b.classList.remove('active'));
-  btn.classList.add('active');
-  renderAlerts(filter);
-}
-function dismissAlert(id){
-  const alert = alertsData.find(a => a.id === id);
-  if(alert) alert.dismissed = true;
-  renderAlerts(currentAlertFilter);
-  document.getElementById('alerts-badge').textContent = alertsData.filter(a => !a.dismissed).length;
-  document.getElementById('alerts-count-badge').textContent = alertsData.filter(a => !a.dismissed).length;
-}
-setInterval(() => {
-  if(document.getElementById('pg-alerts')?.classList.contains('on')){
-    loadAlerts();
-  }
-}, 30000);
-
-// ========== REFRESH ==========
-function refreshAll(){
-  fetchStats();
-  if(document.getElementById('pg-links').classList.contains('on')) loadLinks();
-  if(document.getElementById('pg-subgroups').classList.contains('on')) loadSubs();
-  if(document.getElementById('pg-subscriptions').classList.contains('on')) loadSubsPage();
-  if(document.getElementById('pg-connections').classList.contains('on')) loadConns();
-  if(document.getElementById('pg-logs').classList.contains('on')) loadActivity();
-  if(document.getElementById('pg-alerts').classList.contains('on')) loadAlerts();
-  toast('Refreshed ✓', 'ok');
-}
-
-// ========== DOM READY ==========
-document.addEventListener('DOMContentLoaded', async () => {
-  await checkAuth();
-  applyLanguage();
-  document.querySelectorAll('.btn-lang').forEach(btn => btn.classList.toggle('active', btn.dataset.langCode === currentLang));
-  applyTheme(currentTheme);
-  applyBackgroundStyle(currentBgStyle);
-  document.querySelectorAll('#bg-styles .btn').forEach(btn => {
-    btn.style.outline = btn.dataset.bg === currentBgStyle ? '2px solid var(--accent)' : 'none';
-    btn.style.outlineOffset = btn.dataset.bg === currentBgStyle ? '2px' : '0';
-  });
-
-  prevTraf = parseFloat(localStorage.getItem(PREV_TRAF_KEY)) || 0;
-
-  const hasStored = loadChartDataFromStorage();
-  initPremiumCharts();
-  initSecondaryCharts();
-  if(!hasStored || chartData.load.length === 0){
-    const now = new Date();
-    for(let i=0; i<10; i++){
-      const t = new Date(now.getTime() - (10-i)*5000);
-      addDataPoint('load', 0, t);
-      addDataPoint('traffic', 0, t);
-      addDataPoint('conns', 0, t);
-    }
-  }
-
-  document.getElementById('set-host').textContent = location.host;
-  document.getElementById('sub-all-url').textContent = location.protocol + '//' + location.host + '/sub-all';
-  await loadProtocolSettings();
-  fetchStats();
-  loadLinks();
-  loadSubs();
-  loadSubsPage();
-  setInterval(fetchStats, 5000);
-  setInterval(() => {
-    if(document.getElementById('pg-connections').classList.contains('on')) loadConns();
-    if(document.getElementById('pg-logs').classList.contains('on')) loadActivity();
-  }, 10000);
-});
-document.addEventListener('DOMContentLoaded', function() {
-  if(!document.getElementById('nl-count')) {
-    const hidden = document.createElement('input');
-    hidden.type = 'hidden';
-    hidden.id = 'nl-count';
-    hidden.value = 1;
-    document.querySelector('.cp-body').appendChild(hidden);
-  }
-});
-</script>
-</body></html>"""
-
-def get_public_page_html(uuid_key: str) -> str:
-    return f"""<!DOCTYPE html>
-<html lang="en" dir="ltr">
-<head>
-<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
-<title>CBee Sub</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.19.0/dist/tabler-icons.min.css">
-<style>
-*{{margin:0;padding:0;box-sizing:border-box}}
-:root{{--bg:#0d1117;--card:#161b22;--card-b:#30363d;--accent:#1677ff;--accent2:#4096ff;--t1:#f0f6fc;--t2:#8b949e;--t3:#6e7681;--radius:16px}}
-body{{font-family:'Vazirmatn','Segoe UI',sans-serif;background:var(--bg);color:var(--t1);min-height:100vh;display:flex;justify-content:center;align-items:center;padding:20px}}
-.wrap{{max-width:800px;width:100%}}
-.brand{{font-size:28px;font-weight:900;text-align:center;margin-bottom:20px;color:var(--accent2)}}
-.loading{{text-align:center;padding:40px;color:var(--t3)}}
-.card{{background:var(--card);border:1px solid var(--card-b);border-radius:var(--radius);padding:20px}}
-</style>
-</head>
-<body>
-<div class="wrap"><div class="brand">CBee</div><div id="root" class="loading">Loading...</div></div>
-<script>
-const UUID_KEY='{uuid_key}';let savedPw='';
-async function loadData(pw=''){{const url='/api/public/sub/'+UUID_KEY+(pw?'?pw='+encodeURIComponent(pw):'');const r=await fetch(url);return r.json();}}
-async function renderContent(d){{let html=`<div class="card"><h2 style="color:var(--accent2)">${{d.name}}</h2><p style="color:var(--t3)">${{d.desc||''}}</p><p>Active connections: ${{d.active_connections}}</p><p>Total usage: ${{d.total_used_fmt}}</p><hr style="margin:15px 0;border-color:var(--card-b)"><div>`;for(let l of d.links){{html+=`<div style="background:rgba(0,0,0,.2);border-radius:12px;padding:12px;margin-bottom:8px;border:1px solid var(--card-b)"><strong style="color:var(--accent2)">${{l.label}}</strong> <span style="color:var(--t3)">${{l.used_fmt}} / ${{l.limit_fmt}}</span><div style="font-size:10px;color:var(--t3)">${{l.vless_link.substring(0,60)}}…</div></div>`;}}html+=`</div></div>`;document.getElementById('root').innerHTML=html;}}
-async function init(){{const data=await loadData();if(data.locked){{document.getElementById('root').innerHTML=`<div class="card" style="text-align:center"><h3 style="color:var(--accent2)">${{data.name}}</h3><p>This group is password protected.</p><input type="password" id="pw" placeholder="Enter password" style="margin:10px;padding:8px;border-radius:8px;border:1px solid var(--card-b);background:rgba(0,0,0,.2);color:white;width:200px"><br><button onclick="submitPw()" style="padding:8px 16px;background:var(--accent);border:none;border-radius:8px;cursor:pointer;color:#fff;font-weight:700">Login</button></div>`;}}else{{renderContent(data);}}}}
-async function submitPw(){{const pw=document.getElementById('pw').value;const data=await loadData(pw);if(data.locked){{alert('Wrong password');return;}}savedPw=pw;renderContent(data);}}
-init();
-</script>
-</body></html>"""
-
-def get_single_sub_page_html(uuid: str) -> str:
-    return f"""<!DOCTYPE html>
-<html lang="en" dir="ltr">
-<head>
-<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
-<title>CBee Config</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.19.0/dist/tabler-icons.min.css">
-<style>
-*{{margin:0;padding:0;box-sizing:border-box}}
-:root{{--bg:#0d1117;--card:#161b22;--card-b:#30363d;--accent:#1677ff;--accent2:#4096ff;--t1:#f0f6fc;--t2:#8b949e;--t3:#6e7681;--radius:16px}}
-body{{font-family:'Vazirmatn','Segoe UI',sans-serif;background:var(--bg);color:var(--t1);min-height:100vh;display:flex;justify-content:center;align-items:center;padding:20px}}
-.wrap{{max-width:800px;width:100%}}
-.brand{{font-size:28px;font-weight:900;text-align:center;margin-bottom:20px;color:var(--accent2)}}
-.loading{{text-align:center;padding:40px;color:var(--t3)}}
-.card{{background:var(--card);border:1px solid var(--card-b);border-radius:var(--radius);padding:20px}}
-</style>
-</head>
-<body>
-<div class="wrap"><div class="brand">CBee</div><div id="root" class="loading">Loading...</div></div>
-<script>
-const UUID='{uuid}';
-async function loadData(){{const r=await fetch('/api/public/sub-single/'+UUID);return r.json();}}
-async function renderContent(d){{let html=`<div class="card"><h2 style="color:var(--accent2)">${{d.name}}</h2><p style="color:var(--t3)">${{d.desc||''}}</p><p>Active connections: ${{d.active_connections}}</p><p>Total usage: ${{d.total_used_fmt}}</p><hr style="margin:15px 0;border-color:var(--card-b)"><div>`;for(let l of d.links){{html+=`<div style="background:rgba(0,0,0,.2);border-radius:12px;padding:12px;margin-bottom:8px;border:1px solid var(--card-b)"><strong style="color:var(--accent2)">${{l.label}}</strong> <span style="color:var(--t3)">${{l.used_fmt}} / ${{l.limit_fmt}}</span><div style="font-size:10px;color:var(--t3)">${{l.vless_link.substring(0,60)}}…</div></div>`;}}html+=`</div></div>`;document.getElementById('root').innerHTML=html;}}
-async function init(){{const data=await loadData();renderContent(data);}}
-init();
-</script>
-</body></html>"""
+function toggleLrow(uuid, el){ if(lmodalInSub.has(uuid)){ lmodalInSub.delete(uuid); el.classList.remove('checked'); } else { lmodalIn
