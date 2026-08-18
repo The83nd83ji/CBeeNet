@@ -1,4 +1,4 @@
-# relay_trojan.py
+# relay_trojan.py - نسخه دیباگ کامل
 import asyncio
 import secrets
 from datetime import datetime
@@ -7,7 +7,7 @@ from main import (
     LINKS, LINKS_LOCK, stats, connections, error_logs, logger,
     is_link_allowed, save_state, log_activity, now_ir
 )
-from relay_vless import _ws_client_ip, check_and_use, RELAY_BUF, parse_vless_header
+from relay_vless import _ws_client_ip, check_and_use, RELAY_BUF
 
 router = APIRouter()
 TROJAN_EXPECTED_PASSWORD = "CBeeNet"
@@ -15,12 +15,17 @@ TROJAN_EXPECTED_PASSWORD = "CBeeNet"
 
 async def parse_trojan_header_full(chunk: bytes):
     if len(chunk) < 57 + 1 + 2 + 1:
-        raise ValueError("chunk too small")
+        raise ValueError(f"chunk too small: got {len(chunk)} bytes, need at least 61")
     version = chunk[0]
     if version != 0x01:
         raise ValueError(f"unsupported version: {version}")
     password_bytes = chunk[1:57]
-    password = password_bytes.split(b'\x00')[0].decode('utf-8', errors='ignore')
+    # پیدا کردن null-terminator
+    null_pos = password_bytes.find(b'\x00')
+    if null_pos > 0:
+        password = password_bytes[:null_pos].decode('utf-8', errors='ignore')
+    else:
+        password = password_bytes.decode('utf-8', errors='ignore')
     if not password:
         raise ValueError("empty password")
     pos = 57
@@ -110,30 +115,31 @@ async def trojan_tunnel(ws: WebSocket, uuid: str):
         if not first_chunk:
             await ws.close(code=1008, reason="empty payload")
             return
+        
+        # دیباگ: چاپ سایز و هگز
+        logger.info(f"Trojan first chunk size: {len(first_chunk)}")
+        logger.info(f"Trojan first chunk hex (first 64 bytes): {first_chunk[:64].hex()}")
+        
     except asyncio.TimeoutError:
         await ws.close(code=1008, reason="timeout")
         return
 
-    # تلاش برای parse هدر Trojan
-    use_vless_fallback = False
+    # تلاش برای parse
     try:
         command, password, address, port, payload = await parse_trojan_header_full(first_chunk)
+        logger.info(f"Trojan parsed: password={password[:10]}..., addr={address}:{port}, cmd={command}")
         if password != TROJAN_EXPECTED_PASSWORD:
-            logger.warning(f"Trojan invalid password: expected {TROJAN_EXPECTED_PASSWORD}, got {password}")
-            use_vless_fallback = True
-    except Exception as e:
-        logger.warning(f"Trojan parse error: {e} → fallback to VLESS")
-        use_vless_fallback = True
-
-    # fallback به VLESS
-    if use_vless_fallback:
-        try:
-            command, address, port, payload = await parse_vless_header(first_chunk)
-            logger.info(f"Trojan fallback VLESS → {address}:{port}")
-        except Exception as e2:
-            logger.warning(f"Trojan VLESS fallback also failed: {e2}")
-            await ws.close(code=1008, reason="invalid header")
+            logger.warning(f"Trojan password mismatch: expected {TROJAN_EXPECTED_PASSWORD}, got {password}")
+            await ws.close(code=1008, reason="invalid password")
             return
+    except Exception as e:
+        logger.error(f"Trojan parse error: {e}")
+        # fallback: شاید کلاینت بدون هدر می‌فرسته (مثل بعضی نسخه‌های v2rayNG)
+        logger.warning("Trojan: trying fallback mode (raw data to 127.0.0.1:443)")
+        address = "127.0.0.1"
+        port = 443
+        payload = first_chunk
+        command = 0x01
 
     ip = _ws_client_ip(ws)
     conn_id = secrets.token_urlsafe(6)
