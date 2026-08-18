@@ -93,7 +93,8 @@ LINKS_LOCK = asyncio.Lock()
 SUBS: dict = {}
 SUBS_LOCK = asyncio.Lock()
 
-PROTOCOLS = ("vless-ws", "xhttp-packet-up", "xhttp-stream-up", "xhttp-stream-one")
+# ─── پروتکل‌های مجاز (افزودن تروجان) ───
+PROTOCOLS = ("vless-ws", "xhttp-packet-up", "xhttp-stream-up", "trojan-ws")
 DEFAULT_PROTOCOL = "vless-ws"
 
 GLOBAL_SETTINGS = {
@@ -106,7 +107,7 @@ GLOBAL_SETTINGS = {
         "vless-ws": {"server_name": "", "link_prefix": "", "link_template": ""},
         "xhttp-packet-up": {"server_name": "", "link_prefix": "", "link_template": ""},
         "xhttp-stream-up": {"server_name": "", "link_prefix": "", "link_template": ""},
-        "xhttp-stream-one": {"server_name": "", "link_prefix": "", "link_template": ""},
+        "trojan-ws": {"server_name": "", "link_prefix": "", "link_template": ""},
     }
 }
 
@@ -224,7 +225,7 @@ def format_link_remark(label: str, protocol: str) -> str:
             "vless-ws": "VLESS-WS",
             "xhttp-packet-up": "XHTTP-packet",
             "xhttp-stream-up": "XHTTP-stream",
-            "xhttp-stream-one": "XHTTP-ultra"
+            "trojan-ws": "Trojan"
         }
         proto_name = default_names.get(protocol, protocol)
         result = result.replace("{protocol}", proto_name)
@@ -241,6 +242,17 @@ def _format_uri(uuid: str, ip: str, port: int, remark: str, protocol: str, origi
         }
         query = "&".join(f"{k}={quote(str(v))}" for k, v in params.items())
         return f"vless://{uuid}@{ip}:{port}?{query}#{quote(remark)}"
+
+    if protocol == "trojan-ws":
+        # پسورد ثابت CBeeNet
+        password = "CBeeNet"
+        params = {
+            "allowInsecure": "1",
+            "sni": original_host,
+            "fp": "chrome"
+        }
+        query = "&".join(f"{k}={quote(str(v))}" for k, v in params.items())
+        return f"trojan://{password}@{ip}:{port}?{query}#{quote(remark)}"
 
     # XHTTP protocols
     mode = protocol.replace("xhttp-", "")
@@ -271,13 +283,13 @@ def generate_links(link_data: dict, uuid: str, host: str) -> list[str]:
 
     label = link_data['label']
 
-    # لینک‌های سرورهای واقعی
+    # ─── لینک‌های سرورهای واقعی (برای هر پروتکل و هر IP) ───
     for ip in ips:
         for proto in protocols:
             remark = format_link_remark(label, proto)
             links.append(_format_uri(uuid, ip, port, remark, proto, host))
 
-    # ════════ سرور مجازی 0.0.0.0:443 با برچسب مخصوص ════════
+    # ─── سرور مجازی (فقط یک خط، با اولین پروتکل موجود) ───
     # محاسبه حجم باقی‌مانده
     limit_bytes = link_data.get("limit_bytes", 0)
     used_bytes = link_data.get("used_bytes", 0)
@@ -291,9 +303,11 @@ def generate_links(link_data: dict, uuid: str, host: str) -> list[str]:
         remain_str = f"{remain_gb:.2f} GB"  # دو رقم اعشار
 
     virtual_remark = f"⏳️ 𓏺 [{remain_str}]"
-    for proto in protocols:
-        # از همان uuid و host اصلی استفاده می‌کنیم، ip=0.0.0.0 و port=443
-        links.append(_format_uri(uuid, "0.0.0.0", 443, virtual_remark, proto, host))
+    # از اولین پروتکل برای ساخت لینک مجازی استفاده می‌کنیم
+    virtual_proto = protocols[0] if protocols else DEFAULT_PROTOCOL
+    virtual_link = _format_uri(uuid, "0.0.0.0", 443, virtual_remark, virtual_proto, host)
+    # لینک مجازی را در ابتدای لیست قرار می‌دهیم
+    links.insert(0, virtual_link)
 
     return links
 
@@ -648,7 +662,7 @@ async def get_connections(_=Depends(require_auth)):
 # ── Link Management ───────────────────────────────────────────────────────────
 @app.post("/api/links")
 async def create_link(request: Request):
-    s = await require_auth(request)  # فقط ادمین
+    s = await require_auth(request)
     body = await request.json()
     
     label = (body.get("label") or "New Link").strip()[:60]
@@ -681,7 +695,7 @@ async def create_link(request: Request):
             "created_at": datetime.now().isoformat(), "active": True,
             "expires_at": expires_at, "note": note, "is_default": False,
             "sub_id": sub_id, "protocols": protocols, "ips": ips, "port": port,
-            "is_personal": False  # دیگر استفاده نمی‌شود
+            "is_personal": False
         }
         if sub_id:
             async with SUBS_LOCK:
@@ -697,7 +711,7 @@ async def create_link(request: Request):
 
 @app.post("/api/links/bulk")
 async def create_links_bulk(request: Request):
-    s = await require_auth(request)  # فقط ادمین
+    s = await require_auth(request)
     body = await request.json()
     
     try:
@@ -781,7 +795,7 @@ async def create_links_bulk(request: Request):
 
 @app.get("/api/links")
 async def list_links(request: Request):
-    s = await require_auth(request)  # فقط ادمین
+    s = await require_auth(request)
     host = get_host()
     async with LINKS_LOCK:
         result = []
@@ -794,7 +808,7 @@ async def list_links(request: Request):
 
 @app.patch("/api/links/{uid}")
 async def update_link(uid: str, request: Request):
-    s = await require_auth(request)  # فقط ادمین
+    s = await require_auth(request)
     body = await request.json()
     async with LINKS_LOCK:
         if uid not in LINKS: raise HTTPException(status_code=404, detail="link not found")
@@ -819,7 +833,7 @@ async def update_link(uid: str, request: Request):
 
 @app.delete("/api/links/{uid}")
 async def delete_link(uid: str, request: Request):
-    s = await require_auth(request)  # فقط ادمین
+    s = await require_auth(request)
     async with LINKS_LOCK:
         if uid not in LINKS: raise HTTPException(status_code=404, detail="not found")
         sub_id = LINKS[uid].get("sub_id")
@@ -843,7 +857,7 @@ app.include_router(xhttp_router)
 
 # ── Trojan Relay ─────────────────────────────────────────────────────────────
 from relay_trojan import router as trojan_router
-app.include_router(trojan_router)   # مسیرهای Trojan در همان فایل تعریف شده‌اند
+app.include_router(trojan_router)
 
 # ── HTTP Proxy ────────────────────────────────────────────────────────────────
 _HOP = {"connection","keep-alive","proxy-authenticate","proxy-authorization","te","trailers","transfer-encoding","upgrade","content-encoding","content-length"}
