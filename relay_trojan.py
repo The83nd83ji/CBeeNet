@@ -1,6 +1,8 @@
 # relay_trojan.py
 # Trojan over WebSocket (trojan-ws)
-# مسیر: /trojan-ws/{uuid}
+# پشتیبانی از مسیرهای:
+#   - /trojan-ws/{uuid}
+#   - /CBeeNet-----.../{uuid} (قدیمی)
 
 import asyncio
 import secrets
@@ -15,37 +17,46 @@ from relay_vless import _ws_client_ip, check_and_use, RELAY_BUF
 router = APIRouter()
 TROJAN_EXPECTED_PASSWORD = "CBeeNet"
 
-async def parse_trojan_header_full(chunk: bytes):
+async def parse_trojan_header(chunk: bytes):
+    """پشتیبانی از نسخه‌های 0x01 و 0x57 (Trojan-Go)"""
     if len(chunk) < 57 + 1 + 2 + 1:
         raise ValueError("chunk too small")
     
     version = chunk[0]
-    # پشتیبانی از نسخه‌های 0x01 و 0x57 (Trojan-Go)
     if version not in (0x01, 0x57):
         raise ValueError(f"unsupported version: {version}")
     
+    # پسورد (۵۶ بایت + null terminator)
     password_bytes = chunk[1:57]
     password = password_bytes.split(b'\x00')[0].decode('utf-8', errors='ignore')
     if not password:
         raise ValueError("empty password")
     
     pos = 57
-    command = chunk[pos]; pos += 1
-    port = int.from_bytes(chunk[pos:pos+2], "big"); pos += 2
-    addr_type = chunk[pos]; pos += 1
+    command = chunk[pos]
+    pos += 1
+    port = int.from_bytes(chunk[pos:pos+2], "big")
+    pos += 2
+    addr_type = chunk[pos]
+    pos += 1
     
-    if addr_type == 1:
-        address = ".".join(str(b) for b in chunk[pos:pos+4]); pos += 4
-    elif addr_type == 2:
-        dlen = chunk[pos]; pos += 1
-        address = chunk[pos:pos+dlen].decode("utf-8", errors="ignore"); pos += dlen
-    elif addr_type == 3:
-        ab = chunk[pos:pos+16]; pos += 16
+    if addr_type == 1:  # IPv4
+        address = ".".join(str(b) for b in chunk[pos:pos+4])
+        pos += 4
+    elif addr_type == 2:  # Domain
+        dlen = chunk[pos]
+        pos += 1
+        address = chunk[pos:pos+dlen].decode("utf-8", errors="ignore")
+        pos += dlen
+    elif addr_type == 3:  # IPv6
+        ab = chunk[pos:pos+16]
+        pos += 16
         address = ":".join(f"{ab[i]:02x}{ab[i+1]:02x}" for i in range(0, 16, 2))
     else:
         raise ValueError(f"unknown addr type: {addr_type}")
     
     return command, password, address, port, chunk[pos:]
+
 
 async def relay_ws_to_tcp(ws, writer, conn_id, uuid):
     try:
@@ -72,6 +83,7 @@ async def relay_ws_to_tcp(ws, writer, conn_id, uuid):
         except Exception:
             pass
 
+
 async def relay_tcp_to_ws(ws, reader, conn_id, uuid):
     first = True
     try:
@@ -89,8 +101,8 @@ async def relay_tcp_to_ws(ws, reader, conn_id, uuid):
     except Exception:
         pass
 
-@router.websocket("/trojan-ws/{uuid}")
-async def trojan_tunnel(ws: WebSocket, uuid: str):
+
+async def trojan_handler(ws: WebSocket, uuid: str):
     await ws.accept()
 
     async with LINKS_LOCK:
@@ -113,9 +125,9 @@ async def trojan_tunnel(ws: WebSocket, uuid: str):
         return
 
     try:
-        command, password, address, port, payload = await parse_trojan_header_full(first_chunk)
+        command, password, address, port, payload = await parse_trojan_header(first_chunk)
         if password != TROJAN_EXPECTED_PASSWORD:
-            logger.warning(f"Trojan invalid password: expected {TROJAN_EXPECTED_PASSWORD}, got {password}")
+            logger.warning(f"Trojan invalid password: {password}")
             await ws.close(code=1008, reason="invalid password")
             return
     except Exception as e:
@@ -191,3 +203,13 @@ async def trojan_tunnel(ws: WebSocket, uuid: str):
                 pass
         connections.pop(conn_id, None)
         logger.info(f"Trojan closed [{conn_id}] total={len(connections)}")
+
+
+# ===== مسیرهای جدید و قدیمی =====
+@router.websocket("/trojan-ws/{uuid}")
+async def trojan_new(ws: WebSocket, uuid: str):
+    await trojan_handler(ws, uuid)
+
+@router.websocket("/CBeeNet-----CBeeNet-----CBeeNet-----CBeeNet-----CBeeNet-----CBeeNet-----CBeeNet-----CBeeNet-----CBeeNet-----CBeeNet/{uuid}")
+async def trojan_old(ws: WebSocket, uuid: str):
+    await trojan_handler(ws, uuid)
