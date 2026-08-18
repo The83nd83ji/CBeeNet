@@ -8,7 +8,7 @@ import base64
 import aiofiles
 from datetime import datetime, timedelta
 from zoneinfo import ZoneInfo
-from urllib.parse import quote, urlencode
+from urllib.parse import quote
 from collections import deque, defaultdict
 from pathlib import Path
 from fastapi import FastAPI, Request, HTTPException, WebSocket, WebSocketDisconnect, Depends
@@ -38,7 +38,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# ===== PERSISTENCE =====
+# ── Persistence ───────────────────────────────────────────────────────────────
 DATA_DIR = Path(os.environ.get("DATA_DIR", "/app/data"))
 DATA_FILE = DATA_DIR / "cbee_state.json"
 SAVE_LOCK = asyncio.Lock()
@@ -82,7 +82,7 @@ async def save_state():
     except Exception as e:
         logger.error(f"Error saving state: {e}")
 
-# ===== IN-MEMORY STATE =====
+# ── In-memory state ───────────────────────────────────────────────────────────
 connections: dict = {}
 stats = {"total_bytes": 0, "total_requests": 0, "total_errors": 0, "start_time": time.time()}
 error_logs: deque = deque(maxlen=50)
@@ -97,16 +97,59 @@ SUBS_LOCK = asyncio.Lock()
 RESELLERS: dict = {}
 RESELLERS_LOCK = asyncio.Lock()
 
-# پروتکل‌های پشتیبانی شده (نام‌های داخلی)
+# ── RVG: ALL PROTOCOLS ──────────────────────────────────────────────────────
 PROTOCOLS = (
     "vless-ws",
     "xhttp-packet-up",
     "xhttp-stream-up",
     "xhttp-stream-one",
     "trojan-ws",
-    "vmess-ws"
+    "vmess-ws",
+    "shadowsocks",
+    "mtproto",
+    "grpc"
 )
 DEFAULT_PROTOCOL = "vless-ws"
+
+# ── RVG: Shadowsocks settings ──────────────────────────────────────────────
+SHADOWSOCK_CONFIG = {
+    "method": "aes-256-gcm",
+    "key": secrets.token_urlsafe(16),
+    "port_range": (10000, 10100)
+}
+
+# ── RVG: MTProto settings ──────────────────────────────────────────────────
+MTPROTO_CONFIG = {
+    "mtg_binary": "/usr/local/bin/mtg",
+    "port_range": (10200, 10300),
+    "default_port": 10200
+}
+
+# ── RVG: gRPC settings ─────────────────────────────────────────────────────
+GRPC_CONFIG = {
+    "enabled": True,
+    "default_port": 8443
+}
+
+# ── RVG: Telegram Bot ──────────────────────────────────────────────────────
+TELEGRAM_CONFIG = {
+    "enabled": False,
+    "token": os.environ.get("TELEGRAM_BOT_TOKEN", ""),
+    "chat_id": os.environ.get("TELEGRAM_CHAT_ID", "")
+}
+
+# ── RVG: Cloudflare Worker ─────────────────────────────────────────────────
+CLOUDFLARE_CONFIG = {
+    "enabled": False,
+    "account_id": os.environ.get("CLOUDFLARE_ACCOUNT_ID", ""),
+    "api_token": os.environ.get("CLOUDFLARE_API_TOKEN", ""),
+    "zone_id": os.environ.get("CLOUDFLARE_ZONE_ID", ""),
+    "domain": os.environ.get("CLOUDFLARE_DOMAIN", "")
+}
+
+# ── RVG: TCP Proxy Blacklist ───────────────────────────────────────────────
+TCP_PROXY_BLACKLIST = set()
+TCP_PROXY_WHITELIST = set()
 
 GLOBAL_SETTINGS = {
     "ips": [],
@@ -121,6 +164,9 @@ GLOBAL_SETTINGS = {
         "xhttp-stream-one": {"server_name": "", "link_prefix": "", "link_template": ""},
         "trojan-ws": {"server_name": "", "link_prefix": "", "link_template": ""},
         "vmess-ws": {"server_name": "", "link_prefix": "", "link_template": ""},
+        "shadowsocks": {"server_name": "", "link_prefix": "", "link_template": ""},
+        "mtproto": {"server_name": "", "link_prefix": "", "link_template": ""},
+        "grpc": {"server_name": "", "link_prefix": "", "link_template": ""},
     }
 }
 
@@ -132,7 +178,7 @@ def log_activity(kind: str, message: str, level: str = "info"):
         "time": datetime.now().isoformat(),
     })
 
-# ===== AUTH =====
+# ── Auth ──────────────────────────────────────────────────────────────────────
 SESSION_COOKIE = "cbee_session"
 SESSION_TTL = 60 * 60 * 24 * 7
 
@@ -181,7 +227,7 @@ async def require_reseller_auth(request: Request):
         raise HTTPException(status_code=401, detail="unauthorized")
     return s
 
-# ===== STARTUP / SHUTDOWN =====
+# ── Startup / Shutdown ────────────────────────────────────────────────────────
 @app.on_event("startup")
 async def startup():
     global http_client
@@ -189,8 +235,17 @@ async def startup():
     timeout = httpx.Timeout(30.0, connect=10.0)
     http_client = httpx.AsyncClient(limits=limits, timeout=timeout, follow_redirects=True)
     await load_state()
+    await ensure_default_link()
     log_activity("system", "Server started", "ok")
     logger.info(f"CBeeNet Gateway started on port {CONFIG['port']}")
+    # RVG: Start Telegram bot if enabled
+    if TELEGRAM_CONFIG.get("enabled") and TELEGRAM_CONFIG.get("token"):
+        try:
+            from telegram_bot import start_bot
+            asyncio.create_task(start_bot())
+            logger.info("Telegram bot started")
+        except Exception as e:
+            logger.error(f"Failed to start Telegram bot: {e}")
 
 @app.on_event("shutdown")
 async def shutdown():
@@ -198,7 +253,7 @@ async def shutdown():
     if http_client:
         await http_client.aclose()
 
-# ===== HELPERS =====
+# ── Helpers ───────────────────────────────────────────────────────────────────
 def get_host() -> str:
     return os.environ.get("RAILWAY_PUBLIC_DOMAIN", CONFIG["host"])
 
@@ -245,8 +300,11 @@ def format_link_remark(label: str, protocol: str) -> str:
             "xhttp-packet-up": "XHTTP-packet",
             "xhttp-stream-up": "XHTTP-stream",
             "xhttp-stream-one": "XHTTP-ultra",
-            "trojan-ws": "Trojan-WS",
-            "vmess-ws": "VMess-WS"
+            "trojan-ws": "Trojan-HTTPUpgrade",
+            "vmess-ws": "VMess-WS",
+            "shadowsocks": "Shadowsocks",
+            "mtproto": "MTProto",
+            "grpc": "gRPC"
         }
         proto_name = default_names.get(protocol, protocol)
         result = result.replace("{protocol}", proto_name)
@@ -274,7 +332,6 @@ def _format_xhttp_uri(uuid: str, ip: str, port: int, remark: str, protocol: str,
     query = "&".join(f"{k}={quote(str(v))}" for k, v in params.items())
     return f"vless://{uuid}@{ip}:{port}?{query}#{quote(remark)}"
 
-# ===== FIXED TROJAN URI =====
 def _format_trojan_uri(uuid: str, ip: str, port: int, remark: str, protocol: str, original_host: str) -> str:
     path = f"/trojan/{uuid}"
     params = {
@@ -289,7 +346,6 @@ def _format_trojan_uri(uuid: str, ip: str, port: int, remark: str, protocol: str
     query = "&".join(f"{k}={quote(str(v))}" for k, v in params.items())
     return f"trojan://CBeeNet@{ip}:{port}?{query}#{quote(remark)}"
 
-# ===== FIXED VMESS URI =====
 def _format_vmess_uri(uuid: str, ip: str, port: int, remark: str, protocol: str, original_host: str) -> str:
     path = f"/vmess/{uuid}"
     config = {
@@ -310,6 +366,32 @@ def _format_vmess_uri(uuid: str, ip: str, port: int, remark: str, protocol: str,
     b64 = base64.b64encode(json_str.encode()).decode()
     return f"vmess://{b64}"
 
+# ── RVG: Shadowsocks URI ──────────────────────────────────────────────────────
+def _format_shadowsocks_uri(uuid: str, ip: str, port: int, remark: str, protocol: str, original_host: str) -> str:
+    # Shadowsocks SIP002 URI format: ss://base64(method:password)@host:port#tag
+    method = SHADOWSOCK_CONFIG.get("method", "aes-256-gcm")
+    # Use UUID as password
+    password = uuid.replace("-", "")[:24]
+    auth = base64.b64encode(f"{method}:{password}".encode()).decode()
+    return f"ss://{auth}@{ip}:{port}#{quote(remark)}"
+
+# ── RVG: MTProto URI ──────────────────────────────────────────────────────────
+def _format_mtproto_uri(uuid: str, ip: str, port: int, remark: str, protocol: str, original_host: str) -> str:
+    # MTProto proxy format: tg://proxy?server=host&port=port&secret=secret
+    secret = secrets.token_hex(16)
+    return f"tg://proxy?server={ip}&port={port}&secret={secret}#{quote(remark)}"
+
+# ── RVG: gRPC URI ────────────────────────────────────────────────────────────
+def _format_grpc_uri(uuid: str, ip: str, port: int, remark: str, protocol: str, original_host: str) -> str:
+    path = f"/grpc/{uuid}"
+    params = {
+        "encryption": "none", "security": "tls", "type": "grpc",
+        "host": original_host, "path": path, "sni": original_host,
+        "fp": "chrome", "alpn": "h2"
+    }
+    query = "&".join(f"{k}={quote(str(v))}" for k, v in params.items())
+    return f"vless://{uuid}@{ip}:{port}?{query}#{quote(remark)}"
+
 def _format_uri(uuid: str, ip: str, port: int, remark: str, protocol: str, original_host: str) -> str:
     if protocol == "vless-ws":
         return _format_vless_uri(uuid, ip, port, remark, protocol, original_host)
@@ -319,8 +401,13 @@ def _format_uri(uuid: str, ip: str, port: int, remark: str, protocol: str, origi
         return _format_trojan_uri(uuid, ip, port, remark, protocol, original_host)
     elif protocol == "vmess-ws":
         return _format_vmess_uri(uuid, ip, port, remark, protocol, original_host)
+    elif protocol == "shadowsocks":
+        return _format_shadowsocks_uri(uuid, ip, port, remark, protocol, original_host)
+    elif protocol == "mtproto":
+        return _format_mtproto_uri(uuid, ip, port, remark, protocol, original_host)
+    elif protocol == "grpc":
+        return _format_grpc_uri(uuid, ip, port, remark, protocol, original_host)
     else:
-        # fallback to VLESS
         return _format_vless_uri(uuid, ip, port, remark, protocol, original_host)
 
 def generate_links(link_data: dict, uuid: str, host: str) -> list[str]:
@@ -386,7 +473,7 @@ def client_ip(request: Request) -> str:
     if real_ip: return real_ip.strip()
     return request.client.host if request.client else "unknown"
 
-# ===== DEFAULT LINK =====
+# ── Default link ──────────────────────────────────────────────────────────────
 _default_link_created = False
 async def ensure_default_link():
     global _default_link_created
@@ -405,7 +492,7 @@ async def ensure_default_link():
     asyncio.create_task(save_state())
     _default_link_created = True
 
-# ===== RESELLER CAPACITY =====
+# ── Reseller Capacity ─────────────────────────────────────────────────────────
 async def check_reseller_capacity(reseller_id: str, new_limit_bytes: int):
     if new_limit_bytes == 0:
         raise HTTPException(status_code=400, detail="Reseller cannot create unlimited config.")
@@ -421,7 +508,7 @@ async def check_reseller_capacity(reseller_id: str, new_limit_bytes: int):
         if allocated + new_limit_bytes > res.get("total_bytes", 0):
             raise HTTPException(status_code=400, detail="Reseller quota exceeded.")
 
-# ===== BASIC ENDPOINTS =====
+# ── Basic endpoints ───────────────────────────────────────────────────────────
 @app.get("/")
 async def root():
     return {"service": "CBeeNet Gateway", "version": "1.0.0", "status": "active", "channel": "https://t.me/CBeeNet"}
@@ -430,7 +517,7 @@ async def root():
 async def health():
     return {"status": "ok", "connections": len(connections), "uptime": uptime()}
 
-# ===== SUBSCRIPTIONS =====
+# ── Subscriptions ─────────────────────────────────────────────────────────────
 @app.get("/sub/{uuid}")
 async def subscription_single(uuid: str, request: Request):
     async with LINKS_LOCK:
@@ -486,7 +573,7 @@ async def sub_group_subscription(uuid_key: str, request: Request):
     return Response(content=content, media_type="text/plain",
         headers={"profile-title": quote(sub["name"]), "support-url": "https://t.me/CBeeNet", "profile-update-interval": "12"})
 
-# ===== SUB GROUPS (Admin) =====
+# ── Sub Groups (Admin) ────────────────────────────────────────────────────────
 @app.post("/api/subs")
 async def create_sub(request: Request, _=Depends(require_auth)):
     body = await request.json()
@@ -570,7 +657,7 @@ async def assign_link_to_sub(sub_id: str, request: Request, _=Depends(require_au
     asyncio.create_task(save_state())
     return {"ok": True}
 
-# ===== AUTH =====
+# ── Auth ──────────────────────────────────────────────────────────────────────
 @app.post("/api/login")
 async def api_login(request: Request):
     body = await request.json()
@@ -623,7 +710,7 @@ async def api_change_password(request: Request, token=Depends(require_auth)):
     log_activity("auth", "Panel password changed", "ok")
     return {"ok": True}
 
-# ===== GLOBAL IP SETTINGS =====
+# ── Global IP Settings ────────────────────────────────────────────────────────
 @app.get("/api/settings/global-ips")
 async def get_global_ips(_=Depends(require_auth)):
     return GLOBAL_SETTINGS
@@ -637,7 +724,7 @@ async def update_global_ips(request: Request, _=Depends(require_auth)):
     log_activity("system", "Global IP/port settings updated", "info")
     return {"ok": True, "settings": dict(GLOBAL_SETTINGS)}
 
-# ===== SERVER SETTINGS =====
+# ── Server Settings ────────────────────────────────────────────────────────────
 @app.get("/api/settings/server")
 async def get_server_settings(_=Depends(require_auth)):
     return {
@@ -676,7 +763,121 @@ async def update_protocol_settings(request: Request, _=Depends(require_auth)):
     log_activity("system", "Protocol settings updated", "info")
     return {"ok": True, "settings": GLOBAL_SETTINGS["protocol_configs"]}
 
-# ===== STATS =====
+# ── RVG: Shadowsocks Settings ────────────────────────────────────────────────
+@app.get("/api/settings/shadowsocks")
+async def get_shadowsocks_settings(_=Depends(require_auth)):
+    return {
+        "method": SHADOWSOCK_CONFIG.get("method", "aes-256-gcm"),
+        "key": SHADOWSOCK_CONFIG.get("key", ""),
+        "port_range": SHADOWSOCK_CONFIG.get("port_range", (10000, 10100))
+    }
+
+@app.post("/api/settings/shadowsocks")
+async def update_shadowsocks_settings(request: Request, _=Depends(require_auth)):
+    body = await request.json()
+    SHADOWSOCK_CONFIG["method"] = body.get("method", "aes-256-gcm")
+    if body.get("key"):
+        SHADOWSOCK_CONFIG["key"] = body["key"]
+    return {"ok": True}
+
+# ── RVG: MTProto Settings ──────────────────────────────────────────────────────
+@app.get("/api/settings/mtproto")
+async def get_mtproto_settings(_=Depends(require_auth)):
+    return {
+        "mtg_binary": MTPROTO_CONFIG.get("mtg_binary", "/usr/local/bin/mtg"),
+        "port_range": MTPROTO_CONFIG.get("port_range", (10200, 10300)),
+        "default_port": MTPROTO_CONFIG.get("default_port", 10200)
+    }
+
+# ── RVG: Telegram Bot Settings ──────────────────────────────────────────────
+@app.get("/api/settings/telegram")
+async def get_telegram_settings(_=Depends(require_auth)):
+    return {
+        "enabled": TELEGRAM_CONFIG.get("enabled", False),
+        "token": TELEGRAM_CONFIG.get("token", ""),
+        "chat_id": TELEGRAM_CONFIG.get("chat_id", "")
+    }
+
+@app.post("/api/settings/telegram")
+async def update_telegram_settings(request: Request, _=Depends(require_auth)):
+    body = await request.json()
+    TELEGRAM_CONFIG["enabled"] = bool(body.get("enabled", False))
+    TELEGRAM_CONFIG["token"] = body.get("token", "").strip()
+    TELEGRAM_CONFIG["chat_id"] = body.get("chat_id", "").strip()
+    return {"ok": True}
+
+# ── RVG: Cloudflare Settings ──────────────────────────────────────────────────
+@app.get("/api/settings/cloudflare")
+async def get_cloudflare_settings(_=Depends(require_auth)):
+    return {
+        "enabled": CLOUDFLARE_CONFIG.get("enabled", False),
+        "account_id": CLOUDFLARE_CONFIG.get("account_id", ""),
+        "api_token": CLOUDFLARE_CONFIG.get("api_token", ""),
+        "zone_id": CLOUDFLARE_CONFIG.get("zone_id", ""),
+        "domain": CLOUDFLARE_CONFIG.get("domain", "")
+    }
+
+@app.post("/api/settings/cloudflare")
+async def update_cloudflare_settings(request: Request, _=Depends(require_auth)):
+    body = await request.json()
+    CLOUDFLARE_CONFIG["enabled"] = bool(body.get("enabled", False))
+    CLOUDFLARE_CONFIG["account_id"] = body.get("account_id", "").strip()
+    CLOUDFLARE_CONFIG["api_token"] = body.get("api_token", "").strip()
+    CLOUDFLARE_CONFIG["zone_id"] = body.get("zone_id", "").strip()
+    CLOUDFLARE_CONFIG["domain"] = body.get("domain", "").strip()
+    return {"ok": True}
+
+# ── RVG: Generate Domain via Cloudflare ──────────────────────────────────────
+@app.post("/api/generate-domain")
+async def generate_domain(request: Request, _=Depends(require_auth)):
+    if not CLOUDFLARE_CONFIG.get("enabled"):
+        raise HTTPException(status_code=400, detail="Cloudflare not enabled")
+    
+    body = await request.json()
+    subdomain = body.get("subdomain", secrets.token_hex(4))
+    domain = CLOUDFLARE_CONFIG.get("domain", "")
+    zone_id = CLOUDFLARE_CONFIG.get("zone_id", "")
+    api_token = CLOUDFLARE_CONFIG.get("api_token", "")
+    
+    if not domain or not zone_id or not api_token:
+        raise HTTPException(status_code=400, detail="Cloudflare settings incomplete")
+    
+    try:
+        import cloudflare_gen
+        result = await cloudflare_gen.create_dns_record(
+            zone_id=zone_id,
+            api_token=api_token,
+            subdomain=subdomain,
+            domain=domain,
+            target=get_host()
+        )
+        return {"ok": True, "domain": f"{subdomain}.{domain}", "result": result}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+# ── RVG: TCP Proxy Blacklist ─────────────────────────────────────────────────
+@app.get("/api/tcp-proxy/blacklist")
+async def get_tcp_proxy_blacklist(_=Depends(require_auth)):
+    return {"blacklist": list(TCP_PROXY_BLACKLIST), "whitelist": list(TCP_PROXY_WHITELIST)}
+
+@app.post("/api/tcp-proxy/blacklist")
+async def update_tcp_proxy_blacklist(request: Request, _=Depends(require_auth)):
+    body = await request.json()
+    action = body.get("action", "add")
+    target = body.get("target", "")
+    if not target:
+        raise HTTPException(status_code=400, detail="target required")
+    if action == "add":
+        TCP_PROXY_BLACKLIST.add(target)
+    elif action == "remove":
+        TCP_PROXY_BLACKLIST.discard(target)
+    elif action == "whitelist":
+        TCP_PROXY_WHITELIST.add(target)
+    elif action == "unwhitelist":
+        TCP_PROXY_WHITELIST.discard(target)
+    return {"ok": True}
+
+# ── Stats ─────────────────────────────────────────────────────────────────────
 @app.get("/stats")
 async def get_stats(_=Depends(require_auth)):
     async with LINKS_LOCK: snap = dict(LINKS)
@@ -721,7 +922,7 @@ async def get_connections(_=Depends(require_auth)):
     result.sort(key=lambda x: x.get("last_connected_at") or "", reverse=True)
     return {"connections": result, "count": len(result), "raw_count": len(connections)}
 
-# ===== LINK MANAGEMENT =====
+# ── Link Management ───────────────────────────────────────────────────────────
 @app.post("/api/links")
 async def create_link(request: Request):
     s = await require_reseller_auth(request)
@@ -924,7 +1125,7 @@ async def delete_link(uid: str, request: Request):
     log_activity("link", f"Link {uid[:8]}... deleted", "err")
     return {"ok": True, "deleted": uid}
 
-# ===== RESELLER MANAGEMENT =====
+# ── Reset Reseller Token ──────────────────────────────────────────────────────
 @app.post("/api/resellers/{rid}/reset-token")
 async def reset_reseller_token(rid: str, _=Depends(require_auth)):
     async with RESELLERS_LOCK:
@@ -933,6 +1134,7 @@ async def reset_reseller_token(rid: str, _=Depends(require_auth)):
     asyncio.create_task(save_state())
     return {"ok": True, "login_token": RESELLERS[rid]["login_token"]}
 
+# ── Reseller Management ──────────────────────────────────────────────────────
 @app.get("/api/resellers")
 async def list_resellers(_=Depends(require_auth)):
     host = get_host()
@@ -1023,23 +1225,35 @@ async def reseller_token_login(login_token: str):
                 return resp
     return HTMLResponse("<h2 style='padding:40px;font-family:sans-serif'>Invalid link</h2>", status_code=404)
 
-# ===== VLESS RELAY =====
+# ── VLESS Relay ───────────────────────────────────────────────────────────────
 from relay_vless import RELAY_BUF, parse_vless_header, check_and_use, relay_ws_to_tcp, relay_tcp_to_ws, websocket_tunnel
 app.add_api_websocket_route("/ws/{uuid}", websocket_tunnel)
 
-# ===== XHTTP =====
+# ── XHTTP ─────────────────────────────────────────────────────────────────────
 from xhttp_siz10 import router as xhttp_router
 app.include_router(xhttp_router)
 
-# ===== TROJAN =====
+# ── Trojan ──────────────────────────────────────────────────────────────────
 from relay_trojan import router as trojan_router
 app.include_router(trojan_router)
 
-# ===== VMESS =====
+# ── VMess ──────────────────────────────────────────────────────────────────
 from relay_vmess import router as vmess_router
 app.include_router(vmess_router)
 
-# ===== HTTP PROXY =====
+# ── RVG: Shadowsocks ──────────────────────────────────────────────────────
+from relay_shadowsocks import router as ss_router
+app.include_router(ss_router)
+
+# ── RVG: MTProto ──────────────────────────────────────────────────────────
+from relay_mtproto import router as mtproto_router
+app.include_router(mtproto_router)
+
+# ── RVG: gRPC ──────────────────────────────────────────────────────────────
+from relay_grpc import router as grpc_router
+app.include_router(grpc_router)
+
+# ── HTTP Proxy ────────────────────────────────────────────────────────────────
 _HOP = {"connection","keep-alive","proxy-authenticate","proxy-authorization","te","trailers","transfer-encoding","upgrade","content-encoding","content-length"}
 @app.api_route("/proxy/{target_url:path}", methods=["GET","POST","PUT","DELETE","PATCH","HEAD","OPTIONS"])
 async def http_proxy(target_url: str, request: Request):
@@ -1058,7 +1272,13 @@ async def http_proxy(target_url: str, request: Request):
         error_logs.append({"error": str(exc), "url": target_url, "time": datetime.now().isoformat()})
         raise HTTPException(status_code=502, detail=f"Proxy error: {exc}")
 
-# ===== PUBLIC SUB PAGES =====
+# ── RVG: TCP Proxy with Blacklist ──────────────────────────────────────────
+@app.api_route("/tcp-proxy/{target_url:path}", methods=["GET","POST","PUT","DELETE","PATCH","HEAD","OPTIONS"])
+async def tcp_proxy(target_url: str, request: Request):
+    from relay_tcp_proxy import handle_tcp_proxy
+    return await handle_tcp_proxy(target_url, request, http_client, TCP_PROXY_BLACKLIST, TCP_PROXY_WHITELIST)
+
+# ── Public Sub Pages ──────────────────────────────────────────────────────────
 @app.get("/p/{uuid_key}", response_class=HTMLResponse)
 async def public_sub_page(uuid_key: str, request: Request):
     from public_page import get_public_page_html
@@ -1133,7 +1353,6 @@ async def public_single_sub_data(uuid: str):
             }]
         }
 
-# ===== PAGES =====
 from pages import LOGIN_HTML, DASHBOARD_HTML
 
 @app.get("/login", response_class=HTMLResponse)
