@@ -1,4 +1,7 @@
 # relay_vmess.py
+# VMess over WebSocket (vmess-ws)
+# مسیر: /vmess-ws/{uuid}
+
 import asyncio
 import secrets
 import hashlib
@@ -14,47 +17,48 @@ from relay_vless import _ws_client_ip, check_and_use, RELAY_BUF
 
 router = APIRouter()
 
-
+# ─── توابع VMess ──────────────────────────────────────────────────────────
 def vmess_key_from_uuid(uuid: str) -> bytes:
+    """استخراج کلید 16 بایتی از UUID با استفاده از MD5 (طبق استاندارد VMess)."""
     return hashlib.md5(uuid.encode()).digest()
 
+def vmess_decrypt_header(key: bytes, data: bytes) -> tuple:
+    """
+    رمزگشایی هدر VMess (نسخه 1) با AES-128-CFB.
+    ورودی: کلید 16 بایتی و داده‌های خام (شامل IV 16 بایتی + هدر رمزنگاری‌شده)
+    خروجی: (command, address, port, remaining_payload)
+    """
+    if len(data) < 16:
+        raise ValueError("Header too short for IV")
+    iv = data[:16]
+    cipher = AES.new(key, AES.MODE_CFB, iv=iv, segment_size=128)
+    decrypted = cipher.decrypt(data[16:])
+    if len(decrypted) < 21:
+        raise ValueError("Decrypted header too short")
+    version = decrypted[0]
+    if version != 0x01:
+        raise ValueError(f"Unsupported VMess version: {version}")
+    command = decrypted[17]          # 0x01 = CONNECT
+    port = struct.unpack('>H', decrypted[18:20])[0]
+    addr_type = decrypted[20]
+    pos = 21
+    if addr_type == 1:   # IPv4
+        address = ".".join(str(b) for b in decrypted[pos:pos+4])
+        pos += 4
+    elif addr_type == 2: # domain
+        dlen = decrypted[pos]
+        pos += 1
+        address = decrypted[pos:pos+dlen].decode('utf-8', errors='ignore')
+        pos += dlen
+    elif addr_type == 3: # IPv6
+        ab = decrypted[pos:pos+16]
+        pos += 16
+        address = ":".join(f"{ab[i]:02x}{ab[i+1]:02x}" for i in range(0, 16, 2))
+    else:
+        raise ValueError(f"Unknown address type: {addr_type}")
+    return command, address, port, decrypted[pos:]
 
-def try_vmess_decrypt(key: bytes, data: bytes) -> tuple:
-    """تلاش برای رمزگشایی VMess، در صورت شکست fallback"""
-    try:
-        if len(data) < 16:
-            raise ValueError("too short")
-        iv = data[:16]
-        cipher = AES.new(key, AES.MODE_CFB, iv=iv, segment_size=128)
-        decrypted = cipher.decrypt(data[16:])
-        if len(decrypted) < 21:
-            raise ValueError("decrypted too short")
-        version = decrypted[0]
-        if version != 0x01:
-            raise ValueError(f"unsupported version: {version}")
-        command = decrypted[17]
-        port = struct.unpack('>H', decrypted[18:20])[0]
-        addr_type = decrypted[20]
-        pos = 21
-        if addr_type == 1:
-            address = ".".join(str(b) for b in decrypted[pos:pos+4])
-            pos += 4
-        elif addr_type == 2:
-            dlen = decrypted[pos]
-            pos += 1
-            address = decrypted[pos:pos+dlen].decode('utf-8', errors='ignore')
-            pos += dlen
-        elif addr_type == 3:
-            ab = decrypted[pos:pos+16]
-            pos += 16
-            address = ":".join(f"{ab[i]:02x}{ab[i+1]:02x}" for i in range(0, 16, 2))
-        else:
-            raise ValueError(f"unknown addr type: {addr_type}")
-        return command, address, port, decrypted[pos:]
-    except Exception as e:
-        raise ValueError(f"VMess decrypt failed: {e}")
-
-
+# ─── توابع رله ───────────────────────────────────────────────────────────
 async def relay_ws_to_tcp(ws, writer, conn_id, uuid):
     try:
         while True:
@@ -65,7 +69,7 @@ async def relay_ws_to_tcp(ws, writer, conn_id, uuid):
             if not data:
                 continue
             if not await check_and_use(uuid, len(data)):
-                await ws.close(code=1008, reason="quota/disabled")
+                await ws.close(code=1008, reason="quota/disabled/unknown")
                 break
             stats["total_requests"] += 1
             connections[conn_id]["bytes"] += len(data)
@@ -80,26 +84,27 @@ async def relay_ws_to_tcp(ws, writer, conn_id, uuid):
         except Exception:
             pass
 
-
 async def relay_tcp_to_ws(ws, reader, conn_id, uuid):
+    first = True
     try:
         while True:
             data = await reader.read(RELAY_BUF)
             if not data:
                 break
             if not await check_and_use(uuid, len(data)):
-                await ws.close(code=1008, reason="quota/disabled")
+                await ws.close(code=1008, reason="quota/disabled/unknown")
                 break
             connections[conn_id]["bytes"] += len(data)
-            await ws.send_bytes(data)
+            payload = (b"\x00\x00" + data) if first else data
+            first = False
+            await ws.send_bytes(payload)
     except Exception:
         pass
 
-
-@router.websocket("/CBeeNet-----CBeeNet-----CBeeNet-----CBeeNet-----CBeeNet-----CBeeNet-----CBeeNet-----CBeeNet-----CBeeNet-----CBeeNet/{uuid}")
+# ===== مسیر جدید: /vmess-ws/{uuid} =====
+@router.websocket("/vmess-ws/{uuid}")
 async def vmess_standard_tunnel(ws: WebSocket, uuid: str):
-    # توی Hiddify/Nekoray باید subprotocol رو تنظیم کنی
-    await ws.accept(subprotocol="binary")
+    await ws.accept()
 
     async with LINKS_LOCK:
         link = LINKS.get(uuid)
@@ -120,6 +125,14 @@ async def vmess_standard_tunnel(ws: WebSocket, uuid: str):
         await ws.close(code=1008, reason="timeout")
         return
 
+    key = vmess_key_from_uuid(uuid)
+    try:
+        command, address, port, remaining = vmess_decrypt_header(key, first_chunk)
+    except Exception as e:
+        logger.warning(f"VMess header decryption error: {e}")
+        await ws.close(code=1008, reason="invalid vmess header")
+        return
+
     ip = _ws_client_ip(ws)
     conn_id = secrets.token_urlsafe(6)
     connections[conn_id] = {
@@ -134,19 +147,6 @@ async def vmess_standard_tunnel(ws: WebSocket, uuid: str):
 
     writer = None
     try:
-        key = vmess_key_from_uuid(uuid)
-        
-        # سعی کن هدر رو رمزگشایی کنی
-        try:
-            command, address, port, remaining = try_vmess_decrypt(key, first_chunk)
-            logger.info(f"VMess decrypted: {address}:{port}")
-        except Exception as e:
-            logger.warning(f"VMess decrypt failed: {e}, using fallback")
-            # fallback: به عنوان داده خام به 127.0.0.1:443
-            address = "127.0.0.1"
-            port = 443
-            remaining = first_chunk
-
         if not await check_and_use(uuid, len(first_chunk)):
             await ws.close(code=1008, reason="quota/disabled")
             return
