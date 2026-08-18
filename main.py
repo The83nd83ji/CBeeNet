@@ -44,7 +44,7 @@ DATA_FILE = DATA_DIR / "cbee_state.json"
 SAVE_LOCK = asyncio.Lock()
 
 async def load_state():
-    global LINKS, AUTH, SUBS, GLOBAL_SETTINGS, RESELLERS
+    global LINKS, AUTH, SUBS, GLOBAL_SETTINGS
     try:
         DATA_DIR.mkdir(parents=True, exist_ok=True)
         if DATA_FILE.exists():
@@ -55,7 +55,6 @@ async def load_state():
                     link["protocols"] = [link.pop("protocol")]
             LINKS.update(data.get("links", {}))
             SUBS.update(data.get("subs", {}))
-            RESELLERS.update(data.get("resellers", {}))
             if "global_settings" in data:
                 GLOBAL_SETTINGS.update(data["global_settings"])
             if "password_hash" in data:
@@ -71,7 +70,6 @@ async def save_state():
         data = {
             "links": dict(LINKS),
             "subs": dict(SUBS),
-            "resellers": dict(RESELLERS),
             "global_settings": dict(GLOBAL_SETTINGS),
             "password_hash": AUTH["password_hash"]
         }
@@ -94,23 +92,10 @@ LINKS: dict = {}
 LINKS_LOCK = asyncio.Lock()
 SUBS: dict = {}
 SUBS_LOCK = asyncio.Lock()
-RESELLERS: dict = {}
-RESELLERS_LOCK = asyncio.Lock()
 
-# ====== پروتکل‌های مجاز (افزودن پروتکل‌های RVG) ======
-PROTOCOLS = (
-    "vless-ws",
-    "xhttp-packet-up",
-    "xhttp-stream-up",
-    "xhttp-stream-one",
-    "trojan-ws",
-    "vmess-ws",
-    "shadowsocks-ws",
-    "mtproto-ws"
-)
+PROTOCOLS = ("vless-ws", "xhttp-packet-up", "xhttp-stream-up", "xhttp-stream-one")
 DEFAULT_PROTOCOL = "vless-ws"
 
-# تنظیمات سرور
 GLOBAL_SETTINGS = {
     "ips": [],
     "port": None,
@@ -122,11 +107,6 @@ GLOBAL_SETTINGS = {
         "xhttp-packet-up": {"server_name": "", "link_prefix": "", "link_template": ""},
         "xhttp-stream-up": {"server_name": "", "link_prefix": "", "link_template": ""},
         "xhttp-stream-one": {"server_name": "", "link_prefix": "", "link_template": ""},
-        # ====== پروتکل‌های جدید RVG ======
-        "trojan-ws": {"server_name": "", "link_prefix": "", "link_template": ""},
-        "vmess-ws": {"server_name": "", "link_prefix": "", "link_template": ""},
-        "shadowsocks-ws": {"server_name": "", "link_prefix": "", "link_template": ""},
-        "mtproto-ws": {"server_name": "", "link_prefix": "", "link_template": ""},
     }
 }
 
@@ -180,12 +160,6 @@ async def require_auth(request: Request):
     if not s or s["role"] != "admin":
         raise HTTPException(status_code=401, detail="unauthorized")
     return s["user_id"]
-
-async def require_reseller_auth(request: Request):
-    s = await get_session_data(request.cookies.get(SESSION_COOKIE))
-    if not s or s["role"] not in ["admin", "reseller"]:
-        raise HTTPException(status_code=401, detail="unauthorized")
-    return s
 
 # ── Startup / Shutdown ────────────────────────────────────────────────────────
 @app.on_event("startup")
@@ -250,11 +224,7 @@ def format_link_remark(label: str, protocol: str) -> str:
             "vless-ws": "VLESS-WS",
             "xhttp-packet-up": "XHTTP-packet",
             "xhttp-stream-up": "XHTTP-stream",
-            "xhttp-stream-one": "XHTTP-ultra",
-            "trojan-ws": "Trojan-WS",
-            "vmess-ws": "VMess-WS",
-            "shadowsocks-ws": "SS-WS",
-            "mtproto-ws": "MTProto-WS"
+            "xhttp-stream-one": "XHTTP-ultra"
         }
         proto_name = default_names.get(protocol, protocol)
         result = result.replace("{protocol}", proto_name)
@@ -262,62 +232,6 @@ def format_link_remark(label: str, protocol: str) -> str:
     return result
 
 def _format_uri(uuid: str, ip: str, port: int, remark: str, protocol: str, original_host: str) -> str:
-    # ====== پروتکل‌های جدید ======
-    if protocol == "trojan-ws":
-        # لینک استاندارد Trojan
-        # ساختار: trojan://password@ip:port?peer=host&sni=host#remark
-        # پسورد ثابت CBeeNet (مطابق relay_trojan.py)
-        password = "CBeeNet"
-        params = {
-            "peer": original_host,
-            "sni": original_host,
-            "fp": "chrome",
-            "type": "ws",
-            "host": original_host,
-            "path": f"/CBeeNet-----CBeeNet-----CBeeNet-----CBeeNet-----CBeeNet-----CBeeNet-----CBeeNet-----CBeeNet-----CBeeNet-----CBeeNet/{uuid}"
-        }
-        query = "&".join(f"{k}={quote(str(v))}" for k, v in params.items())
-        return f"trojan://{password}@{ip}:{port}?{query}#{quote(remark)}"
-
-    if protocol == "vmess-ws":
-        # لینک استاندارد VMess (با payload base64)
-        # ساختار: vmess://base64(json)
-        import json as jsonlib
-        payload = {
-            "v": "2",
-            "ps": remark,
-            "add": ip,
-            "port": str(port),
-            "id": uuid,
-            "aid": "0",
-            "net": "ws",
-            "type": "none",
-            "host": original_host,
-            "path": f"/CBeeNet-----CBeeNet-----CBeeNet-----CBeeNet-----CBeeNet-----CBeeNet-----CBeeNet-----CBeeNet-----CBeeNet-----CBeeNet/{uuid}",
-            "tls": "tls",
-            "sni": original_host,
-            "fp": "chrome"
-        }
-        b64 = base64.b64encode(jsonlib.dumps(payload).encode()).decode()
-        return f"vmess://{b64}"
-
-    if protocol == "shadowsocks-ws":
-        # لینک استاندارد Shadowsocks (ss://base64(method:password)@ip:port?plugin=...)
-        method = "aes-256-gcm"
-        password = secrets.token_urlsafe(16)  # رمز تصادفی برای هر لینک
-        import base64 as b64
-        userinfo = f"{method}:{password}"
-        b64_user = b64.b64encode(userinfo.encode()).decode().rstrip("=")
-        plugin = f"v2ray-plugin;host={original_host};path=/CBeeNet-----CBeeNet-----CBeeNet-----CBeeNet-----CBeeNet-----CBeeNet-----CBeeNet-----CBeeNet-----CBeeNet-----CBeeNet/{uuid};tls"
-        return f"ss://{b64_user}@{ip}:{port}?plugin={quote(plugin)}#{quote(remark)}"
-
-    if protocol == "mtproto-ws":
-        # لینک MTProto (tg://) – برای تلگرام
-        # ساختار: tg://proxy?server=ip&port=port&secret=...&type=mtproto
-        secret = secrets.token_hex(16)  # رمز تصادفی
-        return f"tg://proxy?server={ip}&port={port}&secret={secret}&type=mtproto"
-
-    # ====== پروتکل‌های موجود ======
     if protocol == "vless-ws":
         path = f"/ws/{uuid}"
         params = {
@@ -342,25 +256,45 @@ def _format_uri(uuid: str, ip: str, port: int, remark: str, protocol: str, origi
 def generate_links(link_data: dict, uuid: str, host: str) -> list[str]:
     links = []
     protocols = link_data.get("protocols", [DEFAULT_PROTOCOL])
-    is_personal = link_data.get("is_personal", False)
-    
+    # سرورهای واقعی (IPهای موجود در کانفیگ یا global)
     ips = link_data.get("ips") or []
-    if not is_personal and GLOBAL_SETTINGS.get("ips"):
+    if not ips and GLOBAL_SETTINGS.get("ips"):
         ips = GLOBAL_SETTINGS["ips"]
     if not ips:
         ips = [host]
         
     port = link_data.get("port")
-    if not is_personal and GLOBAL_SETTINGS.get("port"):
+    if not port and GLOBAL_SETTINGS.get("port"):
         port = GLOBAL_SETTINGS["port"]
     if not port:
         port = 443
 
     label = link_data['label']
+
+    # لینک‌های سرورهای واقعی
     for ip in ips:
         for proto in protocols:
             remark = format_link_remark(label, proto)
             links.append(_format_uri(uuid, ip, port, remark, proto, host))
+
+    # ════════ سرور مجازی 0.0.0.0:443 با برچسب مخصوص ════════
+    # محاسبه حجم باقی‌مانده
+    limit_bytes = link_data.get("limit_bytes", 0)
+    used_bytes = link_data.get("used_bytes", 0)
+    remain = limit_bytes - used_bytes
+    if remain < 0:
+        remain = 0
+    if limit_bytes == 0:
+        remain_str = "∞"
+    else:
+        remain_gb = remain / (1024 ** 3)  # تبدیل به گیگابایت
+        remain_str = f"{remain_gb:.2f} GB"  # دو رقم اعشار
+
+    virtual_remark = f"⏳️ 𓏺 [{remain_str}]"
+    for proto in protocols:
+        # از همان uuid و host اصلی استفاده می‌کنیم، ip=0.0.0.0 و port=443
+        links.append(_format_uri(uuid, "0.0.0.0", 443, virtual_remark, proto, host))
+
     return links
 
 def uptime() -> str:
@@ -420,22 +354,6 @@ async def ensure_default_link():
                 }
     asyncio.create_task(save_state())
     _default_link_created = True
-
-# ── Reseller Capacity ─────────────────────────────────────────────────────────
-async def check_reseller_capacity(reseller_id: str, new_limit_bytes: int):
-    if new_limit_bytes == 0:
-        raise HTTPException(status_code=400, detail="Reseller cannot create unlimited config.")
-    async with RESELLERS_LOCK:
-        res = RESELLERS.get(reseller_id)
-        if not res or not res.get("active", True):
-            raise HTTPException(status_code=403, detail="Reseller account is inactive")
-        allocated = 0
-        async with LINKS_LOCK:
-            for d in LINKS.values():
-                if d.get("creator_id") == reseller_id:
-                    allocated += d.get("limit_bytes", 0)
-        if allocated + new_limit_bytes > res.get("total_bytes", 0):
-            raise HTTPException(status_code=400, detail="Reseller quota exceeded.")
 
 # ── Basic endpoints ───────────────────────────────────────────────────────────
 @app.get("/")
@@ -600,15 +518,6 @@ async def api_login(request: Request):
         resp.set_cookie(SESSION_COOKIE, token, max_age=SESSION_TTL, httponly=True, samesite="lax", path="/")
         return resp
     
-    async with RESELLERS_LOCK:
-        for rid, res in RESELLERS.items():
-            if res.get("active", True) and res.get("password_hash") == hash_password(pw):
-                token = await create_session("reseller", rid)
-                log_activity("auth", f"Reseller {res['name']} login from {ip}", "ok")
-                resp = JSONResponse({"ok": True, "role": "reseller"})
-                resp.set_cookie(SESSION_COOKIE, token, max_age=SESSION_TTL, httponly=True, samesite="lax", path="/")
-                return resp
-    
     log_activity("auth", f"Failed login attempt from {ip}", "err")
     raise HTTPException(status_code=401, detail="Wrong password")
 
@@ -703,7 +612,6 @@ async def get_stats(_=Depends(require_auth)):
         "hourly": dict(hourly_traffic), "recent_errors": list(error_logs)[-10:],
         "links_count": len(snap), "active_links": sum(1 for l in snap.values() if is_link_allowed(l)),
         "expired_links": sum(1 for l in snap.values() if is_link_expired(l)), "subs_count": len(SUBS),
-        "resellers_count": len(RESELLERS),
     }
 
 @app.get("/api/activity")
@@ -740,7 +648,7 @@ async def get_connections(_=Depends(require_auth)):
 # ── Link Management ───────────────────────────────────────────────────────────
 @app.post("/api/links")
 async def create_link(request: Request):
-    s = await require_reseller_auth(request)
+    s = await require_auth(request)  # فقط ادمین
     body = await request.json()
     
     label = (body.get("label") or "New Link").strip()[:60]
@@ -752,7 +660,6 @@ async def create_link(request: Request):
     note = (body.get("note") or "").strip()[:200]
     ips = [ip.strip() for ip in body.get("ips", []) if ip.strip()]
     port = int(body.get("port")) if body.get("port") else None
-    is_personal = bool(body.get("is_personal", False))
     sub_id = body.get("sub_id")
     
     protocols = body.get("protocols")
@@ -762,10 +669,6 @@ async def create_link(request: Request):
     protocols = [p for p in protocols if p in PROTOCOLS]
     if not protocols:
         protocols = [DEFAULT_PROTOCOL]
-
-    if s["role"] == "reseller":
-        await check_reseller_capacity(s["user_id"], limit_bytes)
-        is_personal = True
 
     flag = ""
     if ips: flag = await fetch_ip_flag(ips[0])
@@ -778,7 +681,7 @@ async def create_link(request: Request):
             "created_at": datetime.now().isoformat(), "active": True,
             "expires_at": expires_at, "note": note, "is_default": False,
             "sub_id": sub_id, "protocols": protocols, "ips": ips, "port": port,
-            "is_personal": is_personal, "creator_id": s["user_id"]
+            "is_personal": False  # دیگر استفاده نمی‌شود
         }
         if sub_id:
             async with SUBS_LOCK:
@@ -786,7 +689,7 @@ async def create_link(request: Request):
                     ids = SUBS[sub_id].setdefault("link_ids", [])
                     if uid not in ids: ids.append(uid)
     asyncio.create_task(save_state())
-    log_activity("link", f"Link '{label}' created by {s['user_id']}", "ok")
+    log_activity("link", f"Link '{label}' created", "ok")
     host = get_host()
     vless_list = generate_links(LINKS[uid], uid, host)
     return {"uuid": uid, **LINKS[uid], "vless_link": "\n".join(vless_list),
@@ -794,7 +697,7 @@ async def create_link(request: Request):
 
 @app.post("/api/links/bulk")
 async def create_links_bulk(request: Request):
-    s = await require_reseller_auth(request)
+    s = await require_auth(request)  # فقط ادمین
     body = await request.json()
     
     try:
@@ -811,7 +714,6 @@ async def create_links_bulk(request: Request):
     expires_at = (datetime.now() + timedelta(days=exp_days)).isoformat() if exp_days > 0 else None
     ips = [ip.strip() for ip in body.get("ips", []) if ip.strip()]
     port = int(body.get("port")) if body.get("port") else None
-    is_personal = bool(body.get("is_personal", False))
     sub_id = body.get("sub_id")
     
     protocols = body.get("protocols")
@@ -821,10 +723,6 @@ async def create_links_bulk(request: Request):
     protocols = [p for p in protocols if p in PROTOCOLS]
     if not protocols:
         protocols = [DEFAULT_PROTOCOL]
-
-    if s["role"] == "reseller":
-        await check_reseller_capacity(s["user_id"], limit_bytes * count)
-        is_personal = True
 
     ip_flags = {}
     for ip in ips:
@@ -855,7 +753,7 @@ async def create_links_bulk(request: Request):
                 "expires_at": expires_at, "note": "", "is_default": False,
                 "sub_id": sub_id, "protocols": protocols,
                 "ips": [target_ip] if target_ip else [],
-                "port": port, "is_personal": is_personal, "creator_id": s["user_id"]
+                "port": port, "is_personal": False
             }
             LINKS[uid] = link_data
             created_uids.append(uid)
@@ -883,12 +781,11 @@ async def create_links_bulk(request: Request):
 
 @app.get("/api/links")
 async def list_links(request: Request):
-    s = await require_reseller_auth(request)
+    s = await require_auth(request)  # فقط ادمین
     host = get_host()
     async with LINKS_LOCK:
         result = []
         for uid, d in LINKS.items():
-            if s["role"] == "reseller" and d.get("creator_id") != s["user_id"]: continue
             vless_list = generate_links(d, uid, host)
             result.append({"uuid": uid, **d, "expired": is_link_expired(d),
                 "vless_link": "\n".join(vless_list), "sub_url": f"https://{host}/sub/{uid}"})
@@ -897,13 +794,11 @@ async def list_links(request: Request):
 
 @app.patch("/api/links/{uid}")
 async def update_link(uid: str, request: Request):
-    s = await require_reseller_auth(request)
+    s = await require_auth(request)  # فقط ادمین
     body = await request.json()
     async with LINKS_LOCK:
         if uid not in LINKS: raise HTTPException(status_code=404, detail="link not found")
         link = LINKS[uid]
-        if s["role"] == "reseller" and link.get("creator_id") != s["user_id"]:
-            raise HTTPException(status_code=403, detail="forbidden")
         if "active" in body: link["active"] = bool(body["active"])
         if "label" in body: link["label"] = str(body["label"])[:60]
         if "note" in body: link["note"] = str(body["note"])[:200]
@@ -924,11 +819,9 @@ async def update_link(uid: str, request: Request):
 
 @app.delete("/api/links/{uid}")
 async def delete_link(uid: str, request: Request):
-    s = await require_reseller_auth(request)
+    s = await require_auth(request)  # فقط ادمین
     async with LINKS_LOCK:
         if uid not in LINKS: raise HTTPException(status_code=404, detail="not found")
-        if s["role"] == "reseller" and LINKS[uid].get("creator_id") != s["user_id"]:
-            raise HTTPException(status_code=403, detail="forbidden")
         sub_id = LINKS[uid].get("sub_id")
         del LINKS[uid]
         if sub_id:
@@ -940,108 +833,6 @@ async def delete_link(uid: str, request: Request):
     log_activity("link", f"Link {uid[:8]}... deleted", "err")
     return {"ok": True, "deleted": uid}
 
-# ── Reset Reseller Token ──────────────────────────────────────────────────────
-@app.post("/api/resellers/{rid}/reset-token")
-async def reset_reseller_token(rid: str, _=Depends(require_auth)):
-    async with RESELLERS_LOCK:
-        if rid not in RESELLERS: raise HTTPException(404, "not found")
-        RESELLERS[rid]["login_token"] = secrets.token_urlsafe(16)
-    asyncio.create_task(save_state())
-    return {"ok": True, "login_token": RESELLERS[rid]["login_token"]}
-
-# ── Reseller Management (Admin Only) ──────────────────────────────────────────
-@app.get("/api/resellers")
-async def list_resellers(_=Depends(require_auth)):
-    host = get_host()
-    async with RESELLERS_LOCK: snap_r = dict(RESELLERS)
-    async with LINKS_LOCK: snap_l = dict(LINKS)
-    result = []
-    for rid, r in snap_r.items():
-        links_cnt = sum(1 for l in snap_l.values() if l.get("creator_id") == rid)
-        allocated = sum(l.get("limit_bytes", 0) for l in snap_l.values() if l.get("creator_id") == rid)
-        traffic = sum(l.get("used_bytes", 0) for l in snap_l.values() if l.get("creator_id") == rid)
-        result.append({
-            "id": rid, "name": r["name"], "active": r.get("active", True),
-            "total_bytes": r.get("total_bytes", 0), "total_fmt": fmt_bytes(r.get("total_bytes", 0)),
-            "allocated_bytes": allocated, "allocated_fmt": fmt_bytes(allocated),
-            "traffic_used": traffic, "traffic_fmt": fmt_bytes(traffic),
-            "remaining_bytes": max(0, r.get("total_bytes", 0) - allocated),
-            "remaining_fmt": fmt_bytes(max(0, r.get("total_bytes", 0) - allocated)),
-            "created_at": r.get("created_at"), "links_count": links_cnt,
-            "login_link": f"https://{host}/r/{r.get('login_token', '')}"
-        })
-    return {"resellers": result}
-
-@app.post("/api/resellers")
-async def create_reseller(request: Request, _=Depends(require_auth)):
-    body = await request.json()
-    name = str(body.get("name", "")).strip()
-    pw = str(body.get("password", "")).strip()
-    limit_gb = float(body.get("limit_gb") or 0)
-    if not name or not pw: raise HTTPException(400, "Name and password are required")
-    if limit_gb <= 0: raise HTTPException(400, "Limit must be greater than 0")
-    rid = secrets.token_hex(8)
-    async with RESELLERS_LOCK:
-        RESELLERS[rid] = {
-            "name": name, "password_hash": hash_password(pw),
-            "total_bytes": parse_size_to_bytes(limit_gb, "GB"),
-            "active": True, 
-            "login_token": secrets.token_urlsafe(16),
-            "created_at": datetime.now().isoformat()
-        }
-    asyncio.create_task(save_state())
-    log_activity("system", f"Reseller '{name}' created with {limit_gb}GB", "ok")
-    return {"ok": True, "id": rid, "name": name, "limit_gb": limit_gb}
-
-@app.patch("/api/resellers/{rid}")
-async def update_reseller(rid: str, request: Request, _=Depends(require_auth)):
-    body = await request.json()
-    async with RESELLERS_LOCK:
-        if rid not in RESELLERS: raise HTTPException(404, "Reseller not found")
-        r = RESELLERS[rid]
-        if "name" in body and str(body["name"]).strip():
-            r["name"] = str(body["name"]).strip()
-        if "active" in body:
-            r["active"] = bool(body["active"])
-            log_activity("system", f"Reseller '{r['name']}' {'activated' if r['active'] else 'deactivated'}", "info")
-        if "limit_gb" in body:
-            r["total_bytes"] = parse_size_to_bytes(float(body["limit_gb"]), "GB")
-            log_activity("system", f"Reseller '{r['name']}' limit changed to {body['limit_gb']}GB", "info")
-        if "password" in body and str(body["password"]).strip():
-            r["password_hash"] = hash_password(str(body["password"]).strip())
-            log_activity("system", f"Reseller '{r['name']}' password changed", "info")
-    asyncio.create_task(save_state())
-    return {"ok": True}
-
-@app.delete("/api/resellers/{rid}")
-async def delete_reseller(rid: str, _=Depends(require_auth)):
-    async with RESELLERS_LOCK:
-        if rid not in RESELLERS: raise HTTPException(404)
-        del RESELLERS[rid]
-    asyncio.create_task(save_state())
-    log_activity("system", f"Reseller {rid[:8]}... deleted", "warn")
-    return {"ok": True, "deleted": rid}
-
-# ── Reseller Report (Admin) ───────────────────────────────────────────────────
-@app.get("/api/resellers/{rid}/links")
-async def reseller_links(rid: str, _=Depends(require_auth)):
-    async with LINKS_LOCK:
-        result = [{"uuid": uid, **d} for uid, d in LINKS.items() if d.get("creator_id") == rid]
-    return {"links": result}
-
-# ── Reseller Token Login ──────────────────────────────────────────────────────
-@app.get("/r/{login_token}")
-async def reseller_token_login(login_token: str):
-    async with RESELLERS_LOCK:
-        for rid, res in RESELLERS.items():
-            if res.get("login_token") == login_token and res.get("active", True):
-                token = await create_session("reseller", rid)
-                log_activity("auth", f"Reseller {res['name']} logged in via token", "ok")
-                resp = RedirectResponse(url="/CFOX")
-                resp.set_cookie(SESSION_COOKIE, token, max_age=SESSION_TTL, httponly=True, samesite="lax", path="/")
-                return resp
-    return HTMLResponse("<h2 style='padding:40px;font-family:sans-serif'>Invalid link</h2>", status_code=404)
-
 # ── VLESS Relay ───────────────────────────────────────────────────────────────
 from relay_vless import RELAY_BUF, parse_vless_header, check_and_use, relay_ws_to_tcp, relay_tcp_to_ws, websocket_tunnel
 app.add_api_websocket_route("/ws/{uuid}", websocket_tunnel)
@@ -1050,22 +841,9 @@ app.add_api_websocket_route("/ws/{uuid}", websocket_tunnel)
 from xhttp_siz10 import router as xhttp_router
 app.include_router(xhttp_router)
 
-# ====== پروتکل‌های جدید RVG ======
-# Trojan
+# ── Trojan Relay ─────────────────────────────────────────────────────────────
 from relay_trojan import router as trojan_router
-app.include_router(trojan_router)
-
-# VMess
-from relay_vmess import router as vmess_router
-app.include_router(vmess_router)
-
-# Shadowsocks
-from relay_shadowsocks import router as shadowsocks_router
-app.include_router(shadowsocks_router)
-
-# MTProto
-from relay_mtproto import router as mtproto_router
-app.include_router(mtproto_router)
+app.include_router(trojan_router)   # مسیرهای Trojan در همان فایل تعریف شده‌اند
 
 # ── HTTP Proxy ────────────────────────────────────────────────────────────────
 _HOP = {"connection","keep-alive","proxy-authenticate","proxy-authorization","te","trailers","transfer-encoding","upgrade","content-encoding","content-length"}
