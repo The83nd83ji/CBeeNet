@@ -13,19 +13,27 @@ router = APIRouter()
 TROJAN_EXPECTED_PASSWORD = "CBeeNet"
 
 async def parse_trojan_header_full(chunk: bytes):
+    # اگر اولین بایت نسخه استاندارد نبود (57 یا غیره)، آن را به‌عنوان یک payload ساده در نظر بگیر
     if len(chunk) < 57 + 1 + 2 + 1:
-        raise ValueError("chunk too small")
+        # داده‌ها برای هدر تروجان کافی نیست، پس فرض می‌کنیم کل payload است
+        return None, None, None, 0, chunk  # command, password, address, port, payload
+
     version = chunk[0]
     if version != 0x01:
-        raise ValueError(f"unsupported version: {version}")
+        # نسخه ناشناخته، کل payload را به‌عنوان داده به مقصد می‌فرستیم
+        return None, None, None, 0, chunk
+
+    # استخراج پسورد (۵۶ بایت با padding \x00)
     password_bytes = chunk[1:57]
     password = password_bytes.split(b'\x00')[0].decode('utf-8', errors='ignore')
     if not password:
-        raise ValueError("empty password")
+        return None, None, None, 0, chunk
+
     pos = 57
     command = chunk[pos]; pos += 1
     port = int.from_bytes(chunk[pos:pos+2], "big"); pos += 2
     addr_type = chunk[pos]; pos += 1
+
     if addr_type == 1:
         address = ".".join(str(b) for b in chunk[pos:pos+4]); pos += 4
     elif addr_type == 2:
@@ -35,7 +43,8 @@ async def parse_trojan_header_full(chunk: bytes):
         ab = chunk[pos:pos+16]; pos += 16
         address = ":".join(f"{ab[i]:02x}{ab[i+1]:02x}" for i in range(0, 16, 2))
     else:
-        raise ValueError(f"unknown addr type: {addr_type}")
+        return None, None, None, 0, chunk
+
     return command, password, address, port, chunk[pos:]
 
 async def relay_ws_to_tcp(ws, writer, conn_id, uuid):
@@ -103,15 +112,25 @@ async def trojan_tunnel(ws: WebSocket, uuid: str):
         await ws.close(code=1008, reason="timeout")
         return
 
-    try:
-        command, password, address, port, payload = await parse_trojan_header_full(first_chunk)
-        if password != TROJAN_EXPECTED_PASSWORD:
-            logger.warning(f"Trojan invalid password: expected {TROJAN_EXPECTED_PASSWORD}, got {password}")
-            await ws.close(code=1008, reason="invalid password")
-            return
-    except Exception as e:
-        logger.warning(f"Trojan parse error: {e}")
+    # Parse هدر تروجان
+    command, password, address, port, payload = await parse_trojan_header_full(first_chunk)
+
+    # اگر هدر معتبر نبود (address None است)، از UUID مسیر استفاده کن و payload را به‌عنوان داده بفرست
+    if address is None:
+        # حالت fallback: کلاینت فقط WebSocket باز کرده بدون هدر تروجان
+        # از uuid مسیر استفاده می‌کنیم و payload را به مقصد می‌فرستیم
+        # برای این حالت، باید آدرس و پورت را از payload استخراج کنیم (مثل VLESS) یا از کلاینت بخواهیم
+        # اما ساده‌ترین راه: از یک آدرس پیش‌فرض استفاده نکنیم، بلکه بگوییم کلاینت باید هدر بفرستد
+        # در اینجا ما از همان UUID استفاده می‌کنیم و payload را به‌عنوان داده به مقصد می‌فرستیم،
+        # اما آدرس و پورت را نمی‌دانیم. بنابراین این حالت پشتیبانی نمی‌شود و باید کلاینت اصلاح شود.
+        logger.warning(f"Trojan: invalid header, closing connection for {uuid[:8]}")
         await ws.close(code=1008, reason="invalid trojan header")
+        return
+
+    # بررسی پسورد (اگر هدر معتبر بود)
+    if password != TROJAN_EXPECTED_PASSWORD:
+        logger.warning(f"Trojan invalid password: expected {TROJAN_EXPECTED_PASSWORD}, got {password}")
+        await ws.close(code=1008, reason="invalid password")
         return
 
     ip = _ws_client_ip(ws)
