@@ -93,7 +93,7 @@ LINKS_LOCK = asyncio.Lock()
 SUBS: dict = {}
 SUBS_LOCK = asyncio.Lock()
 
-# ─── پروتکل‌های مجاز (افزودن Trojan) ───
+# ─── پروتکل‌های مجاز ───
 PROTOCOLS = ("vless-ws", "xhttp-packet-up", "xhttp-stream-up", "trojan-ws")
 DEFAULT_PROTOCOL = "vless-ws"
 
@@ -247,12 +247,11 @@ def _format_uri(uuid: str, ip: str, port: int, remark: str, protocol: str, origi
         password = "CBeeNet"
         path = f"/CBeeNet-----CBeeNet-----CBeeNet-----CBeeNet-----CBeeNet-----CBeeNet-----CBeeNet-----CBeeNet-----CBeeNet-----CBeeNet/{uuid}"
         params = {
-            "allowInsecure": "1",
-            "sni": original_host,
-            "fp": "chrome",
+            "security": "tls",
             "type": "ws",
             "path": path,
-            "security": "tls"
+            "sni": original_host,
+            "fp": "chrome"
         }
         query = "&".join(f"{k}={quote(str(v))}" for k, v in params.items())
         return f"trojan://{password}@{ip}:{port}?{query}#{quote(remark)}"
@@ -855,7 +854,7 @@ app.add_api_websocket_route("/ws/{uuid}", websocket_tunnel)
 from xhttp_siz10 import router as xhttp_router
 app.include_router(xhttp_router)
 
-# ── Trojan Relay ─────────────────────────────────────────────────────────────
+# ── Trojan Relay (دقیقاً مثل RVG) ──────────────────────────────────────────
 from relay_trojan import router as trojan_router
 app.include_router(trojan_router)
 
