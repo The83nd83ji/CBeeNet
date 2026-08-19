@@ -38,7 +38,6 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# ── Persistence ───────────────────────────────────────────────────────────────
 DATA_DIR = Path(os.environ.get("DATA_DIR", "/app/data"))
 DATA_FILE = DATA_DIR / "cbee_state.json"
 SAVE_LOCK = asyncio.Lock()
@@ -80,7 +79,6 @@ async def save_state():
     except Exception as e:
         logger.error(f"Error saving state: {e}")
 
-# ── In-memory state ───────────────────────────────────────────────────────────
 connections: dict = {}
 stats = {"total_bytes": 0, "total_requests": 0, "total_errors": 0, "start_time": time.time()}
 error_logs: deque = deque(maxlen=50)
@@ -93,7 +91,6 @@ LINKS_LOCK = asyncio.Lock()
 SUBS: dict = {}
 SUBS_LOCK = asyncio.Lock()
 
-# ─── پروتکل‌های مجاز ───
 PROTOCOLS = ("vless-ws", "xhttp-packet-up", "xhttp-stream-up", "trojan-ws")
 DEFAULT_PROTOCOL = "vless-ws"
 
@@ -119,7 +116,6 @@ def log_activity(kind: str, message: str, level: str = "info"):
         "time": datetime.now().isoformat(),
     })
 
-# ── Auth ──────────────────────────────────────────────────────────────────────
 SESSION_COOKIE = "cbee_session"
 SESSION_TTL = 60 * 60 * 24 * 7
 
@@ -162,7 +158,6 @@ async def require_auth(request: Request):
         raise HTTPException(status_code=401, detail="unauthorized")
     return s["user_id"]
 
-# ── Startup / Shutdown ────────────────────────────────────────────────────────
 @app.on_event("startup")
 async def startup():
     global http_client
@@ -179,7 +174,6 @@ async def shutdown():
     if http_client:
         await http_client.aclose()
 
-# ── Helpers ───────────────────────────────────────────────────────────────────
 def get_host() -> str:
     return os.environ.get("RAILWAY_PUBLIC_DOMAIN", CONFIG["host"])
 
@@ -256,7 +250,6 @@ def _format_uri(uuid: str, ip: str, port: int, remark: str, protocol: str, origi
         query = "&".join(f"{k}={quote(str(v))}" for k, v in params.items())
         return f"trojan://{password}@{ip}:{port}?{query}#{quote(remark)}"
 
-    # XHTTP protocols
     mode = protocol.replace("xhttp-", "")
     path = f"/xhttp-siz10/{mode}/{uuid}"
     params = {
@@ -270,7 +263,6 @@ def _format_uri(uuid: str, ip: str, port: int, remark: str, protocol: str, origi
 def generate_links(link_data: dict, uuid: str, host: str) -> list[str]:
     links = []
     protocols = link_data.get("protocols", [DEFAULT_PROTOCOL])
-    # سرورهای واقعی (IPهای موجود در کانفیگ یا global)
     ips = link_data.get("ips") or []
     if not ips and GLOBAL_SETTINGS.get("ips"):
         ips = GLOBAL_SETTINGS["ips"]
@@ -285,13 +277,11 @@ def generate_links(link_data: dict, uuid: str, host: str) -> list[str]:
 
     label = link_data['label']
 
-    # ─── لینک‌های سرورهای واقعی (برای هر پروتکل و هر IP) ───
     for ip in ips:
         for proto in protocols:
             remark = format_link_remark(label, proto)
             links.append(_format_uri(uuid, ip, port, remark, proto, host))
 
-    # ─── سرور مجازی (فقط یک خط، با اولین پروتکل موجود) ───
     limit_bytes = link_data.get("limit_bytes", 0)
     used_bytes = link_data.get("used_bytes", 0)
     remain = limit_bytes - used_bytes
@@ -349,7 +339,6 @@ def client_ip(request: Request) -> str:
     if real_ip: return real_ip.strip()
     return request.client.host if request.client else "unknown"
 
-# ── Default link ──────────────────────────────────────────────────────────────
 _default_link_created = False
 async def ensure_default_link():
     global _default_link_created
@@ -368,7 +357,6 @@ async def ensure_default_link():
     asyncio.create_task(save_state())
     _default_link_created = True
 
-# ── Basic endpoints ───────────────────────────────────────────────────────────
 @app.get("/")
 async def root():
     return {"service": "CBeeNet Gateway", "version": "1.0.0", "status": "active", "channel": "https://t.me/CBeeNet"}
@@ -377,7 +365,6 @@ async def root():
 async def health():
     return {"status": "ok", "connections": len(connections), "uptime": uptime()}
 
-# ── Subscriptions ─────────────────────────────────────────────────────────────
 @app.get("/sub/{uuid}")
 async def subscription_single(uuid: str, request: Request):
     async with LINKS_LOCK:
@@ -433,7 +420,6 @@ async def sub_group_subscription(uuid_key: str, request: Request):
     return Response(content=content, media_type="text/plain",
         headers={"profile-title": quote(sub["name"]), "support-url": "https://t.me/CBeeNet", "profile-update-interval": "12"})
 
-# ── Sub Groups (Admin) ────────────────────────────────────────────────────────
 @app.post("/api/subs")
 async def create_sub(request: Request, _=Depends(require_auth)):
     body = await request.json()
@@ -517,7 +503,6 @@ async def assign_link_to_sub(sub_id: str, request: Request, _=Depends(require_au
     asyncio.create_task(save_state())
     return {"ok": True}
 
-# ── Auth ──────────────────────────────────────────────────────────────────────
 @app.post("/api/login")
 async def api_login(request: Request):
     body = await request.json()
@@ -561,7 +546,6 @@ async def api_change_password(request: Request, token=Depends(require_auth)):
     log_activity("auth", "Panel password changed", "ok")
     return {"ok": True}
 
-# ── Global IP Settings ────────────────────────────────────────────────────────
 @app.get("/api/settings/global-ips")
 async def get_global_ips(_=Depends(require_auth)):
     return GLOBAL_SETTINGS
@@ -575,7 +559,6 @@ async def update_global_ips(request: Request, _=Depends(require_auth)):
     log_activity("system", "Global IP/port settings updated", "info")
     return {"ok": True, "settings": dict(GLOBAL_SETTINGS)}
 
-# ── Server Settings (default + protocol configs) ────────────────────────────
 @app.get("/api/settings/server")
 async def get_server_settings(_=Depends(require_auth)):
     return {
@@ -614,7 +597,6 @@ async def update_protocol_settings(request: Request, _=Depends(require_auth)):
     log_activity("system", "Protocol settings updated", "info")
     return {"ok": True, "settings": GLOBAL_SETTINGS["protocol_configs"]}
 
-# ── Stats ─────────────────────────────────────────────────────────────────────
 @app.get("/stats")
 async def get_stats(_=Depends(require_auth)):
     async with LINKS_LOCK: snap = dict(LINKS)
@@ -658,7 +640,6 @@ async def get_connections(_=Depends(require_auth)):
     result.sort(key=lambda x: x.get("last_connected_at") or "", reverse=True)
     return {"connections": result, "count": len(result), "raw_count": len(connections)}
 
-# ── Link Management ───────────────────────────────────────────────────────────
 @app.post("/api/links")
 async def create_link(request: Request):
     s = await require_auth(request)
@@ -846,19 +827,15 @@ async def delete_link(uid: str, request: Request):
     log_activity("link", f"Link {uid[:8]}... deleted", "err")
     return {"ok": True, "deleted": uid}
 
-# ── VLESS Relay ───────────────────────────────────────────────────────────────
 from relay_vless import RELAY_BUF, parse_vless_header, check_and_use, relay_ws_to_tcp, relay_tcp_to_ws, websocket_tunnel
 app.add_api_websocket_route("/ws/{uuid}", websocket_tunnel)
 
-# ── XHTTP ─────────────────────────────────────────────────────────────────────
 from xhttp_siz10 import router as xhttp_router
 app.include_router(xhttp_router)
 
-# ── Trojan Relay (دقیقاً مثل RVG) ──────────────────────────────────────────
 from relay_trojan import router as trojan_router
 app.include_router(trojan_router)
 
-# ── HTTP Proxy ────────────────────────────────────────────────────────────────
 _HOP = {"connection","keep-alive","proxy-authenticate","proxy-authorization","te","trailers","transfer-encoding","upgrade","content-encoding","content-length"}
 @app.api_route("/proxy/{target_url:path}", methods=["GET","POST","PUT","DELETE","PATCH","HEAD","OPTIONS"])
 async def http_proxy(target_url: str, request: Request):
@@ -877,7 +854,6 @@ async def http_proxy(target_url: str, request: Request):
         error_logs.append({"error": str(exc), "url": target_url, "time": datetime.now().isoformat()})
         raise HTTPException(status_code=502, detail=f"Proxy error: {exc}")
 
-# ── Public Sub Page ───────────────────────────────────────────────────────────
 @app.get("/p/{uuid_key}", response_class=HTMLResponse)
 async def public_sub_page(uuid_key: str, request: Request):
     from public_page import get_public_page_html
