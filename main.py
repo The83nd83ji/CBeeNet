@@ -247,7 +247,8 @@ def _format_uri(uuid: str, ip: str, port: int, remark: str, protocol: str, origi
         password = "CBeeNet"
         path = f"/CBeeNet-----CBeeNet-----CBeeNet-----CBeeNet-----CBeeNet-----CBeeNet-----CBeeNet-----CBeeNet-----CBeeNet-----CBeeNet/{uuid}"
         params = {
-            "allowInsecure": "1",
+            "security": "tls",
+            "alpn": "http/1.1",
             "sni": original_host,
             "fp": "chrome",
             "type": "ws",
