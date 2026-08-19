@@ -251,8 +251,7 @@ def _format_uri(uuid: str, ip: str, port: int, remark: str, protocol: str, origi
             "sni": original_host,
             "fp": "chrome",
             "type": "ws",
-            "path": path,
-            "security": "tls"
+            "path": path
         }
         query = "&".join(f"{k}={quote(str(v))}" for k, v in params.items())
         return f"trojan://{password}@{ip}:{port}?{query}#{quote(remark)}"
