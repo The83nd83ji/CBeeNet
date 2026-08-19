@@ -10,33 +10,56 @@ from main import (
 from relay_vless import _ws_client_ip, check_and_use, RELAY_BUF
 
 router = APIRouter()
-TROJAN_EXPECTED_PASSWORD = "CBeeNet"
 
-async def parse_trojan_header_full(chunk: bytes):
-    if len(chunk) < 57 + 1 + 2 + 1:
-        raise ValueError("chunk too small for Trojan header")
+
+async def parse_trojan_header(chunk: bytes):
+    """پشتیبانی از ورژن‌های ۱ (استاندارد) و ۵۷ (بعضی کلاینت‌ها)"""
+    if len(chunk) < 60:
+        raise ValueError(f"header too short: {len(chunk)} bytes")
+    
     version = chunk[0]
-    if version != 0x01:
+    if version not in (0x01, 0x39):  # 0x39 = 57
         raise ValueError(f"unsupported version: {version}")
+    
+    # استخراج پسورد
     password_bytes = chunk[1:57]
-    password = password_bytes.split(b'\x00')[0].decode('utf-8', errors='ignore')
-    if not password:
-        raise ValueError("empty password")
+    null_pos = password_bytes.find(b'\x00')
+    if null_pos > 0:
+        password = password_bytes[:null_pos].decode('utf-8', errors='ignore')
+    else:
+        password = password_bytes.decode('utf-8', errors='ignore')
+    
+    if password != "CBeeNet":
+        raise ValueError(f"invalid password: {password}")
+    
     pos = 57
-    command = chunk[pos]; pos += 1
-    port = int.from_bytes(chunk[pos:pos+2], "big"); pos += 2
-    addr_type = chunk[pos]; pos += 1
-    if addr_type == 1:
-        address = ".".join(str(b) for b in chunk[pos:pos+4]); pos += 4
-    elif addr_type == 2:
-        dlen = chunk[pos]; pos += 1
-        address = chunk[pos:pos+dlen].decode("utf-8", errors="ignore"); pos += dlen
-    elif addr_type == 3:
-        ab = chunk[pos:pos+16]; pos += 16
+    command = chunk[pos]
+    pos += 1
+    
+    port = int.from_bytes(chunk[pos:pos+2], "big")
+    pos += 2
+    
+    addr_type = chunk[pos]
+    pos += 1
+    
+    if addr_type == 1:  # IPv4
+        address = ".".join(str(b) for b in chunk[pos:pos+4])
+        pos += 4
+    elif addr_type == 2:  # Domain
+        dlen = chunk[pos]
+        pos += 1
+        address = chunk[pos:pos+dlen].decode('utf-8', errors='ignore')
+        pos += dlen
+    elif addr_type == 3:  # IPv6
+        ab = chunk[pos:pos+16]
+        pos += 16
         address = ":".join(f"{ab[i]:02x}{ab[i+1]:02x}" for i in range(0, 16, 2))
     else:
         raise ValueError(f"unknown addr type: {addr_type}")
-    return command, password, address, port, chunk[pos:]
+    
+    payload = chunk[pos:]
+    return command, address, port, payload
+
 
 async def relay_ws_to_tcp(ws, writer, conn_id, uuid):
     try:
@@ -48,7 +71,7 @@ async def relay_ws_to_tcp(ws, writer, conn_id, uuid):
             if not data:
                 continue
             if not await check_and_use(uuid, len(data)):
-                await ws.close(code=1008, reason="quota/disabled/unknown")
+                await ws.close(code=1008, reason="quota/disabled")
                 break
             stats["total_requests"] += 1
             connections[conn_id]["bytes"] += len(data)
@@ -63,31 +86,31 @@ async def relay_ws_to_tcp(ws, writer, conn_id, uuid):
         except Exception:
             pass
 
+
 async def relay_tcp_to_ws(ws, reader, conn_id, uuid):
-    first = True
     try:
         while True:
             data = await reader.read(RELAY_BUF)
             if not data:
                 break
             if not await check_and_use(uuid, len(data)):
-                await ws.close(code=1008, reason="quota/disabled/unknown")
+                await ws.close(code=1008, reason="quota/disabled")
                 break
             connections[conn_id]["bytes"] += len(data)
-            payload = (b"\x00\x00" + data) if first else data
-            first = False
-            await ws.send_bytes(payload)
+            await ws.send_bytes(data)
     except Exception:
         pass
 
+
 @router.websocket("/trojan-ws/{uuid}")
+@router.websocket("/CBeeNet-----CBeeNet-----CBeeNet-----CBeeNet-----CBeeNet-----CBeeNet-----CBeeNet-----CBeeNet-----CBeeNet-----CBeeNet/{uuid}")
 async def trojan_tunnel(ws: WebSocket, uuid: str):
     await ws.accept()
 
     async with LINKS_LOCK:
         link = LINKS.get(uuid)
     if not is_link_allowed(link):
-        logger.warning(f"Trojan rejected uuid={uuid[:8]}… (not allowed)")
+        logger.warning(f"Trojan rejected uuid={uuid[:8]}…")
         await ws.close(code=1008, reason="not authorized")
         return
 
@@ -103,17 +126,6 @@ async def trojan_tunnel(ws: WebSocket, uuid: str):
         await ws.close(code=1008, reason="timeout")
         return
 
-    try:
-        command, password, address, port, payload = await parse_trojan_header_full(first_chunk)
-        if password != TROJAN_EXPECTED_PASSWORD:
-            logger.warning(f"Trojan invalid password for {uuid[:8]}: expected {TROJAN_EXPECTED_PASSWORD}, got {password}")
-            await ws.close(code=1008, reason="invalid password")
-            return
-    except ValueError as e:
-        logger.warning(f"Trojan header error for {uuid[:8]}: {e}")
-        await ws.close(code=1008, reason="invalid trojan header")
-        return
-
     ip = _ws_client_ip(ws)
     conn_id = secrets.token_urlsafe(6)
     connections[conn_id] = {
@@ -124,16 +136,18 @@ async def trojan_tunnel(ws: WebSocket, uuid: str):
         "bytes": 0,
     }
     logger.info(f"Trojan [{conn_id}] uuid={uuid[:8]}… ip={ip}")
-    log_activity("connection", f"Trojan from {ip} (config {link.get('label','?')})", "info")
+    log_activity("connection", f"Trojan از {ip} (کانفیگ {link.get('label','?')})", "info")
 
     writer = None
     try:
+        command, address, port, payload = await parse_trojan_header(first_chunk)
+        logger.info(f"Trojan [{conn_id}] → {address}:{port} (cmd={command})")
+
         if not await check_and_use(uuid, len(first_chunk)):
             await ws.close(code=1008, reason="quota/disabled")
             return
         stats["total_requests"] += 1
         connections[conn_id]["bytes"] += len(first_chunk)
-        logger.info(f"Trojan [{conn_id}] → {address}:{port}")
 
         reader, writer = await asyncio.wait_for(
             asyncio.open_connection(address, port),
