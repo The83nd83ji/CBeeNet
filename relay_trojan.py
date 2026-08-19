@@ -1,4 +1,5 @@
 # relay_trojan.py
+
 import asyncio
 import secrets
 from datetime import datetime
@@ -13,6 +14,10 @@ router = APIRouter()
 TROJAN_EXPECTED_PASSWORD = "CBeeNet"
 
 async def parse_trojan_header_full(chunk: bytes):
+    """
+    Parse هدر Trojan از اولین پکت WebSocket.
+    ساختار: نسخه(1) + پسورد(56) + command(1) + port(2) + addr_type(1) + آدرس + payload
+    """
     if len(chunk) < 57 + 1 + 2 + 1:
         raise ValueError("chunk too small")
     version = chunk[0]
@@ -39,6 +44,7 @@ async def parse_trojan_header_full(chunk: bytes):
     return command, password, address, port, chunk[pos:]
 
 async def relay_ws_to_tcp(ws, writer, conn_id, uuid):
+    """رله داده از WebSocket به TCP (آپلینک)"""
     try:
         while True:
             msg = await ws.receive()
@@ -64,6 +70,7 @@ async def relay_ws_to_tcp(ws, writer, conn_id, uuid):
             pass
 
 async def relay_tcp_to_ws(ws, reader, conn_id, uuid):
+    """رله داده از TCP به WebSocket (دانلینک)"""
     first = True
     try:
         while True:
@@ -82,8 +89,13 @@ async def relay_tcp_to_ws(ws, reader, conn_id, uuid):
 
 @router.websocket("/CBeeNet-----CBeeNet-----CBeeNet-----CBeeNet-----CBeeNet-----CBeeNet-----CBeeNet-----CBeeNet-----CBeeNet-----CBeeNet/{uuid}")
 async def trojan_tunnel(ws: WebSocket, uuid: str):
+    """
+    WebSocket endpoint اصلی برای پروتکل Trojan.
+    مسیر: /CBeeNet-----.../UUID
+    """
     await ws.accept()
 
+    # بررسی کانفیگ
     async with LINKS_LOCK:
         link = LINKS.get(uuid)
     if not is_link_allowed(link):
@@ -91,6 +103,7 @@ async def trojan_tunnel(ws: WebSocket, uuid: str):
         await ws.close(code=1008, reason="not authorized")
         return
 
+    # دریافت اولین پکت
     try:
         first_msg = await asyncio.wait_for(ws.receive(), timeout=15.0)
         if first_msg["type"] == "websocket.disconnect":
@@ -103,6 +116,7 @@ async def trojan_tunnel(ws: WebSocket, uuid: str):
         await ws.close(code=1008, reason="timeout")
         return
 
+    # Parse هدر و بررسی پسورد
     try:
         command, password, address, port, payload = await parse_trojan_header_full(first_chunk)
         if password != TROJAN_EXPECTED_PASSWORD:
