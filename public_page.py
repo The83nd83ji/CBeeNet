@@ -82,7 +82,7 @@ body {{
 .wrap {{
   position: relative;
   z-index: 10;
-  max-width: 540px;
+  max-width: 580px;
   margin: 0 auto;
   padding: 24px 16px 48px;
 }}
@@ -108,38 +108,12 @@ body {{
   transition: transform 0.4s ease, border-color 0.5s;
 }}
 .logo-wrap:hover {{ transform: scale(1.05) rotate(-4deg); }}
-
-/* ===== BEE ANIMATION ===== */
-.bee-container {{
-  width: 70px;
-  height: 70px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+.logo-icon {{
+  font-size: 42px;
+  color: var(--primary);
+  transition: transform 0.3s;
 }}
-.bee-container svg {{
-  width: 100%;
-  height: 100%;
-  display: block;
-}}
-.wing-container-left {{
-  transform-origin: 42px 40px;
-  animation: flapLeft 0.5s ease-in-out infinite alternate;
-}}
-.wing-container-right {{
-  transform-origin: 58px 40px;
-  animation: flapRight 0.5s ease-in-out infinite alternate;
-}}
-@keyframes flapLeft {{
-  0% {{ transform: rotate(0deg) scaleY(1); }}
-  100% {{ transform: rotate(-35deg) scaleY(0.8); }}
-}}
-@keyframes flapRight {{
-  0% {{ transform: rotate(0deg) scaleY(1); }}
-  100% {{ transform: rotate(35deg) scaleY(0.8); }}
-}}
-
-/* حالت خاموش (غیرفعال) */
+.logo-wrap:hover .logo-icon {{ transform: scale(1.1) rotate(-8deg); }}
 .logo-wrap.bee-off {{
   border-color: #2a2a25;
   box-shadow: 0 0 0 6px rgba(255,255,255,0.02), 0 20px 50px rgba(0,0,0,0.3);
@@ -148,12 +122,9 @@ body {{
   border-color: var(--primary);
   box-shadow: 0 0 0 6px rgba(255,215,0,0.15), 0 20px 50px rgba(255,215,0,0.25);
 }}
-.bee-off .bee-container svg {{
+.bee-off .logo-icon {{
+  color: #444;
   filter: grayscale(1) opacity(0.3) brightness(0.8);
-}}
-.bee-off .wing-container-left,
-.bee-off .wing-container-right {{
-  animation-play-state: paused;
 }}
 
 .brand {{
@@ -201,16 +172,6 @@ body {{
   border-color: var(--primary);
   box-shadow: 0 0 30px rgba(255,215,0,0.15);
   transform: translateY(-2px);
-}}
-
-/* ===== GLASS CARD ===== */
-.glass {{
-  background: var(--surface);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  box-shadow: var(--shadow);
 }}
 
 /* ===== INFO CARD ===== */
@@ -268,7 +229,7 @@ body {{
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   gap: 12px;
-  margin-bottom: 18px;
+  margin-bottom: 16px;
 }}
 .stat-item {{
   background: var(--surface2);
@@ -427,6 +388,7 @@ body {{
   font-weight: 700;
   flex: 1;
   min-width: 0;
+  flex-wrap: wrap;
 }}
 .config-badge-proto {{
   font-size: 9px;
@@ -435,6 +397,7 @@ body {{
   font-weight: 700;
   background: rgba(255,215,0,0.10);
   color: var(--primary-light);
+  white-space: nowrap;
 }}
 .config-status {{
   font-size: 10px;
@@ -661,45 +624,7 @@ body {{
 <div class="wrap">
   <div class="header">
     <div class="logo-wrap" id="logoWrap">
-      <div class="bee-container" id="beeContainer">
-        <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
-          <!-- Antennas (Lightning style) -->
-          <path d="M 44 24 L 40 15 L 42 12 L 38 6" fill="none" stroke="#ffcc00" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
-          <path d="M 56 24 L 60 15 L 58 12 L 62 6" fill="none" stroke="#ffcc00" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
-          
-          <!-- Head -->
-          <circle cx="50" cy="30" r="12" fill="#ffcc00" />
-          
-          <!-- Eyes (Half moon) -->
-          <path d="M 45 32 Q 47 28 49 32" fill="none" stroke="#1a1a15" stroke-width="2" stroke-linecap="round" />
-          <path d="M 51 32 Q 53 28 55 32" fill="none" stroke="#1a1a15" stroke-width="2" stroke-linecap="round" />
-          
-          <!-- Upper Wings -->
-          <g class="wing-container-left">
-            <polygon points="42,40 6,12 35,40" fill="#ffcc00" />
-          </g>
-          <g class="wing-container-right">
-            <polygon points="58,40 94,12 65,40" fill="#ffcc00" />
-          </g>
-          
-          <!-- Lower Wings -->
-          <g class="wing-container-left">
-            <polygon points="40,45 24,32 35,45" fill="#e6b800" />
-          </g>
-          <g class="wing-container-right">
-            <polygon points="60,45 76,32 65,45" fill="#e6b800" />
-          </g>
-          
-          <!-- Body Segments (Stripes) -->
-          <ellipse cx="50" cy="65" rx="18" ry="22" fill="#ffcc00" />
-          <path d="M 33 56 L 67 56" stroke="#1a1a15" stroke-width="4" />
-          <path d="M 32 65 L 68 65" stroke="#1a1a15" stroke-width="4" />
-          <path d="M 34 74 L 66 74" stroke="#1a1a15" stroke-width="4" />
-          
-          <!-- Stinger -->
-          <polygon points="50,86 46,98 54,98" fill="#ffcc00" />
-        </svg>
-      </div>
+      <i class="ti ti-bolt logo-icon" id="logoIcon"></i>
     </div>
     <div class="brand">CBeeNet</div>
     <div class="tagline">SUBSCRIPTION</div>
@@ -716,7 +641,7 @@ body {{
   </div>
 
   <div class="footer">
-    کانال رسمی <a href="https://t.me/CBeeNet" target="_blank">@CBeeNet</a> · v10
+    کانال رسمی <a href="https://t.me/CBeeNet" target="_blank">@CBeeNet</a> · v11
   </div>
 </div>
 
@@ -739,17 +664,15 @@ function esc(s) {{
     "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;"
   }})[c]);
 }}
-// اصلاح: اضافه کردن Trojan به لیست پروتکل‌ها
 function protoLabel(protocols) {{
-  if (!protocols || !protocols.length) return '<span class="config-badge-proto">VLESS+WS</span>';
+  if (!protocols || !protocols.length) return '<span class="config-badge-proto">VLESS • WS</span>';
   const labels = {{
-    'vless-ws': 'VLESS+WS',
-    'xhttp-packet-up': 'XHTTP',
-    'xhttp-stream-up': 'XHTTP',
-    'xhttp-stream-one': 'XHTTP ULTRA',
-    'trojan-ws': 'Trojan+WS'   // اضافه شد
+    'vless-ws': 'VLESS • WS',
+    'xhttp-packet-up': 'XHTTP • packet-up',
+    'xhttp-stream-up': 'XHTTP • stream-up',
+    'xhttp-stream-one': 'XHTTP ULTRA • stream-one'
   }};
-  return protocols.map(p => `<span class="config-badge-proto">${{labels[p] || 'VLESS+WS'}}</span>`).join('');
+  return protocols.map(p => `<span class="config-badge-proto">${{labels[p] || 'VLESS • WS'}}</span>`).join(' ');
 }}
 
 // ===== PARTICLES =====
@@ -770,15 +693,15 @@ function protoLabel(protocols) {{
 // ===== BEE CONTROL =====
 function setBeeState(on) {{
   const wrap = document.getElementById('logoWrap');
-  const container = document.getElementById('beeContainer');
+  const icon = document.getElementById('logoIcon');
   if (on) {{
     wrap.classList.remove('bee-off');
     wrap.classList.add('bee-on');
-    container.classList.remove('bee-off');
+    icon.style.color = 'var(--primary)';
   }} else {{
     wrap.classList.remove('bee-on');
     wrap.classList.add('bee-off');
-    container.classList.add('bee-off');
+    icon.style.color = '#444';
   }}
 }}
 
@@ -808,12 +731,11 @@ function render(d) {{
   allLinks = d.links;
   d.links.forEach(l => l._lines = l.vless_link ? l.vless_link.split("\\n").filter(x => x) : []);
 
-  // Determine if any link is active and has remaining quota (or unlimited)
   const hasActive = d.links.some(l => l.active && (l.limit_bytes === 0 || l.used_bytes < l.limit_bytes));
   setBeeState(hasActive);
 
-  const active = d.links.filter(l => l.active).length;
-  const totalUsed = d.links.reduce((s, l) => s + (l.used_bytes || 0), 0);
+  const activeCount = d.links.filter(l => l.active).length;
+  const uniqueIps = d.unique_ips !== undefined ? d.unique_ips : d.active_connections || 0;
   let html = '';
 
   // Info card
@@ -825,21 +747,22 @@ function render(d) {{
   </div>`;
 
   // Stats
+  const overallStatus = activeCount > 0 ? 'فعال' : 'غیرفعال';
   html += `<div class="stats">
     <div class="stat-item">
-      <div class="stat-label">وضعیت</div>
-      <div class="stat-value">${{d.links.length === 1 ? (d.links[0].active ? 'فعال' : 'غیرفعال') : active + '/' + d.links.length}}</div>
-      <div class="stat-sub"></div>
-    </div>
-    <div class="stat-item">
-      <div class="stat-label">مصرف کل</div>
-      <div class="stat-value">${{fmtB(totalUsed)}}</div>
-      <div class="stat-sub">مجموع</div>
+      <div class="stat-label">وضعیت کانفیگ</div>
+      <div class="stat-value">${{overallStatus}}</div>
+      <div class="stat-sub" style="display:none"></div>
     </div>
     <div class="stat-item">
       <div class="stat-label">اتصالات</div>
-      <div class="stat-value">${{d.active_connections || 0}}</div>
-      <div class="stat-sub"><span class="dot-live"></span> آنلاین</div>
+      <div class="stat-value">${{toFa(uniqueIps)}}</div>
+      <div class="stat-sub" style="display:none"></div>
+    </div>
+    <div class="stat-item">
+      <div class="stat-label">مصرف کل</div>
+      <div class="stat-value">${{d.total_used_fmt || '0 B'}}</div>
+      <div class="stat-sub" style="display:none"></div>
     </div>
   </div>`;
 
@@ -848,10 +771,10 @@ function render(d) {{
   if (allVlessLinks.length > 0) {{
     html += `<div class="copy-all">
       <div class="copy-all-text">
-        <div class="copy-all-title"><i class="ti ti-copy"></i> کپی همه کانفیگ‌ها</div>
-        <div class="copy-all-sub">${{allVlessLinks.length}} لینک · با یک کلیک</div>
+        <div class="copy-all-title"><i class="ti ti-copy"></i> کپی همه لینک‌ها</div>
+        <div class="copy-all-sub">یکبار کلیک</div>
       </div>
-      <button class="btn-copy-all" onclick="copyAll()"><i class="ti ti-clipboard-copy"></i> کپی همه (${{allVlessLinks.length}})</button>
+      <button class="btn-copy-all" onclick="copyAll()"><i class="ti ti-clipboard-copy"></i> کپی همه</button>
     </div>`;
   }}
 
@@ -868,7 +791,7 @@ function render(d) {{
     const statusClass = l.active ? 'on' : 'off';
     const statusIcon = l.active ? 'circle-check' : 'circle-x';
     const statusText = l.active ? 'فعال' : 'غیرفعال';
-    const protoBadges = l.protocols ? protoLabel(l.protocols) : '<span class="config-badge-proto">VLESS+WS</span>';
+    const protoBadges = l.protocols ? protoLabel(l.protocols) : '<span class="config-badge-proto">VLESS • WS</span>';
 
     html += `<div class="config-item">
       <div class="config-header" onclick="toggleBody(this)">
@@ -903,6 +826,23 @@ function render(d) {{
   }}
 
   root.innerHTML = html;
+
+  // هر ۱۰ ثانیه آمار رو رفرش کن (فقط اگر صفحه باز باشد)
+  if (window._refreshInterval) clearInterval(window._refreshInterval);
+  window._refreshInterval = setInterval(async () => {{
+    const newData = await loadData();
+    if (newData && !newData.locked) {{
+      const statItems = document.querySelectorAll('.stat-item');
+      if (statItems.length >= 3) {{
+        const activeCountNew = newData.links.filter(l => l.active).length;
+        const overallStatusNew = activeCountNew > 0 ? 'فعال' : 'غیرفعال';
+        const uniqueIpsNew = newData.unique_ips !== undefined ? newData.unique_ips : newData.active_connections || 0;
+        statItems[0].querySelector('.stat-value').textContent = overallStatusNew;
+        statItems[1].querySelector('.stat-value').textContent = toFa(uniqueIpsNew);
+        statItems[2].querySelector('.stat-value').textContent = newData.total_used_fmt || '0 B';
+      }}
+    }}
+  }}, 10000);
 }}
 
 // ===== TOGGLE =====
@@ -926,7 +866,7 @@ function copyAll() {{
     return;
   }}
   navigator.clipboard.writeText(all).then(() => {{
-    showToast('✅ همه ' + allLinks.length + ' کانفیگ کپی شد', 'success');
+    showToast('✅ همه کانفیگ‌ها کپی شد', 'success');
   }});
 }}
 function showToast(msg, type = '') {{
@@ -937,11 +877,30 @@ function showToast(msg, type = '') {{
   t._hide = setTimeout(() => t.classList.remove('show'), 3000);
 }}
 
+// ===== TOFA =====
+function toFa(n) {{
+  return String(n).replace(/\\d/g, d => '۰۱۲۳۴۵۶۷۸۹'[d]);
+}}
+
 // ===== INIT =====
 (async function init() {{
   const data = await loadData();
-  if (data) {{
+  if (data && !data.locked) {{
     render(data);
+  }} else if (data && data.locked) {{
+    document.getElementById('root').innerHTML = `
+      <div class="state-placeholder" style="padding:40px 20px">
+        <i class="ti ti-lock" style="color:var(--primary-light);opacity:1"></i>
+        <p style="font-size:15px;font-weight:700;margin-top:8px">این گروه با رمز محافظت می‌شود</p>
+        <p style="font-size:12px;color:var(--text3);margin-top:4px">برای دسترسی، رمز را وارد کنید</p>
+        <div style="margin-top:16px;max-width:280px;margin-left:auto;margin-right:auto">
+          <input type="password" id="lock-pw-input" placeholder="رمز عبور" style="width:100%;padding:12px 16px;border-radius:14px;border:1px solid var(--border);background:rgba(0,0,0,0.3);color:var(--text);font-family:inherit;font-size:14px;outline:none;text-align:center;margin-bottom:10px" onkeydown="if(event.key==='Enter') submitLock()">
+          <button class="btn-copy-all" style="width:100%;justify-content:center" onclick="submitLock()"><i class="ti ti-lock-open"></i> ورود</button>
+        </div>
+        <div id="lock-error" style="color:var(--red);font-size:12px;margin-top:8px"></div>
+      </div>
+    `;
+    window._lockData = data;
   }} else {{
     document.getElementById('root').innerHTML = `
       <div class="state-placeholder">
@@ -952,6 +911,23 @@ function showToast(msg, type = '') {{
     setBeeState(false);
   }}
 }})();
+
+// ===== LOCK SUBMIT =====
+async function submitLock() {{
+  const pw = document.getElementById('lock-pw-input').value;
+  if (!pw) {{ document.getElementById('lock-error').textContent = 'لطفاً رمز را وارد کنید'; return; }}
+  try {{
+    const r = await fetch(API_URL + '?pw=' + encodeURIComponent(pw));
+    const data = await r.json();
+    if (data.locked) {{
+      document.getElementById('lock-error').textContent = '❌ رمز اشتباه است';
+      return;
+    }}
+    render(data);
+  }} catch (e) {{
+    document.getElementById('lock-error').textContent = '❌ خطا در ارتباط با سرور';
+  }}
+}}
 </script>
 </body>
 </html>"""
