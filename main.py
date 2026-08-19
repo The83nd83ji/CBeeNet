@@ -93,7 +93,7 @@ LINKS_LOCK = asyncio.Lock()
 SUBS: dict = {}
 SUBS_LOCK = asyncio.Lock()
 
-# ─── پروتکل‌های مجاز ───
+# ─── پروتکل‌های مجاز (افزودن Trojan) ───
 PROTOCOLS = ("vless-ws", "xhttp-packet-up", "xhttp-stream-up", "trojan-ws")
 DEFAULT_PROTOCOL = "vless-ws"
 
