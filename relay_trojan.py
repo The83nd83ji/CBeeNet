@@ -8,7 +8,6 @@ from main import (
     is_link_allowed, save_state, log_activity, now_ir
 )
 from relay_vless import _ws_client_ip, check_and_use, RELAY_BUF
-from relay_vless import parse_vless_header
 
 router = APIRouter()
 TROJAN_EXPECTED_PASSWORD = "CBeeNet"
@@ -104,7 +103,6 @@ async def trojan_tunnel(ws: WebSocket, uuid: str):
         await ws.close(code=1008, reason="timeout")
         return
 
-    # Try to parse as Trojan header
     try:
         command, password, address, port, payload = await parse_trojan_header_full(first_chunk)
         if password != TROJAN_EXPECTED_PASSWORD:
@@ -112,14 +110,9 @@ async def trojan_tunnel(ws: WebSocket, uuid: str):
             await ws.close(code=1008, reason="invalid password")
             return
     except ValueError as e:
-        # Fallback: parse as VLESS header (for clients that send VLESS-style headers)
-        try:
-            command, address, port, payload = await parse_vless_header(first_chunk)
-            logger.info(f"Trojan fallback: parsed as VLESS header for {uuid[:8]}")
-        except Exception as e2:
-            logger.warning(f"Trojan header error for {uuid[:8]}: {e}, fallback failed: {e2}")
-            await ws.close(code=1008, reason="invalid header")
-            return
+        logger.warning(f"Trojan header error for {uuid[:8]}: {e}")
+        await ws.close(code=1008, reason="invalid trojan header")
+        return
 
     ip = _ws_client_ip(ws)
     conn_id = secrets.token_urlsafe(6)
