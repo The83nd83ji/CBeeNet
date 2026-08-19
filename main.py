@@ -93,7 +93,7 @@ LINKS_LOCK = asyncio.Lock()
 SUBS: dict = {}
 SUBS_LOCK = asyncio.Lock()
 
-# ─── پروتکل‌های مجاز (افزودن تروجان) ───
+# ─── پروتکل‌های مجاز ───
 PROTOCOLS = ("vless-ws", "xhttp-packet-up", "xhttp-stream-up", "trojan-ws")
 DEFAULT_PROTOCOL = "vless-ws"
 
@@ -244,12 +244,15 @@ def _format_uri(uuid: str, ip: str, port: int, remark: str, protocol: str, origi
         return f"vless://{uuid}@{ip}:{port}?{query}#{quote(remark)}"
 
     if protocol == "trojan-ws":
-        # پسورد ثابت CBeeNet
         password = "CBeeNet"
+        path = f"/CBeeNet-----CBeeNet-----CBeeNet-----CBeeNet-----CBeeNet-----CBeeNet-----CBeeNet-----CBeeNet-----CBeeNet-----CBeeNet/{uuid}"
         params = {
             "allowInsecure": "1",
             "sni": original_host,
-            "fp": "chrome"
+            "fp": "chrome",
+            "type": "ws",
+            "path": path,
+            "security": "tls"
         }
         query = "&".join(f"{k}={quote(str(v))}" for k, v in params.items())
         return f"trojan://{password}@{ip}:{port}?{query}#{quote(remark)}"
@@ -290,7 +293,6 @@ def generate_links(link_data: dict, uuid: str, host: str) -> list[str]:
             links.append(_format_uri(uuid, ip, port, remark, proto, host))
 
     # ─── سرور مجازی (فقط یک خط، با اولین پروتکل موجود) ───
-    # محاسبه حجم باقی‌مانده
     limit_bytes = link_data.get("limit_bytes", 0)
     used_bytes = link_data.get("used_bytes", 0)
     remain = limit_bytes - used_bytes
@@ -299,14 +301,12 @@ def generate_links(link_data: dict, uuid: str, host: str) -> list[str]:
     if limit_bytes == 0:
         remain_str = "∞"
     else:
-        remain_gb = remain / (1024 ** 3)  # تبدیل به گیگابایت
-        remain_str = f"{remain_gb:.2f} GB"  # دو رقم اعشار
+        remain_gb = remain / (1024 ** 3)
+        remain_str = f"{remain_gb:.2f} GB"
 
     virtual_remark = f"⏳️ 𓏺 [{remain_str}]"
-    # از اولین پروتکل برای ساخت لینک مجازی استفاده می‌کنیم
     virtual_proto = protocols[0] if protocols else DEFAULT_PROTOCOL
     virtual_link = _format_uri(uuid, "0.0.0.0", 443, virtual_remark, virtual_proto, host)
-    # لینک مجازی را در ابتدای لیست قرار می‌دهیم
     links.insert(0, virtual_link)
 
     return links
