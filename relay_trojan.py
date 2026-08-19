@@ -80,7 +80,7 @@ async def relay_tcp_to_ws(ws, reader, conn_id, uuid):
     except Exception:
         pass
 
-@router.websocket("/CBeeNet-----CBeeNet-----CBeeNet-----CBeeNet-----CBeeNet-----CBeeNet-----CBeeNet-----CBeeNet-----CBeeNet-----CBeeNet/{uuid}")
+@router.websocket("/trojan-ws/{uuid}")
 async def trojan_tunnel(ws: WebSocket, uuid: str):
     await ws.accept()
 
